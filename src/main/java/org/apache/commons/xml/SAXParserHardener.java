@@ -17,10 +17,6 @@
 
 package org.apache.commons.xml;
 
-import static org.apache.commons.xml.JaxpSetters.setFeature;
-import static org.apache.commons.xml.JaxpSetters.setOptionalFeature;
-import static org.apache.commons.xml.JaxpSetters.trySetProperty;
-
 import java.io.IOException;
 import java.util.Objects;
 
@@ -178,6 +174,39 @@ final class SAXParserHardener {
         // That floor blocks external DTD, entity, schema and xi:include fetches in one place: no ACCESS_EXTERNAL_* properties are needed here.
         // Callers can chain their resolvers, but not override the floor.
         return new HardeningXMLReader(reader);
+    }
+
+    private static void setFeature(final SAXParserFactory factory, final String feature, final boolean value) {
+        try {
+            factory.setFeature(feature, value);
+        } catch (final Exception e) {
+            throw HardeningException.settingFailed("feature", feature, factory, e);
+        }
+    }
+
+    private static void setFeature(final XMLReader reader, final String feature, final boolean value) {
+        try {
+            reader.setFeature(feature, value);
+        } catch (final Exception e) {
+            throw HardeningException.settingFailed("feature", feature, reader, e);
+        }
+    }
+
+    private static void setOptionalFeature(final XMLReader reader, final String feature, final boolean value) {
+        try {
+            reader.setFeature(feature, value);
+        } catch (final Exception e) {
+            // Ignored: the implementation does not recognize this feature.
+        }
+    }
+
+    private static boolean trySetProperty(final XMLReader reader, final String property, final Object value) {
+        try {
+            reader.setProperty(property, value);
+            return true;
+        } catch (final Exception e) {
+            return false;
+        }
     }
 
     private SAXParserHardener() {

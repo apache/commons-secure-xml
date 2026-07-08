@@ -40,7 +40,7 @@ import org.vafer.jdependency.Clazzpath;
  *
  * <p>Using {@code jdependency}, the same library {@code maven-shade-plugin}'s {@code minimizeJar} uses, this test computes each entry point's transitive class
  * closure over the compiled {@code target/classes} and pins it to an expected set. It keeps the DOM, SAX and StAX hardeners from silently regaining a dependency
- * on classes they should not need (for example the shared {@code JaxpSetters} or the sibling resolver floors), and records that the TrAX, XPath and schema entry
+ * on classes they should not need (for example the sibling resolver floors, or another hardener), and records that the TrAX, XPath and schema entry
  * points still pull the whole library through the {@link XmlFactories} re-hardening cycle. Update the expected sets deliberately: a change here is a change to what
  * a downstream shade includes.</p>
  */
@@ -53,25 +53,22 @@ class ShadingFootprintTest {
 
     private static final Set<String> DOCUMENT_BUILDER_HARDENER = set(
             "DocumentBuilderHardener", "HardeningDocumentBuilder", "HardeningDocumentBuilderFactory", CORE,
-            "JaxpSetters", "JaxpSetters$ThrowingAction",
             "Resolvers", "Resolvers$FallbackDenyResolver", "Resolvers$FallbackDenyLSResourceResolver", "Resolvers$FallbackDenyURIResolver",
             "Resolvers$FallbackDenyXMLResolver", "Resolvers$FallbackIgnoreXMLResolver");
 
     private static final Set<String> SAX_PARSER_HARDENER = set(
             "SAXParserHardener", "SAXParserHardener$DtdAwareDenyResolver", "SAXParserHardener$HardeningExpatXMLReader",
             "HardeningSAXParser", "HardeningSAXParserFactory", "HardeningXMLReader", CORE,
-            "JaxpSetters", "JaxpSetters$ThrowingAction",
             "Resolvers", "Resolvers$FallbackDenyResolver", "Resolvers$FallbackDenyLSResourceResolver", "Resolvers$FallbackDenyURIResolver",
             "Resolvers$FallbackDenyXMLResolver", "Resolvers$FallbackIgnoreXMLResolver");
 
     private static final Set<String> STAX_HARDENER = set(
             "StaxHardener", "StaxHardener$DtdSubsetFloor", "HardeningXMLInputFactory", CORE,
-            "JaxpSetters", "JaxpSetters$ThrowingAction",
             "Resolvers", "Resolvers$FallbackDenyResolver", "Resolvers$FallbackDenyLSResourceResolver", "Resolvers$FallbackDenyURIResolver",
             "Resolvers$FallbackDenyXMLResolver", "Resolvers$FallbackIgnoreXMLResolver");
 
     /** The TrAX/XPath/schema entry points all pull the whole library through {@link XmlFactories}; this is its class count (Phase 4 territory to reduce). */
-    private static final int WHOLE_LIBRARY_SIZE = 35;
+    private static final int WHOLE_LIBRARY_SIZE = 33;
 
     /** Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library. */
     private static final String[] REPORTED = {

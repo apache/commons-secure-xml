@@ -17,9 +17,6 @@
 
 package org.apache.commons.xml;
 
-import static org.apache.commons.xml.JaxpSetters.setOptionalProperty;
-import static org.apache.commons.xml.JaxpSetters.trySetProperty;
-
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 
@@ -81,7 +78,7 @@ final class StaxHardener {
 
     static XMLInputFactory harden(final XMLInputFactory factory) {
         // Optional: Zephyr's StAX equivalent of XERCES_LOAD_EXTERNAL_DTD=false skips the external DTD subset entirely.
-        setOptionalProperty(factory, ZEPHYR_IGNORE_EXTERNAL_DTD, true);
+        trySetProperty(factory, ZEPHYR_IGNORE_EXTERNAL_DTD, true);
 
         // Each hook carries its own FallbackDenyXMLResolver floor; a caller can opt specific entities in through it, but cannot remove it (see
         // HardeningXMLInputFactory, which routes a caller-set resolver into the floor rather than replacing it). The DTD-subset and undeclared-entity hooks skip
@@ -93,6 +90,15 @@ final class StaxHardener {
             factory.setXMLResolver(new Resolvers.FallbackDenyXMLResolver(null));
         }
         return new HardeningXMLInputFactory(factory);
+    }
+
+    private static boolean trySetProperty(final XMLInputFactory factory, final String property, final Object value) {
+        try {
+            factory.setProperty(property, value);
+            return true;
+        } catch (final Exception e) {
+            return false;
+        }
     }
 
     private StaxHardener() {

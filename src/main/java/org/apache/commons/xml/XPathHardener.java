@@ -17,9 +17,6 @@
 
 package org.apache.commons.xml;
 
-import static org.apache.commons.xml.JaxpSetters.setFeature;
-import static org.apache.commons.xml.JaxpSetters.setOptionalFeature;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -71,6 +68,22 @@ final class XPathHardener {
         // Required: enables the engine's secure-processing limits; XPathFactory has no attribute API for finer control.
         setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
         return factory;
+    }
+
+    private static void setFeature(final XPathFactory factory, final String feature, final boolean value) {
+        try {
+            factory.setFeature(feature, value);
+        } catch (final Exception e) {
+            throw HardeningException.settingFailed("feature", feature, factory, e);
+        }
+    }
+
+    private static void setOptionalFeature(final XPathFactory factory, final String feature, final boolean value) {
+        try {
+            factory.setFeature(feature, value);
+        } catch (final Exception e) {
+            // Ignored: the implementation does not recognize this feature.
+        }
     }
 
     private XPathHardener() {

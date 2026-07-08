@@ -17,8 +17,6 @@
 
 package org.apache.commons.xml;
 
-import static org.apache.commons.xml.JaxpSetters.setFeature;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -73,6 +71,14 @@ final class TransformerHardener {
         // Required: source/stylesheet parsing provisions its own SAX reader otherwise; the wrapper routes every Source through a hardened one and installs the
         // deny-all URIResolver floor (blocking xsl:import/include at compile time and document() at runtime) that a caller-set resolver cannot remove.
         return new HardeningTransformerFactory((SAXTransformerFactory) factory);
+    }
+
+    private static void setFeature(final TransformerFactory factory, final String feature, final boolean value) {
+        try {
+            factory.setFeature(feature, value);
+        } catch (final Exception e) {
+            throw HardeningException.settingFailed("feature", feature, factory, e);
+        }
     }
 
     private TransformerHardener() {

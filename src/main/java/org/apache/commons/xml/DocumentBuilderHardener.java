@@ -17,9 +17,6 @@
 
 package org.apache.commons.xml;
 
-import static org.apache.commons.xml.JaxpSetters.setFeature;
-import static org.apache.commons.xml.JaxpSetters.setOptionalFeature;
-
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -64,6 +61,22 @@ final class DocumentBuilderHardener {
         // That floor blocks external DTD, entity, schema and xi:include fetches in one place: no ACCESS_EXTERNAL_* attributes are needed here.
         // Callers can chain their resolvers, but not override the floor.
         return new HardeningDocumentBuilderFactory(factory);
+    }
+
+    private static void setFeature(final DocumentBuilderFactory factory, final String feature, final boolean value) {
+        try {
+            factory.setFeature(feature, value);
+        } catch (final Exception e) {
+            throw HardeningException.settingFailed("feature", feature, factory, e);
+        }
+    }
+
+    private static void setOptionalFeature(final DocumentBuilderFactory factory, final String feature, final boolean value) {
+        try {
+            factory.setFeature(feature, value);
+        } catch (final Exception e) {
+            // Ignored: the implementation does not recognize this feature.
+        }
     }
 
     private DocumentBuilderHardener() {
