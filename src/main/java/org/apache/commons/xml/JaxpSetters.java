@@ -48,7 +48,7 @@ final class JaxpSetters {
         try {
             action.run();
         } catch (final Exception e) {
-            throw new HardeningException("Failed to set " + kind + " '" + name + "' on " + factory.getClass().getName(), e);
+            throw HardeningException.settingFailed(kind, name, factory, e);
         }
     }
 

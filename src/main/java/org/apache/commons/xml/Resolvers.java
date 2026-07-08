@@ -74,6 +74,25 @@ final class Resolvers {
          */
         private EntityResolver delegate;
 
+        /**
+         * Resolves {@code systemId} against {@code baseURI}.
+         *
+         * @param baseURI  The absolute base URI to resolve against, or {@code null} if none is available.
+         * @param systemId The system identifier, possibly relative to {@code baseURI}.
+         * @return The absolutized system identifier, or {@code systemId} unchanged when it cannot or need not be resolved.
+         */
+        private static String absolutize(final String baseURI, final String systemId) {
+            if (systemId == null || baseURI == null) {
+                return systemId;
+            }
+            try {
+                final URI system = new URI(systemId);
+                return system.isAbsolute() ? systemId : new URI(baseURI).resolve(system).toString();
+            } catch (final URISyntaxException e) {
+                return systemId;
+            }
+        }
+
         FallbackDenyResolver(final EntityResolver delegate) {
             this.delegate = delegate;
         }
@@ -117,7 +136,7 @@ final class Resolvers {
          */
         protected InputSource onUnresolved(final String name, final String publicId, final String baseURI, final String systemId)
                 throws SAXException, IOException {
-            throw new SAXException(forbiddenMessage(name, null, publicId, systemId, baseURI));
+            throw new SAXException(HardeningException.forbidden(name, null, publicId, systemId, baseURI));
         }
 
         private InputSource resolveWithDelegate(final String name, final String publicId, final String baseURI,
@@ -161,7 +180,7 @@ final class Resolvers {
             if (resolved != null) {
                 return resolved;
             }
-            throw new SecurityException(forbiddenMessage(type, namespaceURI, publicId, systemId, baseURI));
+            throw new SecurityException(HardeningException.forbidden(type, namespaceURI, publicId, systemId, baseURI));
         }
     }
 
@@ -195,7 +214,7 @@ final class Resolvers {
             if (resolved != null) {
                 return resolved;
             }
-            throw new TransformerException(forbiddenMessage("uri", null, null, href, base));
+            throw new TransformerException(HardeningException.forbidden("uri", null, null, href, base));
         }
     }
 
@@ -257,7 +276,7 @@ final class Resolvers {
          * @return The exception to throw.
          */
         protected final XMLStreamException denied(final String publicID, final String systemID, final String baseURI, final String namespace) {
-            return new XMLStreamException(forbiddenMessage(null, namespace, publicID, systemID, baseURI));
+            return new XMLStreamException(HardeningException.forbidden(null, namespace, publicID, systemID, baseURI));
         }
     }
 
@@ -282,30 +301,6 @@ final class Resolvers {
         protected Object onUnresolved(final String publicID, final String systemID, final String baseURI, final String namespace) throws XMLStreamException {
             return EMPTY;
         }
-    }
-
-    /**
-     * Resolves {@code systemId} against {@code baseURI}.
-     *
-     * @param baseURI  The absolute base URI to resolve against, or {@code null} if none is available.
-     * @param systemId The system identifier, possibly relative to {@code baseURI}.
-     * @return The absolutized system identifier, or {@code systemId} unchanged when it cannot or need not be resolved.
-     */
-    private static String absolutize(final String baseURI, final String systemId) {
-        if (systemId == null || baseURI == null) {
-            return systemId;
-        }
-        try {
-            final URI system = new URI(systemId);
-            return system.isAbsolute() ? systemId : new URI(baseURI).resolve(system).toString();
-        } catch (final URISyntaxException e) {
-            return systemId;
-        }
-    }
-
-    private static String forbiddenMessage(final String type, final String namespace, final String publicId, final String systemId, final String baseURI) {
-        return String.format("External resource fetch forbidden by hardening: type=%s, namespace=%s, publicId=%s, systemId=%s, baseURI=%s", type, namespace,
-                publicId, systemId, baseURI);
     }
 
     private Resolvers() {
