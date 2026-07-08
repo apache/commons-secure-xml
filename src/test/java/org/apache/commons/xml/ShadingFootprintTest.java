@@ -39,37 +39,52 @@ import org.vafer.jdependency.Clazzpath;
  * Guards the shade footprint: the set of classes a consumer pulls in when they shade a single hardener entry point.
  *
  * <p>Using {@code jdependency}, the same library {@code maven-shade-plugin}'s {@code minimizeJar} uses, this test computes each entry point's transitive class
- * closure over the compiled {@code target/classes} and pins it to an expected set. It keeps the DOM, SAX and StAX hardeners from silently regaining a dependency
- * on classes they should not need (for example the sibling resolver floors, or another hardener), and records that the TrAX, XPath and schema entry
- * points still pull the whole library through the {@link XmlFactories} re-hardening cycle. Update the expected sets deliberately: a change here is a change to what
- * a downstream shade includes.</p>
+ * closure over the compiled {@code target/classes} and pins it to an expected set. It keeps each hardener from silently regaining a dependency on classes it
+ * should not need (for example a sibling resolver floor or another hardener), so TrAX, XPath and schema build only on the shared SAX path while only the public
+ * {@link XmlFactories} entry pulls the whole library. Update the expected sets deliberately: a change here is a change to what a downstream shade includes.</p>
  */
 class ShadingFootprintTest {
 
     private static final String PKG = "org.apache.commons.xml.";
 
-    /** Every hardener needs this shared exception (its {@code settingFailed}/{@code forbidden} message helpers). */
-    private static final String CORE = "HardeningException";
+    /**
+     * Every hardener needs this shared exception (its {@code settingFailed}/{@code forbidden} message helpers).
+     */
+    private static final String HARDENING_EXCEPTION = "HardeningException";
 
-    private static final Set<String> DOCUMENT_BUILDER_HARDENER = set(
-            "DocumentBuilderHardener", "HardeningDocumentBuilder", "HardeningDocumentBuilderFactory", CORE,
+    private static final Set<String> DOCUMENT_BUILDER_HARDENER = set("DocumentBuilderHardener", "HardeningDocumentBuilder", "HardeningDocumentBuilderFactory"
+            , HARDENING_EXCEPTION, "FallbackDenyEntityResolver2");
+
+    private static final Set<String> SAX_PARSER_HARDENER = set("SAXParserHardener", "SAXParserHardener$DtdAwareDenyResolver",
+            "SAXParserHardener$HardeningExpatXMLReader", "HardeningSAXParser", "HardeningSAXParserFactory", "HardeningXMLReader", HARDENING_EXCEPTION,
             "FallbackDenyEntityResolver2");
 
-    private static final Set<String> SAX_PARSER_HARDENER = set(
-            "SAXParserHardener", "SAXParserHardener$DtdAwareDenyResolver", "SAXParserHardener$HardeningExpatXMLReader",
-            "HardeningSAXParser", "HardeningSAXParserFactory", "HardeningXMLReader", CORE,
-            "FallbackDenyEntityResolver2");
-
-    private static final Set<String> STAX_HARDENER = set(
-            "StaxHardener", "StaxHardener$DtdSubsetFloor", "HardeningXMLInputFactory", CORE,
+    private static final Set<String> STAX_HARDENER = set("StaxHardener", "StaxHardener$DtdSubsetFloor", "HardeningXMLInputFactory", HARDENING_EXCEPTION,
             "FallbackDenyXMLResolver", "FallbackIgnoreXMLResolver");
 
-    /** The TrAX/XPath/schema entry points all pull the whole library through {@link XmlFactories}; this is its class count (Phase 4 territory to reduce). */
+    /**
+     * TrAX, XPath and schema re-harden their sub-parsers through {@link SAXParserHardener#hardenSource}, so each builds on the full SAX closure below.
+     */
+    private static final Set<String> TRANSFORMER_HARDENER = saxParsersHardenerPlus("TransformerHardener", "HardeningTransformerFactory",
+            "HardeningTransformer", "HardeningTemplates", "FallbackDenyURIResolver", "SaxonProvider", "SaxonProvider$1", "SaxonProvider$HardenedConfiguration"
+            , "SaxonProvider$SaxonProviderConfigurer");
+
+    private static final Set<String> XPATH_HARDENER = saxParsersHardenerPlus("XPathHardener", "SaxonProvider", "SaxonProvider$1",
+            "SaxonProvider$HardenedConfiguration", "SaxonProvider$SaxonProviderConfigurer");
+
+    private static final Set<String> SCHEMA_FACTORY = saxParsersHardenerPlus("HardeningSchemaFactory", "HardeningValidator", "HardeningValidatorHandler",
+            "HardeningSchema", "FallbackDenyLSResourceResolver");
+
+    /**
+     * Only the public {@link XmlFactories} entry, which news up every hardener, still pulls the whole library; this is its class count.
+     */
     private static final int WHOLE_LIBRARY_SIZE = 32;
 
-    /** Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library. */
-    private static final String[] REPORTED = {
-            "DocumentBuilderHardener", "SAXParserHardener", "StaxHardener", "TransformerHardener", "XPathHardener", "HardeningSchemaFactory", "XmlFactories"};
+    /**
+     * Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library.
+     */
+    private static final String[] REPORTED = {"DocumentBuilderHardener", "SAXParserHardener", "StaxHardener", "TransformerHardener", "XPathHardener",
+            "HardeningSchemaFactory", "XmlFactories"};
 
     private static Clazzpath clazzpath;
     private static Path classesDir;
@@ -81,7 +96,10 @@ class ShadingFootprintTest {
         clazzpath.addClazzpathUnit(classesDir);
     }
 
-    /** Prints each entry point's shade closure size (uncompressed {@code .class} bytes) and its share of the full library, to track the footprint over the refactor. */
+    /**
+     * Prints each entry point's shade closure size (uncompressed {@code .class} bytes) and its share of the full library, to track the footprint over the
+     * refactor.
+     */
     @AfterAll
     static void reportFootprint() {
         final long library = bytesOf(closureOf("XmlFactories"));
@@ -110,15 +128,28 @@ class ShadingFootprintTest {
     }
 
     @Test
-    void traxXPathAndSchemaPullTheWholeLibrary() {
-        final Set<String> whole = closureOf("XmlFactories");
-        assertEquals(WHOLE_LIBRARY_SIZE, whole.size(), "XmlFactories closure size drifted: " + whole);
-        assertEquals(whole, closureOf("TransformerHardener"), "TransformerHardener no longer pulls exactly the whole library");
-        assertEquals(whole, closureOf("XPathHardener"), "XPathHardener no longer pulls exactly the whole library");
-        assertEquals(whole, closureOf("HardeningSchemaFactory"), "HardeningSchemaFactory no longer pulls exactly the whole library");
+    void transformerHardenerFootprint() {
+        assertEquals(TRANSFORMER_HARDENER, closureOf("TransformerHardener"));
     }
 
-    /** Transitive class closure of {@code PKG + simpleName}, restricted to this library's own package and reported by simple name. */
+    @Test
+    void xPathHardenerFootprint() {
+        assertEquals(XPATH_HARDENER, closureOf("XPathHardener"));
+    }
+
+    @Test
+    void schemaFactoryFootprint() {
+        assertEquals(SCHEMA_FACTORY, closureOf("HardeningSchemaFactory"));
+    }
+
+    @Test
+    void onlyXmlFactoriesPullsTheWholeLibrary() {
+        assertEquals(WHOLE_LIBRARY_SIZE, closureOf("XmlFactories").size(), "XmlFactories closure size drifted");
+    }
+
+    /**
+     * Transitive class closure of {@code PKG + simpleName}, restricted to this library's own package and reported by simple name.
+     */
     private static Set<String> closureOf(final String simpleName) {
         final Clazz entry = clazzpath.getClazz(PKG + simpleName);
         if (entry == null) {
@@ -134,7 +165,9 @@ class ShadingFootprintTest {
         return names;
     }
 
-    /** Sums the uncompressed {@code .class} file sizes of a closure's classes, as they would land in a shaded jar. */
+    /**
+     * Sums the uncompressed {@code .class} file sizes of a closure's classes, as they would land in a shaded jar.
+     */
     private static long bytesOf(final Set<String> simpleNames) {
         long total = 0;
         for (final String name : simpleNames) {
@@ -153,5 +186,14 @@ class ShadingFootprintTest {
 
     private static Set<String> set(final String... names) {
         return new TreeSet<>(Arrays.asList(names));
+    }
+
+    /**
+     * {@link #SAX_PARSER_HARDENER} plus the extra names; used where an entry point's closure is the SAX path plus its own classes.
+     */
+    private static Set<String> saxParsersHardenerPlus(final String... more) {
+        final Set<String> union = new TreeSet<>(SAX_PARSER_HARDENER);
+        union.addAll(Arrays.asList(more));
+        return union;
     }
 }

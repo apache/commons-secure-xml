@@ -60,7 +60,7 @@ final class HardeningTransformer extends Transformer {
     @Override
     public void transform(final Source xmlSource, final Result outputTarget) throws TransformerException {
         try {
-            delegate.transform(XmlFactories.harden(xmlSource), outputTarget);
+            delegate.transform(SAXParserHardener.hardenSource(xmlSource), outputTarget);
         } catch (final TransformerConfigurationException e) {
             throw new TransformerException(e);
         }

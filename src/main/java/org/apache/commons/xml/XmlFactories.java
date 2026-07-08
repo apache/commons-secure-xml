@@ -20,19 +20,14 @@ package org.apache.commons.xml;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.xpath.XPathFactory;
 
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 /**
@@ -77,27 +72,15 @@ public final class XmlFactories {
     /**
      * Rewrites a {@link Source} so that any SAX parsing it triggers runs through an {@link XmlFactories}-hardened {@link XMLReader}.
      *
-     * <p>Only {@link StreamSource} and {@link SAXSource} without a reader are enriched with a hardened reader. Other kinds of sources are returned as-is.</p>
-     *
-     * <p>The reader is namespace-aware.</p>
+     * <p>Only a {@code StreamSource} or a {@code SAXSource} without a reader is enriched with a hardened, namespace-aware reader; other kinds of sources are
+     * returned as-is.</p>
      *
      * @param source The source to harden; never {@code null}.
      * @return A hardened source.
      * @throws TransformerConfigurationException if a hardened reader cannot be obtained.
      */
     public static Source harden(final Source source) throws TransformerConfigurationException {
-        if (source instanceof StreamSource || source instanceof SAXSource && ((SAXSource) source).getXMLReader() == null) {
-            try {
-                final SAXParserFactory factory = newSAXParserFactory();
-                factory.setNamespaceAware(true);
-                final XMLReader reader = factory.newSAXParser().getXMLReader();
-                final InputSource inputSource = SAXSource.sourceToInputSource(source);
-                return inputSource == null ? source : new SAXSource(reader, inputSource);
-            } catch (final ParserConfigurationException | SAXException e) {
-                throw new TransformerConfigurationException("Failed to obtain a hardened XMLReader for source parsing", e);
-            }
-        }
-        return source;
+        return SAXParserHardener.hardenSource(source);
     }
 
     /**

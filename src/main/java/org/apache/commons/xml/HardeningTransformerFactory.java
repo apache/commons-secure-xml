@@ -81,12 +81,12 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
     @Override
     public Source getAssociatedStylesheet(final Source source, final String media, final String title, final String charset)
             throws TransformerConfigurationException {
-        return delegate.getAssociatedStylesheet(XmlFactories.harden(source), media, title, charset);
+        return delegate.getAssociatedStylesheet(SAXParserHardener.hardenSource(source), media, title, charset);
     }
 
     @Override
     public Templates newTemplates(final Source source) throws TransformerConfigurationException {
-        final Templates templates = delegate.newTemplates(XmlFactories.harden(source));
+        final Templates templates = delegate.newTemplates(SAXParserHardener.hardenSource(source));
         return templates == null ? null : new HardeningTemplates(templates, getURIResolver());
     }
 
@@ -99,13 +99,13 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
 
     @Override
     public Transformer newTransformer(final Source source) throws TransformerConfigurationException {
-        final Transformer transformer = delegate.newTransformer(XmlFactories.harden(source));
+        final Transformer transformer = delegate.newTransformer(SAXParserHardener.hardenSource(source));
         return transformer == null ? null : new HardeningTransformer(transformer, getURIResolver());
     }
 
     @Override
     public TransformerHandler newTransformerHandler(final Source source) throws TransformerConfigurationException {
-        return delegate.newTransformerHandler(XmlFactories.harden(source));
+        return delegate.newTransformerHandler(SAXParserHardener.hardenSource(source));
     }
 
     // <editor-fold defaultstate="collapsed" desc="Trivial delegation">

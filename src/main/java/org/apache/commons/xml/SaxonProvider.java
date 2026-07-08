@@ -71,7 +71,7 @@ final class SaxonProvider {
         @Override
         public XMLReader makeParser(final String className) throws TransformerFactoryConfigurationError {
             try {
-                return XmlFactories.harden(super.makeParser(className));
+                return SAXParserHardener.hardenReader(super.makeParser(className));
             } catch (final HardeningException e) {
                 throw new TransformerFactoryConfigurationError(e);
             }

@@ -21,7 +21,12 @@ import java.io.IOException;
 import java.util.Objects;
 
 import javax.xml.XMLConstants;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.Source;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
 
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
@@ -174,6 +179,31 @@ final class SAXParserHardener {
         // That floor blocks external DTD, entity, schema and xi:include fetches in one place: no ACCESS_EXTERNAL_* properties are needed here.
         // Callers can chain their resolvers, but not override the floor.
         return new HardeningXMLReader(reader);
+    }
+
+    /**
+     * Rewrites a {@link Source} so that any SAX parsing it triggers runs through a hardened {@link XMLReader}.
+     *
+     * <p>Only a {@link StreamSource} or a {@link SAXSource} without a reader is enriched with a hardened, namespace-aware reader; other source kinds are returned
+     * as-is. Used by the TrAX and schema wrappers to route every source they parse through the SAX hardening path.</p>
+     *
+     * @param source the source to harden; never {@code null}.
+     * @return a hardened source.
+     * @throws TransformerConfigurationException if a hardened reader cannot be obtained.
+     */
+    static Source hardenSource(final Source source) throws TransformerConfigurationException {
+        if (source instanceof StreamSource || source instanceof SAXSource && ((SAXSource) source).getXMLReader() == null) {
+            try {
+                final SAXParserFactory factory = harden(SAXParserFactory.newInstance());
+                factory.setNamespaceAware(true);
+                final XMLReader reader = factory.newSAXParser().getXMLReader();
+                final InputSource inputSource = SAXSource.sourceToInputSource(source);
+                return inputSource == null ? source : new SAXSource(reader, inputSource);
+            } catch (final ParserConfigurationException | SAXException e) {
+                throw new TransformerConfigurationException("Failed to obtain a hardened XMLReader for source parsing", e);
+            }
+        }
+        return source;
     }
 
     private static void setFeature(final SAXParserFactory factory, final String feature, final boolean value) {

@@ -97,7 +97,7 @@ final class HardeningValidator extends Validator {
     @Override
     public void validate(final Source source, final Result result) throws SAXException, IOException {
         try {
-            delegate.validate(XmlFactories.harden(source), result);
+            delegate.validate(SAXParserHardener.hardenSource(source), result);
         } catch (final TransformerConfigurationException e) {
             throw new SAXException("Failed to harden source for validation", e);
         }

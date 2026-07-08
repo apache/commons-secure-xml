@@ -88,7 +88,7 @@ final class HardeningSchemaFactory extends SchemaFactory {
         final Source[] hardened = new Source[schemas.length];
         try {
             for (int i = 0; i < schemas.length; i++) {
-                hardened[i] = XmlFactories.harden(schemas[i]);
+                hardened[i] = SAXParserHardener.hardenSource(schemas[i]);
             }
         } catch (final TransformerConfigurationException e) {
             throw new SAXException("Failed to harden schema source", e);
