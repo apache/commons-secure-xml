@@ -60,7 +60,7 @@ import org.xml.sax.helpers.DefaultHandler;
  *
  * <p>The observable contract on every hardened factory is the same: a resource the caller resolves (returns a non-null value) is allowed, but anything the
  * caller does not resolve is denied instead of fetched, so a resolver that resolves nothing leaves the block in place. Most factories enforce this with a
- * {@link Resolvers.FallbackDenyResolver}-style floor that consults the caller and denies on a {@code null} return; Saxon enforces the equivalent through its
+ * {@link FallbackDenyEntityResolver2}-style floor that consults the caller and denies on a {@code null} return; Saxon enforces the equivalent through its
  * {@code ALLOWED_PROTOCOLS} restrictor. Every resolver channel is exercised: the SAX/DOM {@link EntityResolver}, the StAX {@link XMLResolver}, the schema
  * {@link LSResourceResolver} and the XSLT {@link URIResolver}.</p>
  */
@@ -364,7 +364,7 @@ class EntityResolverFloorTest {
 
     /**
      * A hardened {@link TransformerFactory} with a re-throwing error listener. XSLTC and Xalan enforce the deny through the
-     * {@link Resolvers.FallbackDenyURIResolver} floor; Saxon enforces it through its {@code ALLOWED_PROTOCOLS} restrictor. Either way a caller-set resolver that
+     * {@link FallbackDenyURIResolver} floor; Saxon enforces it through its {@code ALLOWED_PROTOCOLS} restrictor. Either way a caller-set resolver that
      * returns {@code null} cannot re-open the fetch. The strict listener is required because interpretive Xalan routes a blocked {@code xsl:import} through the
      * error listener and would otherwise recover and compile instead of throwing (XSLTC and Saxon throw regardless).
      */

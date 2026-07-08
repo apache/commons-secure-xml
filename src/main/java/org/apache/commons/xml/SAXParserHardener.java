@@ -61,11 +61,11 @@ final class SAXParserHardener {
      *
      * <p>Android's Expat routes every external fetch (subset, DOCTYPE {@code SYSTEM}, general/parameter entity) through the 2-arg
      * {@link EntityResolver#resolveEntity(String, String)}; a deny-all resolver there would also reject a DOCTYPE that merely <em>names</em> an unused external
-     * subset. As a {@link Resolvers.FallbackDenyResolver} it consults the caller's resolver first; as a {@link LexicalHandler} (via {@code DefaultHandler2}) it
+     * subset. As a {@link FallbackDenyEntityResolver2} it consults the caller's resolver first; as a {@link LexicalHandler} (via {@code DefaultHandler2}) it
      * tracks the declared subset's identifiers so {@link #onUnresolved} can tell the subset apart from a forbidden external general or parameter entity. It is
      * stateful, so a fresh instance is installed per reader.</p>
      */
-    private static final class DtdAwareDenyResolver extends Resolvers.FallbackDenyResolver {
+    private static final class DtdAwareDenyResolver extends FallbackDenyEntityResolver2 {
 
         private String dtdPublicId;
         private String dtdSystemId;
@@ -110,7 +110,7 @@ final class SAXParserHardener {
 
         private static final String NAMESPACE_PREFIXES_FEATURE = "http://xml.org/sax/features/namespace-prefixes";
 
-        HardeningExpatXMLReader(final XMLReader delegate, final Resolvers.FallbackDenyResolver floor) {
+        HardeningExpatXMLReader(final XMLReader delegate, final FallbackDenyEntityResolver2 floor) {
             super(delegate, floor);
         }
 

@@ -28,7 +28,7 @@ import javax.xml.stream.XMLStreamException;
  * <ul>
  *     <li><strong>External DTD subset</strong>: skipped via Zephyr's {@value #ZEPHYR_IGNORE_EXTERNAL_DTD} (best-effort), so a DOCTYPE-only document parses
  *         without a fetch attempt instead of tripping the deny-all resolver below. Woodstox skips it through {@value #WSTX_DTD_RESOLVER} instead.</li>
- *     <li><strong>External entities</strong>: denied through a non-removable {@link Resolvers.FallbackDenyXMLResolver} floor on the entity-resolution hook,
+ *     <li><strong>External entities</strong>: denied through a non-removable {@link FallbackDenyXMLResolver} floor on the entity-resolution hook,
  *         leaving the standard {@code SUPPORT_DTD} / {@code IS_SUPPORTING_EXTERNAL_ENTITIES} defaults untouched. Woodstox exposes fine-grained hooks, so when all
  *         three apply the factory is Woodstox: {@value #WSTX_DTD_RESOLVER} (empty external subset, but a thrown error on external parameter entities, which share
  *         that hook), {@value #WSTX_ENTITY_RESOLVER} (the floor, denying declared external general entities) and {@value #WSTX_UNDECLARED_ENTITY_RESOLVER}
@@ -52,14 +52,14 @@ final class StaxHardener {
     private static final String ZEPHYR_IGNORE_EXTERNAL_DTD = "http://java.sun.com/xml/stream/properties/ignore-external-dtd";
 
     /**
-     * Woodstox DTD-subset floor: a {@link Resolvers.FallbackIgnoreXMLResolver} that returns the empty input for the external DTD subset (its inherited policy)
+     * Woodstox DTD-subset floor: a {@link FallbackIgnoreXMLResolver} that returns the empty input for the external DTD subset (its inherited policy)
      * but throws on external parameter entities.
      *
      * <p>Woodstox calls this hook with {@code entityName == null} for the subset and {@code entityName != null} for parameter-entity expansion (that
      * discriminator is the 4th {@code resolveEntity} argument; the JDK Zephyr always passes {@code null} there). Applied best-effort, ignored by implementations
      * that do not recognize the property.</p>
      */
-    private static final class DtdSubsetFloor extends Resolvers.FallbackIgnoreXMLResolver {
+    private static final class DtdSubsetFloor extends FallbackIgnoreXMLResolver {
 
         DtdSubsetFloor() {
             super(null);
@@ -84,10 +84,10 @@ final class StaxHardener {
         // HardeningXMLInputFactory, which routes a caller-set resolver into the floor rather than replacing it). The DTD-subset and undeclared-entity hooks skip
         // (empty input) rather than deny on an unresolved lookup, so a DOCTYPE-only document still parses.
         if (!(trySetProperty(factory, WSTX_DTD_RESOLVER, new DtdSubsetFloor())
-                && trySetProperty(factory, WSTX_ENTITY_RESOLVER, new Resolvers.FallbackDenyXMLResolver(null))
-                && trySetProperty(factory, WSTX_UNDECLARED_ENTITY_RESOLVER, new Resolvers.FallbackIgnoreXMLResolver(null)))) {
+                && trySetProperty(factory, WSTX_ENTITY_RESOLVER, new FallbackDenyXMLResolver(null))
+                && trySetProperty(factory, WSTX_UNDECLARED_ENTITY_RESOLVER, new FallbackIgnoreXMLResolver(null)))) {
             // Fallback (JDK Zephyr or unrecognized): the single resolver carries the deny-all floor.
-            factory.setXMLResolver(new Resolvers.FallbackDenyXMLResolver(null));
+            factory.setXMLResolver(new FallbackDenyXMLResolver(null));
         }
         return new HardeningXMLInputFactory(factory);
     }

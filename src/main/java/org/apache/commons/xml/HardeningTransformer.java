@@ -39,11 +39,11 @@ final class HardeningTransformer extends Transformer {
 
     private final Transformer delegate;
 
-    private final Resolvers.FallbackDenyURIResolver floor;
+    private final FallbackDenyURIResolver floor;
 
     HardeningTransformer(final Transformer delegate, final URIResolver uriResolver) {
         this.delegate = delegate;
-        this.floor = new Resolvers.FallbackDenyURIResolver(uriResolver);
+        this.floor = new FallbackDenyURIResolver(uriResolver);
         delegate.setURIResolver(floor);
     }
 

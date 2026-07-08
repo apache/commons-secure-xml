@@ -53,22 +53,19 @@ class ShadingFootprintTest {
 
     private static final Set<String> DOCUMENT_BUILDER_HARDENER = set(
             "DocumentBuilderHardener", "HardeningDocumentBuilder", "HardeningDocumentBuilderFactory", CORE,
-            "Resolvers", "Resolvers$FallbackDenyResolver", "Resolvers$FallbackDenyLSResourceResolver", "Resolvers$FallbackDenyURIResolver",
-            "Resolvers$FallbackDenyXMLResolver", "Resolvers$FallbackIgnoreXMLResolver");
+            "FallbackDenyEntityResolver2");
 
     private static final Set<String> SAX_PARSER_HARDENER = set(
             "SAXParserHardener", "SAXParserHardener$DtdAwareDenyResolver", "SAXParserHardener$HardeningExpatXMLReader",
             "HardeningSAXParser", "HardeningSAXParserFactory", "HardeningXMLReader", CORE,
-            "Resolvers", "Resolvers$FallbackDenyResolver", "Resolvers$FallbackDenyLSResourceResolver", "Resolvers$FallbackDenyURIResolver",
-            "Resolvers$FallbackDenyXMLResolver", "Resolvers$FallbackIgnoreXMLResolver");
+            "FallbackDenyEntityResolver2");
 
     private static final Set<String> STAX_HARDENER = set(
             "StaxHardener", "StaxHardener$DtdSubsetFloor", "HardeningXMLInputFactory", CORE,
-            "Resolvers", "Resolvers$FallbackDenyResolver", "Resolvers$FallbackDenyLSResourceResolver", "Resolvers$FallbackDenyURIResolver",
-            "Resolvers$FallbackDenyXMLResolver", "Resolvers$FallbackIgnoreXMLResolver");
+            "FallbackDenyXMLResolver", "FallbackIgnoreXMLResolver");
 
     /** The TrAX/XPath/schema entry points all pull the whole library through {@link XmlFactories}; this is its class count (Phase 4 territory to reduce). */
-    private static final int WHOLE_LIBRARY_SIZE = 33;
+    private static final int WHOLE_LIBRARY_SIZE = 32;
 
     /** Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library. */
     private static final String[] REPORTED = {

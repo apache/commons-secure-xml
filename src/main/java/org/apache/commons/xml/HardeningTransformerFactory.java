@@ -60,7 +60,7 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
 
     private final SAXTransformerFactory delegate;
 
-    private final Resolvers.FallbackDenyURIResolver floor = new Resolvers.FallbackDenyURIResolver(null);
+    private final FallbackDenyURIResolver floor = new FallbackDenyURIResolver(null);
 
     HardeningTransformerFactory(final SAXTransformerFactory delegate) {
         this.delegate = delegate;

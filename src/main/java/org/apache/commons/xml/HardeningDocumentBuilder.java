@@ -32,7 +32,7 @@ import org.xml.sax.SAXException;
 /**
  * {@link DocumentBuilder} wrapper that keeps a deny-all {@link EntityResolver} as a non-overridable floor.
  *
- * <p>A caller-set resolver is sandwiched inside a {@link Resolvers.FallbackDenyResolver} instead of replacing the deny-all one, so an external lookup the
+ * <p>A caller-set resolver is sandwiched inside a {@link FallbackDenyEntityResolver2} instead of replacing the deny-all one, so an external lookup the
  * caller's resolver does not satisfy is denied rather than fetched. {@link #reset()} re-establishes the bare deny-all floor, matching the just-constructed
  * state.</p>
  */
@@ -40,7 +40,7 @@ final class HardeningDocumentBuilder extends DocumentBuilder {
 
     private final DocumentBuilder delegate;
 
-    private final Resolvers.FallbackDenyResolver floor = new Resolvers.FallbackDenyResolver(null);
+    private final FallbackDenyEntityResolver2 floor = new FallbackDenyEntityResolver2(null);
 
     HardeningDocumentBuilder(final DocumentBuilder delegate) {
         this.delegate = delegate;

@@ -33,13 +33,13 @@ import org.xml.sax.SAXNotSupportedException;
  * {@link ValidatorHandler} wrapper that keeps a deny-all {@link LSResourceResolver} floor a caller cannot remove.
  *
  * <p>Blocks {@code xsi:schemaLocation} resolution during SAX-driven validation. A caller-set resolver is routed through a {@link
- * Resolvers.FallbackDenyLSResourceResolver} rather than replacing the floor, so a schema the caller does not resolve is denied instead of fetched.</p>
+ * FallbackDenyLSResourceResolver} rather than replacing the floor, so a schema the caller does not resolve is denied instead of fetched.</p>
  */
 final class HardeningValidatorHandler extends ValidatorHandler {
 
     private final ValidatorHandler delegate;
 
-    private final Resolvers.FallbackDenyLSResourceResolver floor = new Resolvers.FallbackDenyLSResourceResolver(null);
+    private final FallbackDenyLSResourceResolver floor = new FallbackDenyLSResourceResolver(null);
 
     HardeningValidatorHandler(final ValidatorHandler delegate) {
         this.delegate = delegate;

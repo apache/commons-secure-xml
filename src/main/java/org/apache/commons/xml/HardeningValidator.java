@@ -39,7 +39,7 @@ final class HardeningValidator extends Validator {
 
     private final Validator delegate;
 
-    private final Resolvers.FallbackDenyLSResourceResolver floor = new Resolvers.FallbackDenyLSResourceResolver(null);
+    private final FallbackDenyLSResourceResolver floor = new FallbackDenyLSResourceResolver(null);
 
     HardeningValidator(final Validator delegate) {
         this.delegate = delegate;
