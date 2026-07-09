@@ -64,6 +64,8 @@ limitations under the License.
     <!-- Java baseline -->
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
+    <!-- GraalVM native-image tooling; used by the `native` profile only. -->
+    <commons.graalvm.buildtools.version>1.1.3</commons.graalvm.buildtools.version>
     <!-- Optional JAXP implementations used by bundled providers. -->
     <commons.saxon.version>12.9</commons.saxon.version>
     <commons.woodstox.version>7.1.1</commons.woodstox.version>
@@ -450,6 +452,126 @@ limitations under the License.
       <properties>
         <commons.saxon.version>13.0</commons.saxon.version>
       </properties>
+    </profile>
+    <!--
+      Runs the test suite as a GraalVM native image; activate with -Pnative-xalan on a GraalVM JDK.
+
+      Worth a job because native-image resolves JAXP providers under the closed-world assumption: the lookup a JVM
+      performs at run time through ServiceLoader is decided at build time instead.
+
+      A native binary carries one classpath, so only `test-stockjdk` runs; the other JAXP combinations stay on the
+      JVM matrix. Its `xpath3` group is excluded there already, and that group needs Saxon, which is dropped here.
+    -->
+    <profile>
+      <id>native-xalan</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.graalvm.buildtools</groupId>
+          <artifactId>junit-platform-native</artifactId>
+          <version>${commons.graalvm.buildtools.version}</version>
+          <scope>test</scope>
+        </dependency>
+        <!--
+          Apache Xalan supplies TrAX. The stock JDK's XSLTC compiles each stylesheet into translet bytecode and
+          defines the class at run time, which a closed-world image cannot do; Xalan interprets instead. Declared as
+          project dependencies, not surefire's additionalClasspathDependencies, which native-image never sees.
+        -->
+        <dependency>
+          <groupId>xalan</groupId>
+          <artifactId>xalan</artifactId>
+          <version>${commons.xalan.version}</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>xalan</groupId>
+          <artifactId>serializer</artifactId>
+          <version>${commons.xalan.version}</version>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <executions>
+              <!--
+                Only `test-stockjdk` is left running, unconfigured: it registers the tests the native binary replays.
+                The profile's Xalan dependencies are on its classpath, so it is Xalan, not XSLTC, that supplies TrAX
+                in both the JVM and the native run.
+
+                Every other execution is silenced; their classpath swaps have no native equivalent.
+              -->
+              <execution>
+                <id>test-xalan</id>
+                <phase>none</phase>
+              </execution>
+              <execution>
+                <id>test-saxon</id>
+                <phase>none</phase>
+              </execution>
+              <execution>
+                <id>test-saxon-xerces</id>
+                <phase>none</phase>
+              </execution>
+              <execution>
+                <id>test-woodstox</id>
+                <phase>none</phase>
+              </execution>
+              <execution>
+                <id>test-xalan-xerces</id>
+                <phase>none</phase>
+              </execution>
+              <execution>
+                <id>test-xerces</id>
+                <phase>none</phase>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.graalvm.buildtools</groupId>
+            <artifactId>native-maven-plugin</artifactId>
+            <version>${commons.graalvm.buildtools.version}</version>
+            <extensions>true</extensions>
+            <configuration>
+              <!-- The bundled metadata pins older JUnit versions, whose class-initialization directives
+                   conflict with the JUnit this project resolves. -->
+              <metadataRepository>
+                <enabled>false</enabled>
+              </metadataRepository>
+              <!-- Xalan reflects on org.apache.xalan.templates.* setters and reads its serializer defaults from
+                   property files; static analysis sees none of it. The agent records what the JVM run touched, and
+                   the native binary replays those same tests, so the metadata covers it by construction. -->
+              <agent>
+                <enabled>true</enabled>
+              </agent>
+              <!-- Match `test-stockjdk`, which drops Saxon-HE. Saxon's JAXP entry points carry no reachability
+                   metadata, so every ServiceLoader lookup would fail on a missing no-arg constructor. -->
+              <exclusions>
+                <exclusion>
+                  <groupId>net.sf.saxon</groupId>
+                  <artifactId>Saxon-HE</artifactId>
+                </exclusion>
+              </exclusions>
+              <buildArgs>
+                <!-- The JUnit platform feature discovers tests while the image is built, which initializes TestTag. -->
+                <buildArg>--initialize-at-build-time=org.junit.platform.engine.TestTag</buildArg>
+                <!-- Embed the fixtures explicitly: the agent records only resources a run actually opened. -->
+                <buildArg>-H:IncludeResources=leaked/.*</buildArg>
+              </buildArgs>
+            </configuration>
+            <executions>
+              <execution>
+                <id>test-native</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>test</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
   <developers>
