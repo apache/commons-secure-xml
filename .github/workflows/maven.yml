@@ -45,7 +45,7 @@ jobs:
     # The GraalVM entry runs the test suite as a native image instead of on the JVM, via the `native-xalan` profile.
     name: build (${{ matrix.os }}, ${{ matrix.distribution }} ${{ matrix.java-version }})
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.experimental }}
+    continue-on-error: ${{ matrix.experimental || false }}
     strategy:
       max-parallel: 20
       fail-fast: false
