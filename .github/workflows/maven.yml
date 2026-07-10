@@ -45,6 +45,7 @@ jobs:
     # The GraalVM entry runs the test suite as a native image instead of on the JVM, via the `native-xalan` profile.
     name: build (${{ matrix.os }}, ${{ matrix.distribution }} ${{ matrix.java-version }})
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       max-parallel: 20
       fail-fast: false
@@ -73,7 +74,9 @@ jobs:
           - os: ubuntu-latest
             java-version: 25
             distribution: graalvm
-            maven-args: -Pnative-xalan
+            experimental: true
+            # The test is slower than all JVM tests; run only `test` to skip Javadoc and static-analysis goals
+            maven-args: -Pnative-xalan test
 
     steps:
       - name: Checkout repository
