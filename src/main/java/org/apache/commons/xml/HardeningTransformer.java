@@ -29,8 +29,8 @@ import javax.xml.transform.URIResolver;
 
 /**
  * {@link Transformer} wrapper that rewrites the Source on every {@link Transformer#transform(Source, Result)} call through
- * {@link XmlFactories#harden(Source)} before delegating, and keeps a deny-all {@link URIResolver} floor so runtime {@code document()} calls a caller does not
- * resolve are denied rather than fetched.
+ * {@link XmlFactories#harden(Source)} before delegating, and keeps an ignore-all {@link URIResolver} floor so runtime {@code document()} calls a caller does not
+ * resolve return empty rather than being fetched.
  *
  * <p>The floor is installed on the delegate transformer at construction, seeded with the factory's compile-time resolver; {@link #setURIResolver(URIResolver)}
  * routes a caller's resolver through it rather than replacing it, so the block cannot be dropped.</p>
@@ -39,11 +39,11 @@ final class HardeningTransformer extends Transformer {
 
     private final Transformer delegate;
 
-    private final FallbackDenyURIResolver floor;
+    private final FallbackIgnoreURIResolver floor;
 
     HardeningTransformer(final Transformer delegate, final URIResolver uriResolver) {
         this.delegate = delegate;
-        this.floor = new FallbackDenyURIResolver(uriResolver);
+        this.floor = new FallbackIgnoreURIResolver(uriResolver);
         delegate.setURIResolver(floor);
     }
 

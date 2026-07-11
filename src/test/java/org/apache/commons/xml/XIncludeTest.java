@@ -22,6 +22,7 @@ import static org.apache.commons.xml.AttackTestSupport.LEAKED_MARKER;
 import static org.apache.commons.xml.AttackTestSupport.inputSource;
 import static org.apache.commons.xml.AttackTestSupport.resourceUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -42,7 +43,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * Tests that XInclude resolution is denied by default on factories from {@link XmlFactories}, and that callers can
+ * Tests that XInclude resolution is blocked by default on factories from {@link XmlFactories}, and that callers can
  * allow-list specific resources via an {@link EntityResolver}.
  *
  * <p>Each case is exercised in both {@code parse="xml"} and {@code parse="text"} modes, and for both DOM and SAX
@@ -64,7 +65,7 @@ class XIncludeTest {
     /**
      * Allow-lists the two fixture URLs, returning the appropriate in-memory content for each: {@link #RESOLVED_MARKER}
      * wrapped as XML for {@link #REFERENCED_XML}, and as plain text for {@link #REFERENCED_TEXT}. Anything else returns
-     * {@code null} so the hardening's deny-all floor refuses it. Mirrors a caller allow-listing trusted resources.
+     * {@code null} so the hardening's ignore-all floor empties it. Mirrors a caller allow-listing trusted resources.
      */
     private static final class AllowListResolver implements EntityResolver {
 
@@ -84,7 +85,7 @@ class XIncludeTest {
         }
     }
 
-    /** Resolver that resolves nothing, so the hardening's deny-all floor must refuse every lookup and never leak. */
+    /** Resolver that resolves nothing, so the hardening's ignore-all floor must empty every lookup and never leak. */
     private static final EntityResolver NO_OP_RESOLVER = (publicId, systemId) -> null;
 
     /** XML wrapper for xi:include in the given {@code parse} mode referencing {@code href}. */
@@ -195,7 +196,7 @@ class XIncludeTest {
 
     //endregion
 
-    //region Hardened factory: fails closed (throws)
+    //region Hardened factory: the include is never fetched
 
     @Test
     @Tag("dom")
@@ -219,10 +220,10 @@ class XIncludeTest {
         final DocumentBuilderFactory factory = XmlFactories.newDocumentBuilderFactory();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
-        assertThrows(SAXException.class, () -> {
-            final DocumentBuilder builder = factory.newDocumentBuilder();
-            builder.parse(input);
-        }, "Hardened DOM parse=text should throw");
+        final Document doc = factory.newDocumentBuilder().parse(input);
+        final String text = doc.getDocumentElement().getTextContent();
+        assertFalse(text.contains(LEAKED_MARKER),
+                "Hardened DOM parse=text must resolve the include to empty, not leak; got: " + text);
     }
 
     @Test
@@ -247,10 +248,17 @@ class XIncludeTest {
         final SAXParserFactory factory = XmlFactories.newSAXParserFactory();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
-        assertThrows(SAXException.class, () -> {
-            final XMLReader reader = factory.newSAXParser().getXMLReader();
-            reader.parse(input);
-        }, "Hardened SAX parse=text should throw");
+        final StringBuilder captured = new StringBuilder();
+        final XMLReader reader = factory.newSAXParser().getXMLReader();
+        reader.setContentHandler(new DefaultHandler() {
+            @Override
+            public void characters(final char[] ch, final int start, final int length) {
+                captured.append(ch, start, length);
+            }
+        });
+        reader.parse(input);
+        assertFalse(captured.toString().contains(LEAKED_MARKER),
+                "Hardened SAX parse=text must resolve the include to empty, not leak; got: " + captured);
     }
 
     //endregion
@@ -298,7 +306,7 @@ class XIncludeTest {
         final DocumentBuilder builder = factory.newDocumentBuilder();
         builder.setEntityResolver(NO_OP_RESOLVER);
         assertThrows(SAXException.class, () -> builder.parse(input),
-                "a resolver that returns null must not leak: the deny-all floor blocks the real href");
+                "a resolver that returns null must not leak: the ignore-all floor blocks the real href");
     }
 
     @Test
@@ -356,7 +364,7 @@ class XIncludeTest {
         final XMLReader reader = factory.newSAXParser().getXMLReader();
         reader.setEntityResolver(NO_OP_RESOLVER);
         assertThrows(SAXException.class, () -> reader.parse(input),
-                "a resolver that returns null must not leak: the deny-all floor blocks the real href");
+                "a resolver that returns null must not leak: the ignore-all floor blocks the real href");
     }
 
     //endregion
@@ -386,8 +394,16 @@ class XIncludeTest {
         unhardenedFactory.setNamespaceAware(true);
         assumeXIncludeAware(unhardenedFactory);
         final XMLReader reader = XmlFactories.harden(unhardenedFactory.newSAXParser().getXMLReader());
-        assertThrows(SAXException.class, () -> reader.parse(input),
-                "harden(reader) should block XInclude parse=text on reader with XInclude already enabled");
+        final StringBuilder captured = new StringBuilder();
+        reader.setContentHandler(new DefaultHandler() {
+            @Override
+            public void characters(final char[] ch, final int start, final int length) {
+                captured.append(ch, start, length);
+            }
+        });
+        reader.parse(input);
+        assertFalse(captured.toString().contains(LEAKED_MARKER),
+                "harden(reader) parse=text must resolve the include to empty, not leak; got: " + captured);
     }
 
     @Test

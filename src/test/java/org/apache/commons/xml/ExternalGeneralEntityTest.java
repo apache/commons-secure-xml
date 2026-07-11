@@ -67,49 +67,49 @@ class ExternalGeneralEntityTest {
     void hardenedDomBlocks() {
         Assumptions.assumeTrue(AttackTestSupport.DOM_RESOLVES_INTERNAL_ENTITIES,
                 "Skipped: platform DOM does not resolve user-defined entities");
-        AttackTestSupport.assertDomBlocks(xmlPayload());
+        AttackTestSupport.assertDomBlocksOrDoesNotLeak(xmlPayload());
     }
 
     @Test
     @Tag("sax")
     void hardenedSaxBlocks() {
-        AttackTestSupport.assertSaxBlocks(xmlPayload());
+        AttackTestSupport.assertSaxBlocksOrDoesNotLeak(xmlPayload());
     }
 
     @Test
     @Tag("schema")
     void hardenedSchemaBlocks() {
-        AttackTestSupport.assertSchemaBlocks(AttackTestSupport.streamSource(xsdPayload()));
+        AttackTestSupport.assertSchemaBlocksOrDoesNotLeak(AttackTestSupport.streamSource(xsdPayload()));
     }
 
     @Test
     @Tag("stax")
     void hardenedStaxBlocks() {
-        AttackTestSupport.assertStaxBlocks(xmlPayload());
+        AttackTestSupport.assertStaxBlocksOrDoesNotLeak(xmlPayload());
     }
 
     @Test
     @Tag("trax")
     void hardenedTemplatesBlocks() {
-        AttackTestSupport.assertTemplatesBlocks(AttackTestSupport.streamSource(xsltPayload()));
+        AttackTestSupport.assertTemplatesBlocksOrDoesNotLeak(AttackTestSupport.streamSource(xsltPayload()));
     }
 
     @Test
     @Tag("trax")
     void hardenedTransformerBlocks() {
-        AttackTestSupport.assertTransformerBlocks(xmlPayload());
+        AttackTestSupport.assertTransformerBlocksOrDoesNotLeak(xmlPayload());
     }
 
     @Test
     @Tag("schema")
     void hardenedValidatorBlocks() {
-        AttackTestSupport.assertValidatorBlocks(xmlPayload());
+        AttackTestSupport.assertValidatorBlocksOrDoesNotLeak(xmlPayload());
     }
 
     @Test
     @Tag("sax")
     void hardenedXmlReaderBlocks() {
-        AttackTestSupport.assertXmlReaderBlocks(xmlPayload());
+        AttackTestSupport.assertXmlReaderBlocksOrDoesNotLeak(xmlPayload());
     }
 
     @Test

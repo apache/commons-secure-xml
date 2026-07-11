@@ -21,7 +21,6 @@ import static org.apache.commons.xml.AttackTestSupport.assertParseFails;
 import static org.apache.commons.xml.AttackTestSupport.assertParseSucceeds;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.StringReader;
@@ -56,20 +55,20 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * Checks that a caller-supplied resolver cannot remove the hardened deny-all floor on any factory.
+ * Checks that a caller-supplied resolver cannot remove the hardened ignore-all floor on any factory.
  *
  * <p>The observable contract on every hardened factory is the same: a resource the caller resolves (returns a non-null value) is allowed, but anything the
- * caller does not resolve is denied instead of fetched, so a resolver that resolves nothing leaves the block in place. Most factories enforce this with a
- * {@link FallbackDenyEntityResolver2}-style floor that consults the caller and denies on a {@code null} return; Saxon enforces the equivalent through its
- * {@code ALLOWED_PROTOCOLS} restrictor. Every resolver channel is exercised: the SAX/DOM {@link EntityResolver}, the StAX {@link XMLResolver}, the schema
- * {@link LSResourceResolver} and the XSLT {@link URIResolver}.</p>
+ * caller does not resolve is resolved to empty content instead of fetched, so a resolver that resolves nothing leaves the block in place. Most
+ * factories enforce this with a {@link FallbackIgnoreEntityResolver2}-style floor that consults the caller and returns empty on a {@code null} return; Saxon
+ * enforces the equivalent through its {@code ALLOWED_PROTOCOLS} restrictor. Every resolver channel is exercised: the SAX/DOM
+ * {@link EntityResolver}, the StAX {@link XMLResolver}, the schema {@link LSResourceResolver} and the XSLT {@link URIResolver}.</p>
  */
 class EntityResolverFloorTest {
 
     /** systemId the allow-list resolvers permit (its content carries {@link AttackTestSupport#LEAKED_MARKER}). */
     private static final String ALLOWED = AttackTestSupport.resourceUrl("referenced.txt").toString();
 
-    /** systemId the allow-list resolvers do not resolve (and the floor must deny). */
+    /** systemId the allow-list resolvers do not resolve (so the floor resolves it to empty; its content carries {@link AttackTestSupport#LEAKED_MARKER}). */
     private static final String UNLISTED = AttackTestSupport.resourceUrl("referenced.xml").toString();
 
     // ---- Entity channel (DOM / SAX) ----------------------------------------------------------------------------------------------------------------------
@@ -109,11 +108,18 @@ class EntityResolverFloorTest {
 
     @Test
     @Tag("dom")
-    void domDeniesUnlisted() throws Exception {
+    void domDoesNotLeakUnlisted() throws Exception {
         Assumptions.assumeTrue(AttackTestSupport.DOM_RESOLVES_INTERNAL_ENTITIES, "platform DOM does not resolve user-defined entities");
         final DocumentBuilder builder = hardenedBuilder();
         builder.setEntityResolver(ENTITY_ALLOW_LIST);
-        assertThrows(SAXException.class, () -> builder.parse(AttackTestSupport.inputSource(entityPayload(UNLISTED))));
+        // The caller returns null for the unlisted entity, so the floor resolves it to empty rather than fetching it: the parse completes (or is rejected)
+        // without leaking the entity's content.
+        try {
+            final Document doc = builder.parse(AttackTestSupport.inputSource(entityPayload(UNLISTED)));
+            assertFalse(doc.getDocumentElement().getTextContent().contains(AttackTestSupport.LEAKED_MARKER), "unlisted external entity leaked into the DOM");
+        } catch (final SAXException blocked) {
+            // Acceptable: the reference was rejected at parse rather than resolved to empty.
+        }
     }
 
     @Test
@@ -135,18 +141,30 @@ class EntityResolverFloorTest {
 
     @Test
     @Tag("sax")
-    void saxReaderDeniesUnlisted() throws Exception {
+    void saxReaderDoesNotLeakUnlisted() throws Exception {
         final XMLReader reader = hardenedReader();
         reader.setEntityResolver(ENTITY_ALLOW_LIST);
-        reader.setContentHandler(new DefaultHandler());
-        assertThrows(SAXException.class, () -> reader.parse(AttackTestSupport.inputSource(entityPayload(UNLISTED))));
+        final StringBuilder text = new StringBuilder();
+        reader.setContentHandler(new DefaultHandler() {
+            @Override
+            public void characters(final char[] ch, final int start, final int length) {
+                text.append(ch, start, length);
+            }
+        });
+        // The caller returns null for the unlisted entity, so the floor resolves it to empty rather than fetching it.
+        try {
+            reader.parse(AttackTestSupport.inputSource(entityPayload(UNLISTED)));
+        } catch (final SAXException blocked) {
+            return; // Acceptable: rejected at parse rather than resolved to empty.
+        }
+        assertFalse(text.toString().contains(AttackTestSupport.LEAKED_MARKER), "unlisted external entity leaked:\n" + text);
     }
 
     @Test
     @Tag("sax")
     void saxParseWithHandlerDoesNotBypass() throws Exception {
         // SAXParser.parse(source, handler) installs the handler as the reader's entity resolver; the handler does not resolve it (returns null), so the
-        // deny-all floor must still block the external entity rather than letting the parser fetch it.
+        // ignore-all floor must still resolve the external entity to empty rather than letting the parser fetch it.
         final SAXParser parser = XmlFactories.newSAXParserFactory().newSAXParser();
         final StringBuilder text = new StringBuilder();
         final DefaultHandler handler = new DefaultHandler() {
@@ -273,19 +291,28 @@ class EntityResolverFloorTest {
 
     @Test
     @Tag("stax")
-    void staxDeniesUnlisted() {
+    void staxDoesNotLeakUnlisted() throws Exception {
         final XMLInputFactory factory = externalEntityStaxFactory();
         factory.setXMLResolver(STAX_ALLOW_LIST);
-        assertThrows(XMLStreamException.class, () -> readStaxText(factory, entityPayload(UNLISTED)));
+        // The caller returns null for the unlisted entity, so the floor resolves it to empty rather than fetching it.
+        try {
+            assertFalse(readStaxText(factory, entityPayload(UNLISTED)).contains(AttackTestSupport.LEAKED_MARKER), "unlisted external entity leaked");
+        } catch (final XMLStreamException blocked) {
+            // Acceptable: rejected at parse rather than resolved to empty.
+        }
     }
 
     @Test
     @Tag("stax")
-    void staxCallerCannotRemoveFloor() {
-        // A caller resolver that resolves nothing must not re-open external fetches: the floor still denies.
+    void staxCallerCannotRemoveFloor() throws Exception {
+        // A caller resolver that resolves nothing must not re-open external fetches: the floor still resolves the reference to empty rather than fetching it.
         final XMLInputFactory factory = externalEntityStaxFactory();
         factory.setXMLResolver((publicID, systemID, baseURI, namespace) -> null);
-        assertThrows(XMLStreamException.class, () -> readStaxText(factory, entityPayload(ALLOWED)));
+        try {
+            assertFalse(readStaxText(factory, entityPayload(ALLOWED)).contains(AttackTestSupport.LEAKED_MARKER), "floor was bypassed and the entity leaked");
+        } catch (final XMLStreamException blocked) {
+            // Acceptable: rejected at parse rather than resolved to empty.
+        }
     }
 
     @Test
@@ -363,8 +390,8 @@ class EntityResolverFloorTest {
     }
 
     /**
-     * A hardened {@link TransformerFactory} with a re-throwing error listener. XSLTC and Xalan enforce the deny through the
-     * {@link FallbackDenyURIResolver} floor; Saxon enforces it through its {@code ALLOWED_PROTOCOLS} restrictor. Either way a caller-set resolver that
+     * A hardened {@link TransformerFactory} with a re-throwing error listener. XSLTC and Xalan enforce the block through the
+     * {@link FallbackIgnoreURIResolver} floor; Saxon enforces it through its {@code ALLOWED_PROTOCOLS} restrictor. Either way a caller-set resolver that
      * returns {@code null} cannot re-open the fetch. The strict listener is required because interpretive Xalan routes a blocked {@code xsl:import} through the
      * error listener and would otherwise recover and compile instead of throwing (XSLTC and Saxon throw regardless).
      */

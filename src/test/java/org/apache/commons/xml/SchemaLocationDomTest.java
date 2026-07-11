@@ -20,8 +20,7 @@ package org.apache.commons.xml;
 import static org.apache.commons.xml.AttackTestSupport.LEAKED_MARKER;
 import static org.apache.commons.xml.AttackTestSupport.resourceUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import javax.xml.XMLConstants;
@@ -41,9 +40,9 @@ import org.xml.sax.helpers.DefaultHandler;
  * {@code xsi:noNamespaceSchemaLocation} hint in the instance document.
  *
  * <p>The instance is empty {@code <root/>}; the referenced schema declares a default {@code leak} attribute carrying {@link AttackTestSupport#LEAKED_MARKER}. A
- * parser that fetches the schema inlines that default into the DOM (the permissive control), while a hardened parser refuses the fetch and fails the parse. The
- * attribution differs by implementation (the stock JDK reports an {@code accessExternalSchema} / {@code schema_reference} error; external Xerces' deny-all
- * resolver reports a forbidden-fetch error), so the test only asserts the fetch was blocked, not how.</p>
+ * parser that fetches the schema inlines that default into the DOM (the permissive control), while a hardened parser resolves the schema reference to empty
+ * content instead. Either the empty schema makes the validating parse fail, or the parse completes but the default is never inlined; either way the marker never
+ * reaches the DOM.</p>
  *
  * <p>The test runs only where the implementation supports JAXP 1.2 schema-language XSD validation (the stock JDK and external Xerces do; Android does not), so
  * it skips on parsers without it.</p>
@@ -56,18 +55,19 @@ class SchemaLocationDomTest {
 
     private static final String INSTANCE = "schema-location-instance.xml";
 
-    /** Name of the external schema the instance points at; both block mechanisms name it in the failure message. */
-    private static final String SCHEMA = "schema-location.xsd";
-
     @Test
-    void hardenedBlocksExternalSchemaFetch() {
+    void hardenedDoesNotFetchExternalSchema() {
         assumeTrue(supportsSchemaLanguage(), "parser does not support JAXP 1.2 schema-language XSD validation");
         final DocumentBuilderFactory factory = enableXsdValidation(XmlFactories.newDocumentBuilderFactory());
-        // The schemaLocation fetch is denied and surfaced as a fatal error rather than a silent fetch. The attribution is implementation-specific, so assert
-        // only that the failure names the external schema, not the mechanism (accessExternalSchema on the JDK, the deny-all resolver on external Xerces).
-        final SAXException thrown = assertThrows(SAXException.class, () -> parse(factory));
-        assertTrue(thrown.getMessage() != null && thrown.getMessage().contains(SCHEMA),
-                "Block must reference the external schema, got: " + thrown.getMessage());
+        // The schemaLocation reference resolves to empty rather than being fetched. Either the empty schema fails the validating parse (acceptable), or the
+        // parse completes but the schema's default leak attribute is never inlined. Either way the marker must not reach the DOM.
+        try {
+            final Document document = parse(factory);
+            assertNotEquals(LEAKED_MARKER, document.getDocumentElement().getAttribute("leak"),
+                    "Hardened parse must not inline the external schema's default attribute.");
+        } catch (final Exception blocked) {
+            // Acceptable: the empty schema was rejected at parse time, so nothing was fetched or inlined.
+        }
     }
 
     @Test

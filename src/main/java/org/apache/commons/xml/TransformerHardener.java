@@ -41,7 +41,7 @@ import javax.xml.transform.sax.SAXTransformerFactory;
  *         hardening surface is reachable only through a vendor API.</li>
  *     <li><strong>FSP</strong> ({@link XMLConstants#FEATURE_SECURE_PROCESSING}): required. On XSLTC it enables the runtime evaluator limits; on Xalan it disables
  *         reflection-based extension functions.</li>
- *     <li><strong>{@link FallbackDenyURIResolver} floor</strong>: required. A deny-all {@link URIResolver} floor, installed by
+ *     <li><strong>{@link FallbackIgnoreURIResolver} floor</strong>: required. An ignore-all {@link URIResolver} floor, installed by
  *         {@link HardeningTransformerFactory} and carried onto every produced {@link Transformer}, blocks {@code xsl:import}/{@code xsl:include} at compile time
  *         and {@code document()} at runtime, the one channel both XSLTC and Xalan route through. A caller-set {@link URIResolver} is routed through the floor
  *         rather than replacing it, so a caller can opt a specific URI in but cannot drop the block.</li>
@@ -69,7 +69,7 @@ final class TransformerHardener {
         // Required: enables secure processing (XSLTC runtime limits; Xalan's extension-function block).
         setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
         // Required: source/stylesheet parsing provisions its own SAX reader otherwise; the wrapper routes every Source through a hardened one and installs the
-        // deny-all URIResolver floor (blocking xsl:import/include at compile time and document() at runtime) that a caller-set resolver cannot remove.
+        // ignore-all URIResolver floor (blocking xsl:import/include at compile time and document() at runtime) that a caller-set resolver cannot remove.
         return new HardeningTransformerFactory((SAXTransformerFactory) factory);
     }
 

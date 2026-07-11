@@ -17,23 +17,36 @@
 
 package org.apache.commons.xml;
 
+import org.w3c.dom.bootstrap.DOMImplementationRegistry;
+import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;
 
 /**
- * {@link LSResourceResolver} floor: consults an optional caller-supplied resolver and denies (throws) whatever the caller does not resolve.
+ * {@link LSResourceResolver} floor: consults an optional caller-supplied resolver and ignores (resolves to empty) whatever the caller does not resolve.
  *
- * <p>The schema-compile counterpart of {@link FallbackDenyEntityResolver2}. The hardened {@link javax.xml.validation.SchemaFactory}, {@link
+ * <p>The schema-compile counterpart of {@link FallbackIgnoreEntityResolver2}. The hardened {@link javax.xml.validation.SchemaFactory}, {@link
  * javax.xml.validation.Validator} and {@link javax.xml.validation.ValidatorHandler} wrappers install one of these and route a caller-set resolver through
  * {@link #setDelegate} rather than letting it replace the floor. A caller opts a specific resource in by returning a non-{@code null} {@link LSInput};
- * anything left unresolved is denied.</p>
+ * anything left unresolved resolves to an empty {@link LSInput}, so the external resource is neither fetched nor leaked.</p>
  */
-final class FallbackDenyLSResourceResolver implements LSResourceResolver {
+final class FallbackIgnoreLSResourceResolver implements LSResourceResolver {
+
+    /** DOM Level 3 Load/Save implementation used to build the empty input for unresolved lookups. */
+    private static final DOMImplementationLS DOM_LS = domImplementationLS();
 
     private LSResourceResolver delegate;
 
-    FallbackDenyLSResourceResolver(final LSResourceResolver delegate) {
+    FallbackIgnoreLSResourceResolver(final LSResourceResolver delegate) {
         this.delegate = delegate;
+    }
+
+    private static DOMImplementationLS domImplementationLS() {
+        try {
+            return (DOMImplementationLS) DOMImplementationRegistry.newInstance().getDOMImplementation("LS");
+        } catch (final ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            throw new HardeningException("No DOM Level 3 Load/Save implementation available to build the empty schema input", e);
+        }
     }
 
     void setDelegate(final LSResourceResolver delegate) {
@@ -50,6 +63,8 @@ final class FallbackDenyLSResourceResolver implements LSResourceResolver {
         if (resolved != null) {
             return resolved;
         }
-        throw new SecurityException(HardeningException.forbidden(type, namespaceURI, publicId, systemId, baseURI));
+        final LSInput empty = DOM_LS.createLSInput();
+        empty.setStringData("");
+        return empty;
     }
 }

@@ -51,19 +51,4 @@ final class HardeningException extends IllegalStateException {
     static HardeningException settingFailed(final String kind, final String name, final Object target, final Throwable cause) {
         return new HardeningException("Failed to set " + kind + " '" + name + "' on " + target.getClass().getName(), cause);
     }
-
-    /**
-     * Builds the standard "forbidden by hardening" message shared by every resolver floor.
-     *
-     * @param type      the resource kind, or {@code null} if not applicable.
-     * @param namespace the namespace (or, for Woodstox, the entity name), or {@code null}.
-     * @param publicId  the public identifier, or {@code null} if none.
-     * @param systemId  the system identifier of the denied resource.
-     * @param baseURI   the base URI for relative resolution, or {@code null}.
-     * @return the message describing the denied lookup.
-     */
-    static String forbidden(final String type, final String namespace, final String publicId, final String systemId, final String baseURI) {
-        return String.format("External resource fetch forbidden by hardening: type=%s, namespace=%s, publicId=%s, systemId=%s, baseURI=%s", type, namespace,
-                publicId, systemId, baseURI);
-    }
 }

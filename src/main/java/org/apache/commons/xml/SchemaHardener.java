@@ -23,7 +23,7 @@ import javax.xml.validation.SchemaFactory;
  * Hardening for any {@link SchemaFactory} on the classpath.
  *
  * <p>Unlike the other hardeners there is no per-implementation branching and no feature or limit configuration on the factory itself: schema compilation and
- * validation reach external resources only through the resolver hook, so wrapping the factory with a non-removable deny-all resolver floor is enough on every
+ * validation reach external resources only through the resolver hook, so wrapping the factory with a non-removable ignore-all resolver floor is enough on every
  * implementation. The reader used to parse schema and instance documents is hardened separately, through
  * {@link SAXParserHardener#hardenSource(javax.xml.transform.Source)}.</p>
  */

@@ -24,11 +24,14 @@ import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
 
 /**
- * {@link FallbackDenyXMLResolver} variant whose unresolved policy returns an empty input instead of throwing, so the parse continues with no replacement
- * content. Used on Woodstox's DTD-subset and undeclared-entity hooks (where a missing resource must be skipped, not denied), while still consulting an
- * optional caller-supplied resolver first.
+ * {@link XMLResolver} floor: consults an optional caller-supplied resolver and ignores (resolves to empty) whatever the caller does not resolve.
+ *
+ * <p>The StAX counterpart of {@link FallbackIgnoreEntityResolver2}, installed on each entity-resolution hook. The hardened {@link javax.xml.stream.XMLInputFactory}
+ * wrapper routes a caller-set resolver through {@link #setDelegate} rather than letting it replace the floor. A caller opts a specific entity in by returning
+ * a non-{@code null} result; anything left unresolved resolves to an empty input, so the external resource is neither fetched nor leaked and the parse
+ * continues with no replacement content.</p>
  */
-class FallbackIgnoreXMLResolver extends FallbackDenyXMLResolver {
+final class FallbackIgnoreXMLResolver implements XMLResolver {
 
     /**
      * Empty {@link ByteArrayInputStream} shared across every call. {@code read()} on a zero-length array always returns {@code -1}, so reusing the instance
@@ -36,12 +39,23 @@ class FallbackIgnoreXMLResolver extends FallbackDenyXMLResolver {
      */
     private static final InputStream EMPTY = new ByteArrayInputStream(new byte[0]);
 
+    private XMLResolver delegate;
+
     FallbackIgnoreXMLResolver(final XMLResolver delegate) {
-        super(delegate);
+        this.delegate = delegate;
+    }
+
+    void setDelegate(final XMLResolver delegate) {
+        this.delegate = delegate;
+    }
+
+    XMLResolver getDelegate() {
+        return delegate;
     }
 
     @Override
-    protected Object onUnresolved(final String publicID, final String systemID, final String baseURI, final String namespace) throws XMLStreamException {
-        return EMPTY;
+    public Object resolveEntity(final String publicID, final String systemID, final String baseURI, final String namespace) throws XMLStreamException {
+        final Object resolved = delegate != null ? delegate.resolveEntity(publicID, systemID, baseURI, namespace) : null;
+        return resolved != null ? resolved : EMPTY;
     }
 }

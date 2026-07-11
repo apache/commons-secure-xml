@@ -93,7 +93,7 @@ final class AttackTestSupport {
 
     /**
      * Test-only permissive counterpart of {@code SAXParserHardener.HardeningExpatXMLReader}: a pass-through Expat wrapper that rejects the
-     * {@code namespace-prefixes} feature eagerly (so a probing TrAX identity transformer falls back instead of failing the whole parse) but installs no deny-all
+     * {@code namespace-prefixes} feature eagerly (so a probing TrAX identity transformer falls back instead of failing the whole parse) but installs no ignore-all
      * resolver floor, so the unconfigured/positive controls stay permissive.
      */
     private static final class PermissiveExpatReader extends XMLFilterImpl {
@@ -212,6 +212,16 @@ final class AttackTestSupport {
      */
     static void assertDomBlocks(final String payload) {
         assertParseFails(() -> strictDocumentBuilder(XmlFactories.newDocumentBuilderFactory()).parse(inputSource(payload)), "DOM", SAXException.class);
+    }
+
+    /**
+     * Asserts a hardened DOM parse either blocks at parse or completes without leaked content.
+     *
+     * <p>Used for an external-resource payload whose outcome differs across implementations: one that resolves the reference to empty (the ignore-all floor) does
+     * not leak, while one that rejects the unresolvable systemId throws instead. Both are acceptable.</p>
+     */
+    static void assertDomBlocksOrDoesNotLeak(final String payload) {
+        assertNoLeakOrThrows(() -> domParseAndCaptureText(payload), "DOM", SAXException.class);
     }
 
     /**
@@ -442,6 +452,13 @@ final class AttackTestSupport {
     }
 
     /**
+     * Asserts a hardened SAX parse either blocks at parse or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     */
+    static void assertSaxBlocksOrDoesNotLeak(final String payload) {
+        assertNoLeakOrThrows(() -> captureCharacters(strictXMLReader(XmlFactories.newSAXParserFactory()), payload), "SAX", SAXException.class);
+    }
+
+    /**
      * Asserts a hardened SAX parse completes without throwing and without leaked content.
      *
      * <p>{@link XMLReader#parse(InputSource)} on a parser from {@link XmlFactories#newSAXParserFactory()}; use this when the hardening guarantee is "the parse
@@ -467,6 +484,17 @@ final class AttackTestSupport {
      */
     static void assertSchemaBlocks(final Source xsd) {
         assertParseFails(() -> strictSchema(XmlFactories.newSchemaFactory(), xsd), "Schema compile", SAXException.class, SecurityException.class);
+    }
+
+    /**
+     * Asserts a hardened Schema compile either blocks or completes: an unresolved import resolves to an empty schema (which may itself fail to compile) or is
+     * rejected outright. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     */
+    static void assertSchemaBlocksOrDoesNotLeak(final Source xsd) {
+        assertNoLeakOrThrows(() -> {
+            strictSchema(XmlFactories.newSchemaFactory(), xsd);
+            return "";
+        }, "Schema compile", SAXException.class, SecurityException.class);
     }
 
     /**
@@ -498,6 +526,14 @@ final class AttackTestSupport {
     static void assertStaxBlocks(final String payload) {
         assertParseFails(() -> consumeStreamReader(XmlFactories.newXMLInputFactory(), payload), "StAX stream", XMLStreamException.class);
         assertParseFails(() -> consumeEventReader(XmlFactories.newXMLInputFactory(), payload), "StAX event", XMLStreamException.class);
+    }
+
+    /**
+     * Asserts a hardened StAX parse (stream and event) either blocks at parse or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     */
+    static void assertStaxBlocksOrDoesNotLeak(final String payload) {
+        assertNoLeakOrThrows(() -> captureStaxStreamText(XmlFactories.newXMLInputFactory(), payload), "StAX stream", XMLStreamException.class);
+        assertNoLeakOrThrows(() -> captureStaxEventText(XmlFactories.newXMLInputFactory(), payload), "StAX event", XMLStreamException.class);
     }
 
     /**
@@ -540,6 +576,13 @@ final class AttackTestSupport {
     }
 
     /**
+     * Asserts a hardened Templates compile-and-transform either blocks or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     */
+    static void assertTemplatesBlocksOrDoesNotLeak(final Source xslt) {
+        assertNoLeakOrThrows(() -> templatesCompileAndTransform(xslt), "Templates", TransformerException.class);
+    }
+
+    /**
      * Asserts a hardened Templates compile-and-transform succeeds.
      *
      * <p>{@link TransformerFactory#newTemplates(Source)} via {@link XmlFactories#newTransformerFactory()} followed by transform; positive control for
@@ -569,6 +612,13 @@ final class AttackTestSupport {
         assertParseFails(
                 () -> strictTransformer(XmlFactories.newTransformerFactory()).transform(streamSource(payload), new StreamResult(new StringWriter())),
                 "Transformer", TransformerException.class);
+    }
+
+    /**
+     * Asserts a hardened identity Transformer either blocks or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     */
+    static void assertTransformerBlocksOrDoesNotLeak(final String payload) {
+        assertNoLeakOrThrows(() -> identityTransformAndCapture(payload), "Transformer", TransformerException.class);
     }
 
     /**
@@ -604,6 +654,18 @@ final class AttackTestSupport {
     }
 
     /**
+     * Asserts a hardened Validator either blocks or completes without leaked content. The instance document's unresolvable external entity is either dropped
+     * (no leak) or rejected; a rejection surfaces as a SAX/security error or, where the parser attempts the unresolvable systemId directly, an
+     * {@link IOException}. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     */
+    static void assertValidatorBlocksOrDoesNotLeak(final String xml) {
+        assertNoLeakOrThrows(() -> {
+            strictValidator(strictSchema(XmlFactories.newSchemaFactory(), streamSource(BENIGN_SCHEMA))).validate(streamSource(xml));
+            return "";
+        }, "Validator", SAXException.class, SecurityException.class, IOException.class);
+    }
+
+    /**
      * Asserts a hardened Validator validation completes without throwing.
      *
      * <p>{@link Validator#validate(Source)} on a validator from {@link #BENIGN_SCHEMA} compiled via {@link XmlFactories#newSchemaFactory()}; use this when the
@@ -634,6 +696,13 @@ final class AttackTestSupport {
      */
     static void assertXmlReaderBlocks(final String payload) {
         assertParseFails(() -> consumeXmlReader(rawHardenedReader(), payload), "XMLReader", SAXException.class);
+    }
+
+    /**
+     * Asserts a hardened-in-place XMLReader parse either blocks at parse or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     */
+    static void assertXmlReaderBlocksOrDoesNotLeak(final String payload) {
+        assertNoLeakOrThrows(() -> captureCharacters(rawHardenedReader(), payload), "XMLReader", SAXException.class);
     }
 
     /**

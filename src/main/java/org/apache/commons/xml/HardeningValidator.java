@@ -32,19 +32,19 @@ import org.xml.sax.SAXNotSupportedException;
 
 /**
  * {@link Validator} wrapper that rewrites the Source on every {@link Validator#validate(Source)} and {@link Validator#validate(Source, Result)} call through
- * {@link XmlFactories#harden(Source)} before delegating, and keeps a deny-all {@link LSResourceResolver} floor so {@code xsi:schemaLocation} is not resolved at
+ * {@link XmlFactories#harden(Source)} before delegating, and keeps an ignore-all {@link LSResourceResolver} floor so {@code xsi:schemaLocation} is not resolved at
  * validation time.
  */
 final class HardeningValidator extends Validator {
 
     private final Validator delegate;
 
-    private final FallbackDenyLSResourceResolver floor = new FallbackDenyLSResourceResolver(null);
+    private final FallbackIgnoreLSResourceResolver floor = new FallbackIgnoreLSResourceResolver(null);
 
     HardeningValidator(final Validator delegate) {
         this.delegate = delegate;
         // Block xsi:schemaLocation resolution; neither the JDK nor Xerces reliably propagates the factory's resolver to its Validators. The floor is a
-        // non-removable lower bound: a caller opts specific lookups in by setting their own resolver, but cannot drop the deny-all block.
+        // non-removable lower bound: a caller opts specific lookups in by setting their own resolver, but cannot drop the ignore-all block.
         delegate.setResourceResolver(floor);
     }
 
@@ -90,7 +90,7 @@ final class HardeningValidator extends Validator {
 
     @Override
     public void setResourceResolver(final LSResourceResolver resourceResolver) {
-        // Route a caller resolver through the floor instead of replacing it, so the deny-all lower bound cannot be removed.
+        // Route a caller resolver through the floor instead of replacing it, so the ignore-all lower bound cannot be removed.
         floor.setDelegate(resourceResolver);
     }
 

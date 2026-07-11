@@ -36,6 +36,8 @@ import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.vafer.jdependency.Clazz;
 import org.vafer.jdependency.Clazzpath;
 
+import javax.xml.transform.Source;
+
 /**
  * Guards the shade footprint: the set of classes a consumer pulls in when they shade a single hardener entry point.
  *
@@ -53,37 +55,36 @@ class ShadingFootprintTest {
     private static final String PKG = "org.apache.commons.xml.";
 
     /**
-     * Every hardener needs this shared exception (its {@code settingFailed}/{@code forbidden} message helpers).
+     * Shared exception carrying the {@code settingFailed} message helper; pulled in by every hardener that applies a JAXP setting.
      */
     private static final String HARDENING_EXCEPTION = "HardeningException";
 
     private static final Set<String> DOCUMENT_BUILDER_HARDENER = set("DocumentBuilderHardener", "HardeningDocumentBuilder", "HardeningDocumentBuilderFactory"
-            , HARDENING_EXCEPTION, "FallbackDenyEntityResolver2");
+            , HARDENING_EXCEPTION, "FallbackIgnoreEntityResolver2");
 
-    private static final Set<String> SAX_PARSER_HARDENER = set("SAXParserHardener", "SAXParserHardener$DtdAwareDenyResolver",
+    private static final Set<String> SAX_PARSER_HARDENER = set("SAXParserHardener",
             "SAXParserHardener$HardeningExpatXMLReader", "HardeningSAXParser", "HardeningSAXParserFactory", "HardeningXMLReader", HARDENING_EXCEPTION,
-            "FallbackDenyEntityResolver2");
+            "FallbackIgnoreEntityResolver2");
 
-    private static final Set<String> STAX_HARDENER = set("StaxHardener", "StaxHardener$DtdSubsetFloor", "HardeningXMLInputFactory", HARDENING_EXCEPTION,
-            "FallbackDenyXMLResolver", "FallbackIgnoreXMLResolver");
+    private static final Set<String> STAX_HARDENER = set("StaxHardener", "HardeningXMLInputFactory", "FallbackIgnoreXMLResolver");
 
     /**
-     * TrAX, XPath and schema re-harden their sub-parsers through {@link SAXParserHardener#hardenSource}, so each builds on the full SAX closure below.
+     * TrAX, XPath and schema re-harden their sub-parsers through {@link SAXParserHardener#harden(Source)}, so each builds on the full SAX closure below.
      */
     private static final Set<String> TRANSFORMER_HARDENER = saxParsersHardenerPlus("TransformerHardener", "HardeningTransformerFactory",
-            "HardeningTransformer", "HardeningTemplates", "FallbackDenyURIResolver", "SaxonProvider", "SaxonProvider$1", "SaxonProvider$HardenedConfiguration"
+            "HardeningTransformer", "HardeningTemplates", "FallbackIgnoreURIResolver", "SaxonProvider", "SaxonProvider$1", "SaxonProvider$HardenedConfiguration"
             , "SaxonProvider$SaxonProviderConfigurer");
 
     private static final Set<String> XPATH_HARDENER = saxParsersHardenerPlus("XPathHardener", "SaxonProvider", "SaxonProvider$1",
             "SaxonProvider$HardenedConfiguration", "SaxonProvider$SaxonProviderConfigurer");
 
     private static final Set<String> SCHEMA_HARDENER = saxParsersHardenerPlus("SchemaHardener", "HardeningSchemaFactory", "HardeningValidator",
-            "HardeningValidatorHandler", "HardeningSchema", "FallbackDenyLSResourceResolver");
+            "HardeningValidatorHandler", "HardeningSchema", "FallbackIgnoreLSResourceResolver");
 
     /**
      * Only the public {@link XmlFactories} entry, which news up every hardener, still pulls the whole library; this is its class count.
      */
-    private static final int WHOLE_LIBRARY_SIZE = 33;
+    private static final int WHOLE_LIBRARY_SIZE = 30;
 
     /**
      * Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library.

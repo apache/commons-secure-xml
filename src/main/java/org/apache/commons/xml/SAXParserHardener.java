@@ -17,9 +17,6 @@
 
 package org.apache.commons.xml;
 
-import java.io.IOException;
-import java.util.Objects;
-
 import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
@@ -34,7 +31,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.XMLReader;
-import org.xml.sax.ext.LexicalHandler;
 
 /**
  * Capability-driven hardening for any {@link SAXParserFactory} on the classpath.
@@ -44,64 +40,21 @@ import org.xml.sax.ext.LexicalHandler;
  * funnelled through {@link HardeningSAXParserFactory} into {@link #hardenReader(XMLReader)}:</p>
  * <ul>
  *     <li><strong>Android</strong> (Harmony / Expat): {@link XMLConstants#FEATURE_SECURE_PROCESSING FSP} and the JAXP 1.5 {@code ACCESS_EXTERNAL_*} properties
- *         are not recognized, and libexpat enforces its own Billion Laughs check, so neither is applied. Two fixups are still needed: a subset-aware deny-all
- *         resolver (Expat ignores external fetches silently when no resolver is set, so an explicit one is required to <em>fail</em> on external entities while
- *         still letting an unused external subset load), and a {@link HardeningExpatXMLReader} so the unsupported {@code namespace-prefixes} feature is rejected at
+ *         are not recognized, and libexpat enforces its own Billion Laughs check, so neither is applied. Two fixups are still needed: an ignore-all resolver
+ *         (Expat ignores external fetches silently when no resolver is set; the floor keeps that behavior non-bypassable, resolving anything unresolved to
+ *         empty), and a {@link HardeningExpatXMLReader} so the unsupported {@code namespace-prefixes} feature is rejected at
  *         configuration time rather than mid-parse.</li>
  *     <li><strong>FSP</strong>: required on every other reader. It switches on the implementation's built-in security manager, which is what carries the
  *         processing limits.</li>
  *     <li><strong>{@code XERCES_LOAD_EXTERNAL_DTD}</strong>: optional. Where supported, it skips the external DTD subset on non-validating parsers so a
- *         DOCTYPE-only document parses without a fetch attempt. If not supported, the fetch will throw instead, due to the following settings.</li>
- *     <li><strong>Deny-all resolver floor</strong>: every reader is wrapped in a {@link HardeningXMLReader} that keeps a deny-all {@link EntityResolver} floor.
+ *         DOCTYPE-only document parses without a fetch attempt. If not supported, the resolver floor below resolves the subset to empty instead.</li>
+ *     <li><strong>Ignore-all resolver floor</strong>: every reader is wrapped in a {@link HardeningXMLReader} that keeps an ignore-all {@link EntityResolver} floor.
  *         That floor blocks external DTD, entity, schema and {@code xi:include} fetches in one place: the stock JDK's XInclude processor ignores
  *         {@code ACCESS_EXTERNAL_*} and consults the {@link EntityResolver} instead, so no {@code ACCESS_EXTERNAL_*} properties are needed here. A caller can
  *         chain its own resolver onto the floor to allow-list resources, but cannot remove it.</li>
  * </ul>
  */
 final class SAXParserHardener {
-
-    /**
-     * Deny floor that additionally lets the external DTD subset declared by the DOCTYPE be skipped silently; merely <em>declaring</em> an external subset does
-     * not throw.
-     *
-     * <p>Android's Expat routes every external fetch (subset, DOCTYPE {@code SYSTEM}, general/parameter entity) through the 2-arg
-     * {@link EntityResolver#resolveEntity(String, String)}; a deny-all resolver there would also reject a DOCTYPE that merely <em>names</em> an unused external
-     * subset. As a {@link FallbackDenyEntityResolver2} it consults the caller's resolver first; as a {@link LexicalHandler} (via {@code DefaultHandler2}) it
-     * tracks the declared subset's identifiers so {@link #onUnresolved} can tell the subset apart from a forbidden external general or parameter entity. It is
-     * stateful, so a fresh instance is installed per reader.</p>
-     */
-    private static final class DtdAwareDenyResolver extends FallbackDenyEntityResolver2 {
-
-        private String dtdPublicId;
-        private String dtdSystemId;
-        private boolean inDtd;
-
-        DtdAwareDenyResolver() {
-            super(null);
-        }
-
-        @Override
-        public void startDTD(final String name, final String publicId, final String systemId) {
-            inDtd = true;
-            dtdPublicId = publicId;
-            dtdSystemId = systemId;
-        }
-
-        @Override
-        public void endDTD() {
-            inDtd = false;
-        }
-
-        @Override
-        protected InputSource onUnresolved(final String name, final String publicId, final String baseURI, final String systemId)
-                throws SAXException, IOException {
-            // Declaring (but not using) an external subset must not throw: let the parser skip it silently. Everything else is denied by the floor.
-            if (inDtd && Objects.equals(publicId, dtdPublicId) && Objects.equals(systemId, dtdSystemId)) {
-                return null;
-            }
-            return super.onUnresolved(name, publicId, baseURI, systemId);
-        }
-    }
 
     /**
      * {@link HardeningXMLReader} for Android's {@code org.apache.harmony.xml.ExpatReader} that additionally surfaces its {@code namespace-prefixes} limitation at
@@ -115,8 +68,8 @@ final class SAXParserHardener {
 
         private static final String NAMESPACE_PREFIXES_FEATURE = "http://xml.org/sax/features/namespace-prefixes";
 
-        HardeningExpatXMLReader(final XMLReader delegate, final FallbackDenyEntityResolver2 floor) {
-            super(delegate, floor);
+        HardeningExpatXMLReader(final XMLReader delegate) {
+            super(delegate);
         }
 
         @Override
@@ -133,9 +86,6 @@ final class SAXParserHardener {
 
     /** Class name of Android's Expat-backed {@link XMLReader}. */
     private static final String ANDROID_EXPAT_READER = "org.apache.harmony.xml.ExpatReader";
-
-    /** SAX property carrying the {@link LexicalHandler}; used to observe the DTD boundary on Android's Expat. */
-    private static final String LEXICAL_HANDLER_PROPERTY = "http://xml.org/sax/properties/lexical-handler";
 
     /** Xerces feature: load the external DTD subset for non-validating parsers. */
     private static final String XERCES_LOAD_EXTERNAL_DTD = "http://apache.org/xml/features/nonvalidating/load-external-dtd";
@@ -162,20 +112,16 @@ final class SAXParserHardener {
             return reader;
         }
         if (ANDROID_EXPAT_READER.equals(reader.getClass().getName())) {
-            // Expat ignores external fetches when no resolver is set; a subset-aware deny floor fails on external entities but lets an unused subset load.
-            // HardeningExpatXMLReader keeps that floor non-bypassable (routing a caller-set resolver, including SAXParser.parse's handler, through it) and rejects
-            // the unsupported namespace-prefixes feature eagerly rather than mid-parse.
-            final DtdAwareDenyResolver floor = new DtdAwareDenyResolver();
-            final HardeningExpatXMLReader hardened = new HardeningExpatXMLReader(reader, floor);
-            // The floor needs the DTD-boundary events to tell the subset apart from entities; Expat recognizes the lexical-handler property.
-            trySetProperty(hardened, LEXICAL_HANDLER_PROPERTY, floor);
-            return hardened;
+            // Expat ignores external fetches when no resolver is set; the ignore-all floor keeps that behavior non-bypassable (routing a caller-set resolver,
+            // including SAXParser.parse's handler, through it and resolving anything unresolved to empty) and, via HardeningExpatXMLReader, rejects the
+            // unsupported namespace-prefixes feature eagerly rather than mid-parse.
+            return new HardeningExpatXMLReader(reader);
         }
         // Required: enables the JDK XMLSecurityManager / Xerces SecurityManager limits.
         setFeature(reader, XMLConstants.FEATURE_SECURE_PROCESSING, true);
         // Optional: skip the external DTD subset on non-validating parsers so DOCTYPE-only documents parse without a blocked fetch attempt.
         setOptionalFeature(reader, XERCES_LOAD_EXTERNAL_DTD, false);
-        // Required: HardeningXMLReader installs a deny-all EntityResolver floor on the reader.
+        // Required: HardeningXMLReader installs an ignore-all EntityResolver floor on the reader.
         // That floor blocks external DTD, entity, schema and xi:include fetches in one place: no ACCESS_EXTERNAL_* properties are needed here.
         // Callers can chain their resolvers, but not override the floor.
         return new HardeningXMLReader(reader);
@@ -227,15 +173,6 @@ final class SAXParserHardener {
             reader.setFeature(feature, value);
         } catch (final Exception e) {
             // Ignored: the implementation does not recognize this feature.
-        }
-    }
-
-    private static boolean trySetProperty(final XMLReader reader, final String property, final Object value) {
-        try {
-            reader.setProperty(property, value);
-            return true;
-        } catch (final Exception e) {
-            return false;
         }
     }
 

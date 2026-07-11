@@ -17,6 +17,7 @@
 
 package org.apache.commons.xml;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -28,31 +29,31 @@ import org.xml.sax.ext.DefaultHandler2;
 import org.xml.sax.ext.EntityResolver2;
 
 /**
- * Entity resolver that consults an optional caller-supplied resolver and denies (throws) whatever the caller does not resolve.
+ * Entity resolver that consults an optional caller-supplied resolver and ignores (resolves to empty) whatever the caller does not resolve.
  *
  * <p>The canonical hardening floor, and the entity-resolution counterpart of the JAXP 1.5 {@code ACCESS_EXTERNAL_*} properties. Every floor
- * ({@link FallbackDenyLSResourceResolver}, {@link FallbackDenyURIResolver}, {@link FallbackDenyXMLResolver} and its {@link FallbackIgnoreXMLResolver} variant)
- * shares two defining properties:</p>
+ * ({@link FallbackIgnoreLSResourceResolver}, {@link FallbackIgnoreURIResolver} and {@link FallbackIgnoreXMLResolver}) shares two defining properties:</p>
  * <ol>
  * <li><strong>Non-removable, and it wraps the resolver the caller sets.</strong> The hardened wrappers install one and route a caller-set resolver through
  * {@code setDelegate} rather than letting it replace the floor, so the caller's resolver is consulted first but cannot remove the floor underneath it.</li>
  * <li><strong>It supplies the default action for a lookup the caller's resolver does not resolve</strong> (a {@code null} return, or no caller resolver at
  * all). This is where a floor departs from stock JAXP: normally an unresolved lookup falls back to the processor's built-in resolution and the resource is
- * <em>fetched</em>; a floor instead <em>denies</em> it (throws).</li>
+ * <em>fetched</em>; a floor instead resolves it to <em>empty</em> content, so the parse continues without the external fetch and without a leak.</li>
  * </ol>
  *
  * <p>The hardened DOM and SAX wrappers install one of these and, when the caller sets their own {@link EntityResolver}, route it through {@link #setDelegate}
  * rather than letting it replace the floor. A caller therefore opts a specific resource in by returning a non-{@code null} {@link InputSource} from their
- * resolver; anything they leave unresolved (a {@code null} return, or no caller resolver at all) goes to {@link #onUnresolved}, which denies by default.</p>
+ * resolver; anything they leave unresolved (a {@code null} return, or no caller resolver at all) goes to {@link #onUnresolved}, which returns empty content by
+ * default.</p>
  *
- * <p>It extends {@link DefaultHandler2} so it is also usable as a {@link org.xml.sax.ext.LexicalHandler} (see {@code SAXParserHardener}'s Android subclass,
- * which needs {@code startDTD}/{@code endDTD}); {@link #getExternalSubset} therefore inherits the {@code DefaultHandler2} "no synthetic subset" default. Only
- * {@link #resolveEntity(String, String, String, String) resolveEntity} (the actual external fetch) reaches the deny fallback.</p>
+ * <p>It extends {@link DefaultHandler2} so it is also usable as a {@link org.xml.sax.ext.LexicalHandler}; {@link #getExternalSubset} therefore inherits the
+ * {@code DefaultHandler2} "no synthetic subset" default. Only {@link #resolveEntity(String, String, String, String) resolveEntity} (the actual external fetch)
+ * reaches the ignore fallback.</p>
  */
-class FallbackDenyEntityResolver2 extends DefaultHandler2 {
+class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
 
     /**
-     * Caller-supplied resolver consulted first, or {@code null} for a pure deny-all floor.
+     * Caller-supplied resolver consulted first, or {@code null} for a pure ignore-all floor.
      */
     private EntityResolver delegate;
 
@@ -75,14 +76,14 @@ class FallbackDenyEntityResolver2 extends DefaultHandler2 {
         }
     }
 
-    FallbackDenyEntityResolver2(final EntityResolver delegate) {
+    FallbackIgnoreEntityResolver2(final EntityResolver delegate) {
         this.delegate = delegate;
     }
 
     /**
      * Replaces the caller resolver consulted ahead of the floor; lets a single floor instance back successive {@code setEntityResolver} calls.
      *
-     * @param delegate The caller-supplied resolver, or {@code null} for a pure deny-all floor.
+     * @param delegate The caller-supplied resolver, or {@code null} for a pure ignore-all floor.
      */
     final void setDelegate(final EntityResolver delegate) {
         this.delegate = delegate;
@@ -105,20 +106,20 @@ class FallbackDenyEntityResolver2 extends DefaultHandler2 {
     }
 
     /**
-     * Outcome when neither the caller delegate nor this resolver provides the entity. Denies by default; a subclass may permit specific lookups (e.g. the
-     * external DTD subset) by returning {@code null} or an {@link InputSource} instead of calling {@code super}.
+     * Outcome when neither the caller delegate nor this resolver provides the entity. Resolves to empty content by default, so the external resource is neither
+     * fetched nor leaked and the parse continues with no replacement text.
      *
      * @param name     The entity name, or {@code null} on the 2-arg resolution path.
      * @param publicId The public identifier, or {@code null} if none.
      * @param baseURI  The base URI for relative resolution, or {@code null}.
      * @param systemId The system identifier of the unresolved entity.
-     * @return An {@link InputSource} to permit the lookup, or {@code null} to skip it silently; the default implementation never returns normally.
-     * @throws SAXException to deny the lookup (the default behavior).
-     * @throws IOException  if a subclass opens a stream that fails.
+     * @return An empty {@link InputSource}.
+     * @throws SAXException never by the default implementation.
+     * @throws IOException  never by the default implementation.
      */
     protected InputSource onUnresolved(final String name, final String publicId, final String baseURI, final String systemId)
             throws SAXException, IOException {
-        throw new SAXException(HardeningException.forbidden(name, null, publicId, systemId, baseURI));
+        return new InputSource(new ByteArrayInputStream(new byte[0]));
     }
 
     private InputSource resolveWithDelegate(final String name, final String publicId, final String baseURI,

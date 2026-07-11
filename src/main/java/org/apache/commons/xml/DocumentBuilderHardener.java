@@ -34,8 +34,8 @@ import org.xml.sax.EntityResolver;
  *     <li><strong>FSP</strong>: required. It switches on the implementation's built-in security manager, which is what carries the processing limits.</li>
  *     <li><strong>{@code XERCES_LOAD_EXTERNAL_DTD}</strong>: optional. Where supported, it skips the external DTD subset on non-validating parsers so a
  *         DOCTYPE-only document parses without a fetch attempt. If not supported, the fetch will throw instead, due to the following settings.</li>
- *     <li><strong>Deny-all resolver floor</strong>: every produced {@link DocumentBuilder} is wrapped by a {@link HardeningDocumentBuilderFactory} that keeps a
- *         deny-all {@link EntityResolver} floor. That floor blocks external DTD, entity, schema and {@code xi:include} fetches in one place: the stock JDK's
+ *     <li><strong>Ignore-all resolver floor</strong>: every produced {@link DocumentBuilder} is wrapped by a {@link HardeningDocumentBuilderFactory} that keeps an
+ *         ignore-all {@link EntityResolver} floor. That floor blocks external DTD, entity, schema and {@code xi:include} fetches in one place: the stock JDK's
  *         XInclude processor ignores {@code ACCESS_EXTERNAL_*} and consults the {@link EntityResolver} instead, so no {@code ACCESS_EXTERNAL_*} attributes are
  *         needed here. A caller can chain its own resolver onto the floor to allow-list resources, but cannot remove it.</li>
  * </ul>
@@ -57,7 +57,7 @@ final class DocumentBuilderHardener {
         setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
         // Optional: skip the external DTD subset on non-validating parsers so DOCTYPE-only documents parse without a blocked fetch attempt.
         setOptionalFeature(factory, XERCES_LOAD_EXTERNAL_DTD, false);
-        // Required: HardeningDocumentBuilderFactory installs a deny-all EntityResolver floor on every DocumentBuilder.
+        // Required: HardeningDocumentBuilderFactory installs an ignore-all EntityResolver floor on every DocumentBuilder.
         // That floor blocks external DTD, entity, schema and xi:include fetches in one place: no ACCESS_EXTERNAL_* attributes are needed here.
         // Callers can chain their resolvers, but not override the floor.
         return new HardeningDocumentBuilderFactory(factory);

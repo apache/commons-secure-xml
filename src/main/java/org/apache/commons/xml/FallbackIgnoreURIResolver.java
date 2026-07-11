@@ -17,23 +17,26 @@
 
 package org.apache.commons.xml;
 
+import java.io.StringReader;
+
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
+import javax.xml.transform.stream.StreamSource;
 
 /**
- * {@link URIResolver} floor: consults an optional caller-supplied resolver and denies (throws) whatever the caller does not resolve.
+ * {@link URIResolver} floor: consults an optional caller-supplied resolver and ignores (resolves to empty) whatever the caller does not resolve.
  *
- * <p>The XSLT counterpart of {@link FallbackDenyEntityResolver2}, guarding {@code xsl:import}/{@code xsl:include} at compile time and {@code document()} at
+ * <p>The XSLT counterpart of {@link FallbackIgnoreEntityResolver2}, guarding {@code xsl:import}/{@code xsl:include} at compile time and {@code document()} at
  * transform time. The hardened {@link javax.xml.transform.TransformerFactory} and {@link javax.xml.transform.Transformer} wrappers install one of these and
  * route a caller-set resolver through {@link #setDelegate} rather than letting it replace the floor. A caller opts a specific URI in by returning a
- * non-{@code null} {@link Source}; anything left unresolved is denied.</p>
+ * non-{@code null} {@link Source}; anything left unresolved resolves to an empty {@link Source}, so the external resource is neither fetched nor leaked.</p>
  */
-final class FallbackDenyURIResolver implements URIResolver {
+final class FallbackIgnoreURIResolver implements URIResolver {
 
     private URIResolver delegate;
 
-    FallbackDenyURIResolver(final URIResolver delegate) {
+    FallbackIgnoreURIResolver(final URIResolver delegate) {
         this.delegate = delegate;
     }
 
@@ -48,9 +51,6 @@ final class FallbackDenyURIResolver implements URIResolver {
     @Override
     public Source resolve(final String href, final String base) throws TransformerException {
         final Source resolved = delegate != null ? delegate.resolve(href, base) : null;
-        if (resolved != null) {
-            return resolved;
-        }
-        throw new TransformerException(HardeningException.forbidden("uri", null, null, href, base));
+        return resolved != null ? resolved : new StreamSource(new StringReader(""));
     }
 }
