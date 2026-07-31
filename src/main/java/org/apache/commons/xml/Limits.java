@@ -247,7 +247,7 @@ final class Limits {
     /**
      * Sets every JDK-supported limit on a Xerces {@code org.apache.xerces.util.SecurityManager}.
      *
-     * @param securityManager an instance of {@code org.apache.xerces.util.SecurityManager}; if {@code null} the call is a no-op.
+     * @param securityManager An instance of {@code org.apache.xerces.util.SecurityManager}; if {@code null} the call is a no-op.
      */
     static void applyToXerces(final Object securityManager) {
         if (securityManager == null) {
