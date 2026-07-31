@@ -81,7 +81,7 @@ final class Resolvers {
         /**
          * Replaces the caller resolver consulted ahead of the floor; lets a single floor instance back successive {@code setEntityResolver} calls.
          *
-         * @param delegate the caller-supplied resolver, or {@code null} for a pure deny-all floor.
+         * @param delegate The caller-supplied resolver, or {@code null} for a pure deny-all floor.
          */
         final void setDelegate(final EntityResolver delegate) {
             this.delegate = delegate;
@@ -107,11 +107,11 @@ final class Resolvers {
          * Outcome when neither the caller delegate nor this resolver provides the entity. Denies by default; a subclass may permit specific lookups (e.g. the
          * external DTD subset) by returning {@code null} or an {@link InputSource} instead of calling {@code super}.
          *
-         * @param name     the entity name, or {@code null} on the 2-arg resolution path.
-         * @param publicId the public identifier, or {@code null} if none.
-         * @param baseURI  the base URI for relative resolution, or {@code null}.
-         * @param systemId the system identifier of the unresolved entity.
-         * @return an {@link InputSource} to permit the lookup, or {@code null} to skip it silently; the default implementation never returns normally.
+         * @param name     The entity name, or {@code null} on the 2-arg resolution path.
+         * @param publicId The public identifier, or {@code null} if none.
+         * @param baseURI  The base URI for relative resolution, or {@code null}.
+         * @param systemId The system identifier of the unresolved entity.
+         * @return An {@link InputSource} to permit the lookup, or {@code null} to skip it silently; the default implementation never returns normally.
          * @throws SAXException to deny the lookup (the default behavior).
          * @throws IOException  if a subclass opens a stream that fails.
          */
@@ -235,11 +235,11 @@ final class Resolvers {
          * other {@link XMLResolver}-supported value (for example an empty input) instead of calling {@code super}, or {@code throw}
          * {@link #denied(String, String, String, String)} to deny only some lookups.
          *
-         * @param publicID the public identifier, or {@code null} if none.
-         * @param systemID the system identifier of the unresolved entity.
-         * @param baseURI  the base URI for relative resolution, or {@code null}.
-         * @param namespace the namespace (or, for Woodstox, the entity name), or {@code null}.
-         * @return the replacement input, or a value the caller's parser accepts; the default implementation never returns normally.
+         * @param publicID The public identifier, or {@code null} if none.
+         * @param systemID The system identifier of the unresolved entity.
+         * @param baseURI  The base URI for relative resolution, or {@code null}.
+         * @param namespace The namespace (or, for Woodstox, the entity name), or {@code null}.
+         * @return The replacement input, or a value the caller's parser accepts; the default implementation never returns normally.
          * @throws XMLStreamException to deny the lookup (the default behavior).
          */
         protected Object onUnresolved(final String publicID, final String systemID, final String baseURI, final String namespace) throws XMLStreamException {
@@ -250,11 +250,11 @@ final class Resolvers {
          * Builds the standard "forbidden by hardening" exception for a denied lookup, so a subclass with a mixed policy can reuse the deny outcome for the
          * lookups it refuses.
          *
-         * @param publicID the public identifier, or {@code null} if none.
-         * @param systemID the system identifier of the unresolved entity.
-         * @param baseURI  the base URI for relative resolution, or {@code null}.
-         * @param namespace the namespace (or, for Woodstox, the entity name), or {@code null}.
-         * @return the exception to throw.
+         * @param publicID The public identifier, or {@code null} if none.
+         * @param systemID The system identifier of the unresolved entity.
+         * @param baseURI  The base URI for relative resolution, or {@code null}.
+         * @param namespace The namespace (or, for Woodstox, the entity name), or {@code null}.
+         * @return The exception to throw.
          */
         protected final XMLStreamException denied(final String publicID, final String systemID, final String baseURI, final String namespace) {
             return new XMLStreamException(forbiddenMessage(null, namespace, publicID, systemID, baseURI));
@@ -287,9 +287,9 @@ final class Resolvers {
     /**
      * Resolves {@code systemId} against {@code baseURI}.
      *
-     * @param baseURI  the absolute base URI to resolve against, or {@code null} if none is available.
-     * @param systemId the system identifier, possibly relative to {@code baseURI}.
-     * @return the absolutized system identifier, or {@code systemId} unchanged when it cannot or need not be resolved.
+     * @param baseURI  The absolute base URI to resolve against, or {@code null} if none is available.
+     * @param systemId The system identifier, possibly relative to {@code baseURI}.
+     * @return The absolutized system identifier, or {@code systemId} unchanged when it cannot or need not be resolved.
      */
     private static String absolutize(final String baseURI, final String systemId) {
         if (systemId == null || baseURI == null) {

@@ -82,8 +82,8 @@ final class HardeningXMLInputFactory extends XMLInputFactory {
     /**
      * Routes a caller-set resolver for the property {@code name} behind the floor currently installed on that hook.
      *
-     * @param name     the resolver-valued property being set.
-     * @param resolver the caller's resolver, or their own {@link Resolvers.FallbackDenyXMLResolver} to take control.
+     * @param name     The resolver-valued property being set.
+     * @param resolver The caller's resolver, or their own {@link Resolvers.FallbackDenyXMLResolver} to take control.
      */
     private void setResolverProperty(final String name, final XMLResolver resolver) {
         if (resolver instanceof Resolvers.FallbackDenyXMLResolver) {

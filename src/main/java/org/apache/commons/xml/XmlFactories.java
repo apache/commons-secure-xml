@@ -81,8 +81,8 @@ public final class XmlFactories {
      *
      * <p>The reader is namespace-aware.</p>
      *
-     * @param source the source to harden; never {@code null}.
-     * @return a hardened source.
+     * @param source The source to harden; never {@code null}.
+     * @return A hardened source.
      * @throws TransformerConfigurationException if a hardened reader cannot be obtained.
      */
     public static Source harden(final Source source) throws TransformerConfigurationException {
@@ -103,8 +103,8 @@ public final class XmlFactories {
     /**
      * Hardens an existing {@link XMLReader}.
      *
-     * @param reader the reader to harden; never {@code null}.
-     * @return a hardened reader.
+     * @param reader The reader to harden; never {@code null}.
+     * @return A hardened reader.
      * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
      */
     public static XMLReader harden(final XMLReader reader) {
@@ -120,7 +120,7 @@ public final class XmlFactories {
      * To permit specific trusted resources, install an {@link org.xml.sax.EntityResolver EntityResolver} on the
      * {@link DocumentBuilder} that allow-lists them; any href the resolver does not explicitly allow stays blocked.</p>
      *
-     * @return a hardened factory.
+     * @return A hardened factory.
      * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
      */
     public static DocumentBuilderFactory newDocumentBuilderFactory() {
@@ -137,7 +137,7 @@ public final class XmlFactories {
      * {@link org.xml.sax.XMLReader} that allow-lists them; any href the resolver does not explicitly allow stays
      * blocked.</p>
      *
-     * @return a hardened factory.
+     * @return A hardened factory.
      * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
      */
     public static SAXParserFactory newSAXParserFactory() {
@@ -157,7 +157,7 @@ public final class XmlFactories {
      * <p>The same guarantees apply to {@link javax.xml.validation.Validator} and {@link javax.xml.validation.ValidatorHandler} instances produced from the
      * resulting {@link javax.xml.validation.Schema}.</p>
      *
-     * @return a hardened factory.
+     * @return A hardened factory.
      */
     public static SchemaFactory newSchemaFactory() {
         return new HardeningSchemaFactory(SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI));
@@ -172,7 +172,7 @@ public final class XmlFactories {
      * <p>The guarantees apply to every parser the factory creates internally, both for stylesheet compilation and for source-document reading at
      * {@code Transformer.transform(Source, Result)} time.</p>
      *
-     * @return a hardened factory.
+     * @return A hardened factory.
      * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
      */
     public static TransformerFactory newTransformerFactory() {
@@ -184,7 +184,7 @@ public final class XmlFactories {
      *
      * <p>The three universal guarantees on {@link XmlFactories} apply; StAX exposes no additional vectors beyond them.</p>
      *
-     * @return a hardened factory.
+     * @return A hardened factory.
      * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
      */
     public static XMLInputFactory newXMLInputFactory() {
@@ -197,7 +197,7 @@ public final class XmlFactories {
      * <p>Beyond the three universal guarantees on {@link XmlFactories}, URI-fetching XPath 3.1+ functions ({@code doc()}, {@code collection()},
      * {@code unparsed-text()}) are not resolved.</p>
      *
-     * @return a hardened factory.
+     * @return A hardened factory.
      * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
      */
     public static XPathFactory newXPathFactory() {

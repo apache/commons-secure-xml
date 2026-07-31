@@ -240,9 +240,9 @@ final class AttackTestSupport {
      * omits {@link #LEAKED_MARKER}. A throw whose type does not match {@code expected} fails the test, so unrelated failures (for example, a {@link HardeningException}
      * because no recipe matched the JAXP implementation) cannot be silently accepted as a clean block.</p>
      *
-     * @param action      the parse to execute, returning the captured output text checked for {@link #LEAKED_MARKER}.
+     * @param action      The parse to execute, returning the captured output text checked for {@link #LEAKED_MARKER}.
      * @param description short label naming the JAXP surface under test.
-     * @param expected    the exception types any of which the hardening layer may surface as a clean rejection.
+     * @param expected    The exception types any of which the hardening layer may surface as a clean rejection.
      */
     @SafeVarargs
     private static void assertNoLeakOrThrows(final ThrowingSupplier<String> action, final String description, final Class<? extends Throwable>... expected) {
@@ -266,7 +266,7 @@ final class AttackTestSupport {
      * hardening contract guarantees "parses successfully without resolving the external resource"; use {@link #assertNoLeakOrThrows} when the contract is
      * "either blocks at parse or completes without leaked content".</p>
      *
-     * @param action      the parse to execute, returning the captured output text checked for {@link #LEAKED_MARKER}.
+     * @param action      The parse to execute, returning the captured output text checked for {@link #LEAKED_MARKER}.
      * @param description short label naming the JAXP surface under test.
      */
     private static void assertNoLeakStrict(final ThrowingSupplier<String> action, final String description) {
@@ -278,9 +278,9 @@ final class AttackTestSupport {
     /**
      * Asserts the supplied parsing action throws an exception of the {@code expected} type.
      *
-     * @param action      the parse to execute.
+     * @param action      The parse to execute.
      * @param description short label naming the JAXP surface under test.
-     * @param expected    the exception type the hardening layer is expected to surface.
+     * @param expected    The exception type the hardening layer is expected to surface.
      */
     static void assertParseFails(final Executable action, final String description, final Class<? extends Throwable> expected) {
         assertThrows(expected, action, blockedDescription(description));
@@ -289,9 +289,9 @@ final class AttackTestSupport {
     /**
      * Asserts the supplied parsing action throws an exception that matches one of the {@code expected} types.
      *
-     * @param action      the parse to execute.
+     * @param action      The parse to execute.
      * @param description short label naming the JAXP surface under test.
-     * @param expected    the exception types any of which the hardening layer may surface.
+     * @param expected    The exception types any of which the hardening layer may surface.
      */
     @SafeVarargs
     static void assertParseFails(final Executable action, final String description, final Class<? extends Throwable>... expected) {
@@ -308,7 +308,7 @@ final class AttackTestSupport {
      * {@code assert*Validates(...)} helper (and their permissive {@code assertPermissive*} counterparts); exposed for tests that compose a non-standard
      * call.</p>
      *
-     * @param action      the parse to execute.
+     * @param action      The parse to execute.
      * @param description short label included in the failure message.
      */
     static void assertParseSucceeds(final Executable action, final String description) {
@@ -672,7 +672,7 @@ final class AttackTestSupport {
      * Builds the failure message used by every {@code assert*Blocks(...)} helper.
      *
      * @param description short label naming the JAXP surface under test.
-     * @return the assertion-failure message string.
+     * @return The assertion-failure message string.
      */
     private static String blockedDescription(final String description) {
         return "Hardening did not block " + description + "; parse completed successfully.";
