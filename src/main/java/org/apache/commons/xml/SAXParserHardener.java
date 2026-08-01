@@ -51,8 +51,6 @@ import org.xml.sax.ext.LexicalHandler;
  *         processing limits.</li>
  *     <li><strong>{@code XERCES_LOAD_EXTERNAL_DTD}</strong>: optional. Where supported, it skips the external DTD subset on non-validating parsers so a
  *         DOCTYPE-only document parses without a fetch attempt. If not supported, the fetch will throw instead, due to the following settings.</li>
- *     <li><strong>Limits</strong>: applied best-effort by {@link Limits#tryApply(XMLReader)}, which adapts to the JDK limit properties or Xerces'
- *         {@code SecurityManager} as appropriate.</li>
  *     <li><strong>Deny-all resolver floor</strong>: every reader is wrapped in a {@link HardeningXMLReader} that keeps a deny-all {@link EntityResolver} floor.
  *         That floor blocks external DTD, entity, schema and {@code xi:include} fetches in one place: the stock JDK's XInclude processor ignores
  *         {@code ACCESS_EXTERNAL_*} and consults the {@link EntityResolver} instead, so no {@code ACCESS_EXTERNAL_*} properties are needed here. A caller can
@@ -176,8 +174,6 @@ final class SAXParserHardener {
         setFeature(reader, XMLConstants.FEATURE_SECURE_PROCESSING, true);
         // Optional: skip the external DTD subset on non-validating parsers so DOCTYPE-only documents parse without a blocked fetch attempt.
         setOptionalFeature(reader, XERCES_LOAD_EXTERNAL_DTD, false);
-        // Optional, implementation-based: JDK limit properties or Xerces' SecurityManager.
-        Limits.tryApply(reader);
         // Required: HardeningXMLReader installs a deny-all EntityResolver floor on the reader.
         // That floor blocks external DTD, entity, schema and xi:include fetches in one place: no ACCESS_EXTERNAL_* properties are needed here.
         // Callers can chain their resolvers, but not override the floor.

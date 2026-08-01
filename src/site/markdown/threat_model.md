@@ -72,27 +72,29 @@ defends against: that is the reason reconfiguration moves a report
 
 ### Assumptions about the environment
 
-The library does not open network connections, spawn processes, install signal handlers, or read environment variables
-of its own: each `XmlFactories` method only configures and returns a JAXP factory, and reads the JDK system properties
-listed below. Which hardening recipe applies depends on the JAXP implementation present on the classpath.
+The library does not open network connections,
+spawn processes,
+install signal handlers,
+or read environment variables of its own:
+each `XmlFactories` method only configures and returns a JAXP factory.
+Which hardening recipe applies depends on the JAXP implementation present on the classpath.
 
 **System properties that modify behavior**
 
-When a factory or parser is created, the library reads the following JDK system properties and pins each value on every
-recognized parser, including bundled ones that ignore `jdk.xml.*` on their own. If a property is unset, the fixed value
-shown applies (matching the JDK 25 secure default), regardless of the JDK in use. These properties are trusted
-deployment configuration: an operator may set one to tighten (or loosen) a limit globally, but loosening through one is
-reconfiguration, treated like loosening any other reserved setting (see [What is out of scope](#what-is-out-of-scope)).
+The library reads no system property of its own. It enables secure processing (`FEATURE_SECURE_PROCESSING`) on every
+recognized parser and leaves the resulting processing limits (entity expansion, element depth, attribute count, and
+similar) at the implementation's own secure default. Those defaults differ by implementation, and on the stock JDK by
+JDK version and the standard `jdk.xml.*` limit properties the JDK itself reads:
 
-- `jdk.xml.elementAttributeLimit`: `200`
-- `jdk.xml.entityExpansionLimit`: `2500`
-- `jdk.xml.entityReplacementLimit`: `100000`
-- `jdk.xml.maxElementDepth`: `100`
-- `jdk.xml.maxGeneralEntitySizeLimit`: `100000`
-- `jdk.xml.maxOccurLimit`: `5000`
-- `jdk.xml.maxParameterEntitySizeLimit`: `15000`
-- `jdk.xml.maxXMLNameLimit`: `1000`
-- `jdk.xml.totalEntitySizeLimit`: `100000`
+- On the stock JDK, secure processing honors the `jdk.xml.*` limit properties (for example `jdk.xml.entityExpansionLimit`,
+  default `2500` on JDK 25 and `64000` on JDK 8 through 21). These are trusted deployment configuration: an operator may
+  set one to tighten (or loosen) a limit globally, but loosening through one is reconfiguration, treated like loosening
+  any other reserved setting (see [What is out of scope](#what-is-out-of-scope)).
+- The bundled parsers apply their own hardcoded secure defaults instead (for example external Xerces and Woodstox cap
+  entity expansion at `100000`) and do not read `jdk.xml.*`.
+
+Every one of these defaults still bounds entity expansion tightly enough to reject entity-expansion denial of service
+such as Billion Laughs.
 
 **Reserved settings (must not be loosened)**
 
@@ -115,7 +117,7 @@ produces, breaks the hardening for that instance.
 - `javax.xml.stream.isSupportingExternalEntities`
 - `javax.xml.stream.supportDTD`
 - `jdk.xml.overrideDefaultParser`
-- the JDK processing-limit properties listed above
+- the implementation's secure-processing limits (entity expansion, element depth, attribute count, and similar)
 
 This list is not exhaustive:
 any other feature, attribute, property, or system property that
@@ -226,8 +228,7 @@ A report judged against this model receives exactly one of:
 
 Revise this model when any of the following change: a new `XmlFactories` factory method or other public
 surface; support for a JAXP implementation beyond those listed under [What is in scope](#what-is-in-scope);
-a change in the pinned processing-limit defaults this list records; a new reserved setting; or a
-report that cannot be routed to one of the dispositions above.
+a new reserved setting; or a report that cannot be routed to one of the dispositions above.
 
 ## Security Vulnerabilities
 

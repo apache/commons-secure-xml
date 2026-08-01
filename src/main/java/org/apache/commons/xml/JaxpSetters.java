@@ -41,7 +41,7 @@ final class JaxpSetters {
     private interface ThrowingAction {
         void run() throws Exception;
     }
-    private static final String KIND_ATTRIBUTE = "attribute";
+
     private static final String KIND_FEATURE = "feature";
 
     private static void apply(final Object factory, final String kind, final String name, final ThrowingAction action) {
@@ -50,10 +50,6 @@ final class JaxpSetters {
         } catch (final Exception e) {
             throw new HardeningException("Failed to set " + kind + " '" + name + "' on " + factory.getClass().getName(), e);
         }
-    }
-
-    static void setAttribute(final DocumentBuilderFactory factory, final String attribute, final Object value) {
-        apply(factory, KIND_ATTRIBUTE, attribute, () -> factory.setAttribute(attribute, value));
     }
 
     static void setFeature(final DocumentBuilderFactory factory, final String feature, final boolean value) {
@@ -86,22 +82,6 @@ final class JaxpSetters {
 
     static void setFeature(final XMLReader reader, final String feature, final boolean value) {
         apply(reader, KIND_FEATURE, feature, () -> reader.setFeature(feature, value));
-    }
-
-    static void setOptionalAttribute(final DocumentBuilderFactory factory, final String attribute, final Object value) {
-        try {
-            factory.setAttribute(attribute, value);
-        } catch (final Exception e) {
-            // Ignored: the implementation does not recognize this attribute.
-        }
-    }
-
-    static void setOptionalAttribute(final TransformerFactory factory, final String attribute, final Object value) {
-        try {
-            factory.setAttribute(attribute, value);
-        } catch (final Exception e) {
-            // Ignored: the implementation does not recognize this attribute.
-        }
     }
 
     static void setOptionalFeature(final DocumentBuilderFactory factory, final String feature, final boolean value) {

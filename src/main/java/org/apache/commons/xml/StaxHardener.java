@@ -29,8 +29,6 @@ import javax.xml.stream.XMLStreamException;
  * <p>Rather than branching on the implementation class, {@link #harden(XMLInputFactory)} consolidates the JDK Zephyr and Woodstox recipes into one pass that
  * probes which properties each factory accepts and adapts:</p>
  * <ul>
- *     <li><strong>Limits</strong>: applied best-effort by {@link Limits#tryApply(XMLInputFactory)}, which sets both the JDK and the Woodstox limit properties;
- *         each implementation honors its own and rejects the other's.</li>
  *     <li><strong>External DTD subset</strong>: skipped via Zephyr's {@value #ZEPHYR_IGNORE_EXTERNAL_DTD} (best-effort), so a DOCTYPE-only document parses
  *         without a fetch attempt instead of tripping the deny-all resolver below. Woodstox skips it through {@value #WSTX_DTD_RESOLVER} instead.</li>
  *     <li><strong>External entities</strong>: denied through a non-removable {@link Resolvers.FallbackDenyXMLResolver} floor on the entity-resolution hook,
@@ -82,8 +80,6 @@ final class StaxHardener {
     }
 
     static XMLInputFactory harden(final XMLInputFactory factory) {
-        // Optional, implementation-based: JDK limit properties or Woodstox limit properties.
-        Limits.tryApply(factory);
         // Optional: Zephyr's StAX equivalent of XERCES_LOAD_EXTERNAL_DTD=false skips the external DTD subset entirely.
         setOptionalProperty(factory, ZEPHYR_IGNORE_EXTERNAL_DTD, true);
 

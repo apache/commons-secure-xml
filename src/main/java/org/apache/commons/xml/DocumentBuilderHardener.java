@@ -37,8 +37,6 @@ import org.xml.sax.EntityResolver;
  *     <li><strong>FSP</strong>: required. It switches on the implementation's built-in security manager, which is what carries the processing limits.</li>
  *     <li><strong>{@code XERCES_LOAD_EXTERNAL_DTD}</strong>: optional. Where supported, it skips the external DTD subset on non-validating parsers so a
  *         DOCTYPE-only document parses without a fetch attempt. If not supported, the fetch will throw instead, due to the following settings.</li>
- *     <li><strong>Limits</strong>: applied best-effort by {@link Limits#tryApply(DocumentBuilderFactory)}, which adapts to the JDK attribute limits or Xerces'
- *         {@code SecurityManager} as appropriate.</li>
  *     <li><strong>Deny-all resolver floor</strong>: every produced {@link DocumentBuilder} is wrapped by a {@link HardeningDocumentBuilderFactory} that keeps a
  *         deny-all {@link EntityResolver} floor. That floor blocks external DTD, entity, schema and {@code xi:include} fetches in one place: the stock JDK's
  *         XInclude processor ignores {@code ACCESS_EXTERNAL_*} and consults the {@link EntityResolver} instead, so no {@code ACCESS_EXTERNAL_*} attributes are
@@ -60,8 +58,6 @@ final class DocumentBuilderHardener {
         }
         // Required: enables the implementation's security manager, which carries the limits.
         setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        // Optional, implementation-based: JDK attribute limits or Xerces' SecurityManager.
-        Limits.tryApply(factory);
         // Optional: skip the external DTD subset on non-validating parsers so DOCTYPE-only documents parse without a blocked fetch attempt.
         setOptionalFeature(factory, XERCES_LOAD_EXTERNAL_DTD, false);
         // Required: HardeningDocumentBuilderFactory installs a deny-all EntityResolver floor on every DocumentBuilder.
