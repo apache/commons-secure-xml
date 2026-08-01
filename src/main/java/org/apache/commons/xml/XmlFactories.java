@@ -143,7 +143,7 @@ public final class XmlFactories {
      * @return A hardened factory.
      */
     public static SchemaFactory newSchemaFactory() {
-        return new HardeningSchemaFactory(SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI));
+        return SchemaHardener.harden(SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI));
     }
 
     /**

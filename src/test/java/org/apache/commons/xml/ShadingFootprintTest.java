@@ -72,19 +72,19 @@ class ShadingFootprintTest {
     private static final Set<String> XPATH_HARDENER = saxParsersHardenerPlus("XPathHardener", "SaxonProvider", "SaxonProvider$1",
             "SaxonProvider$HardenedConfiguration", "SaxonProvider$SaxonProviderConfigurer");
 
-    private static final Set<String> SCHEMA_FACTORY = saxParsersHardenerPlus("HardeningSchemaFactory", "HardeningValidator", "HardeningValidatorHandler",
-            "HardeningSchema", "FallbackDenyLSResourceResolver");
+    private static final Set<String> SCHEMA_HARDENER = saxParsersHardenerPlus("SchemaHardener", "HardeningSchemaFactory", "HardeningValidator",
+            "HardeningValidatorHandler", "HardeningSchema", "FallbackDenyLSResourceResolver");
 
     /**
      * Only the public {@link XmlFactories} entry, which news up every hardener, still pulls the whole library; this is its class count.
      */
-    private static final int WHOLE_LIBRARY_SIZE = 32;
+    private static final int WHOLE_LIBRARY_SIZE = 33;
 
     /**
      * Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library.
      */
     private static final String[] REPORTED = {"DocumentBuilderHardener", "SAXParserHardener", "StaxHardener", "TransformerHardener", "XPathHardener",
-            "HardeningSchemaFactory", "XmlFactories"};
+            "SchemaHardener", "XmlFactories"};
 
     private static Clazzpath clazzpath;
     private static Path classesDir;
@@ -138,8 +138,8 @@ class ShadingFootprintTest {
     }
 
     @Test
-    void schemaFactoryFootprint() {
-        assertEquals(SCHEMA_FACTORY, closureOf("HardeningSchemaFactory"));
+    void schemaHardenerFootprint() {
+        assertEquals(SCHEMA_HARDENER, closureOf("SchemaHardener"));
     }
 
     @Test
