@@ -29,6 +29,6 @@ class TemplatesImportTest {
 
     @Test
     void hardenedTemplatesBlocks() {
-        AttackTestSupport.assertTemplatesBlocks(AttackTestSupport.resourceSource("with-import.xsl"));
+        AttackTestSupport.assertTemplatesBlocksOrDoesNotLeak(AttackTestSupport.resourceSource("with-import.xsl"));
     }
 }

@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.URL;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -38,6 +39,7 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.URIResolver;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.validation.SchemaFactory;
 
 import org.junit.jupiter.api.Assumptions;
@@ -60,7 +62,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * <p>The observable contract on every hardened factory is the same: a resource the caller resolves (returns a non-null value) is allowed, but anything the
  * caller does not resolve is resolved to empty content instead of fetched, so a resolver that resolves nothing leaves the block in place. Most
  * factories enforce this with a {@link FallbackIgnoreEntityResolver2}-style floor that consults the caller and returns empty on a {@code null} return; Saxon
- * enforces the equivalent through its {@code ALLOWED_PROTOCOLS} restrictor. Every resolver channel is exercised: the SAX/DOM
+ * enforces the equivalent through an ignore-all {@code ResourceResolver} floor on its {@code Configuration}. Every resolver channel is exercised: the SAX/DOM
  * {@link EntityResolver}, the StAX {@link XMLResolver}, the schema {@link LSResourceResolver} and the XSLT {@link URIResolver}.</p>
  */
 class EntityResolverFloorTest {
@@ -386,14 +388,22 @@ class EntityResolverFloorTest {
     void transformerDeniesUnlisted() {
         final TransformerFactory factory = hardenedTransformerFactory();
         factory.setURIResolver((href, base) -> null);
-        assertParseFails(() -> factory.newTemplates(AttackTestSupport.resourceSource("with-import.xsl")), "Stylesheet import", TransformerException.class);
+        // XSLTC and Xalan reject the emptied import at compile time; Saxon compiles it as an empty module, so transform and assert the import did not leak.
+        try {
+            final StringWriter sink = new StringWriter();
+            factory.newTemplates(AttackTestSupport.resourceSource("with-import.xsl")).newTransformer()
+                    .transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink));
+            assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "unlisted stylesheet import leaked");
+        } catch (final TransformerException blocked) {
+            // Acceptable: rejected at compile rather than resolved to empty.
+        }
     }
 
     /**
      * A hardened {@link TransformerFactory} with a re-throwing error listener. XSLTC and Xalan enforce the block through the
-     * {@link FallbackIgnoreURIResolver} floor; Saxon enforces it through its {@code ALLOWED_PROTOCOLS} restrictor. Either way a caller-set resolver that
-     * returns {@code null} cannot re-open the fetch. The strict listener is required because interpretive Xalan routes a blocked {@code xsl:import} through the
-     * error listener and would otherwise recover and compile instead of throwing (XSLTC and Saxon throw regardless).
+     * {@link FallbackIgnoreURIResolver} floor; Saxon enforces it through the ignore-all resolver floor on its {@code Configuration}. Either way a caller-set
+     * resolver that returns {@code null} cannot re-open the fetch. The strict listener is required because interpretive Xalan routes a blocked
+     * {@code xsl:import} through the error listener and would otherwise recover and compile instead of throwing.
      */
     private static TransformerFactory hardenedTransformerFactory() {
         final TransformerFactory factory = XmlFactories.newTransformerFactory();
