@@ -32,6 +32,7 @@ import java.util.TreeSet;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.vafer.jdependency.Clazz;
 import org.vafer.jdependency.Clazzpath;
 
@@ -42,7 +43,11 @@ import org.vafer.jdependency.Clazzpath;
  * closure over the compiled {@code target/classes} and pins it to an expected set. It keeps each hardener from silently regaining a dependency on classes it
  * should not need (for example a sibling resolver floor or another hardener), so TrAX, XPath and schema build only on the shared SAX path while only the public
  * {@link XmlFactories} entry pulls the whole library. Update the expected sets deliberately: a change here is a change to what a downstream shade includes.</p>
+ *
+ * <p>The test reads the compiled {@code .class} files from the code-source location, which only exists on a regular JVM: a native image carries no bytecode (and
+ * nobody shades one), so the test is disabled there, just as it is excluded from the Android test compile.</p>
  */
+@DisabledInNativeImage
 class ShadingFootprintTest {
 
     private static final String PKG = "org.apache.commons.xml.";
