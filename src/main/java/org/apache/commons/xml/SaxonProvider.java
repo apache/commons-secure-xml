@@ -51,7 +51,7 @@ final class SaxonProvider {
      *       sidestep the URI restrictions.</li>
      * </ol>
      */
-    private static class HardenedConfiguration extends Configuration {
+    private static final class HardenedConfiguration extends Configuration {
 
         private HardenedConfiguration() {
             // Extension-function layer: turn off Saxon's reflection-based extension calls. Without this an attacker could bypass URI restrictions through
@@ -78,7 +78,7 @@ final class SaxonProvider {
         }
     }
 
-    private static class SaxonProviderConfigurer {
+    private static final class SaxonProviderConfigurer {
 
         private static TransformerFactory configure(final TransformerFactory factory) {
             ((SaxonTransformerFactory) factory).setConfiguration(new HardenedConfiguration());
