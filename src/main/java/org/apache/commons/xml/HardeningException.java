@@ -31,7 +31,7 @@ package org.apache.commons.xml;
  *
  * <p>Package-private by design: callers should catch {@link IllegalStateException}, which this extends.</p>
  */
-class HardeningException extends IllegalStateException {
+final class HardeningException extends IllegalStateException {
 
     private static final long serialVersionUID = 1L;
 
