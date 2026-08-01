@@ -107,19 +107,23 @@ class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
 
     /**
      * Outcome when neither the caller delegate nor this resolver provides the entity. Resolves to empty content by default, so the external resource is neither
-     * fetched nor leaked and the parse continues with no replacement text.
+     * fetched nor leaked and the parse continues with no replacement text. The returned source echoes the requested identifiers (with {@code systemId}
+     * absolutized): the parser reads the empty byte stream, but Xerces still derives the entity's base URI from the system id and fails on a {@code null} one.
      *
      * @param name     The entity name, or {@code null} on the 2-arg resolution path.
      * @param publicId The public identifier, or {@code null} if none.
      * @param baseURI  The base URI for relative resolution, or {@code null}.
      * @param systemId The system identifier of the unresolved entity.
-     * @return An empty {@link InputSource}.
+     * @return An empty {@link InputSource} carrying the requested identifiers.
      * @throws SAXException never by the default implementation.
      * @throws IOException  never by the default implementation.
      */
     protected InputSource onUnresolved(final String name, final String publicId, final String baseURI, final String systemId)
             throws SAXException, IOException {
-        return new InputSource(new ByteArrayInputStream(new byte[0]));
+        final InputSource empty = new InputSource(new ByteArrayInputStream(new byte[0]));
+        empty.setPublicId(publicId);
+        empty.setSystemId(absolutize(baseURI, systemId));
+        return empty;
     }
 
     private InputSource resolveWithDelegate(final String name, final String publicId, final String baseURI,

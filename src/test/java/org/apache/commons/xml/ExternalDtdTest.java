@@ -89,13 +89,15 @@ class ExternalDtdTest {
     @Test
     @Tag("trax")
     void hardenedTemplatesDoesNotLeak() {
-        AttackTestSupport.assertTemplatesDoesNotLeak(AttackTestSupport.streamSource(xsltPayload()));
+        // Saxon rejects the subset lookup through ALLOWED_PROTOCOLS instead of resolving it to empty; both outcomes keep the resource unfetched.
+        AttackTestSupport.assertTemplatesBlocksOrDoesNotLeak(AttackTestSupport.streamSource(xsltPayload()));
     }
 
     @Test
     @Tag("trax")
     void hardenedTransformerDoesNotLeak() {
-        AttackTestSupport.assertTransformerDoesNotLeak(xmlPayload());
+        // Saxon rejects the subset lookup through ALLOWED_PROTOCOLS instead of resolving it to empty; both outcomes keep the resource unfetched.
+        AttackTestSupport.assertTransformerBlocksOrDoesNotLeak(xmlPayload());
     }
 
     @Test

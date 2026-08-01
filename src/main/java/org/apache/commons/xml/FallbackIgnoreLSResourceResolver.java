@@ -17,6 +17,8 @@
 
 package org.apache.commons.xml;
 
+import java.io.StringReader;
+
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSInput;
@@ -63,8 +65,14 @@ final class FallbackIgnoreLSResourceResolver implements LSResourceResolver {
         if (resolved != null) {
             return resolved;
         }
+        // A character stream, not setStringData(""): the JDK's DOMEntityResolverWrapper discards empty string data, leaving a source with no content and a
+        // null system id that Xerces then fails to absolutize. The echoed identifiers give Xerces a valid base URI; the content still comes from this
+        // empty stream, so nothing is fetched.
         final LSInput empty = DOM_LS.createLSInput();
-        empty.setStringData("");
+        empty.setCharacterStream(new StringReader(""));
+        empty.setPublicId(publicId);
+        empty.setSystemId(systemId);
+        empty.setBaseURI(baseURI);
         return empty;
     }
 }

@@ -27,7 +27,9 @@ import org.junit.jupiter.api.Test;
  *
  * <p>The SYSTEM identifier points at a deliberately bogus URL ({@code http://invalid.example.invalid/...}) under the IANA-reserved {@code .invalid} TLD: any
  * attempt to fetch it would raise a network error long before the test could complete, so a passing test proves the parser did not even try. The hardening
- * contract being verified is "skip the external DTD silently when nothing in the body needs it" rather than "reject every DOCTYPE".</p>
+ * contract being verified is best-effort "skip the external DTD silently when nothing in the body needs it": most surfaces parse the document, but an
+ * implementation-prescribed rejection stays acceptable (Saxon's {@code ALLOWED_PROTOCOLS} restrictor refuses the subset lookup outright), so the TrAX cases
+ * accept either outcome.</p>
  */
 class DoctypeOnlyTest {
 
@@ -80,13 +82,15 @@ class DoctypeOnlyTest {
     @Test
     @Tag("trax")
     void hardenedTemplatesCompiles() {
-        AttackTestSupport.assertTemplatesCompiles(AttackTestSupport.streamSource(xsltPayload()));
+        // Saxon prescribes a rejection here: its ALLOWED_PROTOCOLS restrictor refuses the subset lookup before the ignore-all floor can empty it.
+        AttackTestSupport.assertTemplatesBlocksOrDoesNotLeak(AttackTestSupport.streamSource(xsltPayload()));
     }
 
     @Test
     @Tag("trax")
     void hardenedTransformerTransforms() {
-        AttackTestSupport.assertTransformerTransforms(payload());
+        // Saxon prescribes a rejection here: its ALLOWED_PROTOCOLS restrictor refuses the subset lookup before the ignore-all floor can empty it.
+        AttackTestSupport.assertTransformerBlocksOrDoesNotLeak(payload());
     }
 
     @Test

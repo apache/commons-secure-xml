@@ -46,8 +46,6 @@ import org.xml.sax.XMLReader;
  *         configuration time rather than mid-parse.</li>
  *     <li><strong>FSP</strong>: required on every other reader. It switches on the implementation's built-in security manager, which is what carries the
  *         processing limits.</li>
- *     <li><strong>{@code XERCES_LOAD_EXTERNAL_DTD}</strong>: optional. Where supported, it skips the external DTD subset on non-validating parsers so a
- *         DOCTYPE-only document parses without a fetch attempt. If not supported, the resolver floor below resolves the subset to empty instead.</li>
  *     <li><strong>Ignore-all resolver floor</strong>: every reader is wrapped in a {@link HardeningXMLReader} that keeps an ignore-all {@link EntityResolver} floor.
  *         That floor blocks external DTD, entity, schema and {@code xi:include} fetches in one place: the stock JDK's XInclude processor ignores
  *         {@code ACCESS_EXTERNAL_*} and consults the {@link EntityResolver} instead, so no {@code ACCESS_EXTERNAL_*} properties are needed here. A caller can
@@ -87,9 +85,6 @@ final class SAXParserHardener {
     /** Class name of Android's Expat-backed {@link XMLReader}. */
     private static final String ANDROID_EXPAT_READER = "org.apache.harmony.xml.ExpatReader";
 
-    /** Xerces feature: load the external DTD subset for non-validating parsers. */
-    private static final String XERCES_LOAD_EXTERNAL_DTD = "http://apache.org/xml/features/nonvalidating/load-external-dtd";
-
     static SAXParserFactory harden(final SAXParserFactory factory) {
         // Required: enables the implementation's security manager, which carries the limits. Android's Expat rejects FSP, so it is skipped there.
         if (!ANDROID_SAX_PARSER_FACTORY.equals(factory.getClass().getName())) {
@@ -119,8 +114,6 @@ final class SAXParserHardener {
         }
         // Required: enables the JDK XMLSecurityManager / Xerces SecurityManager limits.
         setFeature(reader, XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        // Optional: skip the external DTD subset on non-validating parsers so DOCTYPE-only documents parse without a blocked fetch attempt.
-        setOptionalFeature(reader, XERCES_LOAD_EXTERNAL_DTD, false);
         // Required: HardeningXMLReader installs an ignore-all EntityResolver floor on the reader.
         // That floor blocks external DTD, entity, schema and xi:include fetches in one place: no ACCESS_EXTERNAL_* properties are needed here.
         // Callers can chain their resolvers, but not override the floor.
@@ -165,14 +158,6 @@ final class SAXParserHardener {
             reader.setFeature(feature, value);
         } catch (final Exception e) {
             throw HardeningException.settingFailed("feature", feature, reader, e);
-        }
-    }
-
-    private static void setOptionalFeature(final XMLReader reader, final String feature, final boolean value) {
-        try {
-            reader.setFeature(feature, value);
-        } catch (final Exception e) {
-            // Ignored: the implementation does not recognize this feature.
         }
     }
 
