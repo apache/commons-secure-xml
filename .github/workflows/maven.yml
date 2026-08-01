@@ -32,15 +32,26 @@ concurrency:
 jobs:
   build:
 
-    # JDK coverage across all current LTS versions and all three OSes, but sparingly:
+    # java.xml is pure Java, so the OS and JDK axes barely interact.
+    # The one OS-specific behavior this library touches is file URI / systemId normalization on Windows,
+    # which is old, stable code: a single Windows job exercises it, so there is no reason to cross OSes with JDK versions.
+    # The axes that do change results are the JDK major version and, more weakly, the vendor's class-library lineage.
     #
-    # - On ubuntu-latest we run every LTS (8, 11, 17, 21, 25).
-    # - On windows-latest and macos-latest we run only the endpoints (8 and 25),
-    #   since cross-OS regressions almost always surface at the version endpoints
-    #   rather than in between.
+    # - JDK majors, Windows only. Covers systemId normalization at every version for free.
+    # - One Linux canary, on the current LTS: case-sensitive filesystem, and what contributors and downstream CI run.
+    # - Distribution variance, one job each:
+    #     * Semeru 8 and 21     OpenJ9's class library is the most divergent runtime setup-java offers,
+    #                           and the most plausible source of surprises in factory lookup and class loading.
+    #     * Zulu                Pinned to an old 8 patch level.
+    #                           Verifies the hardening degrades gracefully on a runtime predating the later jdk.xml.* backports.
+    #     * GraalVM             Runs the suite as a native image via the `native-xalan` profile:
+    #                           the JAXP providers resolve at build time under the closed-world assumption, a different code path from
+    #                           the JVM's run-time ServiceLoader lookup. 25 is the latest GraalVM release.
     #
-    # Temurin does not publish a JDK 8 build for ARM-based macOS runners, so that
-    # one combination uses Zulu.
+    # macOS is intentionally omitted: its filesystem is case-insensitive like Windows and POSIX-pathed like Linux, so
+    # it is strictly interior to the other two. Vendors that track the OpenJDK Updates projects closely (Corretto,
+    # Liberica, Microsoft, SapMachine) are likewise omitted: for java.xml purposes they are interchangeable with
+    # Temurin.
     #
     # The GraalVM entry runs the test suite as a native image instead of on the JVM, via the `native-xalan` profile.
     name: build (${{ matrix.os }}, ${{ matrix.distribution }} ${{ matrix.java-version }})
@@ -50,25 +61,22 @@ jobs:
       max-parallel: 20
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, windows-latest, macos-latest ]
-        java-version: [ 8, 25 ]
+        os: [ windows-latest ]
+        java-version: [ "8", "11", "17", "21", "25", "26", "27-ea" ]
         distribution: [ temurin ]
-        exclude:
-          - os: macos-latest
-            java-version: 8
         include:
-          - os: macos-latest
+          - os: ubuntu-latest
+            java-version: 25
+            distribution: temurin
+          - os: ubuntu-latest
             java-version: 8
-            distribution: zulu
-          - os: ubuntu-latest
-            java-version: 11
-            distribution: temurin
-          - os: ubuntu-latest
-            java-version: 17
-            distribution: temurin
+            distribution: semeru
           - os: ubuntu-latest
             java-version: 21
-            distribution: temurin
+            distribution: semeru
+          - os: ubuntu-latest
+            java-version: 8.0.201
+            distribution: zulu
           # native-image resolves the JAXP providers at build time under the closed-world assumption, a different
           # code path from the JVM's run-time ServiceLoader lookup. 25 is the latest GraalVM release.
           - os: ubuntu-latest
