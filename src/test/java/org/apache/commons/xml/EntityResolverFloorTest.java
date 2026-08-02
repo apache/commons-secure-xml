@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URL;
 
@@ -33,9 +32,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLResolver;
-import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.URIResolver;
@@ -239,28 +236,12 @@ class EntityResolverFloorTest {
         return factory;
     }
 
-    private static String readStaxText(final XMLInputFactory factory, final String payload) throws XMLStreamException {
-        final StringBuilder text = new StringBuilder();
-        final XMLStreamReader stream = factory.createXMLStreamReader(new StringReader(payload));
-        try {
-            while (stream.hasNext()) {
-                final int event = stream.next();
-                if (event == XMLStreamConstants.CHARACTERS || event == XMLStreamConstants.CDATA) {
-                    text.append(stream.getText());
-                }
-            }
-        } finally {
-            stream.close();
-        }
-        return text.toString();
-    }
-
     @Test
     @Tag("stax")
     void staxResolvesAllowListed() throws Exception {
         final XMLInputFactory factory = externalEntityStaxFactory();
         factory.setXMLResolver(STAX_ALLOW_LIST);
-        assertTrue(readStaxText(factory, entityPayload(ALLOWED)).contains(AttackTestSupport.LEAKED_MARKER),
+        assertTrue(AttackTestSupport.captureStaxEventText(factory, entityPayload(ALLOWED)).contains(AttackTestSupport.LEAKED_MARKER),
                 "allow-listed external entity should resolve through the caller's resolver");
     }
 
@@ -271,7 +252,8 @@ class EntityResolverFloorTest {
         factory.setXMLResolver(STAX_ALLOW_LIST);
         // The caller returns null for the unlisted entity, so the floor resolves it to empty rather than fetching it.
         try {
-            assertFalse(readStaxText(factory, entityPayload(UNLISTED)).contains(AttackTestSupport.LEAKED_MARKER), "unlisted external entity leaked");
+            assertFalse(AttackTestSupport.captureStaxEventText(factory, entityPayload(UNLISTED)).contains(AttackTestSupport.LEAKED_MARKER),
+                    "unlisted external entity leaked");
         } catch (final XMLStreamException blocked) {
             // Acceptable: rejected at parse rather than resolved to empty.
         }
@@ -284,7 +266,8 @@ class EntityResolverFloorTest {
         final XMLInputFactory factory = externalEntityStaxFactory();
         factory.setXMLResolver((publicID, systemID, baseURI, namespace) -> null);
         try {
-            assertFalse(readStaxText(factory, entityPayload(ALLOWED)).contains(AttackTestSupport.LEAKED_MARKER), "floor was bypassed and the entity leaked");
+            assertFalse(AttackTestSupport.captureStaxEventText(factory, entityPayload(ALLOWED)).contains(AttackTestSupport.LEAKED_MARKER),
+                    "floor was bypassed and the entity leaked");
         } catch (final XMLStreamException blocked) {
             // Acceptable: rejected at parse rather than resolved to empty.
         }

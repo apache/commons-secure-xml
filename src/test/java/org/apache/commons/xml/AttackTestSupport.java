@@ -758,14 +758,14 @@ final class AttackTestSupport {
         return text.toString();
     }
 
-    /** Parses the payload through a {@link XMLEventReader} and returns the accumulated character data, used by the StAX-based {@code DoesNotLeak} helper. */
-    private static String captureStaxEventText(final XMLInputFactory factory, final String payload) throws Exception {
+    /** Parses the payload through a {@link XMLEventReader} and returns the accumulated character and CDATA data, used by the StAX-based {@code DoesNotLeak} helper. */
+    static String captureStaxEventText(final XMLInputFactory factory, final String payload) throws Exception {
         final StringBuilder text = new StringBuilder();
         final XMLEventReader events = factory.createXMLEventReader(new StringReader(payload));
         try {
             while (events.hasNext()) {
                 final XMLEvent event = events.nextEvent();
-                if (event.isCharacters()) {
+                if (event.isCharacters() || event.getEventType() == XMLStreamConstants.CDATA) {
                     text.append(event.asCharacters().getData());
                 }
             }
