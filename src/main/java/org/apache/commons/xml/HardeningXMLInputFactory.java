@@ -36,9 +36,10 @@ import javax.xml.transform.Source;
  * non-removable by the caller.
  *
  * <p>The constructor installs the floor through {@code setXMLResolver}, which every implementation routes external resolution through (Woodstox fans it out to
- * both its DTD-subset and entity resolvers). Woodstox keeps one hook outside that fan-out, {@value StaxHardener#WSTX_UNDECLARED_ENTITY_RESOLVER}, so a second
- * floor is installed there best-effort: emptying the external subset leaves any entity it declared undeclared, and without that floor Woodstox rejects the
- * reference instead of resolving it to empty like every other implementation.</p>
+ * both its DTD-subset and entity resolvers). Woodstox keeps one hook outside that fan-out, {@value StaxHardener#WSTX_UNDECLARED_ENTITY_RESOLVER}, which is
+ * deliberately left empty: emptying the external subset leaves any entity it declared undeclared, and Woodstox then rejects the reference. The rejection is
+ * implementation-prescribed and keeps the resource just as unfetched as the empty resolution the other implementations produce; a caller who wants those
+ * references resolved can still set the property, and their resolver lands behind a floor like on every other resolver hook.</p>
  *
  * <p>Every resolver-valued entry point ({@link #setXMLResolver(XMLResolver)}, {@code setProperty(XMLInputFactory.RESOLVER, ...)} and the Woodstox
  * {@code com.ctc.wstx.*Resolver} keys) is routed uniformly: a caller who supplies their own {@link FallbackIgnoreXMLResolver} takes control and it is
@@ -55,12 +56,6 @@ final class HardeningXMLInputFactory extends XMLInputFactory {
     HardeningXMLInputFactory(final XMLInputFactory delegate) {
         this.delegate = delegate;
         delegate.setXMLResolver(new FallbackIgnoreXMLResolver(null));
-        try {
-            // Woodstox only: the undeclared-entity hook is not covered by setXMLResolver, and an entity declared by the now-emptied external subset arrives here.
-            delegate.setProperty(StaxHardener.WSTX_UNDECLARED_ENTITY_RESOLVER, new FallbackIgnoreXMLResolver(null));
-        } catch (final Exception e) {
-            // Not recognized by this implementation (the JDK Zephyr); nothing to install.
-        }
     }
 
     @Override
