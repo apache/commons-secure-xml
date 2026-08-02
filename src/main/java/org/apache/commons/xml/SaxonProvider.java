@@ -35,6 +35,7 @@ import net.sf.saxon.lib.EmptySource;
 import net.sf.saxon.lib.Feature;
 import net.sf.saxon.lib.ResourceRequest;
 import net.sf.saxon.lib.ResourceResolver;
+import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.xpath.XPathFactoryImpl;
 
 /**
@@ -73,8 +74,11 @@ final class SaxonProvider {
         private static final ResourceResolver IGNORE_ALL_FLOOR = request -> {
             if (ResourceRequest.EXTERNAL_ENTITY_NATURE.equals(request.nature) || ResourceRequest.DTD_NATURE.equals(request.nature)) {
                 // Fall through to the parser's own EntityResolver, which Saxon chains behind this resolver:
-                // on a hardened reader that is the FallbackIgnoreEntityResolver2 floor.
+                // on a hardened reader that is the FallbackIgnoreEntityResolver2 floor, which also implements the throw-on-unresolved toggle.
                 return null;
+            }
+            if (HardeningException.throwOnUnresolved()) {
+                throw new XPathException(HardeningException.unresolvedDenied(request.uri));
             }
             if (ResourceRequest.XML_NATURE.equals(request.nature) || ResourceRequest.XSLT_NATURE.equals(request.nature)
                     || ResourceRequest.XSD_NATURE.equals(request.nature)) {
@@ -86,7 +90,12 @@ final class SaxonProvider {
         };
 
         /** Collection-level ignore: {@code fn:collection()} and {@code fn:uri-collection()} resolve to an empty collection instead of fetching. */
-        private static final CollectionFinder EMPTY_COLLECTION_FINDER = (context, collectionURI) -> CollectionFn.EMPTY_COLLECTION;
+        private static final CollectionFinder EMPTY_COLLECTION_FINDER = (context, collectionURI) -> {
+            if (HardeningException.throwOnUnresolved()) {
+                throw new XPathException(HardeningException.unresolvedDenied(collectionURI));
+            }
+            return CollectionFn.EMPTY_COLLECTION;
+        };
 
         private HardenedConfiguration() {
             // Extension-function layer: turn off Saxon's reflection-based extension calls. Without this an attacker could bypass URI restrictions through

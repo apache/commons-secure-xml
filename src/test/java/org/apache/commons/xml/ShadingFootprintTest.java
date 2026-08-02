@@ -66,7 +66,7 @@ class ShadingFootprintTest {
             "SAXParserHardener$HardeningExpatXMLReader", "HardeningSAXParser", "HardeningSAXParserFactory", "HardeningXMLReader", HARDENING_EXCEPTION,
             "FallbackIgnoreEntityResolver2");
 
-    private static final Set<String> STAX_HARDENER = set("StaxHardener", "HardeningXMLInputFactory", "FallbackIgnoreXMLResolver");
+    private static final Set<String> STAX_HARDENER = set("StaxHardener", "HardeningXMLInputFactory", "FallbackIgnoreXMLResolver", HARDENING_EXCEPTION);
 
     /**
      * TrAX, XPath and schema re-harden their sub-parsers through {@link SAXParserHardener#harden(Source)}, so each builds on the full SAX closure below.

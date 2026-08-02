@@ -51,4 +51,25 @@ final class HardeningException extends IllegalStateException {
     static HardeningException settingFailed(final String kind, final String name, final Object target, final Throwable cause) {
         return new HardeningException("Failed to set " + kind + " '" + name + "' on " + target.getClass().getName(), cause);
     }
+
+    /**
+     * Whether unresolved external references must be rejected instead of resolved to empty content.
+     *
+     * <p>Read per resolution, so the {@value XmlFactories#THROW_ON_UNRESOLVED} system property also toggles factories that already exist.</p>
+     *
+     * @return {@code true} when the {@value XmlFactories#THROW_ON_UNRESOLVED} system property is set.
+     */
+    static boolean throwOnUnresolved() {
+        return Boolean.getBoolean(XmlFactories.THROW_ON_UNRESOLVED);
+    }
+
+    /**
+     * Builds the message every resolver floor uses for a rejected unresolved external reference.
+     *
+     * @param identifier The denied system identifier or URI, possibly {@code null}.
+     * @return The message naming the denied identifier and the enabling property.
+     */
+    static String unresolvedDenied(final String identifier) {
+        return "Resolution of external resource '" + identifier + "' was denied (system property " + XmlFactories.THROW_ON_UNRESOLVED + " is set)";
+    }
 }

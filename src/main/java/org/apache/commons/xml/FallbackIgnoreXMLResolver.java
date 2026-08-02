@@ -56,6 +56,12 @@ final class FallbackIgnoreXMLResolver implements XMLResolver {
     @Override
     public Object resolveEntity(final String publicID, final String systemID, final String baseURI, final String namespace) throws XMLStreamException {
         final Object resolved = delegate != null ? delegate.resolveEntity(publicID, systemID, baseURI, namespace) : null;
-        return resolved != null ? resolved : EMPTY;
+        if (resolved != null) {
+            return resolved;
+        }
+        if (HardeningException.throwOnUnresolved()) {
+            throw new XMLStreamException(HardeningException.unresolvedDenied(systemID));
+        }
+        return EMPTY;
     }
 }

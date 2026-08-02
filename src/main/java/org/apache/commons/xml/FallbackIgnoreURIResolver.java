@@ -68,7 +68,13 @@ final class FallbackIgnoreURIResolver implements URIResolver {
     @Override
     public Source resolve(final String href, final String base) throws TransformerException {
         final Source resolved = delegate != null ? delegate.resolve(href, base) : null;
+        if (resolved != null) {
+            return resolved;
+        }
+        if (HardeningException.throwOnUnresolved()) {
+            throw new TransformerException(HardeningException.unresolvedDenied(href));
+        }
         // A fresh DOMSource per call keeps callers from mutating a shared Source.
-        return resolved != null ? resolved : new DOMSource(EMPTY_DOCUMENT);
+        return new DOMSource(EMPTY_DOCUMENT);
     }
 }

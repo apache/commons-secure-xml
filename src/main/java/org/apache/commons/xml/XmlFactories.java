@@ -54,6 +54,10 @@ import org.xml.sax.XMLReader;
  *
  * <p>Each method on this class adds factory-specific guarantees on top of the three above, documented on the corresponding {@code newXxxFactory()} method.</p>
  *
+ * <p>An unresolved external reference resolves to empty content by default, so the parse continues without the resource. To reject it with an exception
+ * instead, set the system property {@code org.apache.commons.xml.throwOnUnresolved} to {@code true}; the property is read at resolution time, and references
+ * resolved by a caller-supplied resolver are unaffected.</p>
+ *
  * <h2>Caller-supplied URIs</h2>
  *
  * <p>A top-level URI passed directly by the caller is fetched as-is: {@code StreamSource(systemId)}, {@code DocumentBuilder.parse(String)}, or a
@@ -68,6 +72,14 @@ import org.xml.sax.XMLReader;
  * <p>This class itself is thread-safe: all methods are static and stateless.</p>
  */
 public final class XmlFactories {
+
+    /**
+     * System property that switches unresolved external references from the default empty resolution to a thrown exception.
+     *
+     * <p>How to enable: set {@code -Dorg.apache.commons.xml.throwOnUnresolved=true}. The property is read at resolution time, so it also applies to factories
+     * created before it was set; references resolved by a caller-supplied resolver are unaffected.</p>
+     */
+    static final String THROW_ON_UNRESOLVED = "org.apache.commons.xml.throwOnUnresolved";
 
     /**
      * Rewrites a {@link Source} so that any SAX parsing it triggers runs through an {@link XmlFactories}-hardened {@link XMLReader}.
