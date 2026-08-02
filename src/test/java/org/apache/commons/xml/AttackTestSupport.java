@@ -42,7 +42,6 @@ import javax.xml.validation.Validator;
 
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.function.Executable;
-import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.api.function.ThrowingSupplier;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -575,6 +574,13 @@ final class AttackTestSupport {
     }
 
     /**
+     * Asserts a hardened Templates compile-and-transform either blocks or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     */
+    static void assertTemplatesBlocksOrDoesNotLeak(final Source xslt) {
+        assertNoLeakOrThrows(() -> templatesCompileAndTransform(xslt), "Templates", TransformerException.class);
+    }
+
+    /**
      * Asserts a hardened Templates compile-and-transform succeeds.
      *
      * <p>{@link TransformerFactory#newTemplates(Source)} via {@link XmlFactories#newTransformerFactory()} followed by transform; positive control for
@@ -595,23 +601,6 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened Templates compile-and-transform completes without leaked content, tolerating a caller-approved block.
-     *
-     * <p>The pipeline stays strict ({@link #STRICT_REPORTER} installed); a thrown {@link TransformerException} is handed to {@code acceptable}, which rethrows
-     * it to fail the test (the default) or returns to accept the block, in which case nothing was produced and nothing can leak.</p>
-     */
-    static void assertTemplatesDoesNotLeak(final Source xslt, final ThrowingConsumer<TransformerException> acceptable) {
-        assertNoLeakStrict(() -> {
-            try {
-                return templatesCompileAndTransform(xslt);
-            } catch (final TransformerException e) {
-                acceptable.accept(e);
-                return "";
-            }
-        }, "Templates");
-    }
-
-    /**
      * Asserts a hardened identity Transformer of the payload throws.
      *
      * <p>{@link Transformer#transform(Source, javax.xml.transform.Result)} on the identity transformer from {@link XmlFactories#newTransformerFactory()}; only
@@ -624,6 +613,13 @@ final class AttackTestSupport {
     }
 
     /**
+     * Asserts a hardened identity Transformer either blocks or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     */
+    static void assertTransformerBlocksOrDoesNotLeak(final String payload) {
+        assertNoLeakOrThrows(() -> identityTransformAndCapture(payload), "Transformer", TransformerException.class);
+    }
+
+    /**
      * Asserts a hardened identity Transformer completes without throwing and without leaked content.
      *
      * <p>{@link Transformer#transform(Source, javax.xml.transform.Result)} via {@link XmlFactories#newTransformerFactory()}; use this when the hardening
@@ -631,21 +627,6 @@ final class AttackTestSupport {
      */
     static void assertTransformerDoesNotLeak(final String payload) {
         assertNoLeakStrict(() -> identityTransformAndCapture(payload), "Transformer");
-    }
-
-    /**
-     * Asserts a hardened identity Transformer completes without leaked content, tolerating a caller-approved block. See
-     * {@link #assertTemplatesDoesNotLeak(Source, ThrowingConsumer)} for the {@code acceptable} contract.
-     */
-    static void assertTransformerDoesNotLeak(final String payload, final ThrowingConsumer<TransformerException> acceptable) {
-        assertNoLeakStrict(() -> {
-            try {
-                return identityTransformAndCapture(payload);
-            } catch (final TransformerException e) {
-                acceptable.accept(e);
-                return "";
-            }
-        }, "Transformer");
     }
 
     /**

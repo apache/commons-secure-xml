@@ -22,15 +22,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.TransformerException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -39,10 +36,14 @@ import org.xml.sax.helpers.DefaultHandler;
  *
  * <p>The wrapper declares a parameter entity {@code %xxe;} pointing at {@code src/test/resources/leaked/referenced.dtd} and immediately references it in the
  * internal subset; once expanded, the entity declarations from {@code referenced.dtd} (in particular {@code <!ENTITY leaked "...">}) become part of the
- * document's DTD. Each wrapper body then references {@code &leaked;}, so the parse cannot succeed unless the parameter-entity expansion is allowed: a hardened
- * parser refuses, {@code &leaked;} is undefined, and the parse throws; an unconfigured parser fetches and resolves, and the parse succeeds.</p>
+ * document's DTD. Each wrapper body then references {@code &leaked;}, and a hardened parser resolves the parameter-entity expansion to empty, which leaves
+ * {@code &leaked;} undeclared. This is the one payload in the suite with a genuinely undeclared entity, so the hardened outcome is dual: the parser either
+ * skips the undefined reference (no leak) or rejects it (per XML 1.0 section 4.1 the reference is an unreported validity constraint here, but the JDK's parser
+ * reports it as a well-formedness error and Woodstox rejects undeclared references unconditionally). Either way the external DTD is never fetched. An
+ * unconfigured parser fetches and resolves it, and the parse succeeds.</p>
  *
- * <p>Each parser type is exercised twice as a pair (unconfigured factory, expected to parse; hardened factory, expected to throw):</p>
+ * <p>Each parser type is exercised twice as a pair (unconfigured factory, expected to parse; hardened factory, expected to block or complete without leaked
+ * content):</p>
  *
  * <ul>
  *   <li>DOM, SAX and StAX direct XML parsing.</li>
@@ -143,7 +144,7 @@ class ExternalParameterEntityTest {
 
     @Test
     @Tag("dom")
-    void hardenedDomBlocks() {
+    void hardenedDomBlocksOrDoesNotLeak() {
         Assumptions.assumeTrue(DOM_ACCEPTS_PARAMETER_ENTITIES,
                 "Skipped: platform DOM does not accept parameter entities");
         AttackTestSupport.assertDomBlocksOrDoesNotLeak(xmlPayload());
@@ -151,7 +152,7 @@ class ExternalParameterEntityTest {
 
     @Test
     @Tag("sax")
-    void hardenedSaxBlocks() {
+    void hardenedSaxBlocksOrDoesNotLeak() {
         Assumptions.assumeTrue(SAX_RESOLVES_PARAMETER_ENTITIES,
                 "Skipped: platform SAX parser does not invoke the entity resolver for parameter entities");
         AttackTestSupport.assertSaxBlocksOrDoesNotLeak(xmlPayload());
@@ -159,7 +160,7 @@ class ExternalParameterEntityTest {
 
     @Test
     @Tag("schema")
-    void hardenedSchemaBlocks() {
+    void hardenedSchemaBlocksOrDoesNotLeak() {
         Assumptions.assumeTrue(SAX_RESOLVES_PARAMETER_ENTITIES,
                 "Skipped: platform SAX parser does not invoke the entity resolver for parameter entities");
         AttackTestSupport.assertSchemaBlocksOrDoesNotLeak(AttackTestSupport.streamSource(xsdPayload()));
@@ -167,48 +168,29 @@ class ExternalParameterEntityTest {
 
     @Test
     @Tag("stax")
-    void hardenedStaxBlocks() {
+    void hardenedStaxBlocksOrDoesNotLeak() {
         AttackTestSupport.assertStaxBlocksOrDoesNotLeak(xmlPayload());
     }
 
-    /**
-     * Accepts only the stock JDK's "referenced, but not declared" report; every other exception is rethrown and fails the test.
-     *
-     * <p>With only an internal subset containing a parameter-entity reference, a reference to an undeclared general entity is a validity constraint
-     * (XML 1.0 section 4.1) that a non-validating parse must not report. The JDK's parser demotes the check only when the DOCTYPE has an external subset and
-     * otherwise reports a well-formedness fatal; Apache Xerces implements the demotion for this case too.</p>
-     */
-    private static final ThrowingConsumer<TransformerException> ACCEPT_UNDECLARED_ENTITY = ExternalParameterEntityTest::rethrowUnlessUndeclaredEntity;
-
-    private static void rethrowUnlessUndeclaredEntity(final TransformerException exception) throws TransformerException {
-        // XSLTC flattens the compile failure into a bare TransformerConfigurationException, so match the message along the chain rather than the type.
-        for (Throwable cause = exception; cause != null; cause = cause instanceof SAXException ? ((SAXException) cause).getException() : cause.getCause()) {
-            if (String.valueOf(cause.getMessage()).contains("was referenced, but not declared")) {
-                return;
-            }
-        }
-        throw exception;
+    @Test
+    @Tag("trax")
+    void hardenedTemplatesBlocksOrDoesNotLeak() {
+        Assumptions.assumeTrue(SAX_RESOLVES_PARAMETER_ENTITIES,
+                "Skipped: platform SAX parser does not invoke the entity resolver for parameter entities");
+        AttackTestSupport.assertTemplatesBlocksOrDoesNotLeak(AttackTestSupport.streamSource(xsltPayload()));
     }
 
     @Test
     @Tag("trax")
-    void hardenedTemplatesBlocks() {
+    void hardenedTransformerBlocksOrDoesNotLeak() {
         Assumptions.assumeTrue(SAX_RESOLVES_PARAMETER_ENTITIES,
                 "Skipped: platform SAX parser does not invoke the entity resolver for parameter entities");
-        AttackTestSupport.assertTemplatesDoesNotLeak(AttackTestSupport.streamSource(xsltPayload()), ACCEPT_UNDECLARED_ENTITY);
-    }
-
-    @Test
-    @Tag("trax")
-    void hardenedTransformerBlocks() {
-        Assumptions.assumeTrue(SAX_RESOLVES_PARAMETER_ENTITIES,
-                "Skipped: platform SAX parser does not invoke the entity resolver for parameter entities");
-        AttackTestSupport.assertTransformerDoesNotLeak(xmlPayload(), ACCEPT_UNDECLARED_ENTITY);
+        AttackTestSupport.assertTransformerBlocksOrDoesNotLeak(xmlPayload());
     }
 
     @Test
     @Tag("schema")
-    void hardenedValidatorBlocks() {
+    void hardenedValidatorBlocksOrDoesNotLeak() {
         Assumptions.assumeTrue(SAX_RESOLVES_PARAMETER_ENTITIES,
                 "Skipped: platform SAX parser does not invoke the entity resolver for parameter entities");
         AttackTestSupport.assertValidatorBlocksOrDoesNotLeak(xmlPayload());
@@ -216,7 +198,7 @@ class ExternalParameterEntityTest {
 
     @Test
     @Tag("sax")
-    void hardenedXmlReaderBlocks() {
+    void hardenedXmlReaderBlocksOrDoesNotLeak() {
         Assumptions.assumeTrue(SAX_RESOLVES_PARAMETER_ENTITIES,
                 "Skipped: platform SAX parser does not invoke the entity resolver for parameter entities");
         AttackTestSupport.assertXmlReaderBlocksOrDoesNotLeak(xmlPayload());
