@@ -60,7 +60,7 @@ final class FallbackIgnoreXMLResolver implements XMLResolver {
             return resolved;
         }
         if (HardeningException.throwOnUnresolved()) {
-            throw new XMLStreamException(HardeningException.unresolvedDenied(systemID));
+            throw new XMLStreamException(HardeningException.forbidden(null, namespace, publicID, systemID, baseURI));
         }
         return EMPTY;
     }

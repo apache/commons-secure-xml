@@ -121,7 +121,7 @@ class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
     protected InputSource onUnresolved(final String name, final String publicId, final String baseURI, final String systemId)
             throws SAXException, IOException {
         if (HardeningException.throwOnUnresolved()) {
-            throw new SAXException(HardeningException.unresolvedDenied(absolutize(baseURI, systemId)));
+            throw new SAXException(HardeningException.forbidden(name, null, publicId, systemId, baseURI));
         }
         final InputSource empty = new InputSource(new ByteArrayInputStream(new byte[0]));
         empty.setPublicId(publicId);

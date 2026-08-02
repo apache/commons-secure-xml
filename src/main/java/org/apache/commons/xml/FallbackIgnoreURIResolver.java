@@ -72,7 +72,7 @@ final class FallbackIgnoreURIResolver implements URIResolver {
             return resolved;
         }
         if (HardeningException.throwOnUnresolved()) {
-            throw new TransformerException(HardeningException.unresolvedDenied(href));
+            throw new TransformerException(HardeningException.forbidden("uri", null, null, href, base));
         }
         // A fresh DOMSource per call keeps callers from mutating a shared Source.
         return new DOMSource(EMPTY_DOCUMENT);

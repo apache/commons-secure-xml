@@ -68,7 +68,7 @@ final class FallbackIgnoreLSResourceResolver implements LSResourceResolver {
         }
         if (HardeningException.throwOnUnresolved()) {
             // The interface declares no checked exception; LSException is the DOM Load/Save runtime failure type.
-            throw new LSException(LSException.PARSE_ERR, HardeningException.unresolvedDenied(systemId));
+            throw new LSException(LSException.PARSE_ERR, HardeningException.forbidden(type, namespaceURI, publicId, systemId, baseURI));
         }
         // A character stream, not setStringData(""): the JDK's DOMEntityResolverWrapper discards empty string data, leaving a source with no content and a
         // null system id that Xerces then fails to absolutize. The echoed identifiers give Xerces a valid base URI; the content still comes from this

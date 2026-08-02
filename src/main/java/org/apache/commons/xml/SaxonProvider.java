@@ -78,7 +78,7 @@ final class SaxonProvider {
                 return null;
             }
             if (HardeningException.throwOnUnresolved()) {
-                throw new XPathException(HardeningException.unresolvedDenied(request.uri));
+                throw new XPathException(HardeningException.forbidden(request.nature, null, request.publicId, request.uri, request.baseUri));
             }
             if (ResourceRequest.XML_NATURE.equals(request.nature) || ResourceRequest.XSLT_NATURE.equals(request.nature)
                     || ResourceRequest.XSD_NATURE.equals(request.nature)) {
@@ -92,7 +92,7 @@ final class SaxonProvider {
         /** Collection-level ignore: {@code fn:collection()} and {@code fn:uri-collection()} resolve to an empty collection instead of fetching. */
         private static final CollectionFinder EMPTY_COLLECTION_FINDER = (context, collectionURI) -> {
             if (HardeningException.throwOnUnresolved()) {
-                throw new XPathException(HardeningException.unresolvedDenied(collectionURI));
+                throw new XPathException(HardeningException.forbidden("collection", null, null, collectionURI, null));
             }
             return CollectionFn.EMPTY_COLLECTION;
         };

@@ -64,12 +64,17 @@ final class HardeningException extends IllegalStateException {
     }
 
     /**
-     * Builds the message every resolver floor uses for a rejected unresolved external reference.
+     * Builds the standard "forbidden" message shared by every resolver floor when {@link #throwOnUnresolved()} rejects an unresolved reference.
      *
-     * @param identifier The denied system identifier or URI, possibly {@code null}.
-     * @return The message naming the denied identifier and the enabling property.
+     * @param type      the resource kind, or {@code null} if not applicable.
+     * @param namespace the namespace (or, for Woodstox, the entity name), or {@code null}.
+     * @param publicId  the public identifier, or {@code null} if none.
+     * @param systemId  the system identifier of the denied resource.
+     * @param baseURI   the base URI for relative resolution, or {@code null}.
+     * @return the message naming the denied lookup and the enabling property.
      */
-    static String unresolvedDenied(final String identifier) {
-        return "Resolution of external resource '" + identifier + "' was denied (system property " + XmlFactories.THROW_ON_UNRESOLVED + " is set)";
+    static String forbidden(final String type, final String namespace, final String publicId, final String systemId, final String baseURI) {
+        return String.format("External resource fetch forbidden by %s: type=%s, namespace=%s, publicId=%s, systemId=%s, baseURI=%s",
+                XmlFactories.THROW_ON_UNRESOLVED, type, namespace, publicId, systemId, baseURI);
     }
 }
