@@ -54,7 +54,6 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Checks that a caller-supplied resolver cannot remove the hardened ignore-all floor on any factory.
@@ -129,15 +128,8 @@ class EntityResolverFloorTest {
     void saxReaderResolvesAllowListed() throws Exception {
         final XMLReader reader = hardenedReader();
         reader.setEntityResolver(ENTITY_ALLOW_LIST);
-        final StringBuilder text = new StringBuilder();
-        reader.setContentHandler(new DefaultHandler() {
-            @Override
-            public void characters(final char[] ch, final int start, final int length) {
-                text.append(ch, start, length);
-            }
-        });
-        reader.parse(AttackTestSupport.inputSource(entityPayload(ALLOWED)));
-        assertTrue(text.toString().contains(AttackTestSupport.LEAKED_MARKER),
+        final String text = AttackTestSupport.captureCharacters(reader, entityPayload(ALLOWED));
+        assertTrue(text.contains(AttackTestSupport.LEAKED_MARKER),
                 "allow-listed external entity should resolve through the caller's resolver");
     }
 
@@ -146,20 +138,14 @@ class EntityResolverFloorTest {
     void saxReaderDoesNotLeakUnlisted() throws Exception {
         final XMLReader reader = hardenedReader();
         reader.setEntityResolver(ENTITY_ALLOW_LIST);
-        final StringBuilder text = new StringBuilder();
-        reader.setContentHandler(new DefaultHandler() {
-            @Override
-            public void characters(final char[] ch, final int start, final int length) {
-                text.append(ch, start, length);
-            }
-        });
         // The caller returns null for the unlisted entity, so the floor resolves it to empty rather than fetching it.
+        final String text;
         try {
-            reader.parse(AttackTestSupport.inputSource(entityPayload(UNLISTED)));
+            text = AttackTestSupport.captureCharacters(reader, entityPayload(UNLISTED));
         } catch (final SAXException blocked) {
             return; // Acceptable: rejected at parse rather than resolved to empty.
         }
-        assertFalse(text.toString().contains(AttackTestSupport.LEAKED_MARKER), "unlisted external entity leaked:\n" + text);
+        assertFalse(text.contains(AttackTestSupport.LEAKED_MARKER), "unlisted external entity leaked:\n" + text);
     }
 
     @Test
@@ -169,14 +155,8 @@ class EntityResolverFloorTest {
         // ignore-all floor must still resolve the external entity to empty rather than letting the parser fetch it.
         final SAXParser parser = XmlFactories.newSAXParserFactory().newSAXParser();
         final StringBuilder text = new StringBuilder();
-        final DefaultHandler handler = new DefaultHandler() {
-            @Override
-            public void characters(final char[] ch, final int start, final int length) {
-                text.append(ch, start, length);
-            }
-        };
         try {
-            parser.parse(AttackTestSupport.inputSource(entityPayload(ALLOWED)), handler);
+            parser.parse(AttackTestSupport.inputSource(entityPayload(ALLOWED)), AttackTestSupport.capturingHandler(text));
         } catch (final SAXException e) {
             return; // blocked at parse: acceptable
         }
@@ -212,15 +192,8 @@ class EntityResolverFloorTest {
     void saxResolvesRelativeXIncludeSibling() throws Exception {
         final XMLReader reader = xIncludeAwareReader();
         reader.setEntityResolver(RESOLVE_ALL);
-        final StringBuilder text = new StringBuilder();
-        reader.setContentHandler(new DefaultHandler() {
-            @Override
-            public void characters(final char[] ch, final int start, final int length) {
-                text.append(ch, start, length);
-            }
-        });
-        reader.parse(XINCLUDE_HOST);
-        assertTrue(text.toString().contains(AttackTestSupport.LEAKED_MARKER),
+        final String text = AttackTestSupport.captureCharacters(reader, new InputSource(XINCLUDE_HOST));
+        assertTrue(text.contains(AttackTestSupport.LEAKED_MARKER),
                 "relative XInclude sibling should resolve through the caller's resolver after the floor absolutizes the href");
     }
 

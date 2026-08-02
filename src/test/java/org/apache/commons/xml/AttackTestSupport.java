@@ -746,15 +746,15 @@ final class AttackTestSupport {
     }
 
     /** Parses the payload through the supplied reader and returns the accumulated character data, used by the SAX-based {@code DoesNotLeak} helpers. */
-    private static String captureCharacters(final XMLReader reader, final String payload) throws Exception {
+    static String captureCharacters(final XMLReader reader, final String payload) throws Exception {
+        return captureCharacters(reader, inputSource(payload));
+    }
+
+    /** Parses the source through the supplied reader, with {@link #STRICT_REPORTER} installed, and returns the accumulated character data. */
+    static String captureCharacters(final XMLReader reader, final InputSource source) throws Exception {
         final StringBuilder text = new StringBuilder();
-        reader.setContentHandler(new DefaultHandler() {
-            @Override
-            public void characters(final char[] ch, final int start, final int length) {
-                text.append(ch, start, length);
-            }
-        });
-        strictXMLReader(reader).parse(inputSource(payload));
+        reader.setContentHandler(capturingHandler(text));
+        strictXMLReader(reader).parse(source);
         return text.toString();
     }
 
@@ -790,6 +790,16 @@ final class AttackTestSupport {
             stream.close();
         }
         return text.toString();
+    }
+
+    /** Content handler whose {@code characters} callback accumulates into {@code text}; for tests that install (or pass) the handler themselves. */
+    static DefaultHandler capturingHandler(final StringBuilder text) {
+        return new DefaultHandler() {
+            @Override
+            public void characters(final char[] ch, final int start, final int length) {
+                text.append(ch, start, length);
+            }
+        };
     }
 
     /** Drains every {@link XMLEventReader} event from the factory's reader for the payload. */

@@ -19,6 +19,7 @@
 package org.apache.commons.xml;
 
 import static org.apache.commons.xml.AttackTestSupport.LEAKED_MARKER;
+import static org.apache.commons.xml.AttackTestSupport.captureCharacters;
 import static org.apache.commons.xml.AttackTestSupport.inputSource;
 import static org.apache.commons.xml.AttackTestSupport.resourceUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,7 +41,6 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Tests that XInclude resolution is blocked by default on factories from {@link XmlFactories}, and that callers can
@@ -155,42 +155,26 @@ class XIncludeTest {
     @Test
     @Tag("sax")
     void baselineSaxLeaksParseXml() throws Exception {
-        final InputSource input = inputSource(xiIncludeXml(REFERENCED_XML, "xml"));
+        final String input = xiIncludeXml(REFERENCED_XML, "xml");
 
         final SAXParserFactory factory = SAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
-        final StringBuilder captured = new StringBuilder();
-        final XMLReader reader = factory.newSAXParser().getXMLReader();
-        reader.setContentHandler(new DefaultHandler() {
-            @Override
-            public void characters(final char[] ch, final int start, final int length) {
-                captured.append(ch, start, length);
-            }
-        });
-        reader.parse(input);
-        assertEquals(LEAKED_MARKER, captured.toString().trim(),
+        final String captured = captureCharacters(factory.newSAXParser().getXMLReader(), input);
+        assertEquals(LEAKED_MARKER, captured.trim(),
                 "Baseline SAX parse=xml should leak marker; got: " + captured);
     }
 
     @Test
     @Tag("sax")
     void baselineSaxLeaksParseText() throws Exception {
-        final InputSource input = inputSource(xiIncludeXml(REFERENCED_TEXT, "text"));
+        final String input = xiIncludeXml(REFERENCED_TEXT, "text");
 
         final SAXParserFactory factory = SAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
-        final StringBuilder captured = new StringBuilder();
-        final XMLReader reader = factory.newSAXParser().getXMLReader();
-        reader.setContentHandler(new DefaultHandler() {
-            @Override
-            public void characters(final char[] ch, final int start, final int length) {
-                captured.append(ch, start, length);
-            }
-        });
-        reader.parse(input);
-        assertTrue(captured.toString().contains(LEAKED_MARKER),
+        final String captured = captureCharacters(factory.newSAXParser().getXMLReader(), input);
+        assertTrue(captured.contains(LEAKED_MARKER),
                 "Baseline SAX parse=text should leak marker; got: " + captured);
     }
 
@@ -243,21 +227,13 @@ class XIncludeTest {
     @Test
     @Tag("sax")
     void hardenedSaxBlocksParseText() throws Exception {
-        final InputSource input = inputSource(xiIncludeXml(REFERENCED_TEXT, "text"));
+        final String input = xiIncludeXml(REFERENCED_TEXT, "text");
 
         final SAXParserFactory factory = XmlFactories.newSAXParserFactory();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
-        final StringBuilder captured = new StringBuilder();
-        final XMLReader reader = factory.newSAXParser().getXMLReader();
-        reader.setContentHandler(new DefaultHandler() {
-            @Override
-            public void characters(final char[] ch, final int start, final int length) {
-                captured.append(ch, start, length);
-            }
-        });
-        reader.parse(input);
-        assertFalse(captured.toString().contains(LEAKED_MARKER),
+        final String captured = captureCharacters(factory.newSAXParser().getXMLReader(), input);
+        assertFalse(captured.contains(LEAKED_MARKER),
                 "Hardened SAX parse=text must resolve the include to empty, not leak; got: " + captured);
     }
 
@@ -312,44 +288,30 @@ class XIncludeTest {
     @Test
     @Tag("sax")
     void hardenedSaxWithAllowListResolvesParseXml() throws Exception {
-        final InputSource input = inputSource(xiIncludeXml(REFERENCED_XML, "xml"));
+        final String input = xiIncludeXml(REFERENCED_XML, "xml");
 
         final SAXParserFactory factory = XmlFactories.newSAXParserFactory();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         final XMLReader reader = factory.newSAXParser().getXMLReader();
         reader.setEntityResolver(new AllowListResolver());
-        final StringBuilder captured = new StringBuilder();
-        reader.setContentHandler(new DefaultHandler() {
-            @Override
-            public void characters(final char[] ch, final int start, final int length) {
-                captured.append(ch, start, length);
-            }
-        });
-        reader.parse(input);
-        assertEquals(RESOLVED_MARKER, captured.toString().trim(),
+        final String captured = captureCharacters(reader, input);
+        assertEquals(RESOLVED_MARKER, captured.trim(),
                 "SAX parse=xml with allow-list should resolve to the resolver's content");
     }
 
     @Test
     @Tag("sax")
     void hardenedSaxWithAllowListResolvesParseText() throws Exception {
-        final InputSource input = inputSource(xiIncludeXml(REFERENCED_TEXT, "text"));
+        final String input = xiIncludeXml(REFERENCED_TEXT, "text");
 
         final SAXParserFactory factory = XmlFactories.newSAXParserFactory();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         final XMLReader reader = factory.newSAXParser().getXMLReader();
         reader.setEntityResolver(new AllowListResolver());
-        final StringBuilder captured = new StringBuilder();
-        reader.setContentHandler(new DefaultHandler() {
-            @Override
-            public void characters(final char[] ch, final int start, final int length) {
-                captured.append(ch, start, length);
-            }
-        });
-        reader.parse(input);
-        assertEquals(RESOLVED_MARKER, captured.toString().trim(),
+        final String captured = captureCharacters(reader, input);
+        assertEquals(RESOLVED_MARKER, captured.trim(),
                 "SAX parse=text with allow-list should resolve to the resolver's content");
     }
 
@@ -388,43 +350,29 @@ class XIncludeTest {
     @Test
     @Tag("sax")
     void hardenReaderBlocksParseText() throws Exception {
-        final InputSource input = inputSource(xiIncludeXml(REFERENCED_TEXT, "text"));
+        final String input = xiIncludeXml(REFERENCED_TEXT, "text");
 
         final SAXParserFactory unhardenedFactory = SAXParserFactory.newInstance();
         unhardenedFactory.setNamespaceAware(true);
         assumeXIncludeAware(unhardenedFactory);
         final XMLReader reader = XmlFactories.harden(unhardenedFactory.newSAXParser().getXMLReader());
-        final StringBuilder captured = new StringBuilder();
-        reader.setContentHandler(new DefaultHandler() {
-            @Override
-            public void characters(final char[] ch, final int start, final int length) {
-                captured.append(ch, start, length);
-            }
-        });
-        reader.parse(input);
-        assertFalse(captured.toString().contains(LEAKED_MARKER),
+        final String captured = captureCharacters(reader, input);
+        assertFalse(captured.contains(LEAKED_MARKER),
                 "harden(reader) parse=text must resolve the include to empty, not leak; got: " + captured);
     }
 
     @Test
     @Tag("sax")
     void hardenReaderAllowListResolvesParseXml() throws Exception {
-        final InputSource input = inputSource(xiIncludeXml(REFERENCED_XML, "xml"));
+        final String input = xiIncludeXml(REFERENCED_XML, "xml");
 
         final SAXParserFactory unhardenedFactory = SAXParserFactory.newInstance();
         unhardenedFactory.setNamespaceAware(true);
         assumeXIncludeAware(unhardenedFactory);
         final XMLReader reader = XmlFactories.harden(unhardenedFactory.newSAXParser().getXMLReader());
         reader.setEntityResolver(new AllowListResolver());
-        final StringBuilder captured = new StringBuilder();
-        reader.setContentHandler(new DefaultHandler() {
-            @Override
-            public void characters(final char[] ch, final int start, final int length) {
-                captured.append(ch, start, length);
-            }
-        });
-        reader.parse(input);
-        assertEquals(RESOLVED_MARKER, captured.toString().trim(),
+        final String captured = captureCharacters(reader, input);
+        assertEquals(RESOLVED_MARKER, captured.trim(),
                 "harden(reader) + allow-list should resolve to the resolver's content on a reader with XInclude already enabled");
     }
 
