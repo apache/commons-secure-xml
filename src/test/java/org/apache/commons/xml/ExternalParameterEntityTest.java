@@ -22,12 +22,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.ErrorListener;
+import javax.xml.transform.TransformerException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -168,12 +171,48 @@ class ExternalParameterEntityTest {
         AttackTestSupport.assertStaxBlocksOrDoesNotLeak(xmlPayload());
     }
 
+    /**
+     * Strict reporter that additionally accepts the stock JDK's "referenced, but not declared" report.
+     *
+     * <p>With only an internal subset containing a parameter-entity reference, a reference to an undeclared general entity is a validity constraint
+     * (XML 1.0 section 4.1) that a non-validating parse must not report. The JDK's parser demotes the check only when the DOCTYPE has an external subset and
+     * otherwise reports a well-formedness fatal; Apache Xerces implements the demotion for this case too. Swallowing exactly that report keeps the trax tests
+     * strict against every other failure.</p>
+     */
+    private static final ErrorListener ACCEPT_UNDECLARED_ENTITY = new ErrorListener() {
+
+        @Override
+        public void warning(final TransformerException exception) {
+            // not a security signal
+        }
+
+        @Override
+        public void error(final TransformerException exception) throws TransformerException {
+            rethrowUnlessUndeclaredEntity(exception);
+        }
+
+        @Override
+        public void fatalError(final TransformerException exception) throws TransformerException {
+            rethrowUnlessUndeclaredEntity(exception);
+        }
+    };
+
+    private static void rethrowUnlessUndeclaredEntity(final TransformerException exception) throws TransformerException {
+        // XSLTC flattens the compile failure into a bare TransformerConfigurationException, so match the message along the chain rather than the type.
+        for (Throwable cause = exception; cause != null; cause = cause instanceof SAXException ? ((SAXException) cause).getException() : cause.getCause()) {
+            if (String.valueOf(cause.getMessage()).contains("was referenced, but not declared")) {
+                return;
+            }
+        }
+        throw exception;
+    }
+
     @Test
     @Tag("trax")
     void hardenedTemplatesBlocks() {
         Assumptions.assumeTrue(SAX_RESOLVES_PARAMETER_ENTITIES,
                 "Skipped: platform SAX parser does not invoke the entity resolver for parameter entities");
-        AttackTestSupport.assertTemplatesBlocksOrDoesNotLeak(AttackTestSupport.streamSource(xsltPayload()));
+        AttackTestSupport.assertTemplatesDoesNotLeak(AttackTestSupport.streamSource(xsltPayload()), ACCEPT_UNDECLARED_ENTITY);
     }
 
     @Test
@@ -181,7 +220,7 @@ class ExternalParameterEntityTest {
     void hardenedTransformerBlocks() {
         Assumptions.assumeTrue(SAX_RESOLVES_PARAMETER_ENTITIES,
                 "Skipped: platform SAX parser does not invoke the entity resolver for parameter entities");
-        AttackTestSupport.assertTransformerBlocksOrDoesNotLeak(xmlPayload());
+        AttackTestSupport.assertTransformerDoesNotLeak(xmlPayload(), ACCEPT_UNDECLARED_ENTITY);
     }
 
     @Test

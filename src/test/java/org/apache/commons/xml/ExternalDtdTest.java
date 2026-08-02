@@ -57,7 +57,7 @@ class ExternalDtdTest {
     }
 
     private static String xsltPayload() {
-        return withDoctype("xsl:stylesheet", AttackTestSupport.xsltBody(INSERTION));
+    return withDoctype("xsl:stylesheet", AttackTestSupport.xsltBody(INSERTION));
     }
 
     @Test
@@ -89,15 +89,13 @@ class ExternalDtdTest {
     @Test
     @Tag("trax")
     void hardenedTemplatesDoesNotLeak() {
-        // Saxon rejects the subset lookup through ALLOWED_PROTOCOLS instead of resolving it to empty; both outcomes keep the resource unfetched.
-        AttackTestSupport.assertTemplatesBlocksOrDoesNotLeak(AttackTestSupport.streamSource(xsltPayload()));
+        AttackTestSupport.assertTemplatesDoesNotLeak(AttackTestSupport.streamSource(xsltPayload()));
     }
 
     @Test
     @Tag("trax")
     void hardenedTransformerDoesNotLeak() {
-        // Saxon rejects the subset lookup through ALLOWED_PROTOCOLS instead of resolving it to empty; both outcomes keep the resource unfetched.
-        AttackTestSupport.assertTransformerBlocksOrDoesNotLeak(xmlPayload());
+        AttackTestSupport.assertTransformerDoesNotLeak(xmlPayload());
     }
 
     @Test

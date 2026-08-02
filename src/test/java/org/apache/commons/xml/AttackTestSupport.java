@@ -574,13 +574,6 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened Templates compile-and-transform either blocks or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
-     */
-    static void assertTemplatesBlocksOrDoesNotLeak(final Source xslt) {
-        assertNoLeakOrThrows(() -> templatesCompileAndTransform(xslt), "Templates", TransformerException.class);
-    }
-
-    /**
      * Asserts a hardened Templates compile-and-transform succeeds.
      *
      * <p>{@link TransformerFactory#newTemplates(Source)} via {@link XmlFactories#newTransformerFactory()} followed by transform; positive control for
@@ -601,6 +594,18 @@ final class AttackTestSupport {
     }
 
     /**
+     * Asserts a hardened Templates compile-and-transform completes without leaked content, with {@code reporter} in place of {@link #STRICT_REPORTER}.
+     *
+     * <p>The supplied listener is the acceptance policy for every error surface: it receives the events the pipeline reports, and a thrown
+     * {@link TransformerException} is routed through its {@code fatalError} as well, because Saxon and Xalan throw even when the listener swallows the report.
+     * A swallowed compile error can leave the factory without a {@link Templates}; that is the accepted ignore outcome, and the assertion then only requires
+     * that nothing leaked into the output.</p>
+     */
+    static void assertTemplatesDoesNotLeak(final Source xslt, final ErrorListener reporter) {
+        assertNoLeakStrict(() -> templatesCompileAndTransform(xslt, reporter), "Templates");
+    }
+
+    /**
      * Asserts a hardened identity Transformer of the payload throws.
      *
      * <p>{@link Transformer#transform(Source, javax.xml.transform.Result)} on the identity transformer from {@link XmlFactories#newTransformerFactory()}; only
@@ -613,13 +618,6 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened identity Transformer either blocks or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
-     */
-    static void assertTransformerBlocksOrDoesNotLeak(final String payload) {
-        assertNoLeakOrThrows(() -> identityTransformAndCapture(payload), "Transformer", TransformerException.class);
-    }
-
-    /**
      * Asserts a hardened identity Transformer completes without throwing and without leaked content.
      *
      * <p>{@link Transformer#transform(Source, javax.xml.transform.Result)} via {@link XmlFactories#newTransformerFactory()}; use this when the hardening
@@ -627,6 +625,14 @@ final class AttackTestSupport {
      */
     static void assertTransformerDoesNotLeak(final String payload) {
         assertNoLeakStrict(() -> identityTransformAndCapture(payload), "Transformer");
+    }
+
+    /**
+     * Asserts a hardened identity Transformer completes without leaked content, with {@code reporter} in place of {@link #STRICT_REPORTER}. See
+     * {@link #assertTemplatesDoesNotLeak(Source, ErrorListener)} for the reporter's role as the acceptance policy.
+     */
+    static void assertTransformerDoesNotLeak(final String payload, final ErrorListener reporter) {
+        assertNoLeakStrict(() -> identityTransformAndCapture(payload, reporter), "Transformer");
     }
 
     /**
@@ -843,8 +849,22 @@ final class AttackTestSupport {
     }
 
     private static String identityTransformAndCapture(final String payload) throws TransformerException {
+        return identityTransformAndCapture(payload, STRICT_REPORTER);
+    }
+
+    /** Identity-transform pipeline with {@code reporter} in place of {@link #STRICT_REPORTER}; see {@link #assertTransformerDoesNotLeak(String, ErrorListener)}. */
+    private static String identityTransformAndCapture(final String payload, final ErrorListener reporter) throws TransformerException {
         final StringWriter sink = new StringWriter();
-        strictTransformer(XmlFactories.newTransformerFactory()).transform(streamSource(payload), new StreamResult(sink));
+        try {
+            final TransformerFactory factory = XmlFactories.newTransformerFactory();
+            factory.setErrorListener(reporter);
+            final Transformer transformer = factory.newTransformer();
+            transformer.setErrorListener(reporter);
+            transformer.transform(streamSource(payload), new StreamResult(sink));
+        } catch (final TransformerException e) {
+            // The implementation may throw even when the listener swallows the report; the reporter has the final say.
+            reporter.fatalError(e);
+        }
         return sink.toString();
     }
 
@@ -1029,11 +1049,46 @@ final class AttackTestSupport {
     }
 
     private static String templatesCompileAndTransform(final Source xslt) throws TransformerException {
+        return templatesCompileAndTransform(xslt, STRICT_REPORTER);
+    }
+
+    /** Compile-and-transform pipeline with {@code reporter} in place of {@link #STRICT_REPORTER}; see {@link #assertTemplatesDoesNotLeak(Source, ErrorListener)}. */
+    private static String templatesCompileAndTransform(final Source xslt, final ErrorListener reporter) throws TransformerException {
         final StringWriter sink = new StringWriter();
-        final Templates templates = strictTemplates(XmlFactories.newTransformerFactory(), xslt);
-        // Xalan returns `null` if the template fails
-        if (templates != null) {
-            strictTransformer(templates).transform(streamSource("<root/>"), new StreamResult(sink));
+        final boolean[] swallowed = {false};
+        final ErrorListener recording = new ErrorListener() {
+
+            @Override
+            public void warning(final TransformerException exception) throws TransformerException {
+                reporter.warning(exception);
+            }
+
+            @Override
+            public void error(final TransformerException exception) throws TransformerException {
+                reporter.error(exception);
+                swallowed[0] = true;
+            }
+
+            @Override
+            public void fatalError(final TransformerException exception) throws TransformerException {
+                reporter.fatalError(exception);
+                swallowed[0] = true;
+            }
+        };
+        try {
+            final TransformerFactory factory = XmlFactories.newTransformerFactory();
+            factory.setErrorListener(recording);
+            final Templates templates = factory.newTemplates(xslt);
+            // After a swallowed compile report XSLTC returns null and Xalan a half-built Templates whose transform fails on missing output properties;
+            // either way the stylesheet did not compile cleanly and nothing can leak, so transform only a clean compile.
+            if (templates != null && !swallowed[0]) {
+                final Transformer transformer = templates.newTransformer();
+                transformer.setErrorListener(recording);
+                transformer.transform(streamSource("<root/>"), new StreamResult(sink));
+            }
+        } catch (final TransformerException e) {
+            // Saxon and Xalan throw even when the listener swallows the report; the reporter has the final say.
+            reporter.fatalError(e);
         }
         return sink.toString();
     }

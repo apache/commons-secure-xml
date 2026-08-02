@@ -91,13 +91,13 @@ class ExternalGeneralEntityTest {
     @Test
     @Tag("trax")
     void hardenedTemplatesBlocks() {
-        AttackTestSupport.assertTemplatesBlocksOrDoesNotLeak(AttackTestSupport.streamSource(xsltPayload()));
+        AttackTestSupport.assertTemplatesDoesNotLeak(AttackTestSupport.streamSource(xsltPayload()));
     }
 
     @Test
     @Tag("trax")
     void hardenedTransformerBlocks() {
-        AttackTestSupport.assertTransformerBlocksOrDoesNotLeak(xmlPayload());
+        AttackTestSupport.assertTransformerDoesNotLeak(xmlPayload());
     }
 
     @Test
