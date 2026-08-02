@@ -72,8 +72,8 @@ final class SaxonProvider {
          */
         private static final ResourceResolver IGNORE_ALL_FLOOR = request -> {
             if (ResourceRequest.EXTERNAL_ENTITY_NATURE.equals(request.nature) || ResourceRequest.DTD_NATURE.equals(request.nature)) {
-                // Fall through to the parser's own EntityResolver, which Saxon chains behind this resolver: on a hardened reader that is the
-                // FallbackIgnoreEntityResolver2 floor, so caller allow-listing keeps working and the lookup still ends in empty content, not a fetch.
+                // Fall through to the parser's own EntityResolver, which Saxon chains behind this resolver:
+                // on a hardened reader that is the FallbackIgnoreEntityResolver2 floor.
                 return null;
             }
             if (ResourceRequest.XML_NATURE.equals(request.nature) || ResourceRequest.XSLT_NATURE.equals(request.nature)
@@ -92,10 +92,10 @@ final class SaxonProvider {
             // Extension-function layer: turn off Saxon's reflection-based extension calls. Without this an attacker could bypass URI restrictions through
             // user-supplied Java extensions.
             setBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS, false);
-            // Resource-resolution layer: the floor backs every resolution chain ahead of Saxon's direct-fetch fallback (installing it here also keeps the
-            // default catalog resolver out); the setResourceResolver override below keeps it non-removable. fn:collection is the one channel that bypasses
-            // the resolver, closed by the empty collection finder.
-            super.setResourceResolver(IGNORE_ALL_FLOOR);
+            // Resource-resolution layer: the floor backs every resolution chain ahead of Saxon's direct-fetch fallback.
+            // The setResourceResolver override below keeps it non-removable.
+            setResourceResolver(null);
+            //  fn:collection bypasses the resolver, closed by the empty collection finder.
             setCollectionFinder(EMPTY_COLLECTION_FINDER);
             // Use the parser below for both style and source:
             setStyleParserClass("#DEFAULT");
