@@ -155,11 +155,9 @@ public final class XmlFactories {
      * </ul>
      *
      * <p>The same guarantees apply to {@link javax.xml.validation.Validator} and {@link javax.xml.validation.ValidatorHandler} instances produced from the
-     * resulting {@link javax.xml.validation.Schema}. They are enforced through the factory's {@link org.w3c.dom.ls.LSResourceResolver} hook and hardened
-     * source rewriting rather than any implementation-specific setting, so they hold for whichever schema language JAXP locates a factory for.</p>
+     * resulting {@link javax.xml.validation.Schema}.</p>
      *
-     * @param schemaLanguage The schema language, as accepted by {@link SchemaFactory#newInstance(String)}; use
-     *                       {@link XMLConstants#W3C_XML_SCHEMA_NS_URI} for W3C XML Schema.
+     * @param schemaLanguage The schema language, as accepted by {@link SchemaFactory#newInstance(String)}.
      * @return A hardened factory.
      * @throws IllegalArgumentException if no implementation of the schema language is available.
      * @throws NullPointerException     if {@code schemaLanguage} is {@code null}.
