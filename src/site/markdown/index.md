@@ -121,10 +121,11 @@ NodeList hits = (NodeList) XmlFactories.newXPathFactory()
 **W3C XML Schema validation** via `SchemaFactory`:
 
 ```java
+import javax.xml.XMLConstants;
 import javax.xml.transform.stream.StreamSource;
 import org.apache.commons.xml.XmlFactories;
 
-XmlFactories.newSchemaFactory()
+XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         .newSchema(new StreamSource(xsdStream))
         .newValidator()
         .validate(new StreamSource(inputStream));

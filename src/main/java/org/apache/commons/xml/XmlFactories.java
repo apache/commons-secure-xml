@@ -145,7 +145,7 @@ public final class XmlFactories {
     }
 
     /**
-     * Returns a fresh, hardened {@link SchemaFactory} configured for W3C XML Schema ({@link XMLConstants#W3C_XML_SCHEMA_NS_URI}).
+     * Returns a fresh, hardened {@link SchemaFactory} for the given schema language.
      *
      * <p>Beyond the three universal guarantees on {@link XmlFactories}:</p>
      *
@@ -155,12 +155,17 @@ public final class XmlFactories {
      * </ul>
      *
      * <p>The same guarantees apply to {@link javax.xml.validation.Validator} and {@link javax.xml.validation.ValidatorHandler} instances produced from the
-     * resulting {@link javax.xml.validation.Schema}.</p>
+     * resulting {@link javax.xml.validation.Schema}. They are enforced through the factory's {@link org.w3c.dom.ls.LSResourceResolver} hook and hardened
+     * source rewriting rather than any implementation-specific setting, so they hold for whichever schema language JAXP locates a factory for.</p>
      *
+     * @param schemaLanguage The schema language, as accepted by {@link SchemaFactory#newInstance(String)}; use
+     *                       {@link XMLConstants#W3C_XML_SCHEMA_NS_URI} for W3C XML Schema.
      * @return A hardened factory.
+     * @throws IllegalArgumentException if no implementation of the schema language is available.
+     * @throws NullPointerException     if {@code schemaLanguage} is {@code null}.
      */
-    public static SchemaFactory newSchemaFactory() {
-        return new HardeningSchemaFactory(SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI));
+    public static SchemaFactory newSchemaFactory(final String schemaLanguage) {
+        return new HardeningSchemaFactory(SchemaFactory.newInstance(schemaLanguage));
     }
 
     /**
