@@ -42,9 +42,9 @@ import javax.xml.transform.sax.SAXTransformerFactory;
  *     <li><strong>FSP</strong> ({@link XMLConstants#FEATURE_SECURE_PROCESSING}): required. On XSLTC it enables the runtime evaluator limits; on Xalan it disables
  *         reflection-based extension functions.</li>
  *     <li><strong>{@link FallbackIgnoreURIResolver} floor</strong>: required. An ignore-all {@link URIResolver} floor, installed by
- *         {@link HardeningTransformerFactory} and carried onto every produced {@link Transformer}, blocks {@code xsl:import}/{@code xsl:include} at compile time
- *         and {@code document()} at runtime, the one channel both XSLTC and Xalan route through. A caller-set {@link URIResolver} is routed through the floor
- *         rather than replacing it, so a caller can opt a specific URI in but cannot drop the block.</li>
+ *         {@link HardeningTransformerFactory} and carried onto every produced {@link Transformer}, resolves {@code xsl:import}/{@code xsl:include} at compile
+ *         time and {@code document()} at runtime to an empty document, the one channel both XSLTC and Xalan route through. A caller-set {@link URIResolver} is
+ *         routed through the floor rather than replacing it, so a caller can opt a specific URI in but cannot reopen the fetch.</li>
  *     <li><strong>{@link HardeningTransformerFactory}</strong>: required. Both implementations fall back to {@code SAXParserFactory.newInstance()} to parse a
  *         stylesheet or source document that does not carry its own reader, and only set FSP on it; wrapping the factory rewrites every {@link Source} through an
  *         {@link XmlFactories}-hardened reader instead.</li>

@@ -29,6 +29,6 @@ class TransformerDocumentTest {
 
     @Test
     void hardenedTransformerBlocks() {
-        AttackTestSupport.assertTemplatesBlocksOrDoesNotLeak(AttackTestSupport.resourceSource("with-document.xsl"));
+        AttackTestSupport.assertTemplatesDoesNotLeak(AttackTestSupport.resourceSource("with-document.xsl"));
     }
 }

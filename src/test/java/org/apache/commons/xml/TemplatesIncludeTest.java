@@ -29,6 +29,6 @@ class TemplatesIncludeTest {
 
     @Test
     void hardenedTemplatesBlocks() {
-        AttackTestSupport.assertTemplatesBlocksOrDoesNotLeak(AttackTestSupport.resourceSource("with-include.xsl"));
+        AttackTestSupport.assertTemplatesDoesNotLeak(AttackTestSupport.resourceSource("with-include.xsl"));
     }
 }

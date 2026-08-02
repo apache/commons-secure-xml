@@ -17,12 +17,14 @@
 
 package org.apache.commons.xml;
 
-import java.io.StringReader;
-
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
-import javax.xml.transform.stream.StreamSource;
+import javax.xml.transform.dom.DOMSource;
+
+import org.w3c.dom.Document;
 
 /**
  * {@link URIResolver} floor: consults an optional caller-supplied resolver and ignores (resolves to empty) whatever the caller does not resolve.
@@ -33,6 +35,21 @@ import javax.xml.transform.stream.StreamSource;
  * non-{@code null} {@link Source}; anything left unresolved resolves to an empty {@link Source}, so the external resource is neither fetched nor leaked.</p>
  */
 final class FallbackIgnoreURIResolver implements URIResolver {
+
+    /**
+     * Shared backing for the ignore outcome. Consumers parse the resolved {@link Source}, and an empty character stream is not a well-formed XML document
+     * (XSLTC rejects it for {@code document()} and for an ignored {@code xsl:include}/{@code xsl:import}), so the floor answers with a well-formed empty
+     * document that evaluates to no content. It is never mutated, so one instance serves every resolution.
+     */
+    private static final Document EMPTY_DOCUMENT = newEmptyDocument();
+
+    private static Document newEmptyDocument() {
+        try {
+            return DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+        } catch (final ParserConfigurationException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
     private URIResolver delegate;
 
@@ -51,6 +68,7 @@ final class FallbackIgnoreURIResolver implements URIResolver {
     @Override
     public Source resolve(final String href, final String base) throws TransformerException {
         final Source resolved = delegate != null ? delegate.resolve(href, base) : null;
-        return resolved != null ? resolved : new StreamSource(new StringReader(""));
+        // A fresh DOMSource per call keeps callers from mutating a shared Source.
+        return resolved != null ? resolved : new DOMSource(EMPTY_DOCUMENT);
     }
 }
