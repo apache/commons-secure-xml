@@ -22,13 +22,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.ErrorListener;
 import javax.xml.transform.TransformerException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -172,30 +172,13 @@ class ExternalParameterEntityTest {
     }
 
     /**
-     * Strict reporter that additionally accepts the stock JDK's "referenced, but not declared" report.
+     * Accepts only the stock JDK's "referenced, but not declared" report; every other exception is rethrown and fails the test.
      *
      * <p>With only an internal subset containing a parameter-entity reference, a reference to an undeclared general entity is a validity constraint
      * (XML 1.0 section 4.1) that a non-validating parse must not report. The JDK's parser demotes the check only when the DOCTYPE has an external subset and
-     * otherwise reports a well-formedness fatal; Apache Xerces implements the demotion for this case too. Swallowing exactly that report keeps the trax tests
-     * strict against every other failure.</p>
+     * otherwise reports a well-formedness fatal; Apache Xerces implements the demotion for this case too.</p>
      */
-    private static final ErrorListener ACCEPT_UNDECLARED_ENTITY = new ErrorListener() {
-
-        @Override
-        public void warning(final TransformerException exception) {
-            // not a security signal
-        }
-
-        @Override
-        public void error(final TransformerException exception) throws TransformerException {
-            rethrowUnlessUndeclaredEntity(exception);
-        }
-
-        @Override
-        public void fatalError(final TransformerException exception) throws TransformerException {
-            rethrowUnlessUndeclaredEntity(exception);
-        }
-    };
+    private static final ThrowingConsumer<TransformerException> ACCEPT_UNDECLARED_ENTITY = ExternalParameterEntityTest::rethrowUnlessUndeclaredEntity;
 
     private static void rethrowUnlessUndeclaredEntity(final TransformerException exception) throws TransformerException {
         // XSLTC flattens the compile failure into a bare TransformerConfigurationException, so match the message along the chain rather than the type.
