@@ -13,10 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-github:
-  description: "Apache Commons XML"
-  homepage: https://commons.apache.org/sandbox/commons-xml/
-
 notifications:
     commits:      commits@commons.apache.org
     issues:       issues@commons.apache.org
@@ -28,3 +24,15 @@ notifications:
     pullrequests_bot_dependabot: dependabot@commons.apache.org
     issues_bot_codecov-commenter: notifications@commons.apache.org
     pullrequests_bot_codecov-commenter: notifications@commons.apache.org
+
+github:
+  description: "Apache Commons XML"
+  homepage: https://commons.apache.org/sandbox/commons-xml/
+
+  pull_requests:
+    # allow auto-merge
+    allow_auto_merge: false
+    # enable updating head branches of pull requests
+    allow_update_branch: true
+    # auto-delete head branches after being merged
+    del_branch_on_merge: true
