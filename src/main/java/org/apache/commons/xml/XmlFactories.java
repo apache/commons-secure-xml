@@ -21,13 +21,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
-import javax.xml.transform.Source;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.xpath.XPathFactory;
-
-import org.xml.sax.XMLReader;
 
 /**
  * Entry point for obtaining hardened JAXP factories.
@@ -79,31 +75,6 @@ public final class XmlFactories {
      * created before it was set; references resolved by a caller-supplied resolver are unaffected.</p>
      */
     static final String THROW_ON_UNRESOLVED = "org.apache.commons.xml.throwOnUnresolved";
-
-    /**
-     * Rewrites a {@link Source} so that any SAX parsing it triggers runs through an {@link XmlFactories}-hardened {@link XMLReader}.
-     *
-     * <p>Only a {@code StreamSource} or a {@code SAXSource} without a reader is enriched with a hardened, namespace-aware reader; other kinds of sources are
-     * returned as-is.</p>
-     *
-     * @param source The source to harden; never {@code null}.
-     * @return A hardened source.
-     * @throws TransformerConfigurationException if a hardened reader cannot be obtained.
-     */
-    public static Source harden(final Source source) throws TransformerConfigurationException {
-        return SAXParserHardener.hardenSource(source);
-    }
-
-    /**
-     * Hardens an existing {@link XMLReader}.
-     *
-     * @param reader The reader to harden; never {@code null}.
-     * @return A hardened reader.
-     * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
-     */
-    public static XMLReader harden(final XMLReader reader) {
-        return SAXParserHardener.hardenReader(reader);
-    }
 
     /**
      * Returns a fresh, hardened {@link DocumentBuilderFactory}.

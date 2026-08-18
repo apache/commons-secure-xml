@@ -52,7 +52,7 @@ final class SaxonProvider {
      *
      * <ol>
      *   <li><b>SAX layer.</b> {@link #makeParser} hands every {@link XMLReader} Saxon would otherwise use through
-     *   {@link XmlFactories#harden(XMLReader)}, which routes it to the matching bundled hardening recipe. External DTDs, entities and XInclude
+     *   {@link SAXParserHardener#hardenReader(XMLReader)}, which routes it to the matching bundled hardening recipe. External DTDs, entities and XInclude
      *   resolve to empty content at parse time.</li>
      *   <li><b>Resource-resolution layer.</b> A non-removable ignore-all {@link ResourceResolver} floor backs every resolution chain ({@code xsl:include},
      *   {@code xsl:import}, {@code xsl:source-document}, and the XPath/XSLT functions {@code fn:doc}, {@code fn:document}, {@code fn:unparsed-text},

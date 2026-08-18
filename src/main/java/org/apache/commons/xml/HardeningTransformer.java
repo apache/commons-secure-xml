@@ -29,7 +29,7 @@ import javax.xml.transform.URIResolver;
 
 /**
  * {@link Transformer} wrapper that rewrites the Source on every {@link Transformer#transform(Source, Result)} call through
- * {@link XmlFactories#harden(Source)} before delegating, and keeps an ignore-all {@link URIResolver} floor so runtime {@code document()} calls a caller does not
+ * {@link SAXParserHardener#hardenSource(Source)} before delegating, and keeps an ignore-all {@link URIResolver} floor so runtime {@code document()} calls a caller does not
  * resolve return empty rather than being fetched.
  *
  * <p>The floor is installed on the delegate transformer at construction, seeded with the factory's compile-time resolver; {@link #setURIResolver(URIResolver)}

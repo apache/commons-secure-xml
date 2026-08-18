@@ -331,7 +331,7 @@ class XIncludeTest {
 
     //endregion
 
-    //region harden(XMLReader): reader with XInclude enabled before hardening is blocked
+    //region hardenReader: reader with XInclude enabled before hardening is blocked (the internal recipe behind the hardened factory and SaxonProvider)
 
     @Test
     @Tag("sax")
@@ -342,9 +342,9 @@ class XIncludeTest {
         final SAXParserFactory unhardenedFactory = SAXParserFactory.newInstance();
         unhardenedFactory.setNamespaceAware(true);
         assumeXIncludeAware(unhardenedFactory);
-        final XMLReader reader = XmlFactories.harden(unhardenedFactory.newSAXParser().getXMLReader());
+        final XMLReader reader = SAXParserHardener.hardenReader(unhardenedFactory.newSAXParser().getXMLReader());
         assertThrows(SAXException.class, () -> reader.parse(input),
-                "harden(reader) should block XInclude parse=xml on reader with XInclude already enabled");
+                "hardenReader should block XInclude parse=xml on reader with XInclude already enabled");
     }
 
     @Test
@@ -355,10 +355,10 @@ class XIncludeTest {
         final SAXParserFactory unhardenedFactory = SAXParserFactory.newInstance();
         unhardenedFactory.setNamespaceAware(true);
         assumeXIncludeAware(unhardenedFactory);
-        final XMLReader reader = XmlFactories.harden(unhardenedFactory.newSAXParser().getXMLReader());
+        final XMLReader reader = SAXParserHardener.hardenReader(unhardenedFactory.newSAXParser().getXMLReader());
         final String captured = captureCharacters(reader, input);
         assertFalse(captured.contains(LEAKED_MARKER),
-                "harden(reader) parse=text must resolve the include to empty, not leak; got: " + captured);
+                "hardenReader parse=text must resolve the include to empty, not leak; got: " + captured);
     }
 
     @Test
@@ -369,11 +369,11 @@ class XIncludeTest {
         final SAXParserFactory unhardenedFactory = SAXParserFactory.newInstance();
         unhardenedFactory.setNamespaceAware(true);
         assumeXIncludeAware(unhardenedFactory);
-        final XMLReader reader = XmlFactories.harden(unhardenedFactory.newSAXParser().getXMLReader());
+        final XMLReader reader = SAXParserHardener.hardenReader(unhardenedFactory.newSAXParser().getXMLReader());
         reader.setEntityResolver(new AllowListResolver());
         final String captured = captureCharacters(reader, input);
         assertEquals(RESOLVED_MARKER, captured.trim(),
-                "harden(reader) + allow-list should resolve to the resolver's content on a reader with XInclude already enabled");
+                "hardenReader + allow-list should resolve to the resolver's content on a reader with XInclude already enabled");
     }
 
     //endregion
