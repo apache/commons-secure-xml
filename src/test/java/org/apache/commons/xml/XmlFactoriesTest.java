@@ -113,8 +113,8 @@ class XmlFactoriesTest {
 
     @Test
     void newSchemaFactoryReturnsFreshInstance() throws Exception {
-        final SchemaFactory a = XmlFactories.newSchemaFactory();
-        final SchemaFactory b = XmlFactories.newSchemaFactory();
+        final SchemaFactory a = XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        final SchemaFactory b = XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         assertNotSame(a, b);
         assertTrue(a.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
