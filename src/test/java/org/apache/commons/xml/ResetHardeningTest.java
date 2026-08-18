@@ -19,7 +19,9 @@ package org.apache.commons.xml;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.SAXParser;
+import javax.xml.validation.Validator;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -60,5 +62,19 @@ class ResetHardeningTest {
             return; // Acceptable: rejected at parse rather than resolved to empty.
         }
         assertFalse(text.contains(AttackTestSupport.LEAKED_MARKER), "external entity leaked after reset:\n" + text);
+    }
+
+    @Test
+    @Tag("schema")
+    void validatorResetKeepsResourceResolverFloor() throws Exception {
+        // A Schema built without sources validates against the instance's xsi:schemaLocation hints, so the resolver floor is the only barrier between the
+        // validator and the external schema fetch.
+        final Validator validator = XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema().newValidator();
+        AttackTestSupport.assumeDoesNotThrow(validator::reset);
+        validator.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
+        // schema-location-instance.xml hints at schema-location.xsd, which declares its root: a validator whose floor was stripped fetches it and validates
+        // cleanly, while the floor resolves the hint to empty content, which fails the validation.
+        AttackTestSupport.assertParseFails(() -> validator.validate(AttackTestSupport.resourceSource("schema-location-instance.xml")),
+                "Validator after reset", SAXException.class, SecurityException.class);
     }
 }
