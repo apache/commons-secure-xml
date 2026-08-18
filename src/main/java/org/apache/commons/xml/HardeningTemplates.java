@@ -51,6 +51,13 @@ final class HardeningTemplates implements Templates {
         this.emptySource = emptySource;
     }
 
+    /**
+     * The wrapped implementation Templates, for factory methods whose implementations cast {@code newTransformer()} to their own type.
+     */
+    Templates getDelegate() {
+        return delegate;
+    }
+
     @Override
     public Transformer newTransformer() throws TransformerConfigurationException {
         final Transformer transformer = delegate.newTransformer();

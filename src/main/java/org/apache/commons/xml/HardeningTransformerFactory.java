@@ -49,13 +49,16 @@ import org.xml.sax.XMLReader;
  *   <li>{@link HardeningTransformer} rewrites the Source on every {@link Transformer#transform(Source, javax.xml.transform.Result)} call.</li>
  * </ol>
  *
+ * <p>The {@link SAXTransformerFactory} extension products ride the same wrappers: {@code newTransformerHandler}/{@code newTemplatesHandler} products are
+ * wrapped ({@link HardeningTransformerHandler}, {@link HardeningTemplatesHandler}) so the {@link Transformer}/{@link Templates} they expose carry the resolver
+ * floor, and {@code newXMLFilter} returns a {@link HardeningXMLFilter} composed from these wrappers instead of the implementation's filter, which would
+ * self-provision an unhardened input reader.</p>
+ *
  * <h2>Caveats</h2>
  * <ul>
  *   <li>A {@link SAXSource} that carries its own {@link XMLReader} is trusted as-is: the caller is expected to supply a hardened reader (via
- *       {@link XmlFactories#newSAXParserFactory()}) in that case.</li>
- *   <li>{@link TransformerHandler} returned from {@code newTransformerHandler} is not wrapped: it processes incoming SAX events instead of reading a Source, so
- *       it has no inner Source-parsing path. A caller who pulls the inner {@link Transformer} via {@link TransformerHandler#getTransformer()} bypasses the
- *       runtime source rewrite.</li>
+ *       {@link XmlFactories#newSAXParserFactory()}) in that case. The same applies to the SAX events a caller feeds into a handler, and to a parent reader a
+ *       caller sets on a returned {@link XMLFilter}.</li>
  * </ul>
  */
 final class HardeningTransformerFactory extends SAXTransformerFactory {
@@ -115,8 +118,45 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
     }
 
     @Override
+    public TransformerHandler newTransformerHandler() throws TransformerConfigurationException {
+        return hardenHandler(delegate.newTransformerHandler());
+    }
+
+    @Override
     public TransformerHandler newTransformerHandler(final Source source) throws TransformerConfigurationException {
-        return delegate.newTransformerHandler(SAXParserHardener.hardenSource(source));
+        return hardenHandler(delegate.newTransformerHandler(SAXParserHardener.hardenSource(source)));
+    }
+
+    @Override
+    public TransformerHandler newTransformerHandler(final Templates templates) throws TransformerConfigurationException {
+        // Implementations cast templates.newTransformer() to their own Transformer type, so hand them the wrapped implementation Templates, not the wrapper.
+        return hardenHandler(delegate.newTransformerHandler(unwrap(templates)));
+    }
+
+    @Override
+    public TemplatesHandler newTemplatesHandler() throws TransformerConfigurationException {
+        final TemplatesHandler handler = delegate.newTemplatesHandler();
+        return handler == null ? null : new HardeningTemplatesHandler(handler, getURIResolver(), emptySource);
+    }
+
+    @Override
+    public XMLFilter newXMLFilter(final Source source) throws TransformerConfigurationException {
+        final Templates templates = newTemplates(source);
+        return templates == null ? null : new HardeningXMLFilter((HardeningTemplates) templates);
+    }
+
+    @Override
+    public XMLFilter newXMLFilter(final Templates templates) throws TransformerConfigurationException {
+        return new HardeningXMLFilter(templates instanceof HardeningTemplates ? (HardeningTemplates) templates
+                : new HardeningTemplates(templates, getURIResolver(), emptySource));
+    }
+
+    private TransformerHandler hardenHandler(final TransformerHandler handler) {
+        return handler == null ? null : new HardeningTransformerHandler(handler, getURIResolver(), emptySource);
+    }
+
+    private static Templates unwrap(final Templates templates) {
+        return templates instanceof HardeningTemplates ? ((HardeningTemplates) templates).getDelegate() : templates;
     }
 
     // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
@@ -133,31 +173,6 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
     @Override
     public boolean getFeature(final String name) {
         return delegate.getFeature(name);
-    }
-
-    @Override
-    public TemplatesHandler newTemplatesHandler() throws TransformerConfigurationException {
-        return delegate.newTemplatesHandler();
-    }
-
-    @Override
-    public TransformerHandler newTransformerHandler() throws TransformerConfigurationException {
-        return delegate.newTransformerHandler();
-    }
-
-    @Override
-    public TransformerHandler newTransformerHandler(final Templates templates) throws TransformerConfigurationException {
-        return delegate.newTransformerHandler(templates);
-    }
-
-    @Override
-    public XMLFilter newXMLFilter(final Source source) throws TransformerConfigurationException {
-        return delegate.newXMLFilter(source);
-    }
-
-    @Override
-    public XMLFilter newXMLFilter(final Templates templates) throws TransformerConfigurationException {
-        return delegate.newXMLFilter(templates);
     }
 
     @Override

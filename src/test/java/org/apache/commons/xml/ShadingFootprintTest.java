@@ -72,7 +72,8 @@ class ShadingFootprintTest {
      * TrAX, XPath and schema re-harden their sub-parsers through {@link SAXParserHardener#harden(Source)}, so each builds on the full SAX closure below.
      */
     private static final Set<String> TRANSFORMER_HARDENER = saxParsersHardenerPlus("TransformerHardener", "HardeningTransformerFactory",
-            "HardeningTransformer", "HardeningTemplates", "FallbackIgnoreURIResolver", "SaxonProvider", "SaxonProvider$1", "SaxonProvider$HardenedConfiguration"
+            "HardeningTransformer", "HardeningTransformerHandler", "HardeningTemplates", "HardeningTemplatesHandler", "HardeningXMLFilter",
+            "FallbackIgnoreURIResolver", "SaxonProvider", "SaxonProvider$1", "SaxonProvider$HardenedConfiguration"
             , "SaxonProvider$SaxonProviderConfigurer");
 
     private static final Set<String> XPATH_HARDENER = saxParsersHardenerPlus("XPathHardener", "FallbackIgnoreURIResolver", "SaxonProvider", "SaxonProvider$1",
@@ -84,7 +85,7 @@ class ShadingFootprintTest {
     /**
      * Only the public {@link XmlFactories} entry, which news up every hardener, still pulls the whole library; this is its class count.
      */
-    private static final int WHOLE_LIBRARY_SIZE = 29;
+    private static final int WHOLE_LIBRARY_SIZE = 32;
 
     /**
      * Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library.

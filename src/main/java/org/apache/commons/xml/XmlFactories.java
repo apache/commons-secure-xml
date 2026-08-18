@@ -142,11 +142,9 @@ public final class XmlFactories {
      * {@link TransformerFactory#newTransformer(javax.xml.transform.Source) newTransformer(Source)}) and source-document reading at
      * {@code Transformer.transform(Source, Result)} time.</p>
      *
-     * <p>Only the {@link TransformerFactory} API is covered. The {@link javax.xml.transform.sax.SAXTransformerFactory} extension methods
-     * ({@code newTransformerHandler(..)}, {@code newTemplatesHandler()}, {@code newXMLFilter(..)}), if reachable by casting the returned factory, and the
-     * {@code TransformerHandler}, {@code TemplatesHandler}, {@code Templates} and {@code XMLFilter} objects they produce, are <strong>not hardened in this
-     * release</strong>. Treat their input as trusted, or pre-parse it through a hardened {@link XmlFactories} parser. See the threat model for the exact
-     * scope.</p>
+     * <p>The {@link javax.xml.transform.sax.SAXTransformerFactory} extension methods
+     * ({@code newTransformerHandler(..)}, {@code newTemplatesHandler()}, {@code newXMLFilter(..)}), if reachable by casting the returned factory, produce
+     * objects carrying the same guarantees.</p>
      *
      * @return A hardened factory.
      * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
