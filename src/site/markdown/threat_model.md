@@ -88,6 +88,17 @@ or read environment variables of its own:
 each `XmlFactories` method only configures and returns a JAXP factory.
 Which hardening recipe applies depends on the JAXP implementation present on the classpath.
 
+**Supported runtimes**
+
+The guarantees are defined on two runtime families:
+OpenJDK 8 or later (and JDK distributions built from it),
+or Android API level 33 or later.
+On these runtimes the recognized parsers apply the processing limits the guarantees rely on.
+Android below API level 33 is not supported:
+its bundled libexpat has no built-in entity-expansion (billion-laughs) check,
+so the bounded-expansion guarantee does not hold there.
+A report demonstrated only on an unsupported Android release is [out of scope](#what-is-out-of-scope).
+
 **System properties that modify behavior**
 
 The library reads a single system property of its own,
@@ -111,7 +122,8 @@ JDK version and the standard `jdk.xml.*` limit properties the JDK itself reads:
 - The bundled parsers apply their own hardcoded secure defaults instead (for example external Xerces and Woodstox cap
   entity expansion at `100000`) and do not read `jdk.xml.*`.
 
-Every one of these defaults still bounds entity expansion tightly enough to reject entity-expansion denial of service
+On the supported runtimes (see **Supported runtimes** above),
+every one of these defaults still bounds entity expansion tightly enough to reject entity-expansion denial of service
 such as Billion Laughs.
 
 **Reserved settings (must not be loosened)**
@@ -214,6 +226,9 @@ and reports against a factory reconfigured in any of the ways below are out of s
   before wrapping it in a `SAXSource`.
 - The behavior of a JAXP implementation that `XmlFactories` does not recognize (it throws rather than returning an
   unhardened factory), and any defect in the underlying JAXP implementation itself.
+- **An unsupported Android release.**
+  Android below API level 33, whose bundled libexpat has no entity-expansion (billion-laughs) check,
+  so a bounded-expansion report there is out of scope (see [Assumptions about the environment](#assumptions-about-the-environment)).
 
 ### Downstream responsibility
 
@@ -233,6 +248,9 @@ are **not** vulnerabilities under this model:
 - XXE, external-entity, SSRF-through-external-reference, or entity-expansion (Billion Laughs) reports against
   a factory used as delivered. Blocking these is exactly what the hardening does. A working proof against an
   unmodified instance is a `VALID` finding (see below); a scanner that pattern-matches on parser type is not.
+- An entity-expansion (Billion Laughs) report demonstrated only on Android below API level 33,
+  whose bundled libexpat has no billion-laughs check
+  (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)).
 - Reports against an instance after the caller installed a resolver (including the `DefaultHandler` passed to
   `SAXParser.parse(..., DefaultHandler)`) or loosened a reserved setting.
 - Reports demonstrated on a parser the reporter configured themselves:
@@ -261,9 +279,12 @@ A report judged against this model receives exactly one of:
 
 ### Conditions that would change this model
 
-Revise this model when any of the following change: a new `XmlFactories` factory method or other public
-surface; support for a JAXP implementation beyond those listed under [What is in scope](#what-is-in-scope);
-a new reserved setting; or a report that cannot be routed to one of the dispositions above.
+Revise this model when any of the following change:
+a new `XmlFactories` factory method or other public surface;
+support for a JAXP implementation beyond those listed under [What is in scope](#what-is-in-scope);
+a change to the supported runtimes (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment));
+a new reserved setting;
+or a report that cannot be routed to one of the dispositions above.
 
 ## Security Vulnerabilities
 

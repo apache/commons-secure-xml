@@ -65,6 +65,18 @@ it resolves to empty content,
 so the parse continues without it
 (see Configuration below).
 
+### Supported runtimes
+
+The library requires OpenJDK 8 or later (or a JDK distribution built from it),
+or Android API level 33 or later.
+The security guarantees are defined only on those runtimes.
+On Android below API 33 the platform XML parser (libexpat)
+carries no entity-expansion (billion-laughs) check,
+which the SAX hardening recipe relies on,
+so the bounded-expansion guarantee does not hold there.
+Behavior on earlier or other runtimes is out of scope
+(see the [Threat Model](threat_model.html)).
+
 ### Supported implementations
 
 Out of the box the library recognizes the stock JDK JAXP implementations, Apache Xerces 2.x, Woodstox, and Saxon-HE. If
