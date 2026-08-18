@@ -83,7 +83,7 @@ class ShadingFootprintTest {
     /**
      * Only the public {@link XmlFactories} entry, which news up every hardener, still pulls the whole library; this is its class count.
      */
-    private static final int WHOLE_LIBRARY_SIZE = 33;
+    private static final int WHOLE_LIBRARY_SIZE = 32;
 
     /**
      * Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library.
