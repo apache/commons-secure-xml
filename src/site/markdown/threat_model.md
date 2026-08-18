@@ -77,7 +77,8 @@ because your reader's settings are indistinguishable from configuration you chos
 - The hardening recipes applied by `XmlFactories` to the JAXP implementations it recognizes (stock JDK, Apache Xerces,
   Xalan, Saxon, Woodstox, and Android's Expat/KXmlParser).
 - A factory returned by `XmlFactories`, used as delivered, that fails to provide a guarantee the Javadoc states it
-  provides.
+  provides. The guarantee covers the documented entry points of each returned factory type; the
+  `SAXTransformerFactory` extension methods are out of scope (see [What is out of scope](#what-is-out-of-scope)).
 
 ### Assumptions about the environment
 
@@ -211,6 +212,14 @@ and reports against a factory reconfigured in any of the ways below are out of s
   To parse with your own reader under the hardening guarantees,
   obtain it from `XmlFactories.newSAXParserFactory()`
   before wrapping it in a `SAXSource`.
+- **`SAXTransformerFactory` extension methods.**
+  Only the `TransformerFactory` API of the factory returned by `XmlFactories.newTransformerFactory()` is covered.
+  The `SAXTransformerFactory` extension methods,
+  `newTransformerHandler(...)`, `newTemplatesHandler()` and `newXMLFilter(...)`,
+  if reachable by casting the returned factory,
+  and the `TransformerHandler`, `TemplatesHandler`, `Templates` and `XMLFilter` objects they produce,
+  are not hardened in this release.
+  Parse their input through a hardened `XmlFactories` parser, or treat it as trusted.
 - The behavior of a JAXP implementation that `XmlFactories` does not recognize (it throws rather than returning an
   unhardened factory), and any defect in the underlying JAXP implementation itself.
 
@@ -241,6 +250,10 @@ are **not** vulnerabilities under this model:
   The permissive settings belong to the reporter's own reader,
   not to an instance this library produced
   (see **Caller-supplied parser instances** under [What is out of scope](#what-is-out-of-scope)).
+- A report against the `SAXTransformerFactory` extension surface:
+  the `newTransformerHandler(...)`, `newTemplatesHandler()` or `newXMLFilter(...)` methods,
+  or the handlers, filters or `Templates` they return
+  (see **`SAXTransformerFactory` extension methods** under [What is out of scope](#what-is-out-of-scope)).
 - Reports about a top-level URI the caller passed directly to a parse call. That URI is fetched as-is and is
   the caller's to validate.
 - Reports in a JAXP implementation this library does not recognize: `XmlFactories` throws rather than

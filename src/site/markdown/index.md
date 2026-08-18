@@ -143,6 +143,16 @@ the implementation picks internally, and that parser may not be hardened (Saxon'
 below). Treat stylesheets and schemas as trusted input, or pre-parse them through a hardened `XmlFactories` parser and
 pass the result as a `DOMSource` or `SAXSource`.
 
+### Transformer handlers and filters
+
+Only the `TransformerFactory` API of the factory from `XmlFactories.newTransformerFactory()` is hardened.
+The `SAXTransformerFactory` extension methods, `newTransformerHandler(...)`, `newTemplatesHandler()` and `newXMLFilter(...)`,
+if reachable by casting the returned factory,
+and the handlers, filters and `Templates` they produce, are not hardened in this release.
+Use the standard `newTransformer(...)` / `newTemplates(...)` entry points,
+or pre-parse untrusted input through a hardened `XmlFactories` parser.
+See the [Threat Model](threat_model.html) for the exact scope.
+
 ### Caching and thread-safety
 
 There is no caching or pooling inside `XmlFactories`; callers on a hot path are responsible for their own caching. The
