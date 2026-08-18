@@ -19,8 +19,13 @@ package org.apache.commons.xml;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import java.io.StringWriter;
+
 import javax.xml.XMLConstants;
 import javax.xml.parsers.SAXParser;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.validation.Validator;
 
 import org.junit.jupiter.api.Tag;
@@ -76,5 +81,21 @@ class ResetHardeningTest {
         // cleanly, while the floor resolves the hint to empty content, which fails the validation.
         AttackTestSupport.assertParseFails(() -> validator.validate(AttackTestSupport.resourceSource("schema-location-instance.xml")),
                 "Validator after reset", SAXException.class, SecurityException.class);
+    }
+
+    @Test
+    @Tag("trax")
+    void transformerResetKeepsUriResolverFloor() throws Exception {
+        // with-document.xsl copies document('referenced.xml') into the output at transform time, so a transformer whose floor was stripped leaks the marker.
+        final Transformer transformer = XmlFactories.newTransformerFactory()
+                .newTemplates(AttackTestSupport.resourceSource("with-document.xsl")).newTransformer();
+        AttackTestSupport.assumeDoesNotThrow(transformer::reset);
+        final StringWriter sink = new StringWriter();
+        try {
+            transformer.transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink));
+        } catch (final TransformerException blocked) {
+            return; // Acceptable: rejected at transform rather than resolved to empty.
+        }
+        assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "document() leaked after reset:\n" + sink);
     }
 }
