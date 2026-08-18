@@ -137,8 +137,16 @@ public final class XmlFactories {
      * <p>Beyond the three universal guarantees on {@link XmlFactories}: {@code xsl:import}, {@code xsl:include} and {@code document()} URIs are not
      * resolved.</p>
      *
-     * <p>The guarantees apply to every parser the factory creates internally, both for stylesheet compilation and for source-document reading at
+     * <p>The guarantees apply to every parser the factory creates internally for the standard {@link TransformerFactory} entry points: stylesheet compilation
+     * ({@link TransformerFactory#newTemplates(javax.xml.transform.Source) newTemplates(Source)},
+     * {@link TransformerFactory#newTransformer(javax.xml.transform.Source) newTransformer(Source)}) and source-document reading at
      * {@code Transformer.transform(Source, Result)} time.</p>
+     *
+     * <p>Only the {@link TransformerFactory} API is covered. The {@link javax.xml.transform.sax.SAXTransformerFactory} extension methods
+     * ({@code newTransformerHandler(..)}, {@code newTemplatesHandler()}, {@code newXMLFilter(..)}), if reachable by casting the returned factory, and the
+     * {@code TransformerHandler}, {@code TemplatesHandler}, {@code Templates} and {@code XMLFilter} objects they produce, are <strong>not hardened in this
+     * release</strong>. Treat their input as trusted, or pre-parse it through a hardened {@link XmlFactories} parser. See the threat model for the exact
+     * scope.</p>
      *
      * @return A hardened factory.
      * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
