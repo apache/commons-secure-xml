@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.StringReader;
 import java.net.URL;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParser;
@@ -323,7 +324,7 @@ class EntityResolverFloorTest {
     void schemaResolvesAllowListed() {
         // with-import.xsd references an element defined only in the imported included.xsd, so it compiles only if the import is resolved.
         assertParseSucceeds(() -> {
-            final SchemaFactory factory = XmlFactories.newSchemaFactory();
+            final SchemaFactory factory = XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             factory.setResourceResolver(SCHEMA_ALLOW_LIST);
             factory.newSchema(AttackTestSupport.resourceSource("with-import.xsd"));
         }, "Schema import via caller resolver");
@@ -333,7 +334,7 @@ class EntityResolverFloorTest {
     @Tag("schema")
     void schemaDeniesUnlisted() {
         assertParseFails(() -> {
-            final SchemaFactory factory = XmlFactories.newSchemaFactory();
+            final SchemaFactory factory = XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             factory.setResourceResolver((type, namespaceURI, publicId, systemId, baseURI) -> null);
             factory.newSchema(AttackTestSupport.resourceSource("with-import.xsd"));
         }, "Schema import", SAXException.class, SecurityException.class);
