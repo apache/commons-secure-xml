@@ -19,19 +19,14 @@ package org.apache.commons.xml;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.xpath.XPathFactory;
 
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 /**
@@ -58,6 +53,10 @@ import org.xml.sax.XMLReader;
  *
  * <p>Each method on this class adds factory-specific guarantees on top of the three above, documented on the corresponding {@code newXxxFactory()} method.</p>
  *
+ * <p>An unresolved external reference resolves to empty content by default, so the parse continues without the resource. To reject it with an exception
+ * instead, set the system property {@code org.apache.commons.xml.throwOnUnresolved} to {@code true}; the property is read at resolution time, and references
+ * resolved by a caller-supplied resolver are unaffected.</p>
+ *
  * <h2>Caller-supplied URIs</h2>
  *
  * <p>A top-level URI passed directly by the caller is fetched as-is: {@code StreamSource(systemId)}, {@code DocumentBuilder.parse(String)}, or a
@@ -74,29 +73,25 @@ import org.xml.sax.XMLReader;
 public final class XmlFactories {
 
     /**
+     * System property that switches unresolved external references from the default empty resolution to a thrown exception.
+     *
+     * <p>How to enable: set {@code -Dorg.apache.commons.xml.throwOnUnresolved=true}. The property is read at resolution time, so it also applies to factories
+     * created before it was set; references resolved by a caller-supplied resolver are unaffected.</p>
+     */
+    static final String THROW_ON_UNRESOLVED = "org.apache.commons.xml.throwOnUnresolved";
+
+    /**
      * Rewrites a {@link Source} so that any SAX parsing it triggers runs through an {@link XmlFactories}-hardened {@link XMLReader}.
      *
-     * <p>Only {@link StreamSource} and {@link SAXSource} without a reader are enriched with a hardened reader. Other kinds of sources are returned as-is.</p>
-     *
-     * <p>The reader is namespace-aware.</p>
+     * <p>Only a {@code StreamSource} or a {@code SAXSource} without a reader is enriched with a hardened, namespace-aware reader; other kinds of sources are
+     * returned as-is.</p>
      *
      * @param source The source to harden; never {@code null}.
      * @return A hardened source.
      * @throws TransformerConfigurationException if a hardened reader cannot be obtained.
      */
     public static Source harden(final Source source) throws TransformerConfigurationException {
-        if (source instanceof StreamSource || source instanceof SAXSource && ((SAXSource) source).getXMLReader() == null) {
-            try {
-                final SAXParserFactory factory = newSAXParserFactory();
-                factory.setNamespaceAware(true);
-                final XMLReader reader = factory.newSAXParser().getXMLReader();
-                final InputSource inputSource = SAXSource.sourceToInputSource(source);
-                return inputSource == null ? source : new SAXSource(reader, inputSource);
-            } catch (final ParserConfigurationException | SAXException e) {
-                throw new TransformerConfigurationException("Failed to obtain a hardened XMLReader for source parsing", e);
-            }
-        }
-        return source;
+        return SAXParserHardener.hardenSource(source);
     }
 
     /**

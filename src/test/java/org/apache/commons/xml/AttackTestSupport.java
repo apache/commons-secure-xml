@@ -65,11 +65,10 @@ import org.xml.sax.helpers.XMLFilterImpl;
  *       layer is expected to reject the attack outright.</li>
  *   <li>{@code assert*DoesNotLeak(...)} runs the payload through a hardened factory and asserts the parse completes without throwing and without producing the
  *       {@link #LEAKED_MARKER} string. Used when the hardening contract guarantees the parse succeeds but never resolves the external resource (for example,
- *       {@code XERCES_LOAD_EXTERNAL_DTD=false} silently skipping the external subset, with the body's undeclared entity reference dropped per XML 1.0
- *       §4.1).</li>
+ *       the ignore-all resolver floor resolving the external subset to empty content).</li>
  *   <li>{@code assert*BlocksOrDoesNotLeak(...)} accepts either of the previous two outcomes. Used where the same hardening contract surfaces differently across
- *       providers (for example, stock-JDK XSLTC throws via {@code ACCESS_EXTERNAL_DTD} while Apache Xalan silently skips because its source-rewrite routes parsing
- *       through a {@code XERCES_LOAD_EXTERNAL_DTD=false} reader).</li>
+ *       providers (for example, an entity declared in the emptied external subset is a fatal error on one implementation and a silently skipped reference on
+ *       another).</li>
  * </ul>
  *
  * <p>DOM tests that depend on user-defined entity machinery should gate themselves with {@link org.junit.jupiter.api.Assumptions#assumeTrue} on
@@ -93,7 +92,7 @@ final class AttackTestSupport {
 
     /**
      * Test-only permissive counterpart of {@code SAXParserHardener.HardeningExpatXMLReader}: a pass-through Expat wrapper that rejects the
-     * {@code namespace-prefixes} feature eagerly (so a probing TrAX identity transformer falls back instead of failing the whole parse) but installs no deny-all
+     * {@code namespace-prefixes} feature eagerly (so a probing TrAX identity transformer falls back instead of failing the whole parse) but installs no ignore-all
      * resolver floor, so the unconfigured/positive controls stay permissive.
      */
     private static final class PermissiveExpatReader extends XMLFilterImpl {
@@ -215,10 +214,20 @@ final class AttackTestSupport {
     }
 
     /**
+     * Asserts a hardened DOM parse either blocks at parse or completes without leaked content.
+     *
+     * <p>Used for an external-resource payload whose outcome differs across implementations: one that resolves the reference to empty (the ignore-all floor) does
+     * not leak, while one that rejects the unresolvable systemId throws instead. Both are acceptable.</p>
+     */
+    static void assertDomBlocksOrDoesNotLeak(final String payload) {
+        assertNoLeakOrThrows(() -> domParseAndCaptureText(payload), "DOM", SAXException.class);
+    }
+
+    /**
      * Asserts a hardened DOM parse completes without throwing and without leaked content.
      *
      * <p>{@link DocumentBuilder#parse(InputSource)} via {@link XmlFactories#newDocumentBuilderFactory()}; use this when the hardening guarantee is "the parse
-     * succeeds but never resolves the external resource", for example, when {@code XERCES_LOAD_EXTERNAL_DTD=false} silently skips the external subset.</p>
+     * succeeds but never resolves the external resource", for example, when the ignore-all resolver floor resolves the external subset to empty content.</p>
      */
     static void assertDomDoesNotLeak(final String payload) {
         assertNoLeakStrict(() -> domParseAndCaptureText(payload), "DOM");
@@ -442,10 +451,17 @@ final class AttackTestSupport {
     }
 
     /**
+     * Asserts a hardened SAX parse either blocks at parse or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     */
+    static void assertSaxBlocksOrDoesNotLeak(final String payload) {
+        assertNoLeakOrThrows(() -> captureCharacters(strictXMLReader(XmlFactories.newSAXParserFactory()), payload), "SAX", SAXException.class);
+    }
+
+    /**
      * Asserts a hardened SAX parse completes without throwing and without leaked content.
      *
      * <p>{@link XMLReader#parse(InputSource)} on a parser from {@link XmlFactories#newSAXParserFactory()}; use this when the hardening guarantee is "the parse
-     * succeeds but never resolves the external resource", for example, when {@code XERCES_LOAD_EXTERNAL_DTD=false} silently skips the external subset.</p>
+     * succeeds but never resolves the external resource", for example, when the ignore-all resolver floor resolves the external subset to empty content.</p>
      */
     static void assertSaxDoesNotLeak(final String payload) {
         assertNoLeakStrict(() -> captureCharacters(strictXMLReader(XmlFactories.newSAXParserFactory()), payload), "SAX");
@@ -467,6 +483,17 @@ final class AttackTestSupport {
      */
     static void assertSchemaBlocks(final Source xsd) {
         assertParseFails(() -> strictSchema(XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI), xsd), "Schema compile", SAXException.class, SecurityException.class);
+    }
+
+    /**
+     * Asserts a hardened Schema compile either blocks or completes: an unresolved import resolves to an empty schema (which may itself fail to compile) or is
+     * rejected outright. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     */
+    static void assertSchemaBlocksOrDoesNotLeak(final Source xsd) {
+        assertNoLeakOrThrows(() -> {
+            strictSchema(XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI), xsd);
+            return "";
+        }, "Schema compile", SAXException.class, SecurityException.class);
     }
 
     /**
@@ -498,6 +525,14 @@ final class AttackTestSupport {
     static void assertStaxBlocks(final String payload) {
         assertParseFails(() -> consumeStreamReader(XmlFactories.newXMLInputFactory(), payload), "StAX stream", XMLStreamException.class);
         assertParseFails(() -> consumeEventReader(XmlFactories.newXMLInputFactory(), payload), "StAX event", XMLStreamException.class);
+    }
+
+    /**
+     * Asserts a hardened StAX parse (stream and event) either blocks at parse or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     */
+    static void assertStaxBlocksOrDoesNotLeak(final String payload) {
+        assertNoLeakOrThrows(() -> captureStaxStreamText(XmlFactories.newXMLInputFactory(), payload), "StAX stream", XMLStreamException.class);
+        assertNoLeakOrThrows(() -> captureStaxEventText(XmlFactories.newXMLInputFactory(), payload), "StAX event", XMLStreamException.class);
     }
 
     /**
@@ -540,6 +575,13 @@ final class AttackTestSupport {
     }
 
     /**
+     * Asserts a hardened Templates compile-and-transform either blocks or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     */
+    static void assertTemplatesBlocksOrDoesNotLeak(final Source xslt) {
+        assertNoLeakOrThrows(() -> templatesCompileAndTransform(xslt), "Templates", TransformerException.class);
+    }
+
+    /**
      * Asserts a hardened Templates compile-and-transform succeeds.
      *
      * <p>{@link TransformerFactory#newTemplates(Source)} via {@link XmlFactories#newTransformerFactory()} followed by transform; positive control for
@@ -569,6 +611,13 @@ final class AttackTestSupport {
         assertParseFails(
                 () -> strictTransformer(XmlFactories.newTransformerFactory()).transform(streamSource(payload), new StreamResult(new StringWriter())),
                 "Transformer", TransformerException.class);
+    }
+
+    /**
+     * Asserts a hardened identity Transformer either blocks or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     */
+    static void assertTransformerBlocksOrDoesNotLeak(final String payload) {
+        assertNoLeakOrThrows(() -> identityTransformAndCapture(payload), "Transformer", TransformerException.class);
     }
 
     /**
@@ -604,6 +653,18 @@ final class AttackTestSupport {
     }
 
     /**
+     * Asserts a hardened Validator either blocks or completes without leaked content. The instance document's unresolvable external entity is either dropped
+     * (no leak) or rejected; a rejection surfaces as a SAX/security error or, where the parser attempts the unresolvable systemId directly, an
+     * {@link IOException}. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     */
+    static void assertValidatorBlocksOrDoesNotLeak(final String xml) {
+        assertNoLeakOrThrows(() -> {
+            strictValidator(strictSchema(XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI), streamSource(BENIGN_SCHEMA))).validate(streamSource(xml));
+            return "";
+        }, "Validator", SAXException.class, SecurityException.class, IOException.class);
+    }
+
+    /**
      * Asserts a hardened Validator validation completes without throwing.
      *
      * <p>{@link Validator#validate(Source)} on a validator from {@link #BENIGN_SCHEMA} compiled via {@link XmlFactories#newSchemaFactory(String)}; use this when the
@@ -634,6 +695,13 @@ final class AttackTestSupport {
      */
     static void assertXmlReaderBlocks(final String payload) {
         assertParseFails(() -> consumeXmlReader(rawHardenedReader(), payload), "XMLReader", SAXException.class);
+    }
+
+    /**
+     * Asserts a hardened-in-place XMLReader parse either blocks at parse or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     */
+    static void assertXmlReaderBlocksOrDoesNotLeak(final String payload) {
+        assertNoLeakOrThrows(() -> captureCharacters(rawHardenedReader(), payload), "XMLReader", SAXException.class);
     }
 
     /**
@@ -679,26 +747,26 @@ final class AttackTestSupport {
     }
 
     /** Parses the payload through the supplied reader and returns the accumulated character data, used by the SAX-based {@code DoesNotLeak} helpers. */
-    private static String captureCharacters(final XMLReader reader, final String payload) throws Exception {
+    static String captureCharacters(final XMLReader reader, final String payload) throws Exception {
+        return captureCharacters(reader, inputSource(payload));
+    }
+
+    /** Parses the source through the supplied reader, with {@link #STRICT_REPORTER} installed, and returns the accumulated character data. */
+    static String captureCharacters(final XMLReader reader, final InputSource source) throws Exception {
         final StringBuilder text = new StringBuilder();
-        reader.setContentHandler(new DefaultHandler() {
-            @Override
-            public void characters(final char[] ch, final int start, final int length) {
-                text.append(ch, start, length);
-            }
-        });
-        strictXMLReader(reader).parse(inputSource(payload));
+        reader.setContentHandler(capturingHandler(text));
+        strictXMLReader(reader).parse(source);
         return text.toString();
     }
 
-    /** Parses the payload through a {@link XMLEventReader} and returns the accumulated character data, used by the StAX-based {@code DoesNotLeak} helper. */
-    private static String captureStaxEventText(final XMLInputFactory factory, final String payload) throws Exception {
+    /** Parses the payload through a {@link XMLEventReader} and returns the accumulated character and CDATA data, used by the StAX-based {@code DoesNotLeak} helper. */
+    static String captureStaxEventText(final XMLInputFactory factory, final String payload) throws Exception {
         final StringBuilder text = new StringBuilder();
         final XMLEventReader events = factory.createXMLEventReader(new StringReader(payload));
         try {
             while (events.hasNext()) {
                 final XMLEvent event = events.nextEvent();
-                if (event.isCharacters()) {
+                if (event.isCharacters() || event.getEventType() == XMLStreamConstants.CDATA) {
                     text.append(event.asCharacters().getData());
                 }
             }
@@ -723,6 +791,16 @@ final class AttackTestSupport {
             stream.close();
         }
         return text.toString();
+    }
+
+    /** Content handler whose {@code characters} callback accumulates into {@code text}; for tests that install (or pass) the handler themselves. */
+    static DefaultHandler capturingHandler(final StringBuilder text) {
+        return new DefaultHandler() {
+            @Override
+            public void characters(final char[] ch, final int start, final int length) {
+                text.append(ch, start, length);
+            }
+        };
     }
 
     /** Drains every {@link XMLEventReader} event from the factory's reader for the payload. */

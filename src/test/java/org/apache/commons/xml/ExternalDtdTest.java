@@ -25,10 +25,13 @@ import org.junit.jupiter.api.Test;
  * Checks whether parsers can pull in an external DTD declared via {@code <!DOCTYPE root SYSTEM "...">}.
  *
  * <p>The wrapper points at {@code src/test/resources/leaked/referenced.dtd}, which declares a {@code leaked} entity. Each wrapper body references
- * {@code &leaked;}, so the parse cannot succeed unless the DTD is actually fetched: a hardened parser refuses the fetch and {@code &leaked;} is undefined,
- * which throws; an unconfigured parser fetches the DTD, the entity resolves, and the parse succeeds.</p>
+ * {@code &leaked;}, so the entity can only resolve if the DTD is actually fetched: a hardened parser resolves the external subset to empty, leaving
+ * {@code &leaked;} undeclared, and skips the undefined reference (per XML 1.0 section 4.1 an undeclared reference is a validity constraint when the DOCTYPE
+ * has a system identifier, so a non-validating parse completes); an unconfigured parser fetches the DTD, the entity resolves, and the parse succeeds. The one
+ * exception is Woodstox, which rejects undeclared references unconditionally, so the StAX case accepts a block as well.</p>
  *
- * <p>Each parser type is exercised twice as a pair (unconfigured factory, expected to parse; hardened factory, expected to throw):</p>
+ * <p>Each parser type is exercised twice as a pair (unconfigured factory, expected to parse; hardened factory, expected to complete without leaked
+ * content):</p>
  *
  * <ul>
  *   <li>DOM, SAX and StAX direct XML parsing.</li>
@@ -57,7 +60,7 @@ class ExternalDtdTest {
     }
 
     private static String xsltPayload() {
-        return withDoctype("xsl:stylesheet", AttackTestSupport.xsltBody(INSERTION));
+    return withDoctype("xsl:stylesheet", AttackTestSupport.xsltBody(INSERTION));
     }
 
     @Test
@@ -82,8 +85,10 @@ class ExternalDtdTest {
 
     @Test
     @Tag("stax")
-    void hardenedStaxDoesNotLeak() {
-        AttackTestSupport.assertStaxDoesNotLeak(xmlPayload());
+    void hardenedStaxBlocksOrDoesNotLeak() {
+        // Woodstox rejects a reference to an entity declared only in the emptied external subset; the Xerces lineage skips it as an unreported validity
+        // constraint because the DOCTYPE has a system identifier.
+        AttackTestSupport.assertStaxBlocksOrDoesNotLeak(xmlPayload());
     }
 
     @Test

@@ -36,10 +36,14 @@ import org.xml.sax.helpers.DefaultHandler;
  *
  * <p>The wrapper declares a parameter entity {@code %xxe;} pointing at {@code src/test/resources/leaked/referenced.dtd} and immediately references it in the
  * internal subset; once expanded, the entity declarations from {@code referenced.dtd} (in particular {@code <!ENTITY leaked "...">}) become part of the
- * document's DTD. Each wrapper body then references {@code &leaked;}, so the parse cannot succeed unless the parameter-entity expansion is allowed: a hardened
- * parser refuses, {@code &leaked;} is undefined, and the parse throws; an unconfigured parser fetches and resolves, and the parse succeeds.</p>
+ * document's DTD. Each wrapper body then references {@code &leaked;}, and a hardened parser resolves the parameter-entity expansion to empty, which leaves
+ * {@code &leaked;} undeclared. This is the one payload in the suite with a genuinely undeclared entity, so the hardened outcome is dual: the parser either
+ * skips the undefined reference (no leak) or rejects it (per XML 1.0 section 4.1 the reference is an unreported validity constraint here, but the JDK's parser
+ * reports it as a well-formedness error and Woodstox rejects undeclared references unconditionally). Either way the external DTD is never fetched. An
+ * unconfigured parser fetches and resolves it, and the parse succeeds.</p>
  *
- * <p>Each parser type is exercised twice as a pair (unconfigured factory, expected to parse; hardened factory, expected to throw):</p>
+ * <p>Each parser type is exercised twice as a pair (unconfigured factory, expected to parse; hardened factory, expected to block or complete without leaked
+ * content):</p>
  *
  * <ul>
  *   <li>DOM, SAX and StAX direct XML parsing.</li>
@@ -140,64 +144,64 @@ class ExternalParameterEntityTest {
 
     @Test
     @Tag("dom")
-    void hardenedDomBlocks() {
+    void hardenedDomBlocksOrDoesNotLeak() {
         Assumptions.assumeTrue(DOM_ACCEPTS_PARAMETER_ENTITIES,
                 "Skipped: platform DOM does not accept parameter entities");
-        AttackTestSupport.assertDomBlocks(xmlPayload());
+        AttackTestSupport.assertDomBlocksOrDoesNotLeak(xmlPayload());
     }
 
     @Test
     @Tag("sax")
-    void hardenedSaxBlocks() {
+    void hardenedSaxBlocksOrDoesNotLeak() {
         Assumptions.assumeTrue(SAX_RESOLVES_PARAMETER_ENTITIES,
                 "Skipped: platform SAX parser does not invoke the entity resolver for parameter entities");
-        AttackTestSupport.assertSaxBlocks(xmlPayload());
+        AttackTestSupport.assertSaxBlocksOrDoesNotLeak(xmlPayload());
     }
 
     @Test
     @Tag("schema")
-    void hardenedSchemaBlocks() {
+    void hardenedSchemaBlocksOrDoesNotLeak() {
         Assumptions.assumeTrue(SAX_RESOLVES_PARAMETER_ENTITIES,
                 "Skipped: platform SAX parser does not invoke the entity resolver for parameter entities");
-        AttackTestSupport.assertSchemaBlocks(AttackTestSupport.streamSource(xsdPayload()));
+        AttackTestSupport.assertSchemaBlocksOrDoesNotLeak(AttackTestSupport.streamSource(xsdPayload()));
     }
 
     @Test
     @Tag("stax")
-    void hardenedStaxBlocks() {
-        AttackTestSupport.assertStaxBlocks(xmlPayload());
+    void hardenedStaxBlocksOrDoesNotLeak() {
+        AttackTestSupport.assertStaxBlocksOrDoesNotLeak(xmlPayload());
     }
 
     @Test
     @Tag("trax")
-    void hardenedTemplatesBlocks() {
+    void hardenedTemplatesBlocksOrDoesNotLeak() {
         Assumptions.assumeTrue(SAX_RESOLVES_PARAMETER_ENTITIES,
                 "Skipped: platform SAX parser does not invoke the entity resolver for parameter entities");
-        AttackTestSupport.assertTemplatesBlocks(AttackTestSupport.streamSource(xsltPayload()));
+        AttackTestSupport.assertTemplatesBlocksOrDoesNotLeak(AttackTestSupport.streamSource(xsltPayload()));
     }
 
     @Test
     @Tag("trax")
-    void hardenedTransformerBlocks() {
+    void hardenedTransformerBlocksOrDoesNotLeak() {
         Assumptions.assumeTrue(SAX_RESOLVES_PARAMETER_ENTITIES,
                 "Skipped: platform SAX parser does not invoke the entity resolver for parameter entities");
-        AttackTestSupport.assertTransformerBlocks(xmlPayload());
+        AttackTestSupport.assertTransformerBlocksOrDoesNotLeak(xmlPayload());
     }
 
     @Test
     @Tag("schema")
-    void hardenedValidatorBlocks() {
+    void hardenedValidatorBlocksOrDoesNotLeak() {
         Assumptions.assumeTrue(SAX_RESOLVES_PARAMETER_ENTITIES,
                 "Skipped: platform SAX parser does not invoke the entity resolver for parameter entities");
-        AttackTestSupport.assertValidatorBlocks(xmlPayload());
+        AttackTestSupport.assertValidatorBlocksOrDoesNotLeak(xmlPayload());
     }
 
     @Test
     @Tag("sax")
-    void hardenedXmlReaderBlocks() {
+    void hardenedXmlReaderBlocksOrDoesNotLeak() {
         Assumptions.assumeTrue(SAX_RESOLVES_PARAMETER_ENTITIES,
                 "Skipped: platform SAX parser does not invoke the entity resolver for parameter entities");
-        AttackTestSupport.assertXmlReaderBlocks(xmlPayload());
+        AttackTestSupport.assertXmlReaderBlocksOrDoesNotLeak(xmlPayload());
     }
 
     @Test

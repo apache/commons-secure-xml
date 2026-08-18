@@ -35,11 +35,46 @@ final class HardeningException extends IllegalStateException {
 
     private static final long serialVersionUID = 1L;
 
-    HardeningException(final String message) {
-        super(message);
-    }
-
     HardeningException(final String message, final Throwable cause) {
         super(message, cause);
+    }
+
+    /**
+     * Builds the standard exception for a rejected hardening setting.
+     *
+     * @param kind   the kind of setting: {@code "feature"}, {@code "attribute"} or {@code "property"}.
+     * @param name   the name of the feature, attribute or property that could not be set.
+     * @param target the factory, parser, validator or reader that rejected the setting; its concrete class names the offending implementation.
+     * @param cause  the original checked or unchecked exception from the JAXP implementation.
+     * @return the exception to throw.
+     */
+    static HardeningException settingFailed(final String kind, final String name, final Object target, final Throwable cause) {
+        return new HardeningException("Failed to set " + kind + " '" + name + "' on " + target.getClass().getName(), cause);
+    }
+
+    /**
+     * Whether unresolved external references must be rejected instead of resolved to empty content.
+     *
+     * <p>Read per resolution, so the {@value XmlFactories#THROW_ON_UNRESOLVED} system property also toggles factories that already exist.</p>
+     *
+     * @return {@code true} when the {@value XmlFactories#THROW_ON_UNRESOLVED} system property is set.
+     */
+    static boolean throwOnUnresolved() {
+        return Boolean.getBoolean(XmlFactories.THROW_ON_UNRESOLVED);
+    }
+
+    /**
+     * Builds the standard "forbidden" message shared by every resolver floor when {@link #throwOnUnresolved()} rejects an unresolved reference.
+     *
+     * @param type      the resource kind, or {@code null} if not applicable.
+     * @param namespace the namespace (or, for Woodstox, the entity name), or {@code null}.
+     * @param publicId  the public identifier, or {@code null} if none.
+     * @param systemId  the system identifier of the denied resource.
+     * @param baseURI   the base URI for relative resolution, or {@code null}.
+     * @return the message naming the denied lookup and the enabling property.
+     */
+    static String forbidden(final String type, final String namespace, final String publicId, final String systemId, final String baseURI) {
+        return String.format("External resource fetch forbidden by %s: type=%s, namespace=%s, publicId=%s, systemId=%s, baseURI=%s",
+                XmlFactories.THROW_ON_UNRESOLVED, type, namespace, publicId, systemId, baseURI);
     }
 }

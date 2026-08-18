@@ -57,9 +57,13 @@ Add the library to your build:
 </dependency>
 ```
 
-Every method on `XmlFactories` returns a fresh, hardened factory. Pick the one that matches the API you already use; no
-other configuration is required. On hardened factories any attempt to resolve an external resource (DTD, entity, schema,
-stylesheet) is blocked, and DOCTYPE input is rejected wherever the underlying implementation allows it.
+Every method on `XmlFactories` returns a fresh, hardened factory.
+Pick the one that matches the API you already use;
+no other configuration is required.
+On hardened factories an external resource reference (DTD, entity, schema, stylesheet) is never fetched:
+it resolves to empty content,
+so the parse continues without it
+(see Configuration below).
 
 ### Supported implementations
 
@@ -144,4 +148,39 @@ pass the result as a `DOMSource` or `SAXSource`.
 There is no caching or pooling inside `XmlFactories`; callers on a hot path are responsible for their own caching. The
 returned factories inherit the thread-safety properties of the underlying JAXP implementation, which in practice means
 they are not thread-safe. Create a new factory per thread or synchronize externally.
+
+## Configuration
+
+The hardened factories need no configuration.
+When a document references an external resource
+(a DTD, an external entity, a schema, an XInclude target, or an XSLT document),
+the hardening layer resolves the reference to an empty stream:
+nothing is fetched,
+nothing leaks into the result,
+and the parse continues wherever the implementation can proceed with empty content.
+This forgiving default accommodates documents that merely carry such references without needing them.
+
+If your application should reject such documents instead of parsing them,
+tighten the factory yourself.
+The hardening floor stays underneath whatever you configure,
+so the tightening carries **no security weight**
+and can be as strict as the application needs:
+
+- Set a stricter feature on the factory,
+  for example `http://apache.org/xml/features/disallow-doctype-decl`
+  to reject every document carrying a DOCTYPE,
+  on implementations that support the feature.
+- Install a resolver that throws.
+  A caller-supplied `EntityResolver`, `XMLResolver`, `LSResourceResolver` or `URIResolver`
+  is consulted before the hardening floor,
+  so an allow-list and a deny-all are both one resolver away.
+
+As a temporary debugging measure,
+set the system property `org.apache.commons.xml.throwOnUnresolved` to `true`:
+every unresolved external reference is then rejected with the resolution hook's exception,
+and the message names the denied resource.
+The property is read at resolution time,
+so it can be toggled on a running application;
+treat it as a diagnostic switch,
+not as an application configuration.
 

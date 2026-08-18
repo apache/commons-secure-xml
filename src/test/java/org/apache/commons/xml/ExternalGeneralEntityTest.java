@@ -25,10 +25,12 @@ import org.junit.jupiter.api.Test;
  * Checks whether parsers can pull in an external general entity declared inline in the internal subset.
  *
  * <p>The wrapper declares {@code <!ENTITY xxe SYSTEM "file:.../referenced.txt">} and uses {@code &xxe;} in the body. The general entity expands to the
- * content of {@code src/test/resources/leaked/referenced.txt} when the external reference is resolved. A hardened parser refuses the fetch, {@code &xxe;} is
- * undefined, and the parse throws; an unconfigured parser fetches the file, the entity resolves, and the parse succeeds.</p>
+ * content of {@code src/test/resources/leaked/referenced.txt} when the external reference is resolved. A hardened parser keeps the entity declared but
+ * resolves its content to empty, so the parse completes without the file's content; an unconfigured parser fetches the file, the entity resolves, and the
+ * parse succeeds.</p>
  *
- * <p>Each parser type is exercised twice as a pair (unconfigured factory, expected to parse; hardened factory, expected to throw):</p>
+ * <p>Each parser type is exercised twice as a pair (unconfigured factory, expected to parse; hardened factory, expected to complete without leaked
+ * content):</p>
  *
  * <ul>
  *   <li>DOM, SAX and StAX direct XML parsing.</li>
@@ -64,52 +66,52 @@ class ExternalGeneralEntityTest {
 
     @Test
     @Tag("dom")
-    void hardenedDomBlocks() {
+    void hardenedDomDoesNotLeak() {
         Assumptions.assumeTrue(AttackTestSupport.DOM_RESOLVES_INTERNAL_ENTITIES,
                 "Skipped: platform DOM does not resolve user-defined entities");
-        AttackTestSupport.assertDomBlocks(xmlPayload());
+        AttackTestSupport.assertDomDoesNotLeak(xmlPayload());
     }
 
     @Test
     @Tag("sax")
-    void hardenedSaxBlocks() {
-        AttackTestSupport.assertSaxBlocks(xmlPayload());
+    void hardenedSaxDoesNotLeak() {
+        AttackTestSupport.assertSaxDoesNotLeak(xmlPayload());
     }
 
     @Test
     @Tag("schema")
-    void hardenedSchemaBlocks() {
-        AttackTestSupport.assertSchemaBlocks(AttackTestSupport.streamSource(xsdPayload()));
+    void hardenedSchemaDoesNotLeak() {
+        AttackTestSupport.assertSchemaDoesNotLeak(AttackTestSupport.streamSource(xsdPayload()));
     }
 
     @Test
     @Tag("stax")
-    void hardenedStaxBlocks() {
-        AttackTestSupport.assertStaxBlocks(xmlPayload());
+    void hardenedStaxDoesNotLeak() {
+        AttackTestSupport.assertStaxDoesNotLeak(xmlPayload());
     }
 
     @Test
     @Tag("trax")
-    void hardenedTemplatesBlocks() {
-        AttackTestSupport.assertTemplatesBlocks(AttackTestSupport.streamSource(xsltPayload()));
+    void hardenedTemplatesDoesNotLeak() {
+        AttackTestSupport.assertTemplatesDoesNotLeak(AttackTestSupport.streamSource(xsltPayload()));
     }
 
     @Test
     @Tag("trax")
-    void hardenedTransformerBlocks() {
-        AttackTestSupport.assertTransformerBlocks(xmlPayload());
+    void hardenedTransformerDoesNotLeak() {
+        AttackTestSupport.assertTransformerDoesNotLeak(xmlPayload());
     }
 
     @Test
     @Tag("schema")
-    void hardenedValidatorBlocks() {
-        AttackTestSupport.assertValidatorBlocks(xmlPayload());
+    void hardenedValidatorDoesNotLeak() {
+        AttackTestSupport.assertValidatorDoesNotLeak(xmlPayload());
     }
 
     @Test
     @Tag("sax")
-    void hardenedXmlReaderBlocks() {
-        AttackTestSupport.assertXmlReaderBlocks(xmlPayload());
+    void hardenedXmlReaderDoesNotLeak() {
+        AttackTestSupport.assertXmlReaderDoesNotLeak(xmlPayload());
     }
 
     @Test

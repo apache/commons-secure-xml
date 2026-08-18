@@ -32,13 +32,19 @@ import javax.xml.stream.util.XMLEventAllocator;
 import javax.xml.transform.Source;
 
 /**
- * {@link XMLInputFactory} wrapper that keeps the {@link Resolvers.FallbackDenyXMLResolver} floors {@link StaxHardener} installs on the entity-resolution hooks
+ * {@link XMLInputFactory} wrapper that installs a non-removable {@link FallbackIgnoreXMLResolver} floor on the delegate's entity-resolution hook and keeps it
  * non-removable by the caller.
  *
+ * <p>The constructor installs the floor through {@code setXMLResolver}, which every implementation routes external resolution through (Woodstox fans it out to
+ * both its DTD-subset and entity resolvers). Woodstox keeps one hook outside that fan-out, {@value StaxHardener#WSTX_UNDECLARED_ENTITY_RESOLVER}, which is
+ * deliberately left empty: emptying the external subset leaves any entity it declared undeclared, and Woodstox then rejects the reference. The rejection is
+ * implementation-prescribed and keeps the resource just as unfetched as the empty resolution the other implementations produce; a caller who wants those
+ * references resolved can still set the property, and their resolver lands behind a floor like on every other resolver hook.</p>
+ *
  * <p>Every resolver-valued entry point ({@link #setXMLResolver(XMLResolver)}, {@code setProperty(XMLInputFactory.RESOLVER, ...)} and the Woodstox
- * {@code com.ctc.wstx.*Resolver} keys) is routed uniformly: a caller who supplies their own {@link Resolvers.FallbackDenyXMLResolver} takes control and it is
+ * {@code com.ctc.wstx.*Resolver} keys) is routed uniformly: a caller who supplies their own {@link FallbackIgnoreXMLResolver} takes control and it is
  * passed straight to the delegate; otherwise the current resolver on that hook is read, and if it is one of our floors the caller's resolver is set as its
- * {@link Resolvers.FallbackDenyXMLResolver#setDelegate delegate} (an opt-in the floor cannot be removed by), or, if the hook is empty, the caller's resolver is
+ * {@link FallbackIgnoreXMLResolver#setDelegate delegate} (an opt-in the floor cannot be removed by), or, if the hook is empty, the caller's resolver is
  * wrapped in a fresh floor. This matters because Woodstox does not chain resolvers: when a resolver returns {@code null}, {@code DefaultInputResolver} falls
  * through to fetching the systemId URL itself, so a caller-set resolver that returns {@code null} must still land behind the floor. {@link #getXMLResolver()} and
  * {@code getProperty} report the caller's resolver unwrapped.</p>
@@ -49,6 +55,7 @@ final class HardeningXMLInputFactory extends XMLInputFactory {
 
     HardeningXMLInputFactory(final XMLInputFactory delegate) {
         this.delegate = delegate;
+        delegate.setXMLResolver(new FallbackIgnoreXMLResolver(null));
     }
 
     @Override
@@ -83,18 +90,18 @@ final class HardeningXMLInputFactory extends XMLInputFactory {
      * Routes a caller-set resolver for the property {@code name} behind the floor currently installed on that hook.
      *
      * @param name     The resolver-valued property being set.
-     * @param resolver The caller's resolver, or their own {@link Resolvers.FallbackDenyXMLResolver} to take control.
+     * @param resolver The caller's resolver, or their own {@link FallbackIgnoreXMLResolver} to take control.
      */
     private void setResolverProperty(final String name, final XMLResolver resolver) {
-        if (resolver instanceof Resolvers.FallbackDenyXMLResolver) {
+        if (resolver instanceof FallbackIgnoreXMLResolver) {
             // The caller supplies their own floor: hand it to the delegate as-is.
             delegate.setProperty(name, resolver);
         } else {
             final Object current = delegate.getProperty(name);
-            if (current instanceof Resolvers.FallbackDenyXMLResolver) {
-                ((Resolvers.FallbackDenyXMLResolver) current).setDelegate(resolver);
+            if (current instanceof FallbackIgnoreXMLResolver) {
+                ((FallbackIgnoreXMLResolver) current).setDelegate(resolver);
             } else {
-                delegate.setProperty(name, new Resolvers.FallbackDenyXMLResolver(resolver));
+                delegate.setProperty(name, new FallbackIgnoreXMLResolver(resolver));
             }
         }
     }
@@ -107,7 +114,7 @@ final class HardeningXMLInputFactory extends XMLInputFactory {
     }
 
     private static XMLResolver unwrap(final XMLResolver resolver) {
-        return resolver instanceof Resolvers.FallbackDenyXMLResolver ? ((Resolvers.FallbackDenyXMLResolver) resolver).getDelegate() : resolver;
+        return resolver instanceof FallbackIgnoreXMLResolver ? ((FallbackIgnoreXMLResolver) resolver).getDelegate() : resolver;
     }
 
     // <editor-fold defaultstate="collapsed" desc="Trivial delegation">

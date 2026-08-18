@@ -36,7 +36,7 @@ import org.xml.sax.SAXNotSupportedException;
  *
  * <p>Three layers cooperate:</p>
  * <ol>
- *   <li>{@link HardeningSchemaFactory} installs a deny-all {@link Resolvers.FallbackDenyLSResourceResolver} floor on the factory (blocking
+ *   <li>{@link HardeningSchemaFactory} installs an ignore-all {@link FallbackIgnoreLSResourceResolver} floor on the factory (blocking
  *       {@code xs:import}/{@code xs:include}/{@code xs:redefine} at compile time) and rewrites the Source on every {@code newSchema(Source[])} entry point
  *       through {@link XmlFactories#harden(Source)}.</li>
  *   <li>{@link HardeningSchema} wraps every Validator/ValidatorHandler the inner Schema produces and re-installs the floor on each (blocking
@@ -55,7 +55,7 @@ final class HardeningSchemaFactory extends SchemaFactory {
 
     private final SchemaFactory delegate;
 
-    private final Resolvers.FallbackDenyLSResourceResolver floor = new Resolvers.FallbackDenyLSResourceResolver(null);
+    private final FallbackIgnoreLSResourceResolver floor = new FallbackIgnoreLSResourceResolver(null);
 
     HardeningSchemaFactory(final SchemaFactory delegate) {
         this.delegate = delegate;
@@ -65,7 +65,7 @@ final class HardeningSchemaFactory extends SchemaFactory {
 
     @Override
     public void setResourceResolver(final LSResourceResolver resourceResolver) {
-        // Route a caller resolver through the floor instead of replacing it, so the deny-all lower bound cannot be removed.
+        // Route a caller resolver through the floor instead of replacing it, so the ignore-all lower bound cannot be removed.
         floor.setDelegate(resourceResolver);
     }
 
@@ -88,7 +88,7 @@ final class HardeningSchemaFactory extends SchemaFactory {
         final Source[] hardened = new Source[schemas.length];
         try {
             for (int i = 0; i < schemas.length; i++) {
-                hardened[i] = XmlFactories.harden(schemas[i]);
+                hardened[i] = SAXParserHardener.hardenSource(schemas[i]);
             }
         } catch (final TransformerConfigurationException e) {
             throw new SAXException("Failed to harden schema source", e);

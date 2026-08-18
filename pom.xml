@@ -71,6 +71,8 @@ limitations under the License.
     <commons.woodstox.version>7.1.1</commons.woodstox.version>
     <commons.xalan.version>2.7.3</commons.xalan.version>
     <commons.xerces.version>2.12.2</commons.xerces.version>
+    <!-- Test-only: computes each hardener's shade closure, mirroring maven-shade minimizeJar, for ShadingFootprintTest. -->
+    <commons.jdependency.version>2.16</commons.jdependency.version>
   </properties>
   <dependencies>
     <!--
@@ -87,6 +89,13 @@ limitations under the License.
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- Reads the compiled classes to compute each hardener's transitive class closure (the same computation maven-shade minimizeJar performs). -->
+    <dependency>
+      <groupId>org.vafer</groupId>
+      <artifactId>jdependency</artifactId>
+      <version>${commons.jdependency.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

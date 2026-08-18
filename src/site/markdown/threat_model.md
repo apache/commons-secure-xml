@@ -81,7 +81,16 @@ Which hardening recipe applies depends on the JAXP implementation present on the
 
 **System properties that modify behavior**
 
-The library reads no system property of its own. It enables secure processing (`FEATURE_SECURE_PROCESSING`) on every
+The library reads a single system property of its own,
+`org.apache.commons.xml.throwOnUnresolved`:
+when set to `true`,
+every hardened factory rejects an unresolved external reference with an exception
+instead of resolving it to empty content.
+Either way the resource is not fetched,
+so the property selects an error-reporting style,
+not a security posture.
+
+The library enables secure processing (`FEATURE_SECURE_PROCESSING`) on every
 recognized parser and leaves the resulting processing limits (entity expansion, element depth, attribute count, and
 similar) at the implementation's own secure default. Those defaults differ by implementation, and on the stock JDK by
 JDK version and the standard `jdk.xml.*` limit properties the JDK itself reads:
