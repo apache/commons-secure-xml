@@ -22,14 +22,17 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import java.io.StringWriter;
 
 import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.SAXParser;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.validation.Validator;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
@@ -50,6 +53,20 @@ class ResetHardeningTest {
         return "<?xml version=\"1.0\"?>\n"
                 + "<!DOCTYPE root [\n  <!ENTITY xxe SYSTEM \"" + entitySystemId + "\">\n]>\n"
                 + "<root>&xxe;</root>";
+    }
+
+    @Test
+    @Tag("dom")
+    void documentBuilderResetKeepsEntityResolverFloor() throws Exception {
+        Assumptions.assumeTrue(AttackTestSupport.DOM_RESOLVES_INTERNAL_ENTITIES, "platform DOM does not resolve user-defined entities");
+        final DocumentBuilder builder = XmlFactories.newDocumentBuilderFactory().newDocumentBuilder();
+        AttackTestSupport.assumeDoesNotThrow(builder::reset);
+        try {
+            final Document doc = builder.parse(AttackTestSupport.inputSource(entityPayload(UNLISTED)));
+            assertFalse(doc.getDocumentElement().getTextContent().contains(AttackTestSupport.LEAKED_MARKER), "external entity leaked after reset");
+        } catch (final SAXException blocked) {
+            // Acceptable: rejected at parse rather than resolved to empty.
+        }
     }
 
     @Test
