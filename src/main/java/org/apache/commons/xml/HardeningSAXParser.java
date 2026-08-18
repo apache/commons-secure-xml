@@ -68,6 +68,15 @@ final class HardeningSAXParser extends SAXParser {
         return hardenedParser;
     }
 
+    @Override
+    public void reset() {
+        delegate.reset();
+        // The JAXP reset contract reverts the delegate to its just-created state, which strips the post-creation reader hardening.
+        // We reset the cached readers, so hardening can be applied again.
+        hardenedReader = null;
+        hardenedParser = null;
+    }
+
     // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
     @Override
     public Object getProperty(final String name) throws SAXNotRecognizedException, SAXNotSupportedException {
@@ -92,11 +101,6 @@ final class HardeningSAXParser extends SAXParser {
     @Override
     public boolean isXIncludeAware() {
         return delegate.isXIncludeAware();
-    }
-
-    @Override
-    public void reset() {
-        delegate.reset();
     }
 
     @Override

@@ -33,17 +33,29 @@ import javax.xml.transform.URIResolver;
  * resolve return empty rather than being fetched.
  *
  * <p>The floor is installed on the delegate transformer at construction, seeded with the factory's compile-time resolver; {@link #setURIResolver(URIResolver)}
- * routes a caller's resolver through it rather than replacing it, so the block cannot be dropped.</p>
+ * routes a caller's resolver through it rather than replacing it, so the block cannot be dropped. {@link #reset()} re-establishes the floor, seeded again with
+ * the factory's compile-time resolver, matching the just-constructed state.</p>
  */
 final class HardeningTransformer extends Transformer {
 
     private final Transformer delegate;
 
+    /** Compile-time URIResolver snapshot the floor is seeded with, both at construction and again on {@link #reset()}. */
+    private final URIResolver uriResolver;
+
     private final FallbackIgnoreURIResolver floor;
 
     HardeningTransformer(final Transformer delegate, final URIResolver uriResolver) {
         this.delegate = delegate;
+        this.uriResolver = uriResolver;
         this.floor = new FallbackIgnoreURIResolver(uriResolver);
+        delegate.setURIResolver(floor);
+    }
+
+    @Override
+    public void reset() {
+        delegate.reset();
+        floor.setDelegate(uriResolver);
         delegate.setURIResolver(floor);
     }
 
@@ -90,11 +102,6 @@ final class HardeningTransformer extends Transformer {
     @Override
     public Object getParameter(final String name) {
         return delegate.getParameter(name);
-    }
-
-    @Override
-    public void reset() {
-        delegate.reset();
     }
 
     @Override
