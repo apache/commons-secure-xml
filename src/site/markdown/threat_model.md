@@ -63,6 +63,15 @@ process can always reconfigure or replace the factory, so such a caller is not a
 defends against: that is the reason reconfiguration moves a report
 [out of scope](#what-is-out-of-scope).
 
+The same holds for parser objects the caller constructs outside the library and passes in:
+an `XMLReader` wrapped in a `SAXSource`,
+a StAX reader inside a `StAXSource`,
+or a document parsed elsewhere and handed over as a `DOMSource`
+are **trusted** configuration, not untrusted input.
+The library hardens what it creates;
+it does not re-harden what you built,
+because your reader's settings are indistinguishable from configuration you chose deliberately.
+
 ### What is in scope
 
 - The hardening recipes applied by `XmlFactories` to the JAXP implementations it recognizes (stock JDK, Apache Xerces,
@@ -193,6 +202,16 @@ and reports against a factory reconfigured in any of the ways below are out of s
 - **Caller-supplied top-level URIs.** A URI passed directly to a parse call (`DocumentBuilder.parse(String)`,
   `StreamSource(systemId)`, a `SAXSource` built from a system id) is fetched as-is by the JAXP implementation without
   consulting the hardening layer. Restrict it yourself if the URI is untrusted.
+- **Caller-supplied parser instances.**
+  A parser built outside `XmlFactories` and handed to a produced instance is used as configured:
+  a `SAXSource` carrying its own `XMLReader`,
+  a `StAXSource` carrying a stream or event reader,
+  or a `DOMSource` holding a document parsed elsewhere.
+  Its settings are yours, including permissive ones.
+  To parse with your own reader under the hardening guarantees,
+  route it through `XmlFactories.harden(XMLReader)`
+  (or build it from `XmlFactories.newSAXParserFactory()`)
+  before wrapping it in a `SAXSource`.
 - The behavior of a JAXP implementation that `XmlFactories` does not recognize (it throws rather than returning an
   unhardened factory), and any defect in the underlying JAXP implementation itself.
 
@@ -216,6 +235,13 @@ are **not** vulnerabilities under this model:
   unmodified instance is a `VALID` finding (see below); a scanner that pattern-matches on parser type is not.
 - Reports against an instance after the caller installed a resolver (including the `DefaultHandler` passed to
   `SAXParser.parse(..., DefaultHandler)`) or loosened a reserved setting.
+- Reports demonstrated on a parser the reporter configured themselves:
+  for example enabling `external-general-entities` on a self-built `XMLReader`,
+  wrapping it in a `SAXSource`,
+  and showing that a produced `Transformer`, `Validator` or `SchemaFactory` resolves the entity.
+  The permissive settings belong to the reporter's own reader,
+  not to an instance this library produced
+  (see **Caller-supplied parser instances** under [What is out of scope](#what-is-out-of-scope)).
 - Reports about a top-level URI the caller passed directly to a parse call. That URI is fetched as-is and is
   the caller's to validate.
 - Reports in a JAXP implementation this library does not recognize: `XmlFactories` throws rather than
@@ -229,7 +255,7 @@ A report judged against this model receives exactly one of:
 | --- | --- |
 | `VALID` | A factory or instance used as delivered fails to provide a guarantee its Javadoc states (for example, a hardened parser still resolves an external entity, or a documented processing limit is not applied). |
 | `OUT-OF-SCOPE: reconfigured` | A reserved setting was loosened, or a resolver was installed, on the factory or a produced instance before the reported behavior (see [What is out of scope](#what-is-out-of-scope)). |
-| `OUT-OF-SCOPE: caller input` | The behavior follows from a top-level URI, or other input, the caller passed directly to a parse call. |
+| `OUT-OF-SCOPE: caller input` | The behavior follows from a top-level URI, a parser instance the caller constructed outside the library, or other input the caller passed directly to a parse call. |
 | `OUT-OF-SCOPE: foreign implementation` | The behavior is in a JAXP implementation `XmlFactories` does not recognize, or in the underlying JAXP implementation itself. |
 | `MODEL-GAP` | The report fits none of the above. The model is then incomplete: revise it rather than making an ad-hoc call. |
 
