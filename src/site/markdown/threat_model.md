@@ -209,8 +209,7 @@ and reports against a factory reconfigured in any of the ways below are out of s
   or a `DOMSource` holding a document parsed elsewhere.
   Its settings are yours, including permissive ones.
   To parse with your own reader under the hardening guarantees,
-  route it through `XmlFactories.harden(XMLReader)`
-  (or build it from `XmlFactories.newSAXParserFactory()`)
+  obtain it from `XmlFactories.newSAXParserFactory()`
   before wrapping it in a `SAXSource`.
 - The behavior of a JAXP implementation that `XmlFactories` does not recognize (it throws rather than returning an
   unhardened factory), and any defect in the underlying JAXP implementation itself.
