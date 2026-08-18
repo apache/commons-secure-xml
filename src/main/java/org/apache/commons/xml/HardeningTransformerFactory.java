@@ -17,6 +17,8 @@
 
 package org.apache.commons.xml;
 
+import java.util.function.Supplier;
+
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
@@ -60,10 +62,19 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
 
     private final SAXTransformerFactory delegate;
 
-    private final FallbackIgnoreURIResolver floor = new FallbackIgnoreURIResolver(null);
+    /** Empty-{@link Source} supplier for the resolver floor, threaded onto every produced Templates/Transformer; {@code null} means the default empty DOM. */
+    private final Supplier<Source> emptySource;
+
+    private final FallbackIgnoreURIResolver floor;
 
     HardeningTransformerFactory(final SAXTransformerFactory delegate) {
+        this(delegate, null);
+    }
+
+    HardeningTransformerFactory(final SAXTransformerFactory delegate, final Supplier<Source> emptySource) {
         this.delegate = delegate;
+        this.emptySource = emptySource;
+        this.floor = new FallbackIgnoreURIResolver(null, emptySource);
         // Compile-time block for xsl:import/xsl:include and document(); a caller-set resolver is routed through the floor rather than replacing it.
         delegate.setURIResolver(floor);
     }
@@ -87,20 +98,20 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
     @Override
     public Templates newTemplates(final Source source) throws TransformerConfigurationException {
         final Templates templates = delegate.newTemplates(SAXParserHardener.hardenSource(source));
-        return templates == null ? null : new HardeningTemplates(templates, getURIResolver());
+        return templates == null ? null : new HardeningTemplates(templates, getURIResolver(), emptySource);
     }
 
     @Override
     public Transformer newTransformer() throws TransformerConfigurationException {
         // Identity transformer: still parses runtime sources, so wrap it to harden Transformer.transform(Source, Result).
         final Transformer transformer = delegate.newTransformer();
-        return transformer == null ? null : new HardeningTransformer(transformer, getURIResolver());
+        return transformer == null ? null : new HardeningTransformer(transformer, getURIResolver(), emptySource);
     }
 
     @Override
     public Transformer newTransformer(final Source source) throws TransformerConfigurationException {
         final Transformer transformer = delegate.newTransformer(SAXParserHardener.hardenSource(source));
-        return transformer == null ? null : new HardeningTransformer(transformer, getURIResolver());
+        return transformer == null ? null : new HardeningTransformer(transformer, getURIResolver(), emptySource);
     }
 
     @Override

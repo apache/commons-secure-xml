@@ -75,7 +75,7 @@ class ShadingFootprintTest {
             "HardeningTransformer", "HardeningTemplates", "FallbackIgnoreURIResolver", "SaxonProvider", "SaxonProvider$1", "SaxonProvider$HardenedConfiguration"
             , "SaxonProvider$SaxonProviderConfigurer");
 
-    private static final Set<String> XPATH_HARDENER = saxParsersHardenerPlus("XPathHardener", "SaxonProvider", "SaxonProvider$1",
+    private static final Set<String> XPATH_HARDENER = saxParsersHardenerPlus("XPathHardener", "FallbackIgnoreURIResolver", "SaxonProvider", "SaxonProvider$1",
             "SaxonProvider$HardenedConfiguration", "SaxonProvider$SaxonProviderConfigurer");
 
     private static final Set<String> SCHEMA_HARDENER = saxParsersHardenerPlus("SchemaHardener", "HardeningSchemaFactory", "HardeningValidator",
