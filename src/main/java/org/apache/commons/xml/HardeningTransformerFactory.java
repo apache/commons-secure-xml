@@ -32,7 +32,7 @@ import org.xml.sax.XMLFilter;
 import org.xml.sax.XMLReader;
 
 /**
- * {@link javax.xml.transform.TransformerFactory} wrapper that rewrites every Source-taking entry point through {@link XmlFactories#harden(Source)} before
+ * {@link javax.xml.transform.TransformerFactory} wrapper that rewrites every Source-taking entry point through {@link SAXParserHardener#hardenSource(Source)} before
  * delegating.
  *
  * <p>Used by providers whose underlying TrAX implementation pulls a fresh {@code SAXParserFactory.newInstance()} for any Source that is not already a
@@ -50,7 +50,7 @@ import org.xml.sax.XMLReader;
  * <h2>Caveats</h2>
  * <ul>
  *   <li>A {@link SAXSource} that carries its own {@link XMLReader} is trusted as-is: the caller is expected to supply a hardened reader (via
- *       {@link XmlFactories#newSAXParserFactory()} or {@link XmlFactories#harden(XMLReader)}) in that case.</li>
+ *       {@link XmlFactories#newSAXParserFactory()}) in that case.</li>
  *   <li>{@link TransformerHandler} returned from {@code newTransformerHandler} is not wrapped: it processes incoming SAX events instead of reading a Source, so
  *       it has no inner Source-parsing path. A caller who pulls the inner {@link Transformer} via {@link TransformerHandler#getTransformer()} bypasses the
  *       runtime source rewrite.</li>

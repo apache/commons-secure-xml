@@ -32,7 +32,7 @@ import org.xml.sax.SAXNotSupportedException;
 
 /**
  * {@link Validator} wrapper that rewrites the Source on every {@link Validator#validate(Source)} and {@link Validator#validate(Source, Result)} call through
- * {@link XmlFactories#harden(Source)} before delegating, and keeps an ignore-all {@link LSResourceResolver} floor so {@code xsi:schemaLocation} is not resolved at
+ * {@link SAXParserHardener#hardenSource(Source)} before delegating, and keeps an ignore-all {@link LSResourceResolver} floor so {@code xsi:schemaLocation} is not resolved at
  * validation time. {@link #reset()} re-establishes the bare ignore-all floor, matching the just-constructed state.
  */
 final class HardeningValidator extends Validator {
