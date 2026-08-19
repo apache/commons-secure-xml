@@ -66,7 +66,10 @@ final class FallbackIgnoreLSResourceResolver implements LSResourceResolver {
     }
 
     /**
-     * Whether the input carries content, so the consumer never falls back to resolving its identifiers itself.
+     * Tells whether the input carries content, so the consumer never falls back to resolving its identifiers itself.
+     *
+     * @param input The input the caller's resolver returned.
+     * @return Whether a character stream, byte stream, or non-empty string data is present.
      */
     private static boolean hasContent(final LSInput input) {
         // Empty string data counts as no content: the JDK's DOMEntityResolverWrapper discards it (see the unresolved branch below).
