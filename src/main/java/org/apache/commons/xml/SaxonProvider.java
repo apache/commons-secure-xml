@@ -74,7 +74,7 @@ final class SaxonProvider {
             // Extension-function layer: turn off Saxon's reflection-based extension calls. Without this an attacker could bypass URI restrictions through
             // user-supplied Java extensions.
             setBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS, false);
-            // fn:collection bypasses the resolver, closed by the empty collection finder.
+            //  fn:collection bypasses the resolver, closed by the empty collection finder.
             setCollectionFinder(EMPTY_COLLECTION_FINDER);
             // Use the parser below for both style and source:
             setStyleParserClass("#DEFAULT");
@@ -105,7 +105,7 @@ final class SaxonProvider {
         private static XPathFactory configure(final XPathFactory factory) {
             final HardenedConfiguration config = new HardenedConfiguration();
             // XPath has no factory wrapper, so the ignore-all floor lives on the Configuration; reuse FallbackIgnoreURIResolver, adapted to a ResourceResolver.
-            config.setResourceResolver(new ResourceResolverWrappingURIResolver(new FallbackIgnoreURIResolver(null, EmptySource::getInstance)));
+            config.setResourceResolver(new ResourceResolverWrappingURIResolver(new FallbackIgnoreURIResolver(null, emptySourceSupplier())));
             ((XPathFactoryImpl) factory).setConfiguration(config);
             return factory;
         }
