@@ -47,7 +47,7 @@ makes is documented in the Javadoc:
 
 https://commons.apache.org/sandbox/commons-xml/apidocs/org/apache/commons/xml/factory/XmlFactories.html
 
-The hardening applies to the factory and to the parsers, readers, transformers, validators and schemas it produces.
+The hardening applies to the factory and to the parsers, readers, transformers, validators, schemas and XPath objects it produces.
 
 ### Adversary model and trust boundary
 

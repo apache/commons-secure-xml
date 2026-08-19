@@ -43,8 +43,8 @@ import javax.xml.transform.Source;
  *
  * <p>Using {@code jdependency}, the same library {@code maven-shade-plugin}'s {@code minimizeJar} uses, this test computes each entry point's transitive class
  * closure over the compiled {@code target/classes} and pins it to an expected set. It keeps each hardener from silently regaining a dependency on classes it
- * should not need (for example a sibling resolver floor or another hardener), so TrAX, XPath and schema build only on the shared SAX path while only the public
- * {@link XmlFactories} entry pulls the whole library. Update the expected sets deliberately: a change here is a change to what a downstream shade includes.</p>
+ * should not need (for example a sibling resolver floor or another hardener), so TrAX and schema build only on the shared SAX path, XPath additionally on the
+ * DOM path its InputSource rewrite parses through, while only the public {@link XmlFactories} entry pulls the whole library. Update the expected sets deliberately: a change here is a change to what a downstream shade includes.</p>
  *
  * <p>The test reads the compiled {@code .class} files from the code-source location, which only exists on a regular JVM: a native image carries no bytecode (and
  * nobody shades one), so the test is disabled there, just as it is excluded from the Android test compile.</p>
@@ -69,14 +69,16 @@ class ShadingFootprintTest {
     private static final Set<String> STAX_HARDENER = set("StaxHardener", "HardeningXMLInputFactory", "FallbackIgnoreXMLResolver", HARDENING_EXCEPTION);
 
     /**
-     * TrAX, XPath and schema re-harden their sub-parsers through {@link SAXParserHardener#harden(Source)}, so each builds on the full SAX closure below.
+     * TrAX, XPath and schema re-harden their sub-parsers through {@link SAXParserHardener#harden(Source)}, so each builds on the full SAX closure below; XPath
+     * additionally parses InputSource-taking evaluate calls through the DOM hardener, so its closure carries that set too.
      */
     private static final Set<String> TRANSFORMER_HARDENER = saxParsersHardenerPlus("TransformerHardener", "HardeningTransformerFactory",
             "HardeningTransformer", "HardeningTemplates", "FallbackIgnoreURIResolver", "SaxonProvider", "SaxonProvider$1", "SaxonProvider$HardenedConfiguration"
             , "SaxonProvider$SaxonProviderConfigurer");
 
     private static final Set<String> XPATH_HARDENER = saxParsersHardenerPlus("XPathHardener", "SaxonProvider", "SaxonProvider$1",
-            "SaxonProvider$HardenedConfiguration", "SaxonProvider$SaxonProviderConfigurer");
+            "SaxonProvider$HardenedConfiguration", "SaxonProvider$SaxonProviderConfigurer", "HardeningXPathFactory", "HardeningXPath",
+            "HardeningXPathExpression", "DocumentBuilderHardener", "HardeningDocumentBuilder", "HardeningDocumentBuilderFactory");
 
     private static final Set<String> SCHEMA_HARDENER = saxParsersHardenerPlus("SchemaHardener", "HardeningSchemaFactory", "HardeningValidator",
             "HardeningValidatorHandler", "HardeningSchema", "FallbackIgnoreLSResourceResolver");
@@ -84,7 +86,7 @@ class ShadingFootprintTest {
     /**
      * Only the public {@link XmlFactories} entry, which news up every hardener, still pulls the whole library; this is its class count.
      */
-    private static final int WHOLE_LIBRARY_SIZE = 29;
+    private static final int WHOLE_LIBRARY_SIZE = 32;
 
     /**
      * Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library.
