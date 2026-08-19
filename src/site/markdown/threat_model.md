@@ -74,8 +74,12 @@ because your reader's settings are indistinguishable from configuration you chos
 
 ### What is in scope
 
-- The hardening recipes applied by `XmlFactories` to the JAXP implementations it recognizes (stock JDK, Apache Xerces,
-  Xalan, Saxon, Woodstox, and Android's Expat/KXmlParser).
+- The hardening recipes applied by `XmlFactories`.
+  Every JAXP implementation is in scope,
+  as long as it respects the contract of the features, attributes, and properties the recipes use;
+  an implementation that cannot accept a required setting makes the factory method throw
+  instead of returning an unhardened factory.
+  The recipes are exercised against the stock JDK, Apache Xerces, Xalan, Saxon, Woodstox, and Android's Expat/KXmlParser.
 - A factory returned by `XmlFactories`, used as delivered, that fails to provide a guarantee the Javadoc states it
   provides. The guarantee covers the documented entry points of each returned factory type; the
   `SAXTransformerFactory` extension methods are out of scope (see [What is out of scope](#what-is-out-of-scope)).
@@ -220,8 +224,19 @@ and reports against a factory reconfigured in any of the ways below are out of s
   and the `TransformerHandler`, `TemplatesHandler`, `Templates` and `XMLFilter` objects they produce,
   are not hardened in this release.
   Parse their input through a hardened `XmlFactories` parser, or treat it as trusted.
-- The behavior of a JAXP implementation that `XmlFactories` does not recognize (it throws rather than returning an
-  unhardened factory), and any defect in the underlying JAXP implementation itself.
+- **Transform output destinations.**
+  The hardening governs what a parse or transform reads;
+  it does not confine what a transform writes.
+  A stylesheet's output-producing instructions,
+  `xsl:result-document` in particular,
+  write wherever the stylesheet directs, within the runtime's permissions:
+  running a stylesheet grants its author that capability,
+  so restricting destinations when the stylesheet is untrusted is the operator's responsibility
+  (an output resolver of the implementation, filesystem permissions, or process sandboxing).
+  A path-traversal or file-write report through a stylesheet's output instructions is out of scope.
+- The behavior of a JAXP implementation that does not respect the contract of the settings a hardening recipe
+  requires (the factory method throws rather than returning an unhardened factory), and any defect in the
+  underlying JAXP implementation itself.
 
 ### Downstream responsibility
 
@@ -256,8 +271,11 @@ are **not** vulnerabilities under this model:
   (see **`SAXTransformerFactory` extension methods** under [What is out of scope](#what-is-out-of-scope)).
 - Reports about a top-level URI the caller passed directly to a parse call. That URI is fetched as-is and is
   the caller's to validate.
-- Reports in a JAXP implementation this library does not recognize: `XmlFactories` throws rather than
-  returning an unhardened factory, so there is no instance to attack.
+- A path-traversal or file-write report through `xsl:result-document` or another output-producing
+  instruction of a stylesheet
+  (see **Transform output destinations** under [What is out of scope](#what-is-out-of-scope)).
+- Reports in a JAXP implementation that does not respect the contract of the settings a hardening recipe
+  requires: `XmlFactories` throws rather than returning an unhardened factory, so there is no instance to attack.
 
 ### Triage dispositions
 
@@ -268,7 +286,7 @@ A report judged against this model receives exactly one of:
 | `VALID` | A factory or instance used as delivered fails to provide a guarantee its Javadoc states (for example, a hardened parser still resolves an external entity, or a documented processing limit is not applied). |
 | `OUT-OF-SCOPE: reconfigured` | A reserved setting was loosened, or a resolver was installed, on the factory or a produced instance before the reported behavior (see [What is out of scope](#what-is-out-of-scope)). |
 | `OUT-OF-SCOPE: caller input` | The behavior follows from a top-level URI, a parser instance the caller constructed outside the library, or other input the caller passed directly to a parse call. |
-| `OUT-OF-SCOPE: foreign implementation` | The behavior is in a JAXP implementation `XmlFactories` does not recognize, or in the underlying JAXP implementation itself. |
+| `OUT-OF-SCOPE: foreign implementation` | The behavior is in a JAXP implementation that does not respect the contract of the settings a hardening recipe requires, or is a defect in the underlying JAXP implementation itself. |
 | `MODEL-GAP` | The report fits none of the above. The model is then incomplete: revise it rather than making an ad-hoc call. |
 
 ### Conditions that would change this model
