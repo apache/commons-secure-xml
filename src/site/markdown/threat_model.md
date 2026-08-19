@@ -79,7 +79,6 @@ because your reader's settings are indistinguishable from configuration you chos
   as long as it respects the contract of the features, attributes, and properties the recipes use;
   an implementation that cannot accept a required setting makes the factory method throw
   instead of returning an unhardened factory.
-  The recipes are exercised against the stock JDK, Apache Xerces, Xalan, Saxon, Woodstox, and Android's Expat/KXmlParser.
 - A factory returned by `XmlFactories`, used as delivered, that fails to provide a guarantee the Javadoc states it
   provides. The guarantee covers the documented entry points of each returned factory type; the
   `SAXTransformerFactory` extension methods are out of scope (see [What is out of scope](#what-is-out-of-scope)).
