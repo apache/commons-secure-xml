@@ -170,6 +170,14 @@ enforced by the reserved settings above, which a caller cannot lift.
   It therefore *must* resolve every resource you need available: a `null` return blocks the lookup,
   it does not fall through to a fetch.
 
+  An opted-in resource stays on the floor:
+  a `Source` returned by a `URIResolver` is re-parsed through a hardened reader
+  (a `DOMSource`, or a `SAXSource` carrying your own reader, is used as returned),
+  and an `LSInput` returned by an `LSResourceResolver` must carry content
+  (a character stream, byte stream, or string data);
+  an `LSInput` naming only identifiers is treated as unresolved,
+  it does not fall through to a fetch either.
+
 - **Validation.** You may turn on DTD or XSD validation, using these methods and features/properties:
   - `setSchema(Schema)`,
   - `setValidating(true)`,

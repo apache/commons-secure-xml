@@ -304,6 +304,18 @@ class EntityResolverFloorTest {
         }
     }
 
+    /** An {@link LSInput} naming the resource but carrying no content, the shape that would send the implementation into a default-resolution self-fetch. */
+    private static LSInput identifierOnlyLsInput(final String systemId) {
+        try {
+            final DOMImplementationLS ls = (DOMImplementationLS) DOMImplementationRegistry.newInstance().getDOMImplementation("LS");
+            final LSInput input = ls.createLSInput();
+            input.setSystemId(systemId);
+            return input;
+        } catch (final Exception e) {
+            throw new IllegalStateException("Failed to build LSInput for " + systemId, e);
+        }
+    }
+
     @Test
     @Tag("schema")
     void schemaResolvesAllowListed() {
@@ -323,6 +335,18 @@ class EntityResolverFloorTest {
             factory.setResourceResolver((type, namespaceURI, publicId, systemId, baseURI) -> null);
             factory.newSchema(AttackTestSupport.resourceSource("with-import.xsd"));
         }, "Schema import", SAXException.class, SecurityException.class);
+    }
+
+    @Test
+    @Tag("schema")
+    void schemaTreatsIdentifierOnlyOptInAsUnresolved() {
+        // Opting in requires supplying content: an identifier-only LSInput is treated as unresolved, so the import stays empty and the compile fails.
+        assertParseFails(() -> {
+            final SchemaFactory factory = XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            factory.setResourceResolver((type, namespaceURI, publicId, systemId, baseURI) ->
+                    systemId != null && systemId.endsWith("included.xsd") ? identifierOnlyLsInput(ALLOWED_SCHEMA) : null);
+            factory.newSchema(AttackTestSupport.resourceSource("with-import.xsd"));
+        }, "Schema import via identifier-only LSInput", SAXException.class, SecurityException.class);
     }
 
     // ---- XSLT channel (URIResolver) ----------------------------------------------------------------------------------------------------------------------
@@ -353,6 +377,40 @@ class EntityResolverFloorTest {
             assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "unlisted stylesheet import leaked");
         } catch (final TransformerException blocked) {
             // Acceptable: rejected at compile rather than resolved to empty.
+        }
+    }
+
+    @Test
+    @Tag("trax")
+    void transformerParsesOptedInImportHardened() {
+        // The opted-in module carries an external DTD reference; parsed on the floor the DTD is empty, so its entity cannot expand into the output.
+        final TransformerFactory factory = hardenedTransformerFactory();
+        factory.setURIResolver((href, base) ->
+                href != null && href.endsWith("included.xsl") ? AttackTestSupport.resourceSource("included-with-entity.xsl") : null);
+        try {
+            final StringWriter sink = new StringWriter();
+            factory.newTemplates(AttackTestSupport.resourceSource("with-import.xsl")).newTransformer()
+                    .transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink));
+            assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "opted-in stylesheet import leaked its external entity");
+        } catch (final TransformerException blocked) {
+            // Acceptable: the hardened parse reports the entity as undeclared instead of expanding it.
+        }
+    }
+
+    @Test
+    @Tag("trax")
+    void transformerParsesOptedInDocumentHardened() {
+        // Same contract on the runtime document() channel, which reaches a different internal reader than the compile-time import.
+        final TransformerFactory factory = hardenedTransformerFactory();
+        factory.setURIResolver((href, base) ->
+                href != null && href.endsWith("referenced.xml") ? AttackTestSupport.resourceSource("referenced-with-entity.xml") : null);
+        try {
+            final StringWriter sink = new StringWriter();
+            factory.newTemplates(AttackTestSupport.resourceSource("with-document.xsl")).newTransformer()
+                    .transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink));
+            assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "opted-in document() resource leaked its external entity");
+        } catch (final TransformerException blocked) {
+            // Acceptable: the hardened parse reports the entity as undeclared instead of expanding it.
         }
     }
 

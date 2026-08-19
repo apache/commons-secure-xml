@@ -30,8 +30,13 @@ import org.w3c.dom.ls.LSResourceResolver;
  *
  * <p>The schema-compile counterpart of {@link FallbackIgnoreEntityResolver2}. The hardened {@link javax.xml.validation.SchemaFactory}, {@link
  * javax.xml.validation.Validator} and {@link javax.xml.validation.ValidatorHandler} wrappers install one of these and route a caller-set resolver through
- * {@link #setDelegate} rather than letting it replace the floor. A caller opts a specific resource in by returning a non-{@code null} {@link LSInput};
- * anything left unresolved resolves to an empty {@link LSInput}, so the external resource is neither fetched nor leaked.</p>
+ * {@link #setDelegate} rather than letting it replace the floor. A caller opts a specific resource in by returning a non-{@code null} {@link LSInput} that
+ * carries content (a character stream, byte stream, or string data); anything left unresolved resolves to an empty {@link LSInput}, so the external resource
+ * is neither fetched nor leaked.</p>
+ *
+ * <p>An {@link LSInput} naming only identifiers is treated as unresolved, not as an opt-in: handing it to the implementation would trigger default
+ * resolution, where the implementation fetches the system id itself and parses it with an internal parser at its own defaults. A caller who wants the
+ * resource available must supply its content on the {@link LSInput}.</p>
  */
 final class FallbackIgnoreLSResourceResolver implements LSResourceResolver {
 
@@ -60,10 +65,18 @@ final class FallbackIgnoreLSResourceResolver implements LSResourceResolver {
         return delegate;
     }
 
+    /**
+     * Whether the input carries content, so the consumer never falls back to resolving its identifiers itself.
+     */
+    private static boolean hasContent(final LSInput input) {
+        // Empty string data counts as no content: the JDK's DOMEntityResolverWrapper discards it (see the unresolved branch below).
+        return input.getCharacterStream() != null || input.getByteStream() != null || input.getStringData() != null && !input.getStringData().isEmpty();
+    }
+
     @Override
     public LSInput resolveResource(final String type, final String namespaceURI, final String publicId, final String systemId, final String baseURI) {
         final LSInput resolved = delegate != null ? delegate.resolveResource(type, namespaceURI, publicId, systemId, baseURI) : null;
-        if (resolved != null) {
+        if (resolved != null && hasContent(resolved)) {
             return resolved;
         }
         if (HardeningException.throwOnUnresolved()) {
