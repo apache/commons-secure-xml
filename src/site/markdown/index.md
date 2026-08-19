@@ -67,15 +67,15 @@ so the parse continues without it
 
 ### Supported runtimes
 
-The library requires OpenJDK 8 or later (or a JDK distribution built from it),
-or Android API level 33 or later.
-The security guarantees are defined only on those runtimes.
-On Android below API 33 the platform XML parser (libexpat)
-carries no entity-expansion (billion-laughs) check,
-which the SAX hardening recipe relies on,
-so the bounded-expansion guarantee does not hold there.
-Behavior on earlier or other runtimes is out of scope
+The library requires OpenJDK 8 or later (or a JDK distribution built from it), or Android API level 19 or later.
+
+The security guarantees are defined only on the OpenJDK family
 (see the [Threat Model](threat_model.html)).
+No version of Android supports `FEATURE_SECURE_PROCESSING`
+(so states [Android's own documentation](https://developer.android.com/reference/javax/xml/parsers/DocumentBuilderFactory#setFeature%28java.lang.String,%20boolean%29)),
+so the library secures the platform's parsers as best-effort.
+Android's `XmlPullParser` API is not supported:
+it is not a JAXP API.
 
 ### Supported implementations
 

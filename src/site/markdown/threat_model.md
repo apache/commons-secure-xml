@@ -74,8 +74,9 @@ because your reader's settings are indistinguishable from configuration you chos
 
 ### What is in scope
 
-- The hardening recipes applied by `XmlFactories` to the JAXP implementations it recognizes (stock JDK, Apache Xerces,
-  Xalan, Saxon, Woodstox, and Android's Expat/KXmlParser).
+- The hardening recipes applied by `XmlFactories` to the JAXP implementations it recognizes (stock JDK, Apache Xerces, Xalan, Saxon, and Woodstox).
+  The recipes for Android's Expat/KXmlParser are applied as best-effort and carry no guarantee
+  (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)).
 - A factory returned by `XmlFactories`, used as delivered, that fails to provide a guarantee the Javadoc states it
   provides.
 
@@ -90,14 +91,18 @@ Which hardening recipe applies depends on the JAXP implementation present on the
 
 **Supported runtimes**
 
-The guarantees are defined on two runtime families:
-OpenJDK 8 or later (and JDK distributions built from it),
-or Android API level 33 or later.
+The guarantees are defined on a single runtime family:
+OpenJDK 8 or later (and JDK distributions built from it).
 On these runtimes the recognized parsers apply the processing limits the guarantees rely on.
-Android below API level 33 is not supported:
-its bundled libexpat has no built-in entity-expansion (billion-laughs) check,
-so the bounded-expansion guarantee does not hold there.
-A report demonstrated only on an unsupported Android release is [out of scope](#what-is-out-of-scope).
+
+Android, on every API level, carries no guarantee:
+no version of Android supports `FEATURE_SECURE_PROCESSING`
+(so states [Android's own documentation](https://developer.android.com/reference/javax/xml/parsers/DocumentBuilderFactory#setFeature%28java.lang.String,%20boolean%29)),
+the setting the guaranteed processing limits build on.
+The library still hardens Android's parsers as best-effort,
+tested as complete starting with API level 33
+(see [Supported runtimes](index.html) on the main page),
+but a report demonstrated only on Android is [out of scope](#what-is-out-of-scope) on any API level.
 
 **System properties that modify behavior**
 
@@ -110,9 +115,10 @@ Either way the resource is not fetched,
 so the property selects an error-reporting style,
 not a security posture.
 
-The library enables secure processing (`FEATURE_SECURE_PROCESSING`) on every
-recognized parser and leaves the resulting processing limits (entity expansion, element depth, attribute count, and
-similar) at the implementation's own secure default. Those defaults differ by implementation, and on the stock JDK by
+The library enables secure processing (`FEATURE_SECURE_PROCESSING`) on every recognized parser that supports it
+(no Android parser does, see **Supported runtimes** above)
+and leaves the resulting processing limits (entity expansion, element depth, attribute count, and similar)
+at the implementation's own secure default. Those defaults differ by implementation, and on the stock JDK by
 JDK version and the standard `jdk.xml.*` limit properties the JDK itself reads:
 
 - On the stock JDK, secure processing honors the `jdk.xml.*` limit properties (for example `jdk.xml.entityExpansionLimit`,
@@ -226,9 +232,10 @@ and reports against a factory reconfigured in any of the ways below are out of s
   before wrapping it in a `SAXSource`.
 - The behavior of a JAXP implementation that `XmlFactories` does not recognize (it throws rather than returning an
   unhardened factory), and any defect in the underlying JAXP implementation itself.
-- **An unsupported Android release.**
-  Android below API level 33, whose bundled libexpat has no entity-expansion (billion-laughs) check,
-  so a bounded-expansion report there is out of scope (see [Assumptions about the environment](#assumptions-about-the-environment)).
+- **Android, on any API level.**
+  No version of Android supports `FEATURE_SECURE_PROCESSING`,
+  so the hardening there is best-effort and no guarantee is defined
+  (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)).
 
 ### Downstream responsibility
 
@@ -248,8 +255,8 @@ are **not** vulnerabilities under this model:
 - XXE, external-entity, SSRF-through-external-reference, or entity-expansion (Billion Laughs) reports against
   a factory used as delivered. Blocking these is exactly what the hardening does. A working proof against an
   unmodified instance is a `VALID` finding (see below); a scanner that pattern-matches on parser type is not.
-- An entity-expansion (Billion Laughs) report demonstrated only on Android below API level 33,
-  whose bundled libexpat has no billion-laughs check
+- A report demonstrated only on Android,
+  where the hardening is best-effort and no guarantee is defined
   (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)).
 - Reports against an instance after the caller installed a resolver (including the `DefaultHandler` passed to
   `SAXParser.parse(..., DefaultHandler)`) or loosened a reserved setting.
@@ -275,6 +282,7 @@ A report judged against this model receives exactly one of:
 | `OUT-OF-SCOPE: reconfigured` | A reserved setting was loosened, or a resolver was installed, on the factory or a produced instance before the reported behavior (see [What is out of scope](#what-is-out-of-scope)). |
 | `OUT-OF-SCOPE: caller input` | The behavior follows from a top-level URI, a parser instance the caller constructed outside the library, or other input the caller passed directly to a parse call. |
 | `OUT-OF-SCOPE: foreign implementation` | The behavior is in a JAXP implementation `XmlFactories` does not recognize, or in the underlying JAXP implementation itself. |
+| `OUT-OF-SCOPE: unsupported runtime` | The behavior is demonstrated only on a runtime the guarantees are not defined on, such as Android on any API level (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)). |
 | `MODEL-GAP` | The report fits none of the above. The model is then incomplete: revise it rather than making an ad-hoc call. |
 
 ### Conditions that would change this model
