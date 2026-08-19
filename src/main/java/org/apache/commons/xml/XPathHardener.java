@@ -17,11 +17,6 @@
 
 package org.apache.commons.xml;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.xml.XMLConstants;
 import javax.xml.xpath.XPathFactory;
 
@@ -32,9 +27,10 @@ import javax.xml.xpath.XPathFactory;
  * {@code fn:doc}, {@code fn:collection} and {@code fn:unparsed-text} functions that can reach external resources. Rather than branching on the implementation
  * class, {@link #harden(XPathFactory)} probes what the factory supports and adapts:</p>
  * <ul>
- *     <li><strong>Saxon</strong> ({@code net.sf.saxon}): recognized by class name and handed to {@link SaxonProvider#configure(XPathFactory)}. Its URI-fetching
+ *     <li><strong>Saxon</strong> ({@code net.sf.saxon}): recognized by package prefix and handed to {@link SaxonProvider#configure(XPathFactory)}, so any public
+ *         subclass routes to the same recipe as the registered factory. Its URI-fetching
  *         functions and reflection-based extension calls are reachable only through a locked-down Saxon {@code Configuration}, not the standard JAXP knobs; this
- *         is the XPath counterpart of the Saxon exception in {@link TransformerHardener}, kept as a documented class-name exception because the required
+ *         is the XPath counterpart of the Saxon exception in {@link TransformerHardener}, kept as a documented package-prefix exception because the required
  *         hardening surface is reachable only through a vendor API.</li>
  *     <li><strong>FODP</strong> ({@code jdk.xml.overrideDefaultParser}, set to {@code false}): best-effort. On the stock JDK it pins the internal parser lookup to
  *         the bundled SAX parser, blocking a sysprop swap to a third-party parser (defense-in-depth); Xalan rejects the feature and is left unchanged.</li>
@@ -45,21 +41,12 @@ import javax.xml.xpath.XPathFactory;
 final class XPathHardener {
 
     /**
-     * Class names of Saxon's {@link XPathFactory} (open-source and commercial editions), hardened through a Saxon {@code Configuration} rather than the standard
-     * JAXP knobs. The commercial editions subclass the open-source {@code net.sf.saxon.xpath.XPathFactoryImpl}, so {@link SaxonProvider} handles all three.
-     */
-    private static final Set<String> SAXON_XPATH_FACTORIES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-            "net.sf.saxon.xpath.XPathFactoryImpl",
-            "com.saxonica.config.ProfessionalXPathFactory",
-            "com.saxonica.config.EnterpriseXPathFactory")));
-
-    /**
      * {@code jdk.xml.overrideDefaultParser}: pin to the JDK's bundled SAX parser; defense-in-depth against a sysprop swap to a third-party parser.
      */
     private static final String FEATURE_OVERRIDE_DEFAULT_PARSER = "jdk.xml.overrideDefaultParser";
 
     static XPathFactory harden(final XPathFactory factory) {
-        if (SAXON_XPATH_FACTORIES.contains(factory.getClass().getName())) {
+        if (SaxonProvider.isSaxon(factory.getClass())) {
             // Saxon: only a locked-down Configuration can close its URI-fetching functions and extension-function surface.
             return SaxonProvider.configure(factory);
         }

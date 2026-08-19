@@ -17,11 +17,6 @@
 
 package org.apache.commons.xml;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -34,11 +29,12 @@ import javax.xml.transform.sax.SAXTransformerFactory;
  *
  * <p>Rather than branching on the implementation class, {@link #harden(TransformerFactory)} probes what the factory supports and adapts:</p>
  * <ul>
- *     <li><strong>Saxon</strong> ({@code net.sf.saxon}): recognized by class name and handed to {@link SaxonProvider#configure(TransformerFactory)}. Unlike XSLTC
+ *     <li><strong>Saxon</strong> ({@code net.sf.saxon}): recognized by package prefix and handed to {@link SaxonProvider#configure(TransformerFactory)}, so
+ *         public subclasses such as {@code net.sf.saxon.BasicTransformerFactory} route to the same recipe as the registered factory. Unlike XSLTC
  *         and Xalan, Saxon reaches external resources through several channels (the {@link URIResolver}, a collection finder, an unparsed-text resolver) on top
  *         of reflection-based extension functions, none of which the standard JAXP knobs can close; only a locked-down Saxon {@code Configuration} can. This is
- *         the TrAX counterpart of the Android special case in {@link DocumentBuilderHardener}, kept as a documented class-name exception because the required
- *         hardening surface is reachable only through a vendor API.</li>
+ *         the TrAX counterpart of the Android special case in {@link DocumentBuilderHardener}, kept as a documented package-prefix exception because the
+ *         required hardening surface is reachable only through a vendor API.</li>
  *     <li><strong>FSP</strong> ({@link XMLConstants#FEATURE_SECURE_PROCESSING}): required. On XSLTC it enables the runtime evaluator limits; on Xalan it disables
  *         reflection-based extension functions.</li>
  *     <li><strong>{@link FallbackIgnoreURIResolver} floor</strong>: required. An ignore-all {@link URIResolver} floor, installed by
@@ -52,17 +48,8 @@ import javax.xml.transform.sax.SAXTransformerFactory;
  */
 final class TransformerHardener {
 
-    /**
-     * Class names of Saxon's {@link TransformerFactory} (open-source and commercial editions), hardened through a Saxon {@code Configuration} rather than the
-     * standard JAXP knobs.
-     */
-    private static final Set<String> SAXON_TRANSFORMER_FACTORIES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-            "net.sf.saxon.TransformerFactoryImpl",
-            "com.saxonica.config.ProfessionalTransformerFactory",
-            "com.saxonica.config.EnterpriseTransformerFactory")));
-
     static TransformerFactory harden(final TransformerFactory factory) {
-        if (SAXON_TRANSFORMER_FACTORIES.contains(factory.getClass().getName())) {
+        if (SaxonProvider.isSaxon(factory.getClass())) {
             // Saxon: only a locked-down Configuration can close all of its resource-resolution channels and its extension-function surface.
             return SaxonProvider.configure(factory);
         }
