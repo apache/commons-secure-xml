@@ -28,6 +28,7 @@ import javax.xml.transform.Templates;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXTransformerFactory;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
@@ -86,6 +87,9 @@ class XMLFilterTest {
 
     @Test
     void unconfiguredFilterLeaksExternalEntity() throws Exception {
+        // Android's platform parser does not resolve the input's external general entity in this path, so the vector cannot be demonstrated there; the hardened
+        // counterpart still runs on Android and must not leak.
+        Assumptions.assumeFalse(AttackTestSupport.IS_ANDROID, "Android's Expat does not resolve the external general entity here");
         final SAXTransformerFactory factory = (SAXTransformerFactory) TransformerFactory.newInstance();
         factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
         final XMLFilter filter = factory.newXMLFilter(AttackTestSupport.streamSource(IDENTITY_XSLT));
@@ -97,7 +101,19 @@ class XMLFilterTest {
     void unconfiguredFilterLeaksDocument() throws Exception {
         final SAXTransformerFactory factory = (SAXTransformerFactory) TransformerFactory.newInstance();
         final XMLFilter filter = factory.newXMLFilter(AttackTestSupport.resourceSource("with-document.xsl"));
+        setPermissiveParentOnAndroid(filter);
         assertTrue(filterAndCapture(filter, "<root/>").contains(AttackTestSupport.LEAKED_MARKER),
                 "unconfigured XMLFilter should resolve document()");
+    }
+
+    /**
+     * On Android, hand the unconfigured filter a permissive parent so Xalan's {@code TrAXFilter} uses it instead of self-provisioning an Expat reader on which
+     * it enables {@code namespace-prefixes}, a feature Android's libexpat accepts but fails on mid-parse. The parent stays permissive (no floor), so the leak
+     * these controls assert still occurs.
+     */
+    private static void setPermissiveParentOnAndroid(final XMLFilter filter) {
+        if (AttackTestSupport.IS_ANDROID) {
+            filter.setParent(AttackTestSupport.permissiveReader());
+        }
     }
 }
