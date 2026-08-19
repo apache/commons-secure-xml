@@ -111,7 +111,11 @@ final class SaxonProvider {
         }
     }
 
-    /** The empty-{@link Source} shape Saxon's consumers expect, for the {@link FallbackIgnoreURIResolver} floor the TrAX wrapper installs. */
+    /**
+     * The empty-{@link Source} shape Saxon's consumers expect, for the {@link FallbackIgnoreURIResolver} floor the TrAX wrapper installs.
+     *
+     * @return a supplier for Saxon's empty {@link Source}.
+     */
     static Supplier<Source> emptySourceSupplier() {
         return EmptySource::getInstance;
     }
