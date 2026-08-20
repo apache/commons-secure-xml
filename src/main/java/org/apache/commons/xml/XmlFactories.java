@@ -38,9 +38,13 @@ import javax.xml.xpath.XPathFactory;
  * <ul>
  *   <li><strong>External DTDs are not fetched.</strong></li>
  *   <li><strong>External entities are not resolved.</strong></li>
- *   <li><strong>Internal entity expansion is bounded</strong> by the JDK's default limit, so DoS payloads such as Billion Laughs are rejected before they
- *       exhaust resources.</li>
+ *   <li><strong>Internal entity expansion is bounded</strong> by the platform's secure-processing limit, so DoS payloads such as Billion Laughs are rejected
+ *       before they exhaust resources.</li>
  * </ul>
+ *
+ * <p>These guarantees are defined on OpenJDK 8 or later (and JDK distributions built from it). No version of Android supports
+ * {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING}, so on Android (API level 19 or later) the hardening is applied as best-effort without a guarantee,
+ * tested as complete starting with API level 33; see the threat model's "Assumptions about the environment".</p>
  *
  * <p>The guarantees hold whether or not the caller opts into DTD validation
  * ({@link javax.xml.parsers.DocumentBuilderFactory#setValidating(boolean) setValidating(true)}) or attaches a compiled XSD via
@@ -142,11 +146,9 @@ public final class XmlFactories {
      * {@link TransformerFactory#newTransformer(javax.xml.transform.Source) newTransformer(Source)}) and source-document reading at
      * {@code Transformer.transform(Source, Result)} time.</p>
      *
-     * <p>Only the {@link TransformerFactory} API is covered. The {@link javax.xml.transform.sax.SAXTransformerFactory} extension methods
-     * ({@code newTransformerHandler(..)}, {@code newTemplatesHandler()}, {@code newXMLFilter(..)}), if reachable by casting the returned factory, and the
-     * {@code TransformerHandler}, {@code TemplatesHandler}, {@code Templates} and {@code XMLFilter} objects they produce, are <strong>not hardened in this
-     * release</strong>. Treat their input as trusted, or pre-parse it through a hardened {@link XmlFactories} parser. See the threat model for the exact
-     * scope.</p>
+     * <p>The {@link javax.xml.transform.sax.SAXTransformerFactory} extension methods
+     * ({@code newTransformerHandler(..)}, {@code newTemplatesHandler()}, {@code newXMLFilter(..)}), if reachable by casting the returned factory, produce
+     * objects carrying the same guarantees.</p>
      *
      * @return A hardened factory.
      * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.

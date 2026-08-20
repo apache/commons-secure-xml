@@ -132,17 +132,26 @@ final class SAXParserHardener {
      */
     static Source hardenSource(final Source source) throws TransformerConfigurationException {
         if (source instanceof StreamSource || source instanceof SAXSource && ((SAXSource) source).getXMLReader() == null) {
-            try {
-                final SAXParserFactory factory = harden(SAXParserFactory.newInstance());
-                factory.setNamespaceAware(true);
-                final XMLReader reader = factory.newSAXParser().getXMLReader();
-                final InputSource inputSource = SAXSource.sourceToInputSource(source);
-                return inputSource == null ? source : new SAXSource(reader, inputSource);
-            } catch (final ParserConfigurationException | SAXException e) {
-                throw new TransformerConfigurationException("Failed to obtain a hardened XMLReader for source parsing", e);
-            }
+            final InputSource inputSource = SAXSource.sourceToInputSource(source);
+            return inputSource == null ? source : new SAXSource(newHardenedReader(), inputSource);
         }
         return source;
+    }
+
+    /**
+     * Creates a fresh hardened, namespace-aware {@link XMLReader} for the TrAX wrappers to parse sources with.
+     *
+     * @return a hardened reader.
+     * @throws TransformerConfigurationException if a hardened reader cannot be obtained.
+     */
+    static XMLReader newHardenedReader() throws TransformerConfigurationException {
+        try {
+            final SAXParserFactory factory = harden(SAXParserFactory.newInstance());
+            factory.setNamespaceAware(true);
+            return factory.newSAXParser().getXMLReader();
+        } catch (final ParserConfigurationException | SAXException e) {
+            throw new TransformerConfigurationException("Failed to obtain a hardened XMLReader for source parsing", e);
+        }
     }
 
     private static void setFeature(final SAXParserFactory factory, final String feature, final boolean value) {
