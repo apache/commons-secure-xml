@@ -29,12 +29,10 @@ import javax.xml.transform.sax.SAXTransformerFactory;
  *
  * <p>Rather than branching on the implementation class, {@link #harden(TransformerFactory)} probes what the factory supports and adapts:</p>
  * <ul>
- *     <li><strong>Saxon</strong> ({@code net.sf.saxon}): recognized by package prefix and handed to {@link SaxonProvider#configure(TransformerFactory)}, so
- *         public subclasses such as {@code net.sf.saxon.BasicTransformerFactory} route to the same recipe as the registered factory. Unlike XSLTC
- *         and Xalan, Saxon reaches external resources through several channels (the {@link URIResolver}, a collection finder, an unparsed-text resolver) on top
- *         of reflection-based extension functions, none of which the standard JAXP knobs can close; only a locked-down Saxon {@code Configuration} can. This is
- *         the TrAX counterpart of the Android special case in {@link DocumentBuilderHardener}, kept as a documented package-prefix exception because the
- *         required hardening surface is reachable only through a vendor API.</li>
+ *     <li><strong>Saxon</strong> ({@code net.sf.saxon}): recognized by package prefix and handed to {@link SaxonProvider#configure(TransformerFactory)} for the
+ *         channels the standard JAXP knobs cannot close (reflection-based extension functions, the collection finder, the internal SAX parser). It is then
+ *         wrapped in {@link HardeningTransformerFactory} like every other implementation to install the {@link FallbackIgnoreURIResolver} floor; the only
+ *         difference is the empty-{@link Source} shape the floor returns, {@code EmptySource} for Saxon rather than the default empty DOM document.</li>
  *     <li><strong>FSP</strong> ({@link XMLConstants#FEATURE_SECURE_PROCESSING}): required. On XSLTC it enables the runtime evaluator limits; on Xalan it disables
  *         reflection-based extension functions.</li>
  *     <li><strong>{@link FallbackIgnoreURIResolver} floor</strong>: required. An ignore-all {@link URIResolver} floor, installed by

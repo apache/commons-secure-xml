@@ -74,11 +74,12 @@ because your reader's settings are indistinguishable from configuration you chos
 
 ### What is in scope
 
-- The hardening recipes applied by `XmlFactories` to the JAXP implementations it recognizes (stock JDK, Apache Xerces,
-  Xalan, Saxon, Woodstox, and Android's Expat/KXmlParser).
+- The hardening recipes applied by `XmlFactories` to the JAXP implementations it recognizes (stock JDK, Apache Xerces, Xalan, Saxon, and Woodstox).
+  The recipes for Android's Expat/KXmlParser are applied as best-effort and carry no guarantee
+  (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)).
 - A factory returned by `XmlFactories`, used as delivered, that fails to provide a guarantee the Javadoc states it
-  provides. The guarantee covers the documented entry points of each returned factory type; the
-  `SAXTransformerFactory` extension methods are out of scope (see [What is out of scope](#what-is-out-of-scope)).
+  provides. The guarantee covers the documented entry points of each returned factory type,
+  including the `SAXTransformerFactory` extension methods when the returned `TransformerFactory` exposes them.
 
 ### Assumptions about the environment
 
@@ -88,6 +89,21 @@ install signal handlers,
 or read environment variables of its own:
 each `XmlFactories` method only configures and returns a JAXP factory.
 Which hardening recipe applies depends on the JAXP implementation present on the classpath.
+
+**Supported runtimes**
+
+The guarantees are defined on a single runtime family:
+OpenJDK 8 or later (and JDK distributions built from it).
+On these runtimes the recognized parsers apply the processing limits the guarantees rely on.
+
+Android, on every API level, carries no guarantee:
+no version of Android supports `FEATURE_SECURE_PROCESSING`
+(so states [Android's own documentation](https://developer.android.com/reference/javax/xml/parsers/DocumentBuilderFactory#setFeature%28java.lang.String,%20boolean%29)),
+the setting the guaranteed processing limits build on.
+The library still hardens Android's parsers as best-effort,
+tested as complete starting with API level 33
+(see [Supported runtimes](index.html) on the main page),
+but a report demonstrated only on Android is [out of scope](#what-is-out-of-scope) on any API level.
 
 **System properties that modify behavior**
 
@@ -100,9 +116,10 @@ Either way the resource is not fetched,
 so the property selects an error-reporting style,
 not a security posture.
 
-The library enables secure processing (`FEATURE_SECURE_PROCESSING`) on every
-recognized parser and leaves the resulting processing limits (entity expansion, element depth, attribute count, and
-similar) at the implementation's own secure default. Those defaults differ by implementation, and on the stock JDK by
+The library enables secure processing (`FEATURE_SECURE_PROCESSING`) on every recognized parser that supports it
+(no Android parser does, see **Supported runtimes** above)
+and leaves the resulting processing limits (entity expansion, element depth, attribute count, and similar)
+at the implementation's own secure default. Those defaults differ by implementation, and on the stock JDK by
 JDK version and the standard `jdk.xml.*` limit properties the JDK itself reads:
 
 - On the stock JDK, secure processing honors the `jdk.xml.*` limit properties (for example `jdk.xml.entityExpansionLimit`,
@@ -112,7 +129,8 @@ JDK version and the standard `jdk.xml.*` limit properties the JDK itself reads:
 - The bundled parsers apply their own hardcoded secure defaults instead (for example external Xerces and Woodstox cap
   entity expansion at `100000`) and do not read `jdk.xml.*`.
 
-Every one of these defaults still bounds entity expansion tightly enough to reject entity-expansion denial of service
+On the supported runtimes (see **Supported runtimes** above),
+every one of these defaults still bounds entity expansion tightly enough to reject entity-expansion denial of service
 such as Billion Laughs.
 
 **Reserved settings (must not be loosened)**
@@ -212,16 +230,12 @@ and reports against a factory reconfigured in any of the ways below are out of s
   To parse with your own reader under the hardening guarantees,
   obtain it from `XmlFactories.newSAXParserFactory()`
   before wrapping it in a `SAXSource`.
-- **`SAXTransformerFactory` extension methods.**
-  Only the `TransformerFactory` API of the factory returned by `XmlFactories.newTransformerFactory()` is covered.
-  The `SAXTransformerFactory` extension methods,
-  `newTransformerHandler(...)`, `newTemplatesHandler()` and `newXMLFilter(...)`,
-  if reachable by casting the returned factory,
-  and the `TransformerHandler`, `TemplatesHandler`, `Templates` and `XMLFilter` objects they produce,
-  are not hardened in this release.
-  Parse their input through a hardened `XmlFactories` parser, or treat it as trusted.
 - The behavior of a JAXP implementation that `XmlFactories` does not recognize (it throws rather than returning an
   unhardened factory), and any defect in the underlying JAXP implementation itself.
+- **Android, on any API level.**
+  No version of Android supports `FEATURE_SECURE_PROCESSING`,
+  so the hardening there is best-effort and no guarantee is defined
+  (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)).
 
 ### Downstream responsibility
 
@@ -241,6 +255,9 @@ are **not** vulnerabilities under this model:
 - XXE, external-entity, SSRF-through-external-reference, or entity-expansion (Billion Laughs) reports against
   a factory used as delivered. Blocking these is exactly what the hardening does. A working proof against an
   unmodified instance is a `VALID` finding (see below); a scanner that pattern-matches on parser type is not.
+- A report demonstrated only on Android,
+  where the hardening is best-effort and no guarantee is defined
+  (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)).
 - Reports against an instance after the caller installed a resolver (including the `DefaultHandler` passed to
   `SAXParser.parse(..., DefaultHandler)`) or loosened a reserved setting.
 - Reports demonstrated on a parser the reporter configured themselves:
@@ -250,10 +267,6 @@ are **not** vulnerabilities under this model:
   The permissive settings belong to the reporter's own reader,
   not to an instance this library produced
   (see **Caller-supplied parser instances** under [What is out of scope](#what-is-out-of-scope)).
-- A report against the `SAXTransformerFactory` extension surface:
-  the `newTransformerHandler(...)`, `newTemplatesHandler()` or `newXMLFilter(...)` methods,
-  or the handlers, filters or `Templates` they return
-  (see **`SAXTransformerFactory` extension methods** under [What is out of scope](#what-is-out-of-scope)).
 - Reports about a top-level URI the caller passed directly to a parse call. That URI is fetched as-is and is
   the caller's to validate.
 - Reports in a JAXP implementation this library does not recognize: `XmlFactories` throws rather than
@@ -269,13 +282,17 @@ A report judged against this model receives exactly one of:
 | `OUT-OF-SCOPE: reconfigured` | A reserved setting was loosened, or a resolver was installed, on the factory or a produced instance before the reported behavior (see [What is out of scope](#what-is-out-of-scope)). |
 | `OUT-OF-SCOPE: caller input` | The behavior follows from a top-level URI, a parser instance the caller constructed outside the library, or other input the caller passed directly to a parse call. |
 | `OUT-OF-SCOPE: foreign implementation` | The behavior is in a JAXP implementation `XmlFactories` does not recognize, or in the underlying JAXP implementation itself. |
+| `OUT-OF-SCOPE: unsupported runtime` | The behavior is demonstrated only on a runtime the guarantees are not defined on, such as Android on any API level (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)). |
 | `MODEL-GAP` | The report fits none of the above. The model is then incomplete: revise it rather than making an ad-hoc call. |
 
 ### Conditions that would change this model
 
-Revise this model when any of the following change: a new `XmlFactories` factory method or other public
-surface; support for a JAXP implementation beyond those listed under [What is in scope](#what-is-in-scope);
-a new reserved setting; or a report that cannot be routed to one of the dispositions above.
+Revise this model when any of the following change:
+a new `XmlFactories` factory method or other public surface;
+support for a JAXP implementation beyond those listed under [What is in scope](#what-is-in-scope);
+a change to the supported runtimes (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment));
+a new reserved setting;
+or a report that cannot be routed to one of the dispositions above.
 
 ## Security Vulnerabilities
 
