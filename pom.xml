@@ -100,7 +100,8 @@ limitations under the License.
     </dependency>
   </dependencies>
   <build>
-    <defaultGoal>clean checkstyle:check spotbugs:check pmd:check javadoc:javadoc verify</defaultGoal>
+    <!-- spotbugs:check reads bytecode and does not fork a compile, so it has to follow `verify`; the others read sources and run first to fail fast. -->
+    <defaultGoal>clean checkstyle:check pmd:check javadoc:javadoc verify spotbugs:check</defaultGoal>
     <pluginManagement>
       <plugins>
         <plugin>
