@@ -65,6 +65,18 @@ it resolves to empty content,
 so the parse continues without it
 (see Configuration below).
 
+### Supported runtimes
+
+The library requires OpenJDK 8 or later (or a JDK distribution built from it), or Android API level 19 or later.
+
+The security guarantees are defined only on the OpenJDK family
+(see the [Threat Model](threat_model.html)).
+No version of Android supports `FEATURE_SECURE_PROCESSING`
+(so states [Android's own documentation](https://developer.android.com/reference/javax/xml/parsers/DocumentBuilderFactory#setFeature%28java.lang.String,%20boolean%29)),
+so the library secures the platform's parsers as best-effort.
+Android's `XmlPullParser` API is not supported:
+it is not a JAXP API.
+
 ### Supported implementations
 
 Out of the box the library recognizes the stock JDK JAXP implementations, Apache Xerces 2.x, Woodstox, and Saxon-HE. If

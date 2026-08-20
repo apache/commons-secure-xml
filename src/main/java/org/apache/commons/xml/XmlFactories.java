@@ -38,9 +38,13 @@ import javax.xml.xpath.XPathFactory;
  * <ul>
  *   <li><strong>External DTDs are not fetched.</strong></li>
  *   <li><strong>External entities are not resolved.</strong></li>
- *   <li><strong>Internal entity expansion is bounded</strong> by the JDK's default limit, so DoS payloads such as Billion Laughs are rejected before they
- *       exhaust resources.</li>
+ *   <li><strong>Internal entity expansion is bounded</strong> by the platform's secure-processing limit, so DoS payloads such as Billion Laughs are rejected
+ *       before they exhaust resources.</li>
  * </ul>
+ *
+ * <p>These guarantees are defined on OpenJDK 8 or later (and JDK distributions built from it). No version of Android supports
+ * {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING}, so on Android (API level 19 or later) the hardening is applied as best-effort without a guarantee,
+ * tested as complete starting with API level 33; see the threat model's "Assumptions about the environment".</p>
  *
  * <p>The guarantees hold whether or not the caller opts into DTD validation
  * ({@link javax.xml.parsers.DocumentBuilderFactory#setValidating(boolean) setValidating(true)}) or attaches a compiled XSD via
