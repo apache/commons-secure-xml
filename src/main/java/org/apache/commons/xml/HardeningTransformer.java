@@ -18,6 +18,7 @@
 package org.apache.commons.xml;
 
 import java.util.Properties;
+import java.util.function.Supplier;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Result;
@@ -45,10 +46,10 @@ final class HardeningTransformer extends Transformer {
 
     private final FallbackIgnoreURIResolver floor;
 
-    HardeningTransformer(final Transformer delegate, final URIResolver uriResolver) {
+    HardeningTransformer(final Transformer delegate, final URIResolver uriResolver, final Supplier<Source> emptySource) {
         this.delegate = delegate;
         this.uriResolver = uriResolver;
-        this.floor = new FallbackIgnoreURIResolver(uriResolver);
+        this.floor = new FallbackIgnoreURIResolver(uriResolver, emptySource);
         delegate.setURIResolver(floor);
     }
 
