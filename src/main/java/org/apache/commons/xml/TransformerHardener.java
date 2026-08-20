@@ -47,12 +47,14 @@ import javax.xml.transform.sax.SAXTransformerFactory;
 final class TransformerHardener {
 
     static TransformerFactory harden(final TransformerFactory factory) {
-        if (SaxonProvider.isSaxon(factory.getClass())) {
-            // Saxon: only a locked-down Configuration can close all of its resource-resolution channels and its extension-function surface.
-            return SaxonProvider.configure(factory);
-        }
         // Required: enables secure processing (XSLTC runtime limits; Xalan's extension-function block).
         setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        if (SaxonProvider.isSaxon(factory.getClass())) {
+            // Saxon keeps its vendor Configuration for the channels JAXP cannot close,
+            // then goes through the same wrapper as every other impl for the URIResolver floor;
+            // EmptySource is the empty-source shape Saxon's consumers expect.
+            return new HardeningTransformerFactory((SAXTransformerFactory) SaxonProvider.configure(factory), SaxonProvider.emptySourceSupplier());
+        }
         // Required: source/stylesheet parsing provisions its own SAX reader otherwise; the wrapper routes every Source through a hardened one and installs the
         // ignore-all URIResolver floor (blocking xsl:import/include at compile time and document() at runtime) that a caller-set resolver cannot remove.
         return new HardeningTransformerFactory((SAXTransformerFactory) factory);
