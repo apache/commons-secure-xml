@@ -18,7 +18,9 @@
 package org.apache.commons.xml;
 
 import java.util.Properties;
+import java.util.function.Supplier;
 
+import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -40,9 +42,22 @@ final class HardeningTemplates implements Templates {
     /** Compile-time URIResolver snapshot; the underlying impl does not propagate the factory's resolver onto Transformers obtained from Templates. */
     private final URIResolver uriResolver;
 
-    HardeningTemplates(final Templates delegate, final URIResolver uriResolver) {
+    /** Empty-{@link Source} supplier for the produced Transformer's floor; {@code null} means the default empty DOM. */
+    private final Supplier<Source> emptySource;
+
+    HardeningTemplates(final Templates delegate, final URIResolver uriResolver, final Supplier<Source> emptySource) {
         this.delegate = delegate;
         this.uriResolver = uriResolver;
+        this.emptySource = emptySource;
+    }
+
+    /**
+     * The wrapped implementation Templates, for factory methods whose implementations cast {@code newTransformer()} to their own type.
+     *
+     * @return the wrapped {@link Templates} implementation.
+     */
+    Templates getDelegate() {
+        return delegate;
     }
 
     @Override
@@ -51,7 +66,7 @@ final class HardeningTemplates implements Templates {
         if (transformer == null) {
             return null;
         }
-        return new HardeningTransformer(transformer, uriResolver);
+        return new HardeningTransformer(transformer, uriResolver, emptySource);
     }
 
     // <editor-fold defaultstate="collapsed" desc="Trivial delegation">

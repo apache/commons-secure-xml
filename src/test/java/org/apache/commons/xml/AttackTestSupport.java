@@ -887,13 +887,24 @@ final class AttackTestSupport {
      * Builds a {@link SAXSource} wrapping the payload, without an explicit parser; used by the unconfigured-side TrAX controls.
      */
     private static SAXSource permissiveSaxSource(final String xml) {
+        return new SAXSource(permissiveReader(), new InputSource(new StringReader(xml)));
+    }
+
+    /**
+     * A permissive, namespace-aware {@link XMLReader} with every entity-expansion limit lifted, for the unconfigured-side controls.
+     *
+     * <p>On Android the reader is Expat, which accepts {@code namespace-prefixes} at {@code setFeature} time but fails mid-parse; a probing TrAX path (an
+     * identity transform, or Xalan's {@code TrAXFilter} self-provisioning) enables that feature, so wrap it to reject the feature eagerly (matching the
+     * production {@code HardeningExpatXMLReader}) while keeping the control permissive (no floor).</p>
+     *
+     * @return A permissive reader, wrapped on Android to reject {@code namespace-prefixes} eagerly.
+     */
+    static XMLReader permissiveReader() {
         final SAXParserFactory factory = SAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
         final XMLReader reader = strictXMLReader(factory);
         liftEntityLimits(reader);
-        // On Android the reader is Expat, which accepts namespace-prefixes at setFeature time but fails mid-parse; a permissive TrAX identity transform probes
-        // that feature, so wrap it to reject the feature eagerly (matching the production HardeningExpatXMLReader) while keeping the control permissive (no floor).
-        return new SAXSource(IS_ANDROID ? new PermissiveExpatReader(reader) : reader, new InputSource(new StringReader(xml)));
+        return IS_ANDROID ? new PermissiveExpatReader(reader) : reader;
     }
 
     private static boolean probeAndroid() {
