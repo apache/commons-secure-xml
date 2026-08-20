@@ -65,6 +65,18 @@ it resolves to empty content,
 so the parse continues without it
 (see Configuration below).
 
+### Supported runtimes
+
+The library requires OpenJDK 8 or later (or a JDK distribution built from it), or Android API level 19 or later.
+
+The security guarantees are defined only on the OpenJDK family
+(see the [Threat Model](threat_model.html)).
+No version of Android supports `FEATURE_SECURE_PROCESSING`
+(so states [Android's own documentation](https://developer.android.com/reference/javax/xml/parsers/DocumentBuilderFactory#setFeature%28java.lang.String,%20boolean%29)),
+so the library secures the platform's parsers as best-effort.
+Android's `XmlPullParser` API is not supported:
+it is not a JAXP API.
+
 ### Supported implementations
 
 Out of the box the library recognizes the stock JDK JAXP implementations, Apache Xerces 2.x, Woodstox, and Saxon-HE. If
@@ -145,12 +157,13 @@ pass the result as a `DOMSource` or `SAXSource`.
 
 ### Transformer handlers and filters
 
-Only the `TransformerFactory` API of the factory from `XmlFactories.newTransformerFactory()` is hardened.
 The `SAXTransformerFactory` extension methods, `newTransformerHandler(...)`, `newTemplatesHandler()` and `newXMLFilter(...)`,
-if reachable by casting the returned factory,
-and the handlers, filters and `Templates` they produce, are not hardened in this release.
-Use the standard `newTransformer(...)` / `newTemplates(...)` entry points,
-or pre-parse untrusted input through a hardened `XmlFactories` parser.
+if reachable by casting the factory from `XmlFactories.newTransformerFactory()`,
+produce handlers, filters and `Templates` carrying the same hardening as the standard entry points:
+runtime `document()` resolves to empty content,
+and a filter with no caller-set parent parses its input through a hardened reader.
+The SAX events you feed into a handler, and a parent reader you set on a filter,
+are your own configuration, like any caller-supplied parser.
 See the [Threat Model](threat_model.html) for the exact scope.
 
 ### Caching and thread-safety
