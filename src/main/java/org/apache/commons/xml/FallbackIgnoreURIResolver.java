@@ -17,6 +17,8 @@
 
 package org.apache.commons.xml;
 
+import java.util.function.Supplier;
+
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
@@ -33,13 +35,16 @@ import org.w3c.dom.Document;
  * transform time. The hardened {@link javax.xml.transform.TransformerFactory} and {@link javax.xml.transform.Transformer} wrappers install one of these and
  * route a caller-set resolver through {@link #setDelegate} rather than letting it replace the floor. A caller opts a specific URI in by returning a
  * non-{@code null} {@link Source}; anything left unresolved resolves to an empty {@link Source}, so the external resource is neither fetched nor leaked.</p>
+ *
+ * <p>The shape of that empty {@link Source} is supplied by the caller: the default is a well-formed empty DOM document (which every stock TrAX consumer
+ * accepts), while the Saxon path supplies {@code EmptySource.getInstance()} so its consumers get the "empty" shape they expect.</p>
  */
 final class FallbackIgnoreURIResolver implements URIResolver {
 
     /**
-     * Shared backing for the ignore outcome. Consumers parse the resolved {@link Source}, and an empty character stream is not a well-formed XML document
-     * (XSLTC rejects it for {@code document()} and for an ignored {@code xsl:include}/{@code xsl:import}), so the floor answers with a well-formed empty
-     * document that evaluates to no content. It is never mutated, so one instance serves every resolution.
+     * Backing for the default ignore outcome. Consumers parse the resolved {@link Source}, and an empty character stream is not a well-formed XML document
+     * (XSLTC rejects it for {@code document()} and for an ignored {@code xsl:include}/{@code xsl:import}), so the default supplier answers with a well-formed
+     * empty document that evaluates to no content. It is never mutated, so one instance serves every resolution.
      */
     private static final Document EMPTY_DOCUMENT = newEmptyDocument();
 
@@ -53,8 +58,20 @@ final class FallbackIgnoreURIResolver implements URIResolver {
 
     private URIResolver delegate;
 
+    /** Produces the empty {@link Source} returned for an unresolved reference; a fresh value per call keeps callers from mutating a shared Source. */
+    private final Supplier<Source> emptySource;
+
     FallbackIgnoreURIResolver(final URIResolver delegate) {
+        this(delegate, null);
+    }
+
+    /**
+     * @param delegate the resolver to delegate resolution to.
+     * @param emptySource the empty-{@link Source} supplier for the ignore outcome, or {@code null} for the default empty DOM document.
+     */
+    FallbackIgnoreURIResolver(final URIResolver delegate, final Supplier<Source> emptySource) {
         this.delegate = delegate;
+        this.emptySource = emptySource != null ? emptySource : () -> new DOMSource(EMPTY_DOCUMENT);
     }
 
     void setDelegate(final URIResolver delegate) {
@@ -74,7 +91,6 @@ final class FallbackIgnoreURIResolver implements URIResolver {
         if (HardeningException.throwOnUnresolved()) {
             throw new TransformerException(HardeningException.forbidden("uri", null, null, href, base));
         }
-        // A fresh DOMSource per call keeps callers from mutating a shared Source.
-        return new DOMSource(EMPTY_DOCUMENT);
+        return emptySource.get();
     }
 }
