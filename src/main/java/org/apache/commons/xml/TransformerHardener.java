@@ -17,11 +17,6 @@
 
 package org.apache.commons.xml;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -34,7 +29,7 @@ import javax.xml.transform.sax.SAXTransformerFactory;
  *
  * <p>Rather than branching on the implementation class, {@link #harden(TransformerFactory)} probes what the factory supports and adapts:</p>
  * <ul>
- *     <li><strong>Saxon</strong> ({@code net.sf.saxon}): recognized by class name and handed to {@link SaxonProvider#configure(TransformerFactory)} for the
+ *     <li><strong>Saxon</strong> ({@code net.sf.saxon}): recognized by package prefix and handed to {@link SaxonProvider#configure(TransformerFactory)} for the
  *         channels the standard JAXP knobs cannot close (reflection-based extension functions, the collection finder, the internal SAX parser). It is then
  *         wrapped in {@link HardeningTransformerFactory} like every other implementation to install the {@link FallbackIgnoreURIResolver} floor; the only
  *         difference is the empty-{@link Source} shape the floor returns, {@code EmptySource} for Saxon rather than the default empty DOM document.</li>
@@ -51,23 +46,15 @@ import javax.xml.transform.sax.SAXTransformerFactory;
  */
 final class TransformerHardener {
 
-    /**
-     * Class names of Saxon's {@link TransformerFactory} (open-source and commercial editions), hardened through a Saxon {@code Configuration} rather than the
-     * standard JAXP knobs.
-     */
-    private static final Set<String> SAXON_TRANSFORMER_FACTORIES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-            "net.sf.saxon.TransformerFactoryImpl",
-            "com.saxonica.config.ProfessionalTransformerFactory",
-            "com.saxonica.config.EnterpriseTransformerFactory")));
-
     static TransformerFactory harden(final TransformerFactory factory) {
-        if (SAXON_TRANSFORMER_FACTORIES.contains(factory.getClass().getName())) {
-            // Saxon keeps its vendor Configuration for the channels JAXP cannot close, then goes through the same wrapper as every other impl for the
-            // URIResolver floor; EmptySource is the empty-source shape Saxon's consumers expect.
-            return new HardeningTransformerFactory((SAXTransformerFactory) SaxonProvider.configure(factory), SaxonProvider.emptySourceSupplier());
-        }
         // Required: enables secure processing (XSLTC runtime limits; Xalan's extension-function block).
         setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        if (SaxonProvider.isSaxon(factory.getClass())) {
+            // Saxon keeps its vendor Configuration for the channels JAXP cannot close,
+            // then goes through the same wrapper as every other impl for the URIResolver floor;
+            // EmptySource is the empty-source shape Saxon's consumers expect.
+            return new HardeningTransformerFactory((SAXTransformerFactory) SaxonProvider.configure(factory), SaxonProvider.emptySourceSupplier());
+        }
         // Required: source/stylesheet parsing provisions its own SAX reader otherwise; the wrapper routes every Source through a hardened one and installs the
         // ignore-all URIResolver floor (blocking xsl:import/include at compile time and document() at runtime) that a caller-set resolver cannot remove.
         return new HardeningTransformerFactory((SAXTransformerFactory) factory);
