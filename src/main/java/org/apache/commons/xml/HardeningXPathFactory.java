@@ -23,6 +23,8 @@ import javax.xml.xpath.XPathFactoryConfigurationException;
 import javax.xml.xpath.XPathFunctionResolver;
 import javax.xml.xpath.XPathVariableResolver;
 
+import java.util.Objects;
+
 /**
  * {@link XPathFactory} wrapper that returns a {@link HardeningXPath} from {@link #newXPath()}.
  *
@@ -35,7 +37,7 @@ final class HardeningXPathFactory extends XPathFactory {
     private final XPathFactory delegate;
 
     HardeningXPathFactory(final XPathFactory delegate) {
-        this.delegate = delegate;
+        this.delegate = Objects.requireNonNull(delegate, "delegate");
     }
 
     @Override
