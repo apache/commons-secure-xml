@@ -351,7 +351,7 @@ class EntityResolverFloorTest {
 
     @Test
     @Tag("trax")
-    void transformerDeniesUnlisted() {
+    void transformerDoesNotLeakUnlisted() {
         final TransformerFactory factory = hardenedTransformerFactory();
         factory.setURIResolver((href, base) -> null);
         // XSLTC and Xalan reject the emptied import at compile time; Saxon compiles it as an empty module, so transform and assert the import did not leak.
@@ -361,7 +361,7 @@ class EntityResolverFloorTest {
                     .transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink));
             assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "unlisted stylesheet import leaked");
         } catch (final TransformerException blocked) {
-            // Acceptable: rejected at compile rather than resolved to empty.
+            // Throwing is an acceptable outcome, since it doesn't leak the marker.
         }
     }
 
@@ -378,7 +378,7 @@ class EntityResolverFloorTest {
                     .transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink));
             assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "opted-in stylesheet import leaked its external entity");
         } catch (final TransformerException blocked) {
-            // Acceptable: the hardened parse reports the entity as undeclared instead of expanding it.
+            // Throwing is an acceptable outcome, since it doesn't leak the marker.
         }
     }
 
@@ -395,7 +395,7 @@ class EntityResolverFloorTest {
                     .transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink));
             assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "opted-in document() resource leaked its external entity");
         } catch (final TransformerException blocked) {
-            // Acceptable: the hardened parse reports the entity as undeclared instead of expanding it.
+            // Throwing is an acceptable outcome, since it doesn't leak the marker.
         }
     }
 
