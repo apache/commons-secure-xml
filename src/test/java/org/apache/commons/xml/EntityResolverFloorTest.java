@@ -19,6 +19,7 @@ package org.apache.commons.xml;
 
 import static org.apache.commons.xml.AttackTestSupport.assertParseFails;
 import static org.apache.commons.xml.AttackTestSupport.assertParseSucceeds;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -285,27 +286,21 @@ class EntityResolverFloorTest {
             systemId != null && systemId.endsWith("included.xsd") ? lsInput(ALLOWED_SCHEMA) : null;
 
     private static LSInput lsInput(final String systemId) {
-        try {
-            final DOMImplementationLS ls = (DOMImplementationLS) DOMImplementationRegistry.newInstance().getDOMImplementation("LS");
-            final LSInput input = ls.createLSInput();
+        return assertDoesNotThrow(() -> {
+            final LSInput input = identifierOnlyLsInput(systemId);
             input.setByteStream(new URL(systemId).openStream());
-            input.setSystemId(systemId);
             return input;
-        } catch (final Exception e) {
-            throw new IllegalStateException("Failed to build LSInput for " + systemId, e);
-        }
+        }, "Failed to build LSInput for " + systemId);
     }
 
     /** An {@link LSInput} naming the resource but carrying no content: a redirect the implementation fetches itself, like an identifier-only {@code InputSource}. */
     private static LSInput identifierOnlyLsInput(final String systemId) {
-        try {
+        return assertDoesNotThrow(() -> {
             final DOMImplementationLS ls = (DOMImplementationLS) DOMImplementationRegistry.newInstance().getDOMImplementation("LS");
             final LSInput input = ls.createLSInput();
             input.setSystemId(systemId);
             return input;
-        } catch (final Exception e) {
-            throw new IllegalStateException("Failed to build LSInput for " + systemId, e);
-        }
+        }, "Failed to build identifier-only LSInput for " + systemId);
     }
 
     @Test
