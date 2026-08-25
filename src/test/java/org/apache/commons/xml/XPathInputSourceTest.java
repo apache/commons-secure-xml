@@ -51,24 +51,22 @@ class XPathInputSourceTest {
 
     @Test
     void hardenedXPathEvaluateDoesNotLeak() throws Exception {
-        final String result;
         try {
-            result = XmlFactories.newXPathFactory().newXPath().evaluate(EXPRESSION, AttackTestSupport.inputSource(entityPayload()));
-        } catch (final XPathExpressionException blocked) {
-            return; // Acceptable: the parse rejected the reference rather than resolving it to empty.
+            final String result = XmlFactories.newXPathFactory().newXPath().evaluate(EXPRESSION, AttackTestSupport.inputSource(entityPayload()));
+            assertFalse(result.contains(AttackTestSupport.LEAKED_MARKER), "external entity leaked into the XPath result: " + result);
+        } catch (final XPathExpressionException ignored) {
+            // Throwing is an acceptable result, since it does not leak the marker.
         }
-        assertFalse(result.contains(AttackTestSupport.LEAKED_MARKER), "external entity leaked into the XPath result: " + result);
     }
 
     @Test
     void hardenedXPathExpressionEvaluateDoesNotLeak() throws Exception {
-        final String result;
         try {
-            result = XmlFactories.newXPathFactory().newXPath().compile(EXPRESSION).evaluate(AttackTestSupport.inputSource(entityPayload()));
-        } catch (final XPathExpressionException blocked) {
-            return; // Acceptable: the parse rejected the reference rather than resolving it to empty.
+            final String result = XmlFactories.newXPathFactory().newXPath().compile(EXPRESSION).evaluate(AttackTestSupport.inputSource(entityPayload()));
+            assertFalse(result.contains(AttackTestSupport.LEAKED_MARKER), "external entity leaked into the compiled XPath result: " + result);
+        } catch (final XPathExpressionException ignored) {
+            // Throwing is an acceptable result, since it does not leak the marker.
         }
-        assertFalse(result.contains(AttackTestSupport.LEAKED_MARKER), "external entity leaked into the compiled XPath result: " + result);
     }
 
     @Test
