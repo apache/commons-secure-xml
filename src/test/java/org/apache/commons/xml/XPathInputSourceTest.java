@@ -17,11 +17,11 @@
 
 package org.apache.commons.xml;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.junit.jupiter.api.Tag;
@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
  *
  * <p>The stock JDK and Apache Xalan implement the {@link org.xml.sax.InputSource}-taking {@code evaluate} entry points by provisioning an internal document
  * parser that {@code FEATURE_SECURE_PROCESSING} on the {@link XPathFactory} does not reach. The {@link HardeningXPathFactory} wrapper parses the input
- * through a hardened {@code DocumentBuilder} instead, so the external reference resolves to empty on the floor (or the parse is rejected outright), while the
+ * through a hardened {@code DocumentBuilder} instead, so the external reference resolves to empty on the floor, while the
  * evaluation itself still works. Tagged {@code xpath}, so it runs under test-stockjdk, test-xalan and test-xalan-xerces; the Saxon engine takes the separate
  * {@code SaxonProvider} path covered by {@code SaxonXPathExternalCallsTest}.</p>
  */
@@ -51,22 +51,19 @@ class XPathInputSourceTest {
 
     @Test
     void hardenedXPathEvaluateDoesNotLeak() throws Exception {
-        try {
-            final String result = XmlFactories.newXPathFactory().newXPath().evaluate(EXPRESSION, AttackTestSupport.inputSource(entityPayload()));
-            assertFalse(result.contains(AttackTestSupport.LEAKED_MARKER), "external entity leaked into the XPath result: " + result);
-        } catch (final XPathExpressionException ignored) {
-            // Throwing is an acceptable result, since it does not leak the marker.
-        }
+        // Deterministic on every engine: the entity is declared in the internal subset and the floor resolves only its
+        // external content — to empty replacement text — so the pre-parse completes and the reference expands to nothing.
+        final String result = assertDoesNotThrow(
+                () -> XmlFactories.newXPathFactory().newXPath().evaluate(EXPRESSION, AttackTestSupport.inputSource(entityPayload())));
+        assertFalse(result.contains(AttackTestSupport.LEAKED_MARKER), "external entity leaked into the XPath result: " + result);
     }
 
     @Test
     void hardenedXPathExpressionEvaluateDoesNotLeak() throws Exception {
-        try {
-            final String result = XmlFactories.newXPathFactory().newXPath().compile(EXPRESSION).evaluate(AttackTestSupport.inputSource(entityPayload()));
-            assertFalse(result.contains(AttackTestSupport.LEAKED_MARKER), "external entity leaked into the compiled XPath result: " + result);
-        } catch (final XPathExpressionException ignored) {
-            // Throwing is an acceptable result, since it does not leak the marker.
-        }
+        // Same declared-entity outcome as above on the compiled-expression entry point.
+        final String result = assertDoesNotThrow(
+                () -> XmlFactories.newXPathFactory().newXPath().compile(EXPRESSION).evaluate(AttackTestSupport.inputSource(entityPayload())));
+        assertFalse(result.contains(AttackTestSupport.LEAKED_MARKER), "external entity leaked into the compiled XPath result: " + result);
     }
 
     @Test
