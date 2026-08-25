@@ -48,6 +48,9 @@ makes is documented in the Javadoc:
 https://commons.apache.org/sandbox/commons-xml/apidocs/org/apache/commons/xml/factory/XmlFactories.html
 
 The hardening applies to the factory and to the parsers, readers, transformers, validators, schemas and XPath objects it produces.
+It governs what those objects read;
+what a transform writes is the stylesheet author's capability
+(see **Transform output destinations** under [What is out of scope](#what-is-out-of-scope)).
 
 ### Adversary model and trust boundary
 
@@ -74,7 +77,12 @@ because your reader's settings are indistinguishable from configuration you chos
 
 ### What is in scope
 
-- The hardening recipes applied by `XmlFactories` to the JAXP implementations it recognizes (stock JDK, Apache Xerces, Xalan, Saxon, and Woodstox).
+- The hardening recipes applied by `XmlFactories`.
+  Every implementation of JAXP 1.4 or later is in scope,
+  as long as it respects the contract of the features, attributes, and properties the recipes use.
+  An implementation that cannot accept a required setting makes the factory method throw
+  instead of returning an unhardened factory.
+
   The recipes for Android's Expat/KXmlParser are applied as best-effort and carry no guarantee
   (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)).
 - A factory returned by `XmlFactories`, used as delivered, that fails to provide a guarantee the Javadoc states it
@@ -230,12 +238,23 @@ and reports against a factory reconfigured in any of the ways below are out of s
   To parse with your own reader under the hardening guarantees,
   obtain it from `XmlFactories.newSAXParserFactory()`
   before wrapping it in a `SAXSource`.
-- The behavior of a JAXP implementation that `XmlFactories` does not recognize (it throws rather than returning an
-  unhardened factory), and any defect in the underlying JAXP implementation itself.
+- The behavior of a JAXP implementation that does not respect the contract of the settings a hardening recipe requires
+  (the factory method throws rather than returning an unhardened factory),
+  and any defect in the underlying JAXP implementation itself.
 - **Android, on any API level.**
   No version of Android supports `FEATURE_SECURE_PROCESSING`,
   so the hardening there is best-effort and no guarantee is defined
   (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)).
+- **Transform output destinations.**
+  The hardening governs what a parse or transform reads;
+  it does not confine what a transform writes.
+  A stylesheet's output-producing instructions,
+  `xsl:result-document` in particular,
+  write wherever the stylesheet directs, within the runtime's permissions:
+  running a stylesheet grants its author that capability,
+  so restricting destinations when the stylesheet is untrusted is the operator's responsibility
+  (an output resolver of the implementation, filesystem permissions, or process sandboxing).
+  A path-traversal or file-write report through a stylesheet's output instructions is out of scope.
 
 ### Downstream responsibility
 
@@ -269,8 +288,11 @@ are **not** vulnerabilities under this model:
   (see **Caller-supplied parser instances** under [What is out of scope](#what-is-out-of-scope)).
 - Reports about a top-level URI the caller passed directly to a parse call. That URI is fetched as-is and is
   the caller's to validate.
-- Reports in a JAXP implementation this library does not recognize: `XmlFactories` throws rather than
-  returning an unhardened factory, so there is no instance to attack.
+- A path-traversal or file-write report through `xsl:result-document` or another output-producing
+  instruction of a stylesheet
+  (see **Transform output destinations** under [What is out of scope](#what-is-out-of-scope)).
+- Reports in a JAXP implementation that does not respect the contract of the settings a hardening recipe
+  requires: `XmlFactories` throws rather than returning an unhardened factory, so there is no instance to attack.
 
 ### Triage dispositions
 
@@ -281,7 +303,7 @@ A report judged against this model receives exactly one of:
 | `VALID` | A factory or instance used as delivered fails to provide a guarantee its Javadoc states (for example, a hardened parser still resolves an external entity, or a documented processing limit is not applied). |
 | `OUT-OF-SCOPE: reconfigured` | A reserved setting was loosened, or a resolver was installed, on the factory or a produced instance before the reported behavior (see [What is out of scope](#what-is-out-of-scope)). |
 | `OUT-OF-SCOPE: caller input` | The behavior follows from a top-level URI, a parser instance the caller constructed outside the library, or other input the caller passed directly to a parse call. |
-| `OUT-OF-SCOPE: foreign implementation` | The behavior is in a JAXP implementation `XmlFactories` does not recognize, or in the underlying JAXP implementation itself. |
+| `OUT-OF-SCOPE: foreign implementation` | The behavior is in a JAXP implementation that does not respect the contract of the settings a hardening recipe requires, or is a defect in the underlying JAXP implementation itself. |
 | `OUT-OF-SCOPE: unsupported runtime` | The behavior is demonstrated only on a runtime the guarantees are not defined on, such as Android on any API level (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)). |
 | `MODEL-GAP` | The report fits none of the above. The model is then incomplete: revise it rather than making an ad-hoc call. |
 

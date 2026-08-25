@@ -154,6 +154,10 @@ The hardening applies to documents parsed through the returned factory. Styleshe
 the implementation picks internally, and that parser may not be hardened (Saxon's TrAX is one such case, see Building
 below). Treat stylesheets and schemas as trusted input, or pre-parse them through a hardened `XmlFactories` parser and
 pass the result as a `DOMSource` or `SAXSource`.
+A stylesheet also chooses where the transform writes (`xsl:result-document`):
+the hardening governs reads only,
+so restrict output destinations yourself when running an untrusted stylesheet
+(see the [Threat Model](threat_model.html)).
 
 ### Transformer handlers and filters
 
