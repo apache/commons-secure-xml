@@ -87,7 +87,7 @@ class ShadingFootprintTest {
             "HardeningValidatorHandler", "HardeningSchema", "FallbackIgnoreLSResourceResolver");
 
     /**
-     * Only the public {@link XmlFactories} entry, which news up every hardener, still pulls the whole library; this is its class count.
+     * Only the public {@link XmlFactories} entry, which references every hardener, still pulls the whole library; this is its class count.
      */
     private static final int LIBRARY_CLASS_COUNT = 35;
 
