@@ -70,8 +70,6 @@ class EntityResolverFloorTest {
     /** systemId the allow-list resolvers do not resolve (so the floor resolves it to empty; its content carries {@link AttackTestSupport#LEAKED_MARKER}). */
     private static final String UNLISTED = AttackTestSupport.resourceUrl("referenced.xml").toString();
 
-    // ---- Entity channel (DOM / SAX) ----------------------------------------------------------------------------------------------------------------------
-
     /** Resolves only {@link #ALLOWED}; returns {@code null} for anything else. */
     private static final EntityResolver ENTITY_ALLOW_LIST = (publicId, systemId) ->
             ALLOWED.equals(systemId) ? new InputSource(new URL(systemId).openStream()) : null;
@@ -161,8 +159,6 @@ class EntityResolverFloorTest {
         assertFalse(text.toString().contains(AttackTestSupport.LEAKED_MARKER), "parse(source, handler) leaked the external entity:\n" + text);
     }
 
-    // ---- Entity channel: relative XInclude href (DOM / SAX) ----------------------------------------------------------------------------------------------
-
     /**
      * Allow-all resolver: it denies nothing, resolving whatever {@code systemId} it is handed by opening it as a URL. It nonetheless cannot resolve a bare
      * relative reference such as {@code referenced.xml}, because a plain {@link EntityResolver} (unlike {@link org.xml.sax.ext.EntityResolver2}) is given no
@@ -215,8 +211,6 @@ class EntityResolverFloorTest {
         reader.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
         return reader;
     }
-
-    // ---- Entity channel (StAX) ---------------------------------------------------------------------------------------------------------------------------
 
     /** Resolves only {@link #ALLOWED} to its content stream; returns {@code null} for anything else. */
     private static final XMLResolver STAX_ALLOW_LIST = (publicID, systemID, baseURI, namespace) -> {
@@ -283,8 +277,6 @@ class EntityResolverFloorTest {
         assertSame(caller, factory.getXMLResolver(), "getXMLResolver should report the caller's resolver, not the floor wrapper");
     }
 
-    // ---- Schema channel (LSResourceResolver) -------------------------------------------------------------------------------------------------------------
-
     /** Absolute location of the imported schema the allow-list resolver permits. */
     private static final String ALLOWED_SCHEMA = AttackTestSupport.resourceUrl("included.xsd").toString();
 
@@ -348,8 +340,6 @@ class EntityResolverFloorTest {
             factory.newSchema(AttackTestSupport.resourceSource("with-import.xsd"));
         }, "Schema import via identifier-only LSInput");
     }
-
-    // ---- XSLT channel (URIResolver) ----------------------------------------------------------------------------------------------------------------------
 
     /** Resolves only the {@code included.xsl} import; returns {@code null} for anything else. */
     private static final URIResolver XSL_ALLOW_LIST = (href, base) ->
