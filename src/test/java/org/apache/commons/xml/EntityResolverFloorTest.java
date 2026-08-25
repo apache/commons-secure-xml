@@ -35,7 +35,6 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
@@ -354,15 +353,12 @@ class EntityResolverFloorTest {
     void transformerDoesNotLeakUnlisted() {
         final TransformerFactory factory = hardenedTransformerFactory();
         factory.setURIResolver((href, base) -> null);
-        // XSLTC and Xalan reject the emptied import at compile time; Saxon compiles it as an empty module, so transform and assert the import did not leak.
-        try {
-            final StringWriter sink = new StringWriter();
-            factory.newTemplates(AttackTestSupport.resourceSource("with-import.xsl")).newTransformer()
-                    .transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink));
-            assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "unlisted stylesheet import leaked");
-        } catch (final TransformerException blocked) {
-            // Throwing is an acceptable outcome, since it doesn't leak the marker.
-        }
+        // Deterministic on every implementation: XSLTC and Xalan compile the empty document the URIResolver floor
+        // returns, Saxon the EmptySource its Configuration floor returns, so the import contributes nothing.
+        final StringWriter sink = new StringWriter();
+        assertDoesNotThrow(() -> factory.newTemplates(AttackTestSupport.resourceSource("with-import.xsl")).newTransformer()
+                .transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink)));
+        assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "unlisted stylesheet import leaked");
     }
 
     @Test
@@ -372,14 +368,12 @@ class EntityResolverFloorTest {
         final TransformerFactory factory = hardenedTransformerFactory();
         factory.setURIResolver((href, base) ->
                 href != null && href.endsWith("included.xsl") ? AttackTestSupport.resourceSource("included-with-entity.xsl") : null);
-        try {
-            final StringWriter sink = new StringWriter();
-            factory.newTemplates(AttackTestSupport.resourceSource("with-import.xsl")).newTransformer()
-                    .transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink));
-            assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "opted-in stylesheet import leaked its external entity");
-        } catch (final TransformerException blocked) {
-            // Throwing is an acceptable outcome, since it doesn't leak the marker.
-        }
+        // The emptied DTD leaves the entity undeclared — only a validity violation when an external subset is
+        // declared — so every non-validating parser skips it and the transform deterministically completes.
+        final StringWriter sink = new StringWriter();
+        assertDoesNotThrow(() -> factory.newTemplates(AttackTestSupport.resourceSource("with-import.xsl")).newTransformer()
+                .transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink)));
+        assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "opted-in stylesheet import leaked its external entity");
     }
 
     @Test
@@ -389,21 +383,18 @@ class EntityResolverFloorTest {
         final TransformerFactory factory = hardenedTransformerFactory();
         factory.setURIResolver((href, base) ->
                 href != null && href.endsWith("referenced.xml") ? AttackTestSupport.resourceSource("referenced-with-entity.xml") : null);
-        try {
-            final StringWriter sink = new StringWriter();
-            factory.newTemplates(AttackTestSupport.resourceSource("with-document.xsl")).newTransformer()
-                    .transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink));
-            assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "opted-in document() resource leaked its external entity");
-        } catch (final TransformerException blocked) {
-            // Throwing is an acceptable outcome, since it doesn't leak the marker.
-        }
+        // Same undeclared-entity outcome as the import above: skipped, never expanded.
+        final StringWriter sink = new StringWriter();
+        assertDoesNotThrow(() -> factory.newTemplates(AttackTestSupport.resourceSource("with-document.xsl")).newTransformer()
+                .transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink)));
+        assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "opted-in document() resource leaked its external entity");
     }
 
     /**
      * A hardened {@link TransformerFactory} with a re-throwing error listener. XSLTC and Xalan enforce the block through the
      * {@link FallbackIgnoreURIResolver} floor; Saxon enforces it through the ignore-all resolver floor on its {@code Configuration}. Either way a caller-set
-     * resolver that returns {@code null} cannot re-open the fetch. The strict listener is required because interpretive Xalan routes a blocked
-     * {@code xsl:import} through the error listener and would otherwise recover and compile instead of throwing.
+     * resolver that returns {@code null} cannot re-open the fetch. The strict listener turns any reported-and-recovered error into a test failure, so an
+     * implementation cannot quietly recover from a floor resolution while the test asserts clean completion.
      */
     private static TransformerFactory hardenedTransformerFactory() {
         final TransformerFactory factory = XmlFactories.newTransformerFactory();
