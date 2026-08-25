@@ -17,19 +17,27 @@
 
 package org.apache.commons.xml;
 
+import java.io.IOException;
 import java.util.function.Supplier;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.URIResolver;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TemplatesHandler;
 import javax.xml.transform.sax.TransformerHandler;
+import javax.xml.transform.stream.StreamSource;
 
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.xml.sax.XMLFilter;
 import org.xml.sax.XMLReader;
 
@@ -95,7 +103,45 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
     @Override
     public Source getAssociatedStylesheet(final Source source, final String media, final String title, final String charset)
             throws TransformerConfigurationException {
-        return delegate.getAssociatedStylesheet(SAXParserHardener.hardenSource(source), media, title, charset);
+        // Xalan's getAssociatedStylesheet drops a SAXSource's reader and self-provisions its own to scan for xml-stylesheet PIs (XALANJ-2849).
+        final Source hardened = isXalan(delegate) ? hardenSourceToDom(source) : SAXParserHardener.hardenSource(source);
+        return delegate.getAssociatedStylesheet(hardened, media, title, charset);
+    }
+
+    /**
+     * Whether the delegate is Apache Xalan (either its interpretive or its XSLTC factory), whose {@code getAssociatedStylesheet} ignores a SAXSource reader.
+     *
+     * @param factory The delegate factory.
+     * @return Whether the delegate is an {@code org.apache.xalan.} implementation.
+     */
+    private static boolean isXalan(final SAXTransformerFactory factory) {
+        return factory.getClass().getName().startsWith("org.apache.xalan.");
+    }
+
+    /**
+     * Parses a reader-less source into a DOM through a hardened, namespace-aware {@link javax.xml.parsers.DocumentBuilder} and returns a {@link DOMSource}
+     * carrying its system id, so the consumer walks the tree instead of provisioning its own reader. Any other source is left to
+     * {@link SAXParserHardener#hardenSource(Source)}.
+     *
+     * @param source The source to scan for an associated stylesheet.
+     * @return A {@link DOMSource} for a reader-less source, otherwise the result of {@link SAXParserHardener#hardenSource(Source)}.
+     * @throws TransformerConfigurationException if the source cannot be parsed.
+     */
+    private static Source hardenSourceToDom(final Source source) throws TransformerConfigurationException {
+        if (source instanceof StreamSource || source instanceof SAXSource && ((SAXSource) source).getXMLReader() == null) {
+            final InputSource inputSource = SAXSource.sourceToInputSource(source);
+            if (inputSource != null) {
+                try {
+                    final DocumentBuilderFactory factory = DocumentBuilderHardener.harden(DocumentBuilderFactory.newInstance());
+                    factory.setNamespaceAware(true);
+                    final Document document = factory.newDocumentBuilder().parse(inputSource);
+                    return new DOMSource(document, inputSource.getSystemId());
+                } catch (final ParserConfigurationException | SAXException | IOException e) {
+                    throw new TransformerConfigurationException("Failed to parse the source for associated-stylesheet lookup", e);
+                }
+            }
+        }
+        return SAXParserHardener.hardenSource(source);
     }
 
     @Override
