@@ -141,6 +141,9 @@ public final class XmlFactories {
      * <p>Beyond the three universal guarantees on {@link XmlFactories}: {@code xsl:import}, {@code xsl:include} and {@code document()} URIs are not
      * resolved.</p>
      *
+     * <p>The guarantees govern what the transform reads, not what it writes: an output instruction like {@code xsl:result-document} still writes wherever the
+     * stylesheet directs, so an untrusted stylesheet's output destinations must be restricted outside the library.</p>
+     *
      * <p>The guarantees apply to every parser the factory creates internally for the standard {@link TransformerFactory} entry points: stylesheet compilation
      * ({@link TransformerFactory#newTemplates(javax.xml.transform.Source) newTemplates(Source)},
      * {@link TransformerFactory#newTransformer(javax.xml.transform.Source) newTransformer(Source)}) and source-document reading at
