@@ -89,7 +89,7 @@ class ShadingFootprintTest {
     /**
      * Only the public {@link XmlFactories} entry, which news up every hardener, still pulls the whole library; this is its class count.
      */
-    private static final int WHOLE_LIBRARY_SIZE = 35;
+    private static final int LIBRARY_CLASS_COUNT = 35;
 
     /**
      * Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library.
@@ -155,7 +155,7 @@ class ShadingFootprintTest {
 
     @Test
     void onlyXmlFactoriesPullsTheWholeLibrary() {
-        assertEquals(WHOLE_LIBRARY_SIZE, closureOf("XmlFactories").size(), "XmlFactories closure size drifted");
+        assertEquals(LIBRARY_CLASS_COUNT, closureOf("XmlFactories").size(), "XmlFactories closure size drifted");
     }
 
     /**
