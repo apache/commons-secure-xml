@@ -44,7 +44,6 @@ final class HardeningXPathFactory extends XPathFactory {
         return xpath == null ? null : new HardeningXPath(xpath);
     }
 
-    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
     @Override
     public boolean getFeature(final String name) throws XPathFactoryConfigurationException {
         return delegate.getFeature(name);
@@ -69,5 +68,4 @@ final class HardeningXPathFactory extends XPathFactory {
     public void setXPathVariableResolver(final XPathVariableResolver resolver) {
         delegate.setXPathVariableResolver(resolver);
     }
-    // </editor-fold>
 }

@@ -92,7 +92,6 @@ final class HardeningXPath implements XPath {
         return compiled == null ? null : new HardeningXPathExpression(compiled);
     }
 
-    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
     @Override
     public String evaluate(final String expression, final Object item) throws XPathExpressionException {
         return delegate.evaluate(expression, item);
@@ -137,5 +136,4 @@ final class HardeningXPath implements XPath {
     public void setXPathVariableResolver(final XPathVariableResolver resolver) {
         delegate.setXPathVariableResolver(resolver);
     }
-    // </editor-fold>
 }

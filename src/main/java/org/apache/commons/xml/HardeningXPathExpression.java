@@ -48,7 +48,6 @@ final class HardeningXPathExpression implements XPathExpression {
         return delegate.evaluate(HardeningXPath.parse(source), returnType);
     }
 
-    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
     @Override
     public String evaluate(final Object item) throws XPathExpressionException {
         return delegate.evaluate(item);
@@ -58,5 +57,4 @@ final class HardeningXPathExpression implements XPathExpression {
     public Object evaluate(final Object item, final QName returnType) throws XPathExpressionException {
         return delegate.evaluate(item, returnType);
     }
-    // </editor-fold>
 }
