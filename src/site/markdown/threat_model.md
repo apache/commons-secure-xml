@@ -75,7 +75,7 @@ because your reader's settings are indistinguishable from configuration you chos
 ### What is in scope
 
 - The hardening recipes applied by `XmlFactories`.
-  Every JAXP implementation is in scope,
+  Every implementation of JAXP 1.4 or later is in scope,
   as long as it respects the contract of the features, attributes, and properties the recipes use.
   An implementation that cannot accept a required setting makes the factory method throw
   instead of returning an unhardened factory.
