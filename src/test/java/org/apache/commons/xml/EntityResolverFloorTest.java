@@ -304,7 +304,7 @@ class EntityResolverFloorTest {
         }
     }
 
-    /** An {@link LSInput} naming the resource but carrying no content, the shape that would send the implementation into a default-resolution self-fetch. */
+    /** An {@link LSInput} naming the resource but carrying no content: a redirect the implementation fetches itself, like an identifier-only {@code InputSource}. */
     private static LSInput identifierOnlyLsInput(final String systemId) {
         try {
             final DOMImplementationLS ls = (DOMImplementationLS) DOMImplementationRegistry.newInstance().getDOMImplementation("LS");
@@ -339,14 +339,14 @@ class EntityResolverFloorTest {
 
     @Test
     @Tag("schema")
-    void schemaTreatsIdentifierOnlyOptInAsUnresolved() {
-        // Opting in requires supplying content: an identifier-only LSInput is treated as unresolved, so the import stays empty and the compile fails.
-        assertParseFails(() -> {
+    void schemaFetchesIdentifierOnlyOptIn() {
+        // A non-null return is an opt-in even without content: the implementation fetches the named resource itself, mirroring the entity floor's contract.
+        assertParseSucceeds(() -> {
             final SchemaFactory factory = XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             factory.setResourceResolver((type, namespaceURI, publicId, systemId, baseURI) ->
                     systemId != null && systemId.endsWith("included.xsd") ? identifierOnlyLsInput(ALLOWED_SCHEMA) : null);
             factory.newSchema(AttackTestSupport.resourceSource("with-import.xsd"));
-        }, "Schema import via identifier-only LSInput", SAXException.class, SecurityException.class);
+        }, "Schema import via identifier-only LSInput");
     }
 
     // ---- XSLT channel (URIResolver) ----------------------------------------------------------------------------------------------------------------------
