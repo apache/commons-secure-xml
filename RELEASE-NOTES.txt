@@ -29,11 +29,29 @@ First release.
 New features
 ------------
 
-*                  Secure-by-default JAXP factory creation via XmlFactories, with implementation-specific hardening recipes for the
-                   stock JDK, Android, Apache Xalan, Apache Xerces, Woodstox, and Saxon-HE.
+*                  Add secure-by-default JAXP factory creation via XmlFactories, donated from the copernik-xml-factory project (https://github.com/copernik-eu/copernik-xml-factory) and covering the stock JDK, Android, Apache Xalan, Apache Xerces, Woodstox, and Saxon-HE. Thanks to Piotr P. Karwasz, Gary Gregory.
+* COMMONSXML-9:    Install a non-removable resolver floor on every resolver channel (EntityResolver, LSResourceResolver, URIResolver, and XMLResolver), routing caller-supplied resolvers through it as allow-lists. Thanks to Piotr P. Karwasz, Gary Gregory.
+*                  Harden the SAXTransformerFactory extension surface (TransformerHandler, TemplatesHandler, and XMLFilter) and TransformerFactory.getAssociatedStylesheet. Thanks to Piotr P. Karwasz, Gary Gregory.
+*                  Document the threat model on the project site, including the denied-fetch contract and the supported runtime floor (OpenJDK 8 and Android API 33 or later). Thanks to Piotr P. Karwasz, Jarek Potiuk, Gary Gregory.
+* COMMONSXML-11:   Add GitHub CI builds for Java 26 and 27-EA. Thanks to Gary Gregory, Piotr P. Karwasz.
 
+Fixed Bugs
+----------
 
+* COMMONSXML-10:   Block XInclude (xi:include) href resolution by default, since the JAXP external-access properties do not govern it. Thanks to Ta Duc Thien, Piotr P. Karwasz, Gary Gregory.
+*                  Restore the hardened configuration when a factory or parser is reset() instead of reverting to the implementation defaults. Thanks to Piotr P. Karwasz, Gary Gregory.
 
+Changes
+-------
+
+* COMMONSXML-1,COMMONSXML-5,COMMONSXML-6,COMMONSXML-7,COMMONSXML-8: Recognize XML implementations by the JAXP features and properties they support instead of by their implementation class name, extending the hardening to any compliant implementation. Thanks to Piotr P. Karwasz, Gary Gregory.
+* COMMONSXML-4:    Define a consistent contract for denied external fetches: unresolved external references resolve to empty content on every implementation, unless the org.apache.commons.xml.throwOnUnresolved system property requests rejection. Thanks to Piotr P. Karwasz, Gary Gregory.
+* COMMONSXML-3:    Reduce the shaded footprint by splitting the hardeners and resolver floors into independent entry points. Thanks to Piotr P. Karwasz, Gary Gregory.
+
+Removed
+-------
+
+* COMMONSXML-2:    Remove the Limits class that applied uniform processing limits across implementations. Thanks to Piotr P. Karwasz, Gary Gregory.
 
 Historical list of changes: https://commons.apache.org/sandbox/commons-xml//changes.html
 
