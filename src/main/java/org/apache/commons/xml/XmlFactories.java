@@ -197,7 +197,8 @@ public final class XmlFactories {
      * </p>
      *
      * @return A hardened factory.
-     * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws RuntimeException      Thrown if there is a failure in creating an {@link XPathFactory} for the default object model.
      */
     public static XPathFactory newXPathFactory() {
         return XPathHardener.harden(XPathFactory.newInstance());
