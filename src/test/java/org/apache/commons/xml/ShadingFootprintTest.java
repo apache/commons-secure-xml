@@ -29,14 +29,14 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.xml.transform.Source;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.vafer.jdependency.Clazz;
 import org.vafer.jdependency.Clazzpath;
-
-import javax.xml.transform.Source;
 
 /**
  * Guards the shade footprint: the set of classes a consumer pulls in when they shade a single hardener entry point.
