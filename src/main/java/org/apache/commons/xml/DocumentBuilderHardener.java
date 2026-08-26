@@ -20,6 +20,8 @@ package org.apache.commons.xml;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathFactory;
 
 import org.xml.sax.EntityResolver;
 
@@ -56,10 +58,19 @@ final class DocumentBuilderHardener {
         return new HardeningDocumentBuilderFactory(factory);
     }
 
+    /**
+     * Sets a feature on the given factory, throwing a {@link HardeningException} if the implementation does not recognize it.
+     *
+     * @param factory The factory to harden.
+     * @param feature The feature to set.
+     * @param value   The value to set.
+     * @throws HardeningException Thrown if this {@link XPathFactory} or the {@code XPath}s it creates cannot support this feature or if {@code feature} is
+     *                            {@code null}.
+     */
     private static void setFeature(final DocumentBuilderFactory factory, final String feature, final boolean value) {
         try {
             factory.setFeature(feature, value);
-        } catch (final Exception e) {
+        } catch (final ParserConfigurationException e) {
             throw HardeningException.settingFailed("feature", feature, factory, e);
         }
     }
