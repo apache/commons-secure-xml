@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.function.Supplier;
 
+import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
@@ -127,6 +128,12 @@ final class HardeningTransformer extends Transformer {
         floor.setDelegate(resolver);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     */
     @Override
     public void transform(final Source xmlSource, final Result outputTarget) throws TransformerException {
         try {

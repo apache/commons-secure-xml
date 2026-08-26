@@ -92,7 +92,7 @@ public final class XmlFactories {
      *
      * @return A hardened factory.
      * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown from {@link DocumentBuilderFactory} in case of a {@link java.util.ServiceConfigurationError service
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
      *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      */
     public static DocumentBuilderFactory newDocumentBuilderFactory() {
@@ -111,6 +111,8 @@ public final class XmlFactories {
      *
      * @return A hardened factory.
      * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown from {@link SAXParserFactory} in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      */
     public static SAXParserFactory newSAXParserFactory() {
         return SAXParserHardener.harden(SAXParserFactory.newInstance());

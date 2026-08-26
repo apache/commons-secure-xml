@@ -19,6 +19,7 @@ package org.apache.commons.xml;
 
 import java.util.Objects;
 
+import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.validation.Schema;
@@ -55,6 +56,15 @@ import org.xml.sax.SAXNotSupportedException;
  */
 final class HardeningSchemaFactory extends SchemaFactory {
 
+    /**
+     * Hardens every schema source through {@link SAXParserHardener#hardenSource(Source)}.
+     *
+     * @param schemas the schema sources to harden; must not be {@code null}.
+     * @return a new array of hardened sources.
+     * @throws SAXException if any source cannot be hardened.
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     */
     private static Source[] harden(final Source[] schemas) throws SAXException {
         final Source[] hardened = new Source[schemas.length];
         try {
@@ -113,6 +123,12 @@ final class HardeningSchemaFactory extends SchemaFactory {
         return new HardeningSchema(delegate.newSchema());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     */
     @Override
     public Schema newSchema(final Source[] schemas) throws SAXException {
         return new HardeningSchema(delegate.newSchema(harden(schemas)));

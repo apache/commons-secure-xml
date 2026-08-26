@@ -63,7 +63,7 @@ final class FallbackIgnoreURIResolver implements URIResolver {
      *
      * @return a new empty document.
      * @throws HardeningException        Thrown if a {@link DocumentBuilder} cannot be created which satisfies the configuration requested.
-     * @throws FactoryConfigurationError Thrown from {@link DocumentBuilderFactory} in case of a {@link java.util.ServiceConfigurationError service
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
      *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      */
     private static Document newEmptyDocument() {
@@ -110,6 +110,12 @@ final class FallbackIgnoreURIResolver implements URIResolver {
         return delegate;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     */
     @Override
     public Source resolve(final String href, final String base) throws TransformerException {
         final Source resolved = delegate != null ? delegate.resolve(href, base) : null;

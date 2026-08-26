@@ -20,6 +20,7 @@ package org.apache.commons.xml;
 import java.io.IOException;
 import java.util.Objects;
 
+import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerConfigurationException;
@@ -103,6 +104,12 @@ final class HardeningValidator extends Validator {
         floor.setDelegate(resourceResolver);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     */
     @Override
     public void validate(final Source source, final Result result) throws SAXException, IOException {
         try {

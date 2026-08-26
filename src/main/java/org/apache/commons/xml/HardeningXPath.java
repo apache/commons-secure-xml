@@ -58,7 +58,7 @@ final class HardeningXPath implements XPath {
      * @return The parsed document.
      * @throws NullPointerException     if {@code source} is {@code null}, per the {@link XPath} contract.
      * @throws XPathExpressionException if the source cannot be parsed.
-     * @throws FactoryConfigurationError Thrown from {@link DocumentBuilderFactory} in case of a {@link java.util.ServiceConfigurationError service
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
      *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      */
     static Document parse(final InputSource source) throws XPathExpressionException {
@@ -93,7 +93,7 @@ final class HardeningXPath implements XPath {
     /**
      * {@inheritDoc}
      *
-     * @throws FactoryConfigurationError Thrown from {@link DocumentBuilderFactory} in case of a {@link java.util.ServiceConfigurationError service
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
      *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      */
     @Override
@@ -104,7 +104,7 @@ final class HardeningXPath implements XPath {
     /**
      * {@inheritDoc}
      *
-     * @throws FactoryConfigurationError Thrown from {@link DocumentBuilderFactory} in case of a {@link java.util.ServiceConfigurationError service
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
      *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      */
     @Override
