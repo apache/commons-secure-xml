@@ -153,7 +153,9 @@ class ShadingFootprintTest {
             final long bytes = bytesOf(closure);
             report.append(String.format(Locale.ROOT, "  %-24s %2d classes  %7d bytes  %5.1f%%%n", entry, closure.size(), bytes, 100.0 * bytes / library));
         }
-        System.out.print(report);
+        if (Boolean.getBoolean(ShadingFootprintTest.class.getName() + ".reportFootprint")) {
+            System.out.print(report);
+        }
     }
 
     /**
