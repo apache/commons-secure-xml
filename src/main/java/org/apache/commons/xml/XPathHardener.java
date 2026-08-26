@@ -89,7 +89,7 @@ final class XPathHardener {
     private static void setOptionalFeature(final XPathFactory factory, final String feature, final boolean value) {
         try {
             factory.setFeature(feature, value);
-        } catch (final Exception e) {
+        } catch (final XPathFactoryConfigurationException e) {
             // Ignored: the implementation does not recognize this feature.
         }
     }
