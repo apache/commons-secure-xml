@@ -90,7 +90,7 @@ final class XPathHardener {
         try {
             factory.setFeature(feature, value);
         } catch (final XPathFactoryConfigurationException e) {
-            // Ignored: the implementation does not recognize this feature.
+            // Ignored: the implementation does not recognize this option.
         }
     }
 
