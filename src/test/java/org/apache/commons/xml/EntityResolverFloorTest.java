@@ -19,6 +19,7 @@ package org.apache.commons.xml;
 
 import static org.apache.commons.xml.AttackTestSupport.assertParseFails;
 import static org.apache.commons.xml.AttackTestSupport.assertParseSucceeds;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -34,7 +35,6 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
@@ -69,8 +69,6 @@ class EntityResolverFloorTest {
 
     /** systemId the allow-list resolvers do not resolve (so the floor resolves it to empty; its content carries {@link AttackTestSupport#LEAKED_MARKER}). */
     private static final String UNLISTED = AttackTestSupport.resourceUrl("referenced.xml").toString();
-
-    // ---- Entity channel (DOM / SAX) ----------------------------------------------------------------------------------------------------------------------
 
     /** Resolves only {@link #ALLOWED}; returns {@code null} for anything else. */
     private static final EntityResolver ENTITY_ALLOW_LIST = (publicId, systemId) ->
@@ -161,8 +159,6 @@ class EntityResolverFloorTest {
         assertFalse(text.toString().contains(AttackTestSupport.LEAKED_MARKER), "parse(source, handler) leaked the external entity:\n" + text);
     }
 
-    // ---- Entity channel: relative XInclude href (DOM / SAX) ----------------------------------------------------------------------------------------------
-
     /**
      * Allow-all resolver: it denies nothing, resolving whatever {@code systemId} it is handed by opening it as a URL. It nonetheless cannot resolve a bare
      * relative reference such as {@code referenced.xml}, because a plain {@link EntityResolver} (unlike {@link org.xml.sax.ext.EntityResolver2}) is given no
@@ -215,8 +211,6 @@ class EntityResolverFloorTest {
         reader.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
         return reader;
     }
-
-    // ---- Entity channel (StAX) ---------------------------------------------------------------------------------------------------------------------------
 
     /** Resolves only {@link #ALLOWED} to its content stream; returns {@code null} for anything else. */
     private static final XMLResolver STAX_ALLOW_LIST = (publicID, systemID, baseURI, namespace) -> {
@@ -283,8 +277,6 @@ class EntityResolverFloorTest {
         assertSame(caller, factory.getXMLResolver(), "getXMLResolver should report the caller's resolver, not the floor wrapper");
     }
 
-    // ---- Schema channel (LSResourceResolver) -------------------------------------------------------------------------------------------------------------
-
     /** Absolute location of the imported schema the allow-list resolver permits. */
     private static final String ALLOWED_SCHEMA = AttackTestSupport.resourceUrl("included.xsd").toString();
 
@@ -293,15 +285,21 @@ class EntityResolverFloorTest {
             systemId != null && systemId.endsWith("included.xsd") ? lsInput(ALLOWED_SCHEMA) : null;
 
     private static LSInput lsInput(final String systemId) {
-        try {
+        return assertDoesNotThrow(() -> {
+            final LSInput input = identifierOnlyLsInput(systemId);
+            input.setByteStream(new URL(systemId).openStream());
+            return input;
+        }, "Failed to build LSInput for " + systemId);
+    }
+
+    /** An {@link LSInput} naming the resource but carrying no content: a redirect the implementation fetches itself, like an identifier-only {@code InputSource}. */
+    private static LSInput identifierOnlyLsInput(final String systemId) {
+        return assertDoesNotThrow(() -> {
             final DOMImplementationLS ls = (DOMImplementationLS) DOMImplementationRegistry.newInstance().getDOMImplementation("LS");
             final LSInput input = ls.createLSInput();
-            input.setByteStream(new URL(systemId).openStream());
             input.setSystemId(systemId);
             return input;
-        } catch (final Exception e) {
-            throw new IllegalStateException("Failed to build LSInput for " + systemId, e);
-        }
+        }, "Failed to build identifier-only LSInput for " + systemId);
     }
 
     @Test
@@ -325,7 +323,17 @@ class EntityResolverFloorTest {
         }, "Schema import", SAXException.class, SecurityException.class);
     }
 
-    // ---- XSLT channel (URIResolver) ----------------------------------------------------------------------------------------------------------------------
+    @Test
+    @Tag("schema")
+    void schemaFetchesIdentifierOnlyOptIn() {
+        // A non-null return is an opt-in even without content: the implementation fetches the named resource itself, mirroring the entity floor's contract.
+        assertParseSucceeds(() -> {
+            final SchemaFactory factory = XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            factory.setResourceResolver((type, namespaceURI, publicId, systemId, baseURI) ->
+                    systemId != null && systemId.endsWith("included.xsd") ? identifierOnlyLsInput(ALLOWED_SCHEMA) : null);
+            factory.newSchema(AttackTestSupport.resourceSource("with-import.xsd"));
+        }, "Schema import via identifier-only LSInput");
+    }
 
     /** Resolves only the {@code included.xsl} import; returns {@code null} for anything else. */
     private static final URIResolver XSL_ALLOW_LIST = (href, base) ->
@@ -342,25 +350,51 @@ class EntityResolverFloorTest {
 
     @Test
     @Tag("trax")
-    void transformerDeniesUnlisted() {
+    void transformerDoesNotLeakUnlisted() {
         final TransformerFactory factory = hardenedTransformerFactory();
         factory.setURIResolver((href, base) -> null);
-        // XSLTC and Xalan reject the emptied import at compile time; Saxon compiles it as an empty module, so transform and assert the import did not leak.
-        try {
-            final StringWriter sink = new StringWriter();
-            factory.newTemplates(AttackTestSupport.resourceSource("with-import.xsl")).newTransformer()
-                    .transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink));
-            assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "unlisted stylesheet import leaked");
-        } catch (final TransformerException blocked) {
-            // Acceptable: rejected at compile rather than resolved to empty.
-        }
+        // Deterministic on every implementation: XSLTC and Xalan compile the empty document the URIResolver floor
+        // returns, Saxon the EmptySource its Configuration floor returns, so the import contributes nothing.
+        final StringWriter sink = new StringWriter();
+        assertDoesNotThrow(() -> factory.newTemplates(AttackTestSupport.resourceSource("with-import.xsl")).newTransformer()
+                .transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink)));
+        assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "unlisted stylesheet import leaked");
+    }
+
+    @Test
+    @Tag("trax")
+    void transformerParsesOptedInImportHardened() {
+        // The opted-in module carries an external DTD reference; parsed on the floor the DTD is empty, so its entity cannot expand into the output.
+        final TransformerFactory factory = hardenedTransformerFactory();
+        factory.setURIResolver((href, base) ->
+                href != null && href.endsWith("included.xsl") ? AttackTestSupport.resourceSource("included-with-entity.xsl") : null);
+        // The emptied DTD leaves the entity undeclared — only a validity violation when an external subset is
+        // declared — so every non-validating parser skips it and the transform deterministically completes.
+        final StringWriter sink = new StringWriter();
+        assertDoesNotThrow(() -> factory.newTemplates(AttackTestSupport.resourceSource("with-import.xsl")).newTransformer()
+                .transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink)));
+        assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "opted-in stylesheet import leaked its external entity");
+    }
+
+    @Test
+    @Tag("trax")
+    void transformerParsesOptedInDocumentHardened() {
+        // Same contract on the runtime document() channel, which reaches a different internal reader than the compile-time import.
+        final TransformerFactory factory = hardenedTransformerFactory();
+        factory.setURIResolver((href, base) ->
+                href != null && href.endsWith("referenced.xml") ? AttackTestSupport.resourceSource("referenced-with-entity.xml") : null);
+        // Same undeclared-entity outcome as the import above: skipped, never expanded.
+        final StringWriter sink = new StringWriter();
+        assertDoesNotThrow(() -> factory.newTemplates(AttackTestSupport.resourceSource("with-document.xsl")).newTransformer()
+                .transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink)));
+        assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "opted-in document() resource leaked its external entity");
     }
 
     /**
      * A hardened {@link TransformerFactory} with a re-throwing error listener. XSLTC and Xalan enforce the block through the
      * {@link FallbackIgnoreURIResolver} floor; Saxon enforces it through the ignore-all resolver floor on its {@code Configuration}. Either way a caller-set
-     * resolver that returns {@code null} cannot re-open the fetch. The strict listener is required because interpretive Xalan routes a blocked
-     * {@code xsl:import} through the error listener and would otherwise recover and compile instead of throwing.
+     * resolver that returns {@code null} cannot re-open the fetch. The strict listener turns any reported-and-recovered error into a test failure, so an
+     * implementation cannot quietly recover from a floor resolution while the test asserts clean completion.
      */
     private static TransformerFactory hardenedTransformerFactory() {
         final TransformerFactory factory = XmlFactories.newTransformerFactory();

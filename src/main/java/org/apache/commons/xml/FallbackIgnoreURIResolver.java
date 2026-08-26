@@ -38,6 +38,10 @@ import org.w3c.dom.Document;
  *
  * <p>The shape of that empty {@link Source} is supplied by the caller: the default is a well-formed empty DOM document (which every stock TrAX consumer
  * accepts), while the Saxon path supplies {@code EmptySource.getInstance()} so its consumers get the "empty" shape they expect.</p>
+ *
+ * <p>An opted-in {@link javax.xml.transform.stream.StreamSource} or reader-less {@link javax.xml.transform.sax.SAXSource} is rewritten to carry a hardened
+ * reader before it is returned, so the implementation parses the opted-in content on the same floor instead of with an internal reader at its own defaults. A
+ * {@link javax.xml.transform.dom.DOMSource} or a {@link javax.xml.transform.sax.SAXSource} carrying the caller's own reader is returned as-is.</p>
  */
 final class FallbackIgnoreURIResolver implements URIResolver {
 
@@ -86,7 +90,8 @@ final class FallbackIgnoreURIResolver implements URIResolver {
     public Source resolve(final String href, final String base) throws TransformerException {
         final Source resolved = delegate != null ? delegate.resolve(href, base) : null;
         if (resolved != null) {
-            return resolved;
+            // The implementation parses the opted-in handle with an internal reader at its own defaults; the rewrite hands it a hardened reader instead.
+            return SAXParserHardener.hardenSource(resolved);
         }
         if (HardeningException.throwOnUnresolved()) {
             throw new TransformerException(HardeningException.forbidden("uri", null, null, href, base));
