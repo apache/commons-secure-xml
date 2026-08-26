@@ -59,9 +59,7 @@ final class HardeningXPath implements XPath {
      * @throws XPathExpressionException if the source cannot be parsed.
      */
     static Document parse(final InputSource source) throws XPathExpressionException {
-        if (source == null) {
-            throw new NullPointerException("source cannot be null");
-        }
+        Objects.requireNonNull(source, "source");
         try {
             final DocumentBuilderFactory factory = DocumentBuilderHardener.harden(DocumentBuilderFactory.newInstance());
             factory.setNamespaceAware(true);
