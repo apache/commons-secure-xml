@@ -55,6 +55,8 @@ import org.xml.sax.ext.EntityResolver2;
  */
 class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
 
+    private static final byte[] EMPTY = new byte[0];
+
     /**
      * Resolves {@code systemId} against {@code baseURI}.
      *
@@ -114,7 +116,7 @@ class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
         if (HardeningException.throwOnUnresolved()) {
             throw new SAXException(HardeningException.forbidden(name, null, publicId, systemId, baseURI));
         }
-        final InputSource empty = new InputSource(new ByteArrayInputStream(new byte[0]));
+        final InputSource empty = new InputSource(new ByteArrayInputStream(EMPTY));
         empty.setPublicId(publicId);
         empty.setSystemId(absolutize(baseURI, systemId));
         return empty;
