@@ -178,7 +178,8 @@ public final class XmlFactories {
      * </p>
      *
      * @return A hardened factory.
-     * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if an instance of this factory cannot be loaded.
      */
     public static XMLInputFactory newXMLInputFactory() {
         return StaxHardener.harden(XMLInputFactory.newInstance());
