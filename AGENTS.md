@@ -47,7 +47,7 @@ Guidance for AI coding agents working in this repository.
 ### Prose
 
 - No em-dashes (`—`) in Javadoc, comments, commit messages, or documentation.
-  Use commas, colons, parentheses, or a fresh sentence instead. This applies to
+  Use commas, colons, parentheses, or a new sentence instead. This applies to
   HTML entities too (`&mdash;`).
 
 ### Commits

@@ -41,7 +41,7 @@ a finding that falls under [What is out of scope](#what-is-out-of-scope) will be
 ### Scope and intended use
 
 This library is a helper for **safely creating JAXP factories**. Each `XmlFactories.newXxxFactory()` method returns a
-fresh, hardened factory whose parsers reject the common XML attacks (external entity / DTD resolution, XXE, SSRF through
+new, hardened factory whose parsers reject the common XML attacks (external entity / DTD resolution, XXE, SSRF through
 external references, and entity-expansion denial of service such as Billion Laughs). The exact guarantee each factory
 makes is documented in the Javadoc:
 

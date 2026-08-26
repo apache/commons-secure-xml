@@ -66,7 +66,7 @@ final class HardeningXMLFilter extends XMLFilterImpl {
             result.setLexicalHandler((LexicalHandler) handler);
         }
         try {
-            // A fresh HardeningTransformer per parse: the floor is installed on it, and transformers are not reusable across concurrent parses.
+            // A new HardeningTransformer per parse: the floor is installed on it, and transformers are not reusable across concurrent parses.
             final Transformer transformer = templates.newTransformer();
             transformer.transform(new SAXSource(getParent(), input), result);
         } catch (final TransformerException e) {

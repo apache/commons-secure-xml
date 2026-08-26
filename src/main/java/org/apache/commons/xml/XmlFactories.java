@@ -28,7 +28,7 @@ import javax.xml.xpath.XPathFactory;
 /**
  * Entry point for obtaining hardened JAXP factories.
  *
- * <p>Every method on this class returns a <em>fresh, hardened</em> factory instance. No caching or pooling is performed; callers on a hot path are responsible
+ * <p>Every method on this class returns a <em>new, hardened</em> factory instance. No caching or pooling is performed; callers on a hot path are responsible
  * for their own caching.</p>
  *
  * <h2>Hardening guarantees</h2>
@@ -81,7 +81,7 @@ public final class XmlFactories {
     static final String THROW_ON_UNRESOLVED = "org.apache.commons.xml.throwOnUnresolved";
 
     /**
-     * Returns a fresh, hardened {@link DocumentBuilderFactory}.
+     * Returns a new, hardened {@link DocumentBuilderFactory}.
      *
      * <p>Beyond the three universal guarantees on {@link XmlFactories}, XInclude resolution is denied by default.
      * When {@link DocumentBuilderFactory#setXIncludeAware(boolean) setXIncludeAware(true)} is called on the returned
@@ -97,7 +97,7 @@ public final class XmlFactories {
     }
 
     /**
-     * Returns a fresh, hardened {@link SAXParserFactory}.
+     * Returns a new, hardened {@link SAXParserFactory}.
      *
      * <p>Beyond the three universal guarantees on {@link XmlFactories}, XInclude resolution is denied by default.
      * When {@link SAXParserFactory#setXIncludeAware(boolean) setXIncludeAware(true)} is called on the returned
@@ -114,7 +114,7 @@ public final class XmlFactories {
     }
 
     /**
-     * Returns a fresh, hardened {@link SchemaFactory} for the given schema language.
+     * Returns a new, hardened {@link SchemaFactory} for the given schema language.
      *
      * <p>Beyond the three universal guarantees on {@link XmlFactories}:</p>
      *
@@ -136,7 +136,7 @@ public final class XmlFactories {
     }
 
     /**
-     * Returns a fresh, hardened {@link TransformerFactory}.
+     * Returns a new, hardened {@link TransformerFactory}.
      *
      * <p>Beyond the three universal guarantees on {@link XmlFactories}: {@code xsl:import}, {@code xsl:include} and {@code document()} URIs are not
      * resolved.</p>
@@ -161,7 +161,7 @@ public final class XmlFactories {
     }
 
     /**
-     * Returns a fresh, hardened {@link XMLInputFactory}.
+     * Returns a new, hardened {@link XMLInputFactory}.
      *
      * <p>The three universal guarantees on {@link XmlFactories} apply; StAX exposes no additional vectors beyond them.</p>
      *
@@ -173,7 +173,7 @@ public final class XmlFactories {
     }
 
     /**
-     * Returns a fresh, hardened {@link XPathFactory} for the default XPath object model.
+     * Returns a new, hardened {@link XPathFactory} for the default XPath object model.
      *
      * <p>Beyond the three universal guarantees on {@link XmlFactories}, URI-fetching XPath 3.1+ functions ({@code doc()}, {@code collection()},
      * {@code unparsed-text()}) are not resolved.</p>

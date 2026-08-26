@@ -34,7 +34,7 @@ import org.xml.sax.helpers.XMLReaderAdapter;
  * SAX 1 ({@link #getParser()}) path gets the same hardening. The SAX 1 view matters because some consumers, such as Xalan's identity transformer, still ask
  * for a {@link Parser}.</p>
  *
- * <p>The hardened reader is computed lazily on first access and cached: hardening an {@link XMLReader} can install a fresh wrapper (Android's Expat path), so
+ * <p>The hardened reader is computed lazily on first access and cached: hardening an {@link XMLReader} can install a new wrapper (Android's Expat path), so
  * every parse must run through the same instance. The {@code parse(...)} overloads inherited from {@link SAXParser} dispatch virtually to {@link #getXMLReader()}
  * and {@link #getParser()}, so they too run through the hardened views without further overrides.</p>
  */

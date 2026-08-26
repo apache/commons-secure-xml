@@ -45,7 +45,7 @@ import org.xml.sax.XMLReader;
  * {@link javax.xml.transform.TransformerFactory} wrapper that rewrites every Source-taking entry point through {@link SAXParserHardener#hardenSource(Source)} before
  * delegating.
  *
- * <p>Used by providers whose underlying TrAX implementation pulls a fresh {@code SAXParserFactory.newInstance()} for any Source that is not already a
+ * <p>Used by providers whose underlying TrAX implementation pulls a new {@code SAXParserFactory.newInstance()} for any Source that is not already a
  * {@link SAXSource} carrying its own {@link XMLReader}, and only sets {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING FSP} on the resulting reader.
  * Wrapping the factory and rewriting the Source upstream guarantees the parse runs through an {@link XmlFactories}-hardened reader instead.</p>
  *

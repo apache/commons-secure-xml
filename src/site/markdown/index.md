@@ -40,7 +40,7 @@ such as standalone Xerces, Woodstox, or Saxon's TrAX, need further configuration
 library author has no control over which implementation is on the classpath at runtime, so the effective security
 posture of their code depends on a deployment decision made elsewhere.
 
-This library provides that baseline. Each `XmlFactories` call returns a fresh factory hardened by an
+This library provides that baseline. Each `XmlFactories` call returns a new factory hardened by an
 implementation-specific recipe, so the returned object behaves the same way security-wise regardless of which JAXP
 implementation resolved. Security becomes a property of the call, not of the classpath, and there is one place to
 update when a new hardening setting becomes available or a default changes.
@@ -57,7 +57,7 @@ Add the library to your build:
 </dependency>
 ```
 
-Every method on `XmlFactories` returns a fresh, hardened factory.
+Every method on `XmlFactories` returns a new, hardened factory.
 Pick the one that matches the API you already use;
 no other configuration is required.
 On hardened factories an external resource reference (DTD, entity, schema, stylesheet) is never fetched:

@@ -139,7 +139,7 @@ final class SAXParserHardener {
     }
 
     /**
-     * Creates a fresh hardened, namespace-aware {@link XMLReader} for the TrAX wrappers to parse sources with.
+     * Creates a new hardened, namespace-aware {@link XMLReader} for the TrAX wrappers to parse sources with.
      *
      * @return a hardened reader.
      * @throws TransformerConfigurationException if a hardened reader cannot be obtained.

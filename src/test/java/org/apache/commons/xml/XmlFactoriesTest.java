@@ -40,7 +40,7 @@ import org.xml.sax.InputSource;
 /**
  * Public-API smoke tests for {@link XmlFactories}.
  *
- * <p>Attack tests live in the {@code attacks} sub-package; this file only verifies that fresh factories are returned, that they report safe defaults, and that
+ * <p>Attack tests live in the {@code attacks} sub-package; this file only verifies that new factories are returned, that they report safe defaults, and that
  * a benign document still parses successfully.</p>
  */
 class XmlFactoriesTest {

@@ -62,7 +62,7 @@ final class FallbackIgnoreURIResolver implements URIResolver {
 
     private URIResolver delegate;
 
-    /** Produces the empty {@link Source} returned for an unresolved reference; a fresh value per call keeps callers from mutating a shared Source. */
+    /** Produces the empty {@link Source} returned for an unresolved reference; a new value per call keeps callers from mutating a shared Source. */
     private final Supplier<Source> emptySource;
 
     FallbackIgnoreURIResolver(final URIResolver delegate) {
