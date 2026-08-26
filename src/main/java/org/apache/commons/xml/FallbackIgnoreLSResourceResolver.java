@@ -27,11 +27,12 @@ import org.w3c.dom.ls.LSResourceResolver;
 
 /**
  * {@link LSResourceResolver} floor: consults an optional caller-supplied resolver and ignores (resolves to empty) whatever the caller does not resolve.
- *
- * <p>The schema-compile counterpart of {@link FallbackIgnoreEntityResolver2}. The hardened {@link javax.xml.validation.SchemaFactory}, {@link
- * javax.xml.validation.Validator} and {@link javax.xml.validation.ValidatorHandler} wrappers install one of these and route a caller-set resolver through
- * {@link #setDelegate} rather than letting it replace the floor. A caller opts a specific resource in by returning a non-{@code null} {@link LSInput};
- * anything left unresolved resolves to an empty {@link LSInput}, so the external resource is neither fetched nor leaked.</p>
+ * <p>
+ * The schema-compile counterpart of {@link FallbackIgnoreEntityResolver2}. The hardened {@link javax.xml.validation.SchemaFactory},
+ * {@link javax.xml.validation.Validator} and {@link javax.xml.validation.ValidatorHandler} wrappers install one of these and route a caller-set resolver
+ * through {@link #setDelegate} rather than letting it replace the floor. A caller opts a specific resource in by returning a non-{@code null} {@link LSInput};
+ * anything left unresolved resolves to an empty {@link LSInput}, so the external resource is neither fetched nor leaked.
+ * </p>
  */
 final class FallbackIgnoreLSResourceResolver implements LSResourceResolver {
 
@@ -48,10 +49,20 @@ final class FallbackIgnoreLSResourceResolver implements LSResourceResolver {
 
     private LSResourceResolver delegate;
 
+    /**
+     * Constructs a new resolver that consults the given delegate and ignores whatever it does not resolve.
+     *
+     * @param delegate optional caller-supplied resolver to consult first; may be {@code null}.
+     */
     FallbackIgnoreLSResourceResolver(final LSResourceResolver delegate) {
         this.delegate = delegate;
     }
 
+    /**
+     * Gets the delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}.
+     *
+     * @return The delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}.
+     */
     LSResourceResolver getDelegate() {
         return delegate;
     }

@@ -30,18 +30,21 @@ import org.w3c.dom.Document;
 
 /**
  * {@link URIResolver} floor: consults an optional caller-supplied resolver and ignores (resolves to empty) whatever the caller does not resolve.
- *
- * <p>The XSLT counterpart of {@link FallbackIgnoreEntityResolver2}, guarding {@code xsl:import}/{@code xsl:include} at compile time and {@code document()} at
+ * <p>
+ * The XSLT counterpart of {@link FallbackIgnoreEntityResolver2}, guarding {@code xsl:import}/{@code xsl:include} at compile time and {@code document()} at
  * transform time. The hardened {@link javax.xml.transform.TransformerFactory} and {@link javax.xml.transform.Transformer} wrappers install one of these and
  * route a caller-set resolver through {@link #setDelegate} rather than letting it replace the floor. A caller opts a specific URI in by returning a
- * non-{@code null} {@link Source}; anything left unresolved resolves to an empty {@link Source}, so the external resource is neither fetched nor leaked.</p>
- *
- * <p>The shape of that empty {@link Source} is supplied by the caller: the default is a well-formed empty DOM document (which every stock TrAX consumer
- * accepts), while the Saxon path supplies {@code EmptySource.getInstance()} so its consumers get the "empty" shape they expect.</p>
- *
- * <p>An opted-in {@link javax.xml.transform.stream.StreamSource} or reader-less {@link javax.xml.transform.sax.SAXSource} is rewritten to carry a hardened
- * reader before it is returned, so the implementation parses the opted-in content on the same floor instead of with an internal reader at its own defaults. A
- * {@link javax.xml.transform.dom.DOMSource} or a {@link javax.xml.transform.sax.SAXSource} carrying the caller's own reader is returned as-is.</p>
+ * non-{@code null} {@link Source}; anything left unresolved resolves to an empty {@link Source}, so the external resource is neither fetched nor leaked.
+ * </p>
+ * <p>
+ * The shape of that empty {@link Source} is supplied by the caller: the default is a well-formed empty DOM document (which every stock TrAX consumer accepts),
+ * while the Saxon path supplies {@code EmptySource.getInstance()} so its consumers get the "empty" shape they expect.
+ * </p>
+ * <p>
+ * An opted-in {@link javax.xml.transform.stream.StreamSource} or reader-less {@link javax.xml.transform.sax.SAXSource} is rewritten to carry a hardened reader
+ * before it is returned, so the implementation parses the opted-in content on the same floor instead of with an internal reader at its own defaults. A
+ * {@link javax.xml.transform.dom.DOMSource} or a {@link javax.xml.transform.sax.SAXSource} carrying the caller's own reader is returned as-is.
+ * </p>
  */
 final class FallbackIgnoreURIResolver implements URIResolver {
 
@@ -62,15 +65,24 @@ final class FallbackIgnoreURIResolver implements URIResolver {
 
     private URIResolver delegate;
 
-    /** Produces the empty {@link Source} returned for an unresolved reference; a new value per call keeps callers from mutating a shared Source. */
+    /**
+     * Produces the empty {@link Source} returned for an unresolved reference; a new value per call keeps callers from mutating a shared Source.
+     */
     private final Supplier<Source> emptySource;
 
+    /**
+     * Constructs a new resolver.
+     *
+     * @param delegate optional caller-supplied resolver to consult first; may be {@code null}.
+     */
     FallbackIgnoreURIResolver(final URIResolver delegate) {
         this(delegate, null);
     }
 
     /**
-     * @param delegate the resolver to delegate resolution to.
+     * Constructs a new resolver.
+     *
+     * @param delegate    the resolver to delegate resolution to.
      * @param emptySource the empty-{@link Source} supplier for the ignore outcome, or {@code null} for the default empty DOM document.
      */
     FallbackIgnoreURIResolver(final URIResolver delegate, final Supplier<Source> emptySource) {
@@ -78,6 +90,11 @@ final class FallbackIgnoreURIResolver implements URIResolver {
         this.emptySource = emptySource != null ? emptySource : () -> new DOMSource(EMPTY_DOCUMENT);
     }
 
+    /**
+     * Gets the delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}.
+     *
+     * @return The delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}.
+     */
     URIResolver getDelegate() {
         return delegate;
     }

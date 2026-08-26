@@ -41,10 +41,20 @@ final class FallbackIgnoreXMLResolver implements XMLResolver {
 
     private XMLResolver delegate;
 
+    /**
+     * Constructs a new resolver that consults the given delegate and ignores whatever it does not resolve.
+     *
+     * @param delegate optional caller-supplied resolver to consult first; may be {@code null}.
+     */
     FallbackIgnoreXMLResolver(final XMLResolver delegate) {
         this.delegate = delegate;
     }
 
+    /**
+     * Gets the delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}.
+     *
+     * @return The delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}.
+     */
     XMLResolver getDelegate() {
         return delegate;
     }

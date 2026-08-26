@@ -30,9 +30,10 @@ import org.xml.sax.ext.EntityResolver2;
 
 /**
  * Entity resolver that consults an optional caller-supplied resolver and ignores (resolves to empty) whatever the caller does not resolve.
- *
- * <p>The canonical hardening floor, and the entity-resolution counterpart of the JAXP 1.5 {@code ACCESS_EXTERNAL_*} properties. Every floor
- * ({@link FallbackIgnoreLSResourceResolver}, {@link FallbackIgnoreURIResolver} and {@link FallbackIgnoreXMLResolver}) shares two defining properties:</p>
+ * <p>
+ * The canonical hardening floor, and the entity-resolution counterpart of the JAXP 1.5 {@code ACCESS_EXTERNAL_*} properties. Every floor
+ * ({@link FallbackIgnoreLSResourceResolver}, {@link FallbackIgnoreURIResolver} and {@link FallbackIgnoreXMLResolver}) shares two defining properties:
+ * </p>
  * <ol>
  * <li><strong>Non-removable, and it wraps the resolver the caller sets.</strong> The hardened wrappers install one and route a caller-set resolver through
  * {@code setDelegate} rather than letting it replace the floor, so the caller's resolver is consulted first but cannot remove the floor underneath it.</li>
@@ -40,15 +41,17 @@ import org.xml.sax.ext.EntityResolver2;
  * all). This is where a floor departs from stock JAXP: normally an unresolved lookup falls back to the processor's built-in resolution and the resource is
  * <em>fetched</em>; a floor instead resolves it to <em>empty</em> content, so the parse continues without the external fetch and without a leak.</li>
  * </ol>
- *
- * <p>The hardened DOM and SAX wrappers install one of these and, when the caller sets their own {@link EntityResolver}, route it through {@link #setDelegate}
+ * <p>
+ * The hardened DOM and SAX wrappers install one of these and, when the caller sets their own {@link EntityResolver}, route it through {@link #setDelegate}
  * rather than letting it replace the floor. A caller therefore opts a specific resource in by returning a non-{@code null} {@link InputSource} from their
  * resolver; anything they leave unresolved (a {@code null} return, or no caller resolver at all) goes to {@link #onUnresolved}, which returns empty content by
- * default.</p>
- *
- * <p>It extends {@link DefaultHandler2} so it is also usable as a {@link org.xml.sax.ext.LexicalHandler}; {@link #getExternalSubset} therefore inherits the
+ * default.
+ * </p>
+ * <p>
+ * It extends {@link DefaultHandler2} so it is also usable as a {@link org.xml.sax.ext.LexicalHandler}; {@link #getExternalSubset} therefore inherits the
  * {@code DefaultHandler2} "no synthetic subset" default. Only {@link #resolveEntity(String, String, String, String) resolveEntity} (the actual external fetch)
- * reaches the ignore fallback.</p>
+ * reaches the ignore fallback.
+ * </p>
  */
 class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
 
@@ -76,10 +79,20 @@ class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
      */
     private EntityResolver delegate;
 
+    /**
+     * Constructs a new ignore-all floor with an optional caller-supplied resolver.
+     *
+     * @param delegate The caller-supplied resolver, or {@code null} for a pure ignore-all floor.
+     */
     FallbackIgnoreEntityResolver2(final EntityResolver delegate) {
         this.delegate = delegate;
     }
 
+    /**
+     * Gets the delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}.
+     *
+     * @return The delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}.
+     */
     final EntityResolver getDelegate() {
         return delegate;
     }
@@ -97,8 +110,7 @@ class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
      * @throws SAXException when {@value XmlFactories#THROW_ON_UNRESOLVED} is set: unresolved references are rejected instead of resolved to empty.
      * @throws IOException  never by the default implementation.
      */
-    protected InputSource onUnresolved(final String name, final String publicId, final String baseURI, final String systemId)
-            throws SAXException, IOException {
+    protected InputSource onUnresolved(final String name, final String publicId, final String baseURI, final String systemId) throws SAXException, IOException {
         if (HardeningException.throwOnUnresolved()) {
             throw new SAXException(HardeningException.forbidden(name, null, publicId, systemId, baseURI));
         }
@@ -120,11 +132,11 @@ class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
         return resolved != null ? resolved : onUnresolved(name, publicId, baseURI, systemId);
     }
 
-    private InputSource resolveWithDelegate(final String name, final String publicId, final String baseURI,
-            final String systemId) throws SAXException, IOException {
+    private InputSource resolveWithDelegate(final String name, final String publicId, final String baseURI, final String systemId)
+            throws SAXException, IOException {
         if (delegate != null) {
             return delegate instanceof EntityResolver2 ? ((EntityResolver2) delegate).resolveEntity(name, publicId, baseURI, systemId) :
-                    // We need to resolve the systemId against baseURI, because a plain EntityResolver expects an absolute URI.
+            // We need to resolve the systemId against baseURI, because a plain EntityResolver expects an absolute URI.
                     delegate.resolveEntity(publicId, absolutize(baseURI, systemId));
         }
         return null;
