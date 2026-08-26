@@ -47,7 +47,7 @@ makes is documented in the Javadoc:
 
 https://commons.apache.org/sandbox/commons-xml/apidocs/org/apache/commons/xml/factory/XmlFactories.html
 
-The hardening applies to the factory and to the parsers, readers, transformers, validators and schemas it produces.
+The hardening applies to the factory and to the parsers, readers, transformers, validators, schemas and XPath objects it produces.
 It governs what those objects read;
 what a transform writes is the stylesheet author's capability
 (see **Transform output destinations** under [What is out of scope](#what-is-out-of-scope)).

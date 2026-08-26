@@ -178,6 +178,9 @@ public final class XmlFactories {
      * <p>Beyond the three universal guarantees on {@link XmlFactories}, URI-fetching XPath 3.1+ functions ({@code doc()}, {@code collection()},
      * {@code unparsed-text()}) are not resolved.</p>
      *
+     * <p>The guarantees also cover the document parse behind {@code XPath.evaluate(String, InputSource)} and {@code XPathExpression.evaluate(InputSource)}:
+     * the input document is built through a hardened, namespace-aware {@link javax.xml.parsers.DocumentBuilder} instead of the engine's internal parser.</p>
+     *
      * @return A hardened factory.
      * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
      */

@@ -36,6 +36,9 @@ import javax.xml.xpath.XPathFactory;
  *         the bundled SAX parser, blocking a sysprop swap to a third-party parser (defense-in-depth); Xalan rejects the feature and is left unchanged.</li>
  *     <li><strong>FSP</strong> ({@link XMLConstants#FEATURE_SECURE_PROCESSING}): required. It is the only knob both the stock JDK and Xalan XPath engines expose,
  *         and switches on their secure-processing limits. {@link XPathFactory} has no attribute API for finer control.</li>
+ *     <li><strong>{@link HardeningXPathFactory}</strong>: required. FSP governs only the engine, not the parser it provisions internally for the
+ *         {@link org.xml.sax.InputSource}-taking {@code evaluate} entry points; the wrapper performs that document build with a hardened parser instead, so
+ *         the engine never parses.</li>
  * </ul>
  */
 final class XPathHardener {
@@ -54,7 +57,8 @@ final class XPathHardener {
         setOptionalFeature(factory, FEATURE_OVERRIDE_DEFAULT_PARSER, false);
         // Required: enables the engine's secure-processing limits; XPathFactory has no attribute API for finer control.
         setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        return factory;
+        // Required: FSP does not reach the parser the engine provisions for InputSource-taking evaluate calls; the wrapper parses those itself.
+        return new HardeningXPathFactory(factory);
     }
 
     private static void setFeature(final XPathFactory factory, final String feature, final boolean value) {
