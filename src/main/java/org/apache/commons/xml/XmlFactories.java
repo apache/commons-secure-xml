@@ -115,7 +115,7 @@ public final class XmlFactories {
      * </p>
      *
      * @return A hardened factory.
-     * @throws IllegalStateException     if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown from {@link SAXParserFactory} in case of a {@link java.util.ServiceConfigurationError service configuration
      *                                   error} or if the implementation is not available or cannot be instantiated.
      */
