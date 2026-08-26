@@ -45,7 +45,7 @@ Apache Commons XML
 
 [![Java CI](https://github.com/apache/commons-xml/actions/workflows/maven.yml/badge.svg)](https://github.com/apache/commons-xml/actions/workflows/maven.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/org.apache.commons/commons-xml?label=Maven%20Central)](https://search.maven.org/artifact/org.apache.commons/commons-xml)
-[![Javadocs](https://javadoc.io/badge/org.apache.commons/commons-xml/0.1.0.svg)](https://javadoc.io/doc/org.apache.commons/commons-xml/0.1.0)
+[![Javadocs](https://javadoc.io/badge/org.apache.commons/commons-xml/1.0.0.svg)](https://javadoc.io/doc/org.apache.commons/commons-xml/1.0.0)
 [![CodeQL](https://github.com/apache/commons-xml/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/apache/commons-xml/actions/workflows/codeql-analysis.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/apache/commons-xml/badge)](https://api.securityscorecards.dev/projects/github.com/apache/commons-xml)
 
@@ -70,7 +70,7 @@ Alternatively, you can pull it from the central Maven repositories:
 <dependency>
   <groupId>org.apache.commons</groupId>
   <artifactId>commons-xml</artifactId>
-  <version>0.1.0</version>
+  <version>1.0.0</version>
 </dependency>
 ```
 

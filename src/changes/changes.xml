@@ -31,7 +31,9 @@ The <action> type attribute can be add, update, fix, or remove.
     <title>Apache Commons XML - Changes</title>
   </properties>
   <body>
-    <release version="0.1.0" date="YYYY-MM-DD" description="First release.">
+    <release version="1.0.0" date="YYYY-MM-DD" description="First release, requires Java 8 or above.">
+      <!-- SPECIAL -->
+      <action type="add" dev="ggregory" due-to="Piotr P. Karwasz, Gary Gregory">This is the first release.</action>      
       <!-- ADD -->
       <action type="add" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Add secure-by-default JAXP factory creation via XmlFactories, donated from the copernik-xml-factory project (https://github.com/copernik-eu/copernik-xml-factory) and covering the stock JDK, Android, Apache Xalan, Apache Xerces, Woodstox, and Saxon-HE.</action>
       <action type="add" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-9">Install a non-removable resolver floor on every resolver channel (EntityResolver, LSResourceResolver, URIResolver, and XMLResolver), routing caller-supplied resolvers through it as allow-lists.</action>
