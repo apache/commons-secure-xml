@@ -66,7 +66,7 @@ final class HardeningTemplates implements Templates {
     }
 
     /**
-     * The wrapped implementation Templates, for factory methods whose implementations cast {@code newTransformer()} to their own type.
+     * Gets the wrapped implementation Templates, for factory methods whose implementations cast {@code newTransformer()} to their own type.
      *
      * @return the wrapped {@link Templates} implementation.
      */
