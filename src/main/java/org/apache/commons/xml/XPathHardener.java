@@ -86,6 +86,13 @@ final class XPathHardener {
         }
     }
 
+    /**
+     * Sets an optional feature on the given factory, ignoring it if the implementation does not recognize it.
+     *
+     * @param factory The factory to harden.
+     * @param feature The feature to set.
+     * @param value   The value to set.
+     */
     private static void setOptionalFeature(final XPathFactory factory, final String feature, final boolean value) {
         try {
             factory.setFeature(feature, value);
