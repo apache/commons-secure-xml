@@ -19,6 +19,7 @@ package org.apache.commons.xml;
 
 import javax.xml.XMLConstants;
 import javax.xml.xpath.XPathFactory;
+import javax.xml.xpath.XPathFactoryConfigurationException;
 
 /**
  * Capability-driven hardening for any {@link XPathFactory} on the classpath.
@@ -53,8 +54,7 @@ final class XPathHardener {
      *
      * @param factory The factory to harden.
      * @return A new hardened factory or the original factory, hardened, if it is a known Saxon factory.
-     * @throws HardeningException Thrown if this {@link XPathFactory} or the {@code XPath}s it creates cannot support this feature or if {@code feature} is
-     *                            {@code null}.
+     * @throws HardeningException Thrown if this {@link XPathFactory} or the {@code XPath}s it creates cannot support this feature.
      */
     static XPathFactory harden(final XPathFactory factory) {
         if (SaxonProvider.isSaxon(factory.getClass())) {
@@ -81,7 +81,7 @@ final class XPathHardener {
     private static void setFeature(final XPathFactory factory, final String feature, final boolean value) {
         try {
             factory.setFeature(feature, value);
-        } catch (final Exception e) {
+        } catch (final XPathFactoryConfigurationException e) {
             throw HardeningException.settingFailed("feature", feature, factory, e);
         }
     }
