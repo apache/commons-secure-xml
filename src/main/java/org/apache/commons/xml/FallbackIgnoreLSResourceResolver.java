@@ -37,13 +37,13 @@ import org.w3c.dom.ls.LSResourceResolver;
 final class FallbackIgnoreLSResourceResolver implements LSResourceResolver {
 
     /** DOM Level 3 Load/Save implementation used to build the empty input for unresolved lookups. */
-    private static final DOMImplementationLS DOM_LS = domImplementationLS();
+    private static final DOMImplementationLS DOM_LS;
 
-    private static DOMImplementationLS domImplementationLS() {
+    static {
         try {
-            return (DOMImplementationLS) DOMImplementationRegistry.newInstance().getDOMImplementation("LS");
-        } catch (final ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            throw new HardeningException("No DOM Level 3 Load/Save implementation available to build the empty schema input", e);
+            DOM_LS = (DOMImplementationLS) DOMImplementationRegistry.newInstance().getDOMImplementation("LS");
+        } catch (final ReflectiveOperationException e) {
+            throw new ExceptionInInitializerError(e);
         }
     }
 
