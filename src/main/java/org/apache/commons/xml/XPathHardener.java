@@ -48,6 +48,14 @@ final class XPathHardener {
      */
     private static final String FEATURE_OVERRIDE_DEFAULT_PARSER = "jdk.xml.overrideDefaultParser";
 
+    /**
+     * Hardens the given factory, returning a hardened wrapper if necessary.
+     *
+     * @param factory The factory to harden.
+     * @return A new hardened factory or the original factory, hardened, if it is a known Saxon factory.
+     * @throws HardeningException Thrown if this {@link XPathFactory} or the {@code XPath}s it creates cannot support this feature or if {@code feature} is
+     *                            {@code null}.
+     */
     static XPathFactory harden(final XPathFactory factory) {
         if (SaxonProvider.isSaxon(factory.getClass())) {
             // Saxon: only a locked-down Configuration can close its URI-fetching functions and extension-function surface.
@@ -61,6 +69,15 @@ final class XPathHardener {
         return new HardeningXPathFactory(factory);
     }
 
+    /**
+     * Sets a feature on the given factory, throwing a {@link HardeningException} if the implementation does not recognize it.
+     *
+     * @param factory The factory to harden.
+     * @param feature The feature to set.
+     * @param value   The value to set.
+     * @throws HardeningException Thrown if this {@link XPathFactory} or the {@code XPath}s it creates cannot support this feature or if {@code feature} is
+     *                            {@code null}.
+     */
     private static void setFeature(final XPathFactory factory, final String feature, final boolean value) {
         try {
             factory.setFeature(feature, value);
