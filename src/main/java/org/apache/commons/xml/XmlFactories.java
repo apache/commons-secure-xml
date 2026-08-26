@@ -19,6 +19,7 @@ package org.apache.commons.xml;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.transform.TransformerFactory;
@@ -91,6 +92,8 @@ public final class XmlFactories {
      *
      * @return A hardened factory.
      * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown from {@link DocumentBuilderFactory} in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      */
     public static DocumentBuilderFactory newDocumentBuilderFactory() {
         return DocumentBuilderHardener.harden(DocumentBuilderFactory.newInstance());

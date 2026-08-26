@@ -20,6 +20,7 @@ package org.apache.commons.xml;
 import java.util.function.Supplier;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
@@ -52,9 +53,19 @@ final class FallbackIgnoreURIResolver implements URIResolver {
      * Backing for the default ignore outcome. Consumers parse the resolved {@link Source}, and an empty character stream is not a well-formed XML document
      * (XSLTC rejects it for {@code document()} and for an ignored {@code xsl:include}/{@code xsl:import}), so the default supplier answers with a well-formed
      * empty document that evaluates to no content. It is never mutated, so one instance serves every resolution.
+     *
+     * @see #newEmptyDocument()
      */
     private static final Document EMPTY_DOCUMENT = newEmptyDocument();
 
+    /**
+     * Creates a new empty document.
+     *
+     * @return a new empty document.
+     * @throws HardeningException        Thrown if a {@link DocumentBuilder} cannot be created which satisfies the configuration requested.
+     * @throws FactoryConfigurationError Thrown from {@link DocumentBuilderFactory} in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     */
     private static Document newEmptyDocument() {
         try {
             return DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
