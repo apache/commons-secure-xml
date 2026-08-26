@@ -145,7 +145,7 @@ final class SaxonProvider {
     }
 
     /**
-     * Tells whether the factory class is Saxon's, by package prefix, so public subclasses such as {@code net.sf.saxon.BasicTransformerFactory} route to the
+     * Tests whether the factory class is Saxon's, by package prefix, so public subclasses such as {@code net.sf.saxon.BasicTransformerFactory} route to the
      * same locked-down {@link Configuration} as the factory registered for JAXP lookup.
      *
      * @param factoryClass The factory implementation class.
