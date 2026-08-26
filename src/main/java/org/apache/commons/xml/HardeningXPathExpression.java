@@ -20,6 +20,8 @@ package org.apache.commons.xml;
 import java.util.Objects;
 
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 
@@ -27,10 +29,11 @@ import org.xml.sax.InputSource;
 
 /**
  * {@link XPathExpression} wrapper that applies the same {@link InputSource} rewrite as {@link HardeningXPath} to the compiled evaluation entry points.
- *
- * <p>{@link HardeningXPath#compile(String)} returns one of these, so {@link #evaluate(InputSource)} and {@link #evaluate(InputSource, QName)} build the
- * document through a hardened, namespace-aware parser instead of the engine's own; the {@code evaluateExpression} default methods added by Java 9 route
- * through these overloads as well.</p>
+ * <p>
+ * {@link HardeningXPath#compile(String)} returns one of these, so {@link #evaluate(InputSource)} and {@link #evaluate(InputSource, QName)} build the document
+ * through a hardened, namespace-aware parser instead of the engine's own; the {@code evaluateExpression} default methods added by Java 9 route through these
+ * overloads as well.
+ * </p>
  */
 final class HardeningXPathExpression implements XPathExpression {
 
@@ -46,11 +49,23 @@ final class HardeningXPathExpression implements XPathExpression {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws FactoryConfigurationError Thrown from {@link DocumentBuilderFactory} in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     */
     @Override
     public String evaluate(final InputSource source) throws XPathExpressionException {
         return delegate.evaluate(HardeningXPath.parse(source));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws FactoryConfigurationError Thrown from {@link DocumentBuilderFactory} in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     */
     @Override
     public Object evaluate(final InputSource source, final QName returnType) throws XPathExpressionException {
         return delegate.evaluate(HardeningXPath.parse(source), returnType);

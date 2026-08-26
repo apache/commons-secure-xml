@@ -23,6 +23,7 @@ import java.util.Objects;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
@@ -57,6 +58,8 @@ final class HardeningXPath implements XPath {
      * @return The parsed document.
      * @throws NullPointerException     if {@code source} is {@code null}, per the {@link XPath} contract.
      * @throws XPathExpressionException if the source cannot be parsed.
+     * @throws FactoryConfigurationError Thrown from {@link DocumentBuilderFactory} in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      */
     static Document parse(final InputSource source) throws XPathExpressionException {
         Objects.requireNonNull(source, "source");
@@ -87,11 +90,23 @@ final class HardeningXPath implements XPath {
         return compiled == null ? null : new HardeningXPathExpression(compiled);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws FactoryConfigurationError Thrown from {@link DocumentBuilderFactory} in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     */
     @Override
     public String evaluate(final String expression, final InputSource source) throws XPathExpressionException {
         return delegate.evaluate(expression, parse(source));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws FactoryConfigurationError Thrown from {@link DocumentBuilderFactory} in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     */
     @Override
     public Object evaluate(final String expression, final InputSource source, final QName returnType) throws XPathExpressionException {
         return delegate.evaluate(expression, parse(source), returnType);

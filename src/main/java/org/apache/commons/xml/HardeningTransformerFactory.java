@@ -22,6 +22,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
@@ -81,6 +82,8 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
      * @param source The source to scan for an associated stylesheet.
      * @return A {@link DOMSource} for a reader-less source, otherwise the result of {@link SAXParserHardener#hardenSource(Source)}.
      * @throws TransformerConfigurationException if the source cannot be parsed.
+     * @throws FactoryConfigurationError Thrown from {@link DocumentBuilderFactory} in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      */
     private static Source hardenSourceToDom(final Source source) throws TransformerConfigurationException {
         if (source instanceof StreamSource || source instanceof SAXSource && ((SAXSource) source).getXMLReader() == null) {
@@ -148,6 +151,12 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
         delegate.setURIResolver(floor);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws FactoryConfigurationError Thrown from {@link DocumentBuilderFactory} in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     */
     @Override
     public Source getAssociatedStylesheet(final Source source, final String media, final String title, final String charset)
             throws TransformerConfigurationException {

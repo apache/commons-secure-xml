@@ -59,6 +59,7 @@ final class FallbackIgnoreURIResolver implements URIResolver {
         try {
             EMPTY_DOCUMENT = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
         } catch (final ParserConfigurationException e) {
+            // Checked exceptions cannot escape static initialization; a FactoryConfigurationError from newInstance() already can and propagates as-is.
             throw new ExceptionInInitializerError(e);
         }
     }
