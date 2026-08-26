@@ -53,31 +53,8 @@ final class HardeningTemplatesHandler implements TemplatesHandler {
     }
 
     @Override
-    public Templates getTemplates() {
-        // Null before the stylesheet's endDocument (and on a failed compile in some implementations).
-        final Templates templates = delegate.getTemplates();
-        return templates == null ? null : new HardeningTemplates(templates, uriResolver, emptySource);
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
-    @Override
-    public void setSystemId(final String systemID) {
-        delegate.setSystemId(systemID);
-    }
-
-    @Override
-    public String getSystemId() {
-        return delegate.getSystemId();
-    }
-
-    @Override
-    public void setDocumentLocator(final Locator locator) {
-        delegate.setDocumentLocator(locator);
-    }
-
-    @Override
-    public void startDocument() throws SAXException {
-        delegate.startDocument();
+    public void characters(final char[] ch, final int start, final int length) throws SAXException {
+        delegate.characters(ch, start, length);
     }
 
     @Override
@@ -86,8 +63,8 @@ final class HardeningTemplatesHandler implements TemplatesHandler {
     }
 
     @Override
-    public void startPrefixMapping(final String prefix, final String uri) throws SAXException {
-        delegate.startPrefixMapping(prefix, uri);
+    public void endElement(final String uri, final String localName, final String qName) throws SAXException {
+        delegate.endElement(uri, localName, qName);
     }
 
     @Override
@@ -96,18 +73,15 @@ final class HardeningTemplatesHandler implements TemplatesHandler {
     }
 
     @Override
-    public void startElement(final String uri, final String localName, final String qName, final Attributes atts) throws SAXException {
-        delegate.startElement(uri, localName, qName, atts);
+    public String getSystemId() {
+        return delegate.getSystemId();
     }
 
     @Override
-    public void endElement(final String uri, final String localName, final String qName) throws SAXException {
-        delegate.endElement(uri, localName, qName);
-    }
-
-    @Override
-    public void characters(final char[] ch, final int start, final int length) throws SAXException {
-        delegate.characters(ch, start, length);
+    public Templates getTemplates() {
+        // Null before the stylesheet's endDocument (and on a failed compile in some implementations).
+        final Templates templates = delegate.getTemplates();
+        return templates == null ? null : new HardeningTemplates(templates, uriResolver, emptySource);
     }
 
     @Override
@@ -121,8 +95,34 @@ final class HardeningTemplatesHandler implements TemplatesHandler {
     }
 
     @Override
+    public void setDocumentLocator(final Locator locator) {
+        delegate.setDocumentLocator(locator);
+    }
+
+    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
+    @Override
+    public void setSystemId(final String systemID) {
+        delegate.setSystemId(systemID);
+    }
+
+    @Override
     public void skippedEntity(final String name) throws SAXException {
         delegate.skippedEntity(name);
     }
     // </editor-fold>
+
+    @Override
+    public void startDocument() throws SAXException {
+        delegate.startDocument();
+    }
+
+    @Override
+    public void startElement(final String uri, final String localName, final String qName, final Attributes atts) throws SAXException {
+        delegate.startElement(uri, localName, qName, atts);
+    }
+
+    @Override
+    public void startPrefixMapping(final String prefix, final String uri) throws SAXException {
+        delegate.startPrefixMapping(prefix, uri);
+    }
 }

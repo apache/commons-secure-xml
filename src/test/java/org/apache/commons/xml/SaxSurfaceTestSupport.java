@@ -37,14 +37,19 @@ import org.xml.sax.XMLReader;
  */
 final class SaxSurfaceTestSupport {
 
+    /** Feeds the input's SAX events into the handler through a hardened, namespace-aware reader. */
+    static void feed(final ContentHandler handler, final InputSource input) throws Exception {
+        final SAXParserFactory factory = XmlFactories.newSAXParserFactory();
+        factory.setNamespaceAware(true);
+        final XMLReader reader = factory.newSAXParser().getXMLReader();
+        reader.setContentHandler(handler);
+        reader.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
+        reader.parse(input);
+    }
+
     /** The hardened factory, as its runtime {@link SAXTransformerFactory} type. */
     static SAXTransformerFactory hardenedFactory() {
         return (SAXTransformerFactory) XmlFactories.newTransformerFactory();
-    }
-
-    /** A benign {@code <root/>} input document. */
-    static InputSource rootInput() {
-        return new InputSource(new StringReader("<root/>"));
     }
 
     /** Opens a fixture under {@code leaked/} as an {@link InputSource} preserving its system id, so relative hrefs resolve normally. */
@@ -55,14 +60,9 @@ final class SaxSurfaceTestSupport {
         return input;
     }
 
-    /** Feeds the input's SAX events into the handler through a hardened, namespace-aware reader. */
-    static void feed(final ContentHandler handler, final InputSource input) throws Exception {
-        final SAXParserFactory factory = XmlFactories.newSAXParserFactory();
-        factory.setNamespaceAware(true);
-        final XMLReader reader = factory.newSAXParser().getXMLReader();
-        reader.setContentHandler(handler);
-        reader.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
-        reader.parse(input);
+    /** A benign {@code <root/>} input document. */
+    static InputSource rootInput() {
+        return new InputSource(new StringReader("<root/>"));
     }
 
     private SaxSurfaceTestSupport() {

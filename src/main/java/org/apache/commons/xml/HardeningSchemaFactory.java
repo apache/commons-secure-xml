@@ -53,37 +53,6 @@ import org.xml.sax.SAXNotSupportedException;
  */
 final class HardeningSchemaFactory extends SchemaFactory {
 
-    private final SchemaFactory delegate;
-
-    private final FallbackIgnoreLSResourceResolver floor = new FallbackIgnoreLSResourceResolver(null);
-
-    HardeningSchemaFactory(final SchemaFactory delegate) {
-        this.delegate = delegate;
-        // Compile-time block for xs:import/include/redefine; the wrappers carry the rest (per-product resolver, source rewriting, limits via the reader).
-        delegate.setResourceResolver(floor);
-    }
-
-    @Override
-    public void setResourceResolver(final LSResourceResolver resourceResolver) {
-        // Route a caller resolver through the floor instead of replacing it, so the ignore-all lower bound cannot be removed.
-        floor.setDelegate(resourceResolver);
-    }
-
-    @Override
-    public LSResourceResolver getResourceResolver() {
-        return floor.getDelegate();
-    }
-
-    @Override
-    public Schema newSchema() throws SAXException {
-        return new HardeningSchema(delegate.newSchema());
-    }
-
-    @Override
-    public Schema newSchema(final Source[] schemas) throws SAXException {
-        return new HardeningSchema(delegate.newSchema(harden(schemas)));
-    }
-
     private static Source[] harden(final Source[] schemas) throws SAXException {
         final Source[] hardened = new Source[schemas.length];
         try {
@@ -94,6 +63,16 @@ final class HardeningSchemaFactory extends SchemaFactory {
             throw new SAXException("Failed to harden schema source", e);
         }
         return hardened;
+    }
+
+    private final SchemaFactory delegate;
+
+    private final FallbackIgnoreLSResourceResolver floor = new FallbackIgnoreLSResourceResolver(null);
+
+    HardeningSchemaFactory(final SchemaFactory delegate) {
+        this.delegate = delegate;
+        // Compile-time block for xs:import/include/redefine; the wrappers carry the rest (per-product resolver, source rewriting, limits via the reader).
+        delegate.setResourceResolver(floor);
     }
 
     // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
@@ -113,8 +92,23 @@ final class HardeningSchemaFactory extends SchemaFactory {
     }
 
     @Override
+    public LSResourceResolver getResourceResolver() {
+        return floor.getDelegate();
+    }
+
+    @Override
     public boolean isSchemaLanguageSupported(final String schemaLanguage) {
         return delegate.isSchemaLanguageSupported(schemaLanguage);
+    }
+
+    @Override
+    public Schema newSchema() throws SAXException {
+        return new HardeningSchema(delegate.newSchema());
+    }
+
+    @Override
+    public Schema newSchema(final Source[] schemas) throws SAXException {
+        return new HardeningSchema(delegate.newSchema(harden(schemas)));
     }
 
     @Override
@@ -132,4 +126,10 @@ final class HardeningSchemaFactory extends SchemaFactory {
         delegate.setProperty(name, object);
     }
     // </editor-fold>
+
+    @Override
+    public void setResourceResolver(final LSResourceResolver resourceResolver) {
+        // Route a caller resolver through the floor instead of replacing it, so the ignore-all lower bound cannot be removed.
+        floor.setDelegate(resourceResolver);
+    }
 }

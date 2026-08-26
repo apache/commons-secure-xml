@@ -50,14 +50,6 @@ final class HardeningSAXParser extends SAXParser {
     }
 
     @Override
-    public XMLReader getXMLReader() throws SAXException {
-        if (hardenedReader == null) {
-            hardenedReader = SAXParserHardener.hardenReader(delegate.getXMLReader());
-        }
-        return hardenedReader;
-    }
-
-    @Override
     @SuppressWarnings("deprecation")
     public Parser getParser() throws SAXException {
         if (hardenedParser == null) {
@@ -66,15 +58,6 @@ final class HardeningSAXParser extends SAXParser {
             hardenedParser = reader instanceof Parser ? (Parser) reader : new XMLReaderAdapter(reader);
         }
         return hardenedParser;
-    }
-
-    @Override
-    public void reset() {
-        delegate.reset();
-        // The JAXP reset contract reverts the delegate to its just-created state, which strips the post-creation reader hardening.
-        // We reset the cached readers, so hardening can be applied again.
-        hardenedReader = null;
-        hardenedParser = null;
     }
 
     // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
@@ -86,6 +69,14 @@ final class HardeningSAXParser extends SAXParser {
     @Override
     public Schema getSchema() {
         return delegate.getSchema();
+    }
+
+    @Override
+    public XMLReader getXMLReader() throws SAXException {
+        if (hardenedReader == null) {
+            hardenedReader = SAXParserHardener.hardenReader(delegate.getXMLReader());
+        }
+        return hardenedReader;
     }
 
     @Override
@@ -101,6 +92,15 @@ final class HardeningSAXParser extends SAXParser {
     @Override
     public boolean isXIncludeAware() {
         return delegate.isXIncludeAware();
+    }
+
+    @Override
+    public void reset() {
+        delegate.reset();
+        // The JAXP reset contract reverts the delegate to its just-created state, which strips the post-creation reader hardening.
+        // We reset the cached readers, so hardening can be applied again.
+        hardenedReader = null;
+        hardenedParser = null;
     }
 
     @Override

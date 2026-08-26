@@ -51,8 +51,74 @@ final class HardeningTransformerHandler implements TransformerHandler {
     }
 
     @Override
+    public void characters(final char[] ch, final int start, final int length) throws SAXException {
+        delegate.characters(ch, start, length);
+    }
+
+    @Override
+    public void comment(final char[] ch, final int start, final int length) throws SAXException {
+        delegate.comment(ch, start, length);
+    }
+    // </editor-fold>
+
+    @Override
+    public void endCDATA() throws SAXException {
+        delegate.endCDATA();
+    }
+
+    @Override
+    public void endDocument() throws SAXException {
+        delegate.endDocument();
+    }
+
+    @Override
+    public void endDTD() throws SAXException {
+        delegate.endDTD();
+    }
+
+    @Override
+    public void endElement(final String uri, final String localName, final String qName) throws SAXException {
+        delegate.endElement(uri, localName, qName);
+    }
+
+    @Override
+    public void endEntity(final String name) throws SAXException {
+        delegate.endEntity(name);
+    }
+
+    @Override
+    public void endPrefixMapping(final String prefix) throws SAXException {
+        delegate.endPrefixMapping(prefix);
+    }
+
+    @Override
+    public String getSystemId() {
+        return delegate.getSystemId();
+    }
+
+    @Override
     public Transformer getTransformer() {
         return transformer;
+    }
+
+    @Override
+    public void ignorableWhitespace(final char[] ch, final int start, final int length) throws SAXException {
+        delegate.ignorableWhitespace(ch, start, length);
+    }
+
+    @Override
+    public void notationDecl(final String name, final String publicId, final String systemId) throws SAXException {
+        delegate.notationDecl(name, publicId, systemId);
+    }
+
+    @Override
+    public void processingInstruction(final String target, final String data) throws SAXException {
+        delegate.processingInstruction(target, data);
+    }
+
+    @Override
+    public void setDocumentLocator(final Locator locator) {
+        delegate.setDocumentLocator(locator);
     }
 
     // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
@@ -67,93 +133,8 @@ final class HardeningTransformerHandler implements TransformerHandler {
     }
 
     @Override
-    public String getSystemId() {
-        return delegate.getSystemId();
-    }
-
-    @Override
-    public void setDocumentLocator(final Locator locator) {
-        delegate.setDocumentLocator(locator);
-    }
-
-    @Override
-    public void startDocument() throws SAXException {
-        delegate.startDocument();
-    }
-
-    @Override
-    public void endDocument() throws SAXException {
-        delegate.endDocument();
-    }
-
-    @Override
-    public void startPrefixMapping(final String prefix, final String uri) throws SAXException {
-        delegate.startPrefixMapping(prefix, uri);
-    }
-
-    @Override
-    public void endPrefixMapping(final String prefix) throws SAXException {
-        delegate.endPrefixMapping(prefix);
-    }
-
-    @Override
-    public void startElement(final String uri, final String localName, final String qName, final Attributes atts) throws SAXException {
-        delegate.startElement(uri, localName, qName, atts);
-    }
-
-    @Override
-    public void endElement(final String uri, final String localName, final String qName) throws SAXException {
-        delegate.endElement(uri, localName, qName);
-    }
-
-    @Override
-    public void characters(final char[] ch, final int start, final int length) throws SAXException {
-        delegate.characters(ch, start, length);
-    }
-
-    @Override
-    public void ignorableWhitespace(final char[] ch, final int start, final int length) throws SAXException {
-        delegate.ignorableWhitespace(ch, start, length);
-    }
-
-    @Override
-    public void processingInstruction(final String target, final String data) throws SAXException {
-        delegate.processingInstruction(target, data);
-    }
-
-    @Override
     public void skippedEntity(final String name) throws SAXException {
         delegate.skippedEntity(name);
-    }
-
-    @Override
-    public void notationDecl(final String name, final String publicId, final String systemId) throws SAXException {
-        delegate.notationDecl(name, publicId, systemId);
-    }
-
-    @Override
-    public void unparsedEntityDecl(final String name, final String publicId, final String systemId, final String notationName) throws SAXException {
-        delegate.unparsedEntityDecl(name, publicId, systemId, notationName);
-    }
-
-    @Override
-    public void startDTD(final String name, final String publicId, final String systemId) throws SAXException {
-        delegate.startDTD(name, publicId, systemId);
-    }
-
-    @Override
-    public void endDTD() throws SAXException {
-        delegate.endDTD();
-    }
-
-    @Override
-    public void startEntity(final String name) throws SAXException {
-        delegate.startEntity(name);
-    }
-
-    @Override
-    public void endEntity(final String name) throws SAXException {
-        delegate.endEntity(name);
     }
 
     @Override
@@ -162,13 +143,32 @@ final class HardeningTransformerHandler implements TransformerHandler {
     }
 
     @Override
-    public void endCDATA() throws SAXException {
-        delegate.endCDATA();
+    public void startDocument() throws SAXException {
+        delegate.startDocument();
     }
 
     @Override
-    public void comment(final char[] ch, final int start, final int length) throws SAXException {
-        delegate.comment(ch, start, length);
+    public void startDTD(final String name, final String publicId, final String systemId) throws SAXException {
+        delegate.startDTD(name, publicId, systemId);
     }
-    // </editor-fold>
+
+    @Override
+    public void startElement(final String uri, final String localName, final String qName, final Attributes atts) throws SAXException {
+        delegate.startElement(uri, localName, qName, atts);
+    }
+
+    @Override
+    public void startEntity(final String name) throws SAXException {
+        delegate.startEntity(name);
+    }
+
+    @Override
+    public void startPrefixMapping(final String prefix, final String uri) throws SAXException {
+        delegate.startPrefixMapping(prefix, uri);
+    }
+
+    @Override
+    public void unparsedEntityDecl(final String name, final String publicId, final String systemId, final String notationName) throws SAXException {
+        delegate.unparsedEntityDecl(name, publicId, systemId, notationName);
+    }
 }

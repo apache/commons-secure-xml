@@ -58,18 +58,18 @@ class XPathInputSourceTest {
     }
 
     @Test
-    void hardenedXPathExpressionEvaluateDoesNotLeak() throws Exception {
-        // Same declared-entity outcome as above on the compiled-expression entry point.
-        final String result = XmlFactories.newXPathFactory().newXPath().compile(EXPRESSION).evaluate(AttackTestSupport.inputSource(entityPayload()));
-        assertFalse(result.contains(AttackTestSupport.LEAKED_MARKER), "external entity leaked into the compiled XPath result: " + result);
-    }
-
-    @Test
     void hardenedXPathEvaluatesPlainDocument() throws Exception {
         // Positive control: the hardened pre-parse still evaluates an entity-free document end to end.
         final String result = XmlFactories.newXPathFactory().newXPath().evaluate(EXPRESSION,
                 AttackTestSupport.inputSource(AttackTestSupport.xmlBody("plain text")));
         assertEquals("plain text", result, "hardened XPath should evaluate a plain document");
+    }
+
+    @Test
+    void hardenedXPathExpressionEvaluateDoesNotLeak() throws Exception {
+        // Same declared-entity outcome as above on the compiled-expression entry point.
+        final String result = XmlFactories.newXPathFactory().newXPath().compile(EXPRESSION).evaluate(AttackTestSupport.inputSource(entityPayload()));
+        assertFalse(result.contains(AttackTestSupport.LEAKED_MARKER), "external entity leaked into the compiled XPath result: " + result);
     }
 
     @Test

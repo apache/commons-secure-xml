@@ -39,11 +39,6 @@ final class HardeningDocumentBuilderFactory extends DocumentBuilderFactory {
         this.delegate = delegate;
     }
 
-    @Override
-    public DocumentBuilder newDocumentBuilder() throws ParserConfigurationException {
-        return new HardeningDocumentBuilder(delegate.newDocumentBuilder());
-    }
-
     // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
     @Override
     public Object getAttribute(final String name) {
@@ -93,6 +88,11 @@ final class HardeningDocumentBuilderFactory extends DocumentBuilderFactory {
     @Override
     public boolean isXIncludeAware() {
         return delegate.isXIncludeAware();
+    }
+
+    @Override
+    public DocumentBuilder newDocumentBuilder() throws ParserConfigurationException {
+        return new HardeningDocumentBuilder(delegate.newDocumentBuilder());
     }
 
     @Override

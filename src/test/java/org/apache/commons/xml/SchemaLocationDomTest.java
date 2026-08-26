@@ -55,32 +55,6 @@ class SchemaLocationDomTest {
 
     private static final String INSTANCE = "schema-location-instance.xml";
 
-    @Test
-    void hardenedDoesNotFetchExternalSchema() {
-        assumeTrue(supportsSchemaLanguage(), "parser does not support JAXP 1.2 schema-language XSD validation");
-        final DocumentBuilderFactory factory = enableXsdValidation(XmlFactories.newDocumentBuilderFactory());
-        // The schemaLocation reference resolves to empty rather than being fetched. Either the empty schema fails the validating parse (acceptable), or the
-        // parse completes but the schema's default leak attribute is never inlined. Either way the marker must not reach the DOM.
-        try {
-            final Document document = parse(factory);
-            assertNotEquals(LEAKED_MARKER, document.getDocumentElement().getAttribute("leak"),
-                    "Hardened parse must not inline the external schema's default attribute.");
-        } catch (final Exception blocked) {
-            // Acceptable: the empty schema was rejected at parse time, so nothing was fetched or inlined.
-        }
-    }
-
-    @Test
-    void unconfiguredFetchesExternalSchema() throws Exception {
-        assumeTrue(supportsSchemaLanguage(), "parser does not support JAXP 1.2 schema-language XSD validation");
-        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
-        // Positive control: without hardening the external schema is fetched and its default attribute is inlined into the DOM.
-        final Document document = parse(enableXsdValidation(factory));
-        assertEquals(LEAKED_MARKER, document.getDocumentElement().getAttribute("leak"),
-                "Permissive parse should have fetched the external schema and inlined its default attribute.");
-    }
-
     private static DocumentBuilderFactory enableXsdValidation(final DocumentBuilderFactory factory) {
         factory.setNamespaceAware(true);
         factory.setValidating(true);
@@ -108,5 +82,31 @@ class SchemaLocationDomTest {
         } catch (final Exception e) {
             return false;
         }
+    }
+
+    @Test
+    void hardenedDoesNotFetchExternalSchema() {
+        assumeTrue(supportsSchemaLanguage(), "parser does not support JAXP 1.2 schema-language XSD validation");
+        final DocumentBuilderFactory factory = enableXsdValidation(XmlFactories.newDocumentBuilderFactory());
+        // The schemaLocation reference resolves to empty rather than being fetched. Either the empty schema fails the validating parse (acceptable), or the
+        // parse completes but the schema's default leak attribute is never inlined. Either way the marker must not reach the DOM.
+        try {
+            final Document document = parse(factory);
+            assertNotEquals(LEAKED_MARKER, document.getDocumentElement().getAttribute("leak"),
+                    "Hardened parse must not inline the external schema's default attribute.");
+        } catch (final Exception blocked) {
+            // Acceptable: the empty schema was rejected at parse time, so nothing was fetched or inlined.
+        }
+    }
+
+    @Test
+    void unconfiguredFetchesExternalSchema() throws Exception {
+        assumeTrue(supportsSchemaLanguage(), "parser does not support JAXP 1.2 schema-language XSD validation");
+        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
+        // Positive control: without hardening the external schema is fetched and its default attribute is inlined into the DOM.
+        final Document document = parse(enableXsdValidation(factory));
+        assertEquals(LEAKED_MARKER, document.getDocumentElement().getAttribute("leak"),
+                "Permissive parse should have fetched the external schema and inlined its default attribute.");
     }
 }

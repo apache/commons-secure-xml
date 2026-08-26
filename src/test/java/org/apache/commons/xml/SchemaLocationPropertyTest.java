@@ -68,14 +68,6 @@ class SchemaLocationPropertyTest {
     /** Instance whose root, {@code l:leaked}, is declared by {@code included.xsd} in the {@value #LEAKED_NS} namespace. */
     private static final String NAMESPACED_INSTANCE = "<l:leaked xmlns:l=\"" + LEAKED_NS + "\">x</l:leaked>";
 
-    private static String noNamespaceLocation() {
-        return resourceUrl("no-namespace.xsd").toString();
-    }
-
-    private static String namespacedLocation() {
-        return LEAKED_NS + " " + resourceUrl("included.xsd");
-    }
-
     /**
      * Runs the parser setup, skipping the test (rather than failing it) on parsers that do not accept these
      * schema-validation features/properties, such as Android's KXmlParser and Expat.
@@ -99,18 +91,6 @@ class SchemaLocationPropertyTest {
         });
     }
 
-    private static DocumentBuilder permissiveValidatingDom(final String property, final String value) {
-        return configureOrSkip(() -> {
-            final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(true);
-            factory.setValidating(true);
-            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
-            factory.setAttribute(SCHEMA_LANGUAGE, XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            factory.setAttribute(property, value);
-            return strictDocumentBuilder(factory);
-        });
-    }
-
     private static XMLReader hardenedValidatingSax(final String property, final String value) {
         return configureOrSkip(() -> {
             final SAXParserFactory factory = XmlFactories.newSAXParserFactory();
@@ -120,6 +100,26 @@ class SchemaLocationPropertyTest {
             parser.setProperty(SCHEMA_LANGUAGE, XMLConstants.W3C_XML_SCHEMA_NS_URI);
             parser.setProperty(property, value);
             return strictXMLReader(parser.getXMLReader());
+        });
+    }
+
+    private static String namespacedLocation() {
+        return LEAKED_NS + " " + resourceUrl("included.xsd");
+    }
+
+    private static String noNamespaceLocation() {
+        return resourceUrl("no-namespace.xsd").toString();
+    }
+
+    private static DocumentBuilder permissiveValidatingDom(final String property, final String value) {
+        return configureOrSkip(() -> {
+            final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            factory.setValidating(true);
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
+            factory.setAttribute(SCHEMA_LANGUAGE, XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            factory.setAttribute(property, value);
+            return strictDocumentBuilder(factory);
         });
     }
 
@@ -144,21 +144,9 @@ class SchemaLocationPropertyTest {
     }
 
     @Test
-    void permissiveDomFetchesNoNamespaceSchemaLocation() {
-        final DocumentBuilder builder = permissiveValidatingDom(EXTERNAL_NO_NS, noNamespaceLocation());
-        assertParseSucceeds(() -> builder.parse(inputSource(NO_NS_INSTANCE)), "DOM external-noNamespaceSchemaLocation (permissive)");
-    }
-
-    @Test
     void hardenedDomRefusesSchemaLocation() {
         final DocumentBuilder builder = hardenedValidatingDom(EXTERNAL_SCHEMA_LOCATION, namespacedLocation());
         assertParseFails(() -> builder.parse(inputSource(NAMESPACED_INSTANCE)), "DOM external-schemaLocation", SAXException.class);
-    }
-
-    @Test
-    void permissiveDomFetchesSchemaLocation() {
-        final DocumentBuilder builder = permissiveValidatingDom(EXTERNAL_SCHEMA_LOCATION, namespacedLocation());
-        assertParseSucceeds(() -> builder.parse(inputSource(NAMESPACED_INSTANCE)), "DOM external-schemaLocation (permissive)");
     }
 
     @Test
@@ -168,15 +156,27 @@ class SchemaLocationPropertyTest {
     }
 
     @Test
-    void permissiveSaxFetchesNoNamespaceSchemaLocation() {
-        final XMLReader reader = permissiveValidatingSax(EXTERNAL_NO_NS, noNamespaceLocation());
-        assertParseSucceeds(() -> reader.parse(inputSource(NO_NS_INSTANCE)), "SAX external-noNamespaceSchemaLocation (permissive)");
-    }
-
-    @Test
     void hardenedSaxRefusesSchemaLocation() {
         final XMLReader reader = hardenedValidatingSax(EXTERNAL_SCHEMA_LOCATION, namespacedLocation());
         assertParseFails(() -> reader.parse(inputSource(NAMESPACED_INSTANCE)), "SAX external-schemaLocation", SAXException.class);
+    }
+
+    @Test
+    void permissiveDomFetchesNoNamespaceSchemaLocation() {
+        final DocumentBuilder builder = permissiveValidatingDom(EXTERNAL_NO_NS, noNamespaceLocation());
+        assertParseSucceeds(() -> builder.parse(inputSource(NO_NS_INSTANCE)), "DOM external-noNamespaceSchemaLocation (permissive)");
+    }
+
+    @Test
+    void permissiveDomFetchesSchemaLocation() {
+        final DocumentBuilder builder = permissiveValidatingDom(EXTERNAL_SCHEMA_LOCATION, namespacedLocation());
+        assertParseSucceeds(() -> builder.parse(inputSource(NAMESPACED_INSTANCE)), "DOM external-schemaLocation (permissive)");
+    }
+
+    @Test
+    void permissiveSaxFetchesNoNamespaceSchemaLocation() {
+        final XMLReader reader = permissiveValidatingSax(EXTERNAL_NO_NS, noNamespaceLocation());
+        assertParseSucceeds(() -> reader.parse(inputSource(NO_NS_INSTANCE)), "SAX external-noNamespaceSchemaLocation (permissive)");
     }
 
     @Test

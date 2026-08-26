@@ -42,11 +42,6 @@ final class HardeningSAXParserFactory extends SAXParserFactory {
         this.delegate = delegate;
     }
 
-    @Override
-    public SAXParser newSAXParser() throws ParserConfigurationException, SAXException {
-        return new HardeningSAXParser(delegate.newSAXParser());
-    }
-
     // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
     @Override
     public boolean getFeature(final String name) throws ParserConfigurationException, SAXNotRecognizedException, SAXNotSupportedException {
@@ -71,6 +66,11 @@ final class HardeningSAXParserFactory extends SAXParserFactory {
     @Override
     public boolean isXIncludeAware() {
         return delegate.isXIncludeAware();
+    }
+
+    @Override
+    public SAXParser newSAXParser() throws ParserConfigurationException, SAXException {
+        return new HardeningSAXParser(delegate.newSAXParser());
     }
 
     @Override

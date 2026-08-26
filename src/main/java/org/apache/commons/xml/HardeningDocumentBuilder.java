@@ -48,22 +48,15 @@ final class HardeningDocumentBuilder extends DocumentBuilder {
     }
 
     @Override
-    public void setEntityResolver(final EntityResolver resolver) {
-        floor.setDelegate(resolver);
+    public DOMImplementation getDOMImplementation() {
+        return delegate.getDOMImplementation();
     }
 
     @Override
-    public void reset() {
-        delegate.reset();
-        floor.setDelegate(null);
-        delegate.setEntityResolver(floor);
+    public Schema getSchema() {
+        return delegate.getSchema();
     }
-
-    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
-    @Override
-    public Document parse(final InputSource is) throws SAXException, IOException {
-        return delegate.parse(is);
-    }
+    // </editor-fold>
 
     @Override
     public boolean isNamespaceAware() {
@@ -81,23 +74,30 @@ final class HardeningDocumentBuilder extends DocumentBuilder {
     }
 
     @Override
-    public void setErrorHandler(final ErrorHandler eh) {
-        delegate.setErrorHandler(eh);
-    }
-
-    @Override
     public Document newDocument() {
         return delegate.newDocument();
     }
 
+    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
     @Override
-    public DOMImplementation getDOMImplementation() {
-        return delegate.getDOMImplementation();
+    public Document parse(final InputSource is) throws SAXException, IOException {
+        return delegate.parse(is);
     }
 
     @Override
-    public Schema getSchema() {
-        return delegate.getSchema();
+    public void reset() {
+        delegate.reset();
+        floor.setDelegate(null);
+        delegate.setEntityResolver(floor);
     }
-    // </editor-fold>
+
+    @Override
+    public void setEntityResolver(final EntityResolver resolver) {
+        floor.setDelegate(resolver);
+    }
+
+    @Override
+    public void setErrorHandler(final ErrorHandler eh) {
+        delegate.setErrorHandler(eh);
+    }
 }

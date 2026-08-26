@@ -51,16 +51,6 @@ class HardeningXMLReader implements XMLReader {
         delegate.setEntityResolver(floor);
     }
 
-    @Override
-    public void setEntityResolver(final EntityResolver resolver) {
-        floor.setDelegate(resolver);
-    }
-
-    @Override
-    public EntityResolver getEntityResolver() {
-        return floor.getDelegate();
-    }
-
     // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
     @Override
     public ContentHandler getContentHandler() {
@@ -70,6 +60,11 @@ class HardeningXMLReader implements XMLReader {
     @Override
     public DTDHandler getDTDHandler() {
         return delegate.getDTDHandler();
+    }
+
+    @Override
+    public EntityResolver getEntityResolver() {
+        return floor.getDelegate();
     }
 
     @Override
@@ -105,6 +100,11 @@ class HardeningXMLReader implements XMLReader {
     @Override
     public void setDTDHandler(final DTDHandler handler) {
         delegate.setDTDHandler(handler);
+    }
+
+    @Override
+    public void setEntityResolver(final EntityResolver resolver) {
+        floor.setDelegate(resolver);
     }
 
     @Override

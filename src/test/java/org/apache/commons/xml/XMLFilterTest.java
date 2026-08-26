@@ -63,10 +63,28 @@ class XMLFilterTest {
         return text.toString();
     }
 
+    /**
+     * On Android, hand the unconfigured filter a permissive parent so Xalan's {@code TrAXFilter} uses it instead of self-provisioning an Expat reader on which
+     * it enables {@code namespace-prefixes}, a feature Android's libexpat accepts but fails on mid-parse. The parent stays permissive (no floor), so the leak
+     * these controls assert still occurs.
+     */
+    private static void setPermissiveParentOnAndroid(final XMLFilter filter) {
+        if (AttackTestSupport.IS_ANDROID) {
+            filter.setParent(AttackTestSupport.permissiveReader());
+        }
+    }
+
     @Test
     void hardenedFilterDoesNotLeakDocument() throws Exception {
         final XMLFilter filter = SaxSurfaceTestSupport.hardenedFactory().newXMLFilter(AttackTestSupport.resourceSource("with-document.xsl"));
         assertFalse(filterAndCapture(filter, "<root/>").contains(AttackTestSupport.LEAKED_MARKER), "document() through XMLFilter leaked");
+    }
+
+    @Test
+    void hardenedFilterDoesNotLeakExternalEntity() throws Exception {
+        // The f003 vector: with no caller-set parent, the input must be parsed by a hardened reader, not a self-provisioned permissive one.
+        final XMLFilter filter = SaxSurfaceTestSupport.hardenedFactory().newXMLFilter(AttackTestSupport.streamSource(IDENTITY_XSLT));
+        assertFalse(filterAndCapture(filter, entityPayload()).contains(AttackTestSupport.LEAKED_MARKER), "external entity through XMLFilter leaked");
     }
 
     @Test
@@ -79,10 +97,12 @@ class XMLFilterTest {
     }
 
     @Test
-    void hardenedFilterDoesNotLeakExternalEntity() throws Exception {
-        // The f003 vector: with no caller-set parent, the input must be parsed by a hardened reader, not a self-provisioned permissive one.
-        final XMLFilter filter = SaxSurfaceTestSupport.hardenedFactory().newXMLFilter(AttackTestSupport.streamSource(IDENTITY_XSLT));
-        assertFalse(filterAndCapture(filter, entityPayload()).contains(AttackTestSupport.LEAKED_MARKER), "external entity through XMLFilter leaked");
+    void unconfiguredFilterLeaksDocument() throws Exception {
+        final SAXTransformerFactory factory = (SAXTransformerFactory) TransformerFactory.newInstance();
+        final XMLFilter filter = factory.newXMLFilter(AttackTestSupport.resourceSource("with-document.xsl"));
+        setPermissiveParentOnAndroid(filter);
+        assertTrue(filterAndCapture(filter, "<root/>").contains(AttackTestSupport.LEAKED_MARKER),
+                "unconfigured XMLFilter should resolve document()");
     }
 
     @Test
@@ -95,25 +115,5 @@ class XMLFilterTest {
         final XMLFilter filter = factory.newXMLFilter(AttackTestSupport.streamSource(IDENTITY_XSLT));
         assertTrue(filterAndCapture(filter, entityPayload()).contains(AttackTestSupport.LEAKED_MARKER),
                 "unconfigured XMLFilter should resolve the input's external entity");
-    }
-
-    @Test
-    void unconfiguredFilterLeaksDocument() throws Exception {
-        final SAXTransformerFactory factory = (SAXTransformerFactory) TransformerFactory.newInstance();
-        final XMLFilter filter = factory.newXMLFilter(AttackTestSupport.resourceSource("with-document.xsl"));
-        setPermissiveParentOnAndroid(filter);
-        assertTrue(filterAndCapture(filter, "<root/>").contains(AttackTestSupport.LEAKED_MARKER),
-                "unconfigured XMLFilter should resolve document()");
-    }
-
-    /**
-     * On Android, hand the unconfigured filter a permissive parent so Xalan's {@code TrAXFilter} uses it instead of self-provisioning an Expat reader on which
-     * it enables {@code namespace-prefixes}, a feature Android's libexpat accepts but fails on mid-parse. The parent stays permissive (no floor), so the leak
-     * these controls assert still occurs.
-     */
-    private static void setPermissiveParentOnAndroid(final XMLFilter filter) {
-        if (AttackTestSupport.IS_ANDROID) {
-            filter.setParent(AttackTestSupport.permissiveReader());
-        }
     }
 }

@@ -51,6 +51,17 @@ import javax.xml.transform.Source;
  */
 final class HardeningXMLInputFactory extends XMLInputFactory {
 
+    private static boolean isResolverProperty(final String name) {
+        return XMLInputFactory.RESOLVER.equals(name)
+                || StaxHardener.WSTX_DTD_RESOLVER.equals(name)
+                || StaxHardener.WSTX_ENTITY_RESOLVER.equals(name)
+                || StaxHardener.WSTX_UNDECLARED_ENTITY_RESOLVER.equals(name);
+    }
+
+    private static XMLResolver unwrap(final XMLResolver resolver) {
+        return resolver instanceof FallbackIgnoreXMLResolver ? ((FallbackIgnoreXMLResolver) resolver).getDelegate() : resolver;
+    }
+
     private final XMLInputFactory delegate;
 
     HardeningXMLInputFactory(final XMLInputFactory delegate) {
@@ -59,13 +70,113 @@ final class HardeningXMLInputFactory extends XMLInputFactory {
     }
 
     @Override
-    public void setXMLResolver(final XMLResolver resolver) {
-        setResolverProperty(XMLInputFactory.RESOLVER, resolver);
+    public XMLEventReader createFilteredReader(final XMLEventReader reader, final EventFilter filter) throws XMLStreamException {
+        return delegate.createFilteredReader(reader, filter);
+    }
+
+    @Override
+    public XMLStreamReader createFilteredReader(final XMLStreamReader reader, final StreamFilter filter) throws XMLStreamException {
+        return delegate.createFilteredReader(reader, filter);
+    }
+
+    @Override
+    public XMLEventReader createXMLEventReader(final InputStream stream) throws XMLStreamException {
+        return delegate.createXMLEventReader(stream);
+    }
+
+    @Override
+    public XMLEventReader createXMLEventReader(final InputStream stream, final String encoding) throws XMLStreamException {
+        return delegate.createXMLEventReader(stream, encoding);
+    }
+
+    @Override
+    public XMLEventReader createXMLEventReader(final Reader reader) throws XMLStreamException {
+        return delegate.createXMLEventReader(reader);
+    }
+
+    @Override
+    public XMLEventReader createXMLEventReader(final Source source) throws XMLStreamException {
+        return delegate.createXMLEventReader(source);
+    }
+
+    @Override
+    public XMLEventReader createXMLEventReader(final String systemId, final InputStream stream) throws XMLStreamException {
+        return delegate.createXMLEventReader(systemId, stream);
+    }
+
+    @Override
+    public XMLEventReader createXMLEventReader(final String systemId, final Reader reader) throws XMLStreamException {
+        return delegate.createXMLEventReader(systemId, reader);
+    }
+
+    @Override
+    public XMLEventReader createXMLEventReader(final XMLStreamReader reader) throws XMLStreamException {
+        return delegate.createXMLEventReader(reader);
+    }
+
+    @Override
+    public XMLStreamReader createXMLStreamReader(final InputStream stream) throws XMLStreamException {
+        return delegate.createXMLStreamReader(stream);
+    }
+
+    @Override
+    public XMLStreamReader createXMLStreamReader(final InputStream stream, final String encoding) throws XMLStreamException {
+        return delegate.createXMLStreamReader(stream, encoding);
+    }
+
+    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
+    @Override
+    public XMLStreamReader createXMLStreamReader(final Reader reader) throws XMLStreamException {
+        return delegate.createXMLStreamReader(reader);
+    }
+
+    @Override
+    public XMLStreamReader createXMLStreamReader(final Source source) throws XMLStreamException {
+        return delegate.createXMLStreamReader(source);
+    }
+
+    @Override
+    public XMLStreamReader createXMLStreamReader(final String systemId, final InputStream stream) throws XMLStreamException {
+        return delegate.createXMLStreamReader(systemId, stream);
+    }
+
+    @Override
+    public XMLStreamReader createXMLStreamReader(final String systemId, final Reader reader) throws XMLStreamException {
+        return delegate.createXMLStreamReader(systemId, reader);
+    }
+
+    @Override
+    public XMLEventAllocator getEventAllocator() {
+        return delegate.getEventAllocator();
+    }
+    // </editor-fold>
+
+    @Override
+    public Object getProperty(final String name) {
+        if (isResolverProperty(name)) {
+            return unwrap((XMLResolver) delegate.getProperty(name));
+        }
+        return delegate.getProperty(name);
+    }
+
+    @Override
+    public XMLReporter getXMLReporter() {
+        return delegate.getXMLReporter();
     }
 
     @Override
     public XMLResolver getXMLResolver() {
         return unwrap(delegate.getXMLResolver());
+    }
+
+    @Override
+    public boolean isPropertySupported(final String name) {
+        return delegate.isPropertySupported(name);
+    }
+
+    @Override
+    public void setEventAllocator(final XMLEventAllocator allocator) {
+        delegate.setEventAllocator(allocator);
     }
 
     @Override
@@ -76,14 +187,6 @@ final class HardeningXMLInputFactory extends XMLInputFactory {
         } else {
             delegate.setProperty(name, value);
         }
-    }
-
-    @Override
-    public Object getProperty(final String name) {
-        if (isResolverProperty(name)) {
-            return unwrap((XMLResolver) delegate.getProperty(name));
-        }
-        return delegate.getProperty(name);
     }
 
     /**
@@ -106,116 +209,13 @@ final class HardeningXMLInputFactory extends XMLInputFactory {
         }
     }
 
-    private static boolean isResolverProperty(final String name) {
-        return XMLInputFactory.RESOLVER.equals(name)
-                || StaxHardener.WSTX_DTD_RESOLVER.equals(name)
-                || StaxHardener.WSTX_ENTITY_RESOLVER.equals(name)
-                || StaxHardener.WSTX_UNDECLARED_ENTITY_RESOLVER.equals(name);
-    }
-
-    private static XMLResolver unwrap(final XMLResolver resolver) {
-        return resolver instanceof FallbackIgnoreXMLResolver ? ((FallbackIgnoreXMLResolver) resolver).getDelegate() : resolver;
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
-    @Override
-    public XMLStreamReader createXMLStreamReader(final Reader reader) throws XMLStreamException {
-        return delegate.createXMLStreamReader(reader);
-    }
-
-    @Override
-    public XMLStreamReader createXMLStreamReader(final Source source) throws XMLStreamException {
-        return delegate.createXMLStreamReader(source);
-    }
-
-    @Override
-    public XMLStreamReader createXMLStreamReader(final InputStream stream) throws XMLStreamException {
-        return delegate.createXMLStreamReader(stream);
-    }
-
-    @Override
-    public XMLStreamReader createXMLStreamReader(final InputStream stream, final String encoding) throws XMLStreamException {
-        return delegate.createXMLStreamReader(stream, encoding);
-    }
-
-    @Override
-    public XMLStreamReader createXMLStreamReader(final String systemId, final InputStream stream) throws XMLStreamException {
-        return delegate.createXMLStreamReader(systemId, stream);
-    }
-
-    @Override
-    public XMLStreamReader createXMLStreamReader(final String systemId, final Reader reader) throws XMLStreamException {
-        return delegate.createXMLStreamReader(systemId, reader);
-    }
-
-    @Override
-    public XMLEventReader createXMLEventReader(final Reader reader) throws XMLStreamException {
-        return delegate.createXMLEventReader(reader);
-    }
-
-    @Override
-    public XMLEventReader createXMLEventReader(final String systemId, final Reader reader) throws XMLStreamException {
-        return delegate.createXMLEventReader(systemId, reader);
-    }
-
-    @Override
-    public XMLEventReader createXMLEventReader(final XMLStreamReader reader) throws XMLStreamException {
-        return delegate.createXMLEventReader(reader);
-    }
-
-    @Override
-    public XMLEventReader createXMLEventReader(final Source source) throws XMLStreamException {
-        return delegate.createXMLEventReader(source);
-    }
-
-    @Override
-    public XMLEventReader createXMLEventReader(final InputStream stream) throws XMLStreamException {
-        return delegate.createXMLEventReader(stream);
-    }
-
-    @Override
-    public XMLEventReader createXMLEventReader(final InputStream stream, final String encoding) throws XMLStreamException {
-        return delegate.createXMLEventReader(stream, encoding);
-    }
-
-    @Override
-    public XMLEventReader createXMLEventReader(final String systemId, final InputStream stream) throws XMLStreamException {
-        return delegate.createXMLEventReader(systemId, stream);
-    }
-
-    @Override
-    public XMLStreamReader createFilteredReader(final XMLStreamReader reader, final StreamFilter filter) throws XMLStreamException {
-        return delegate.createFilteredReader(reader, filter);
-    }
-
-    @Override
-    public XMLEventReader createFilteredReader(final XMLEventReader reader, final EventFilter filter) throws XMLStreamException {
-        return delegate.createFilteredReader(reader, filter);
-    }
-
-    @Override
-    public XMLReporter getXMLReporter() {
-        return delegate.getXMLReporter();
-    }
-
     @Override
     public void setXMLReporter(final XMLReporter reporter) {
         delegate.setXMLReporter(reporter);
     }
 
     @Override
-    public boolean isPropertySupported(final String name) {
-        return delegate.isPropertySupported(name);
+    public void setXMLResolver(final XMLResolver resolver) {
+        setResolverProperty(XMLInputFactory.RESOLVER, resolver);
     }
-
-    @Override
-    public void setEventAllocator(final XMLEventAllocator allocator) {
-        delegate.setEventAllocator(allocator);
-    }
-
-    @Override
-    public XMLEventAllocator getEventAllocator() {
-        return delegate.getEventAllocator();
-    }
-    // </editor-fold>
 }

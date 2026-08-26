@@ -45,10 +45,6 @@ final class FallbackIgnoreXMLResolver implements XMLResolver {
         this.delegate = delegate;
     }
 
-    void setDelegate(final XMLResolver delegate) {
-        this.delegate = delegate;
-    }
-
     XMLResolver getDelegate() {
         return delegate;
     }
@@ -63,5 +59,9 @@ final class FallbackIgnoreXMLResolver implements XMLResolver {
             throw new XMLStreamException(HardeningException.forbidden(null, namespace, publicID, systemID, baseURI));
         }
         return EMPTY;
+    }
+
+    void setDelegate(final XMLResolver delegate) {
+        this.delegate = delegate;
     }
 }

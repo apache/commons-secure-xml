@@ -41,12 +41,6 @@ final class HardeningXPathFactory extends XPathFactory {
     }
 
     @Override
-    public XPath newXPath() {
-        final XPath xpath = delegate.newXPath();
-        return xpath == null ? null : new HardeningXPath(xpath);
-    }
-
-    @Override
     public boolean getFeature(final String name) throws XPathFactoryConfigurationException {
         return delegate.getFeature(name);
     }
@@ -54,6 +48,12 @@ final class HardeningXPathFactory extends XPathFactory {
     @Override
     public boolean isObjectModelSupported(final String objectModel) {
         return delegate.isObjectModelSupported(objectModel);
+    }
+
+    @Override
+    public XPath newXPath() {
+        final XPath xpath = delegate.newXPath();
+        return xpath == null ? null : new HardeningXPath(xpath);
     }
 
     @Override

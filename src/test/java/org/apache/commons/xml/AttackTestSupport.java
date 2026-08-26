@@ -746,17 +746,17 @@ final class AttackTestSupport {
         return "Hardening did not block " + description + "; parse completed successfully.";
     }
 
-    /** Parses the payload through the supplied reader and returns the accumulated character data, used by the SAX-based {@code DoesNotLeak} helpers. */
-    static String captureCharacters(final XMLReader reader, final String payload) throws Exception {
-        return captureCharacters(reader, inputSource(payload));
-    }
-
     /** Parses the source through the supplied reader, with {@link #STRICT_REPORTER} installed, and returns the accumulated character data. */
     static String captureCharacters(final XMLReader reader, final InputSource source) throws Exception {
         final StringBuilder text = new StringBuilder();
         reader.setContentHandler(capturingHandler(text));
         strictXMLReader(reader).parse(source);
         return text.toString();
+    }
+
+    /** Parses the payload through the supplied reader and returns the accumulated character data, used by the SAX-based {@code DoesNotLeak} helpers. */
+    static String captureCharacters(final XMLReader reader, final String payload) throws Exception {
+        return captureCharacters(reader, inputSource(payload));
     }
 
     /** Parses the payload through a {@link XMLEventReader} and returns the accumulated character and CDATA data, used by the StAX-based {@code DoesNotLeak} helper. */
@@ -884,13 +884,6 @@ final class AttackTestSupport {
     }
 
     /**
-     * Builds a {@link SAXSource} wrapping the payload, without an explicit parser; used by the unconfigured-side TrAX controls.
-     */
-    private static SAXSource permissiveSaxSource(final String xml) {
-        return new SAXSource(permissiveReader(), new InputSource(new StringReader(xml)));
-    }
-
-    /**
      * A permissive, namespace-aware {@link XMLReader} with every entity-expansion limit lifted, for the unconfigured-side controls.
      *
      * <p>On Android the reader is Expat, which accepts {@code namespace-prefixes} at {@code setFeature} time but fails mid-parse; a probing TrAX path (an
@@ -905,6 +898,13 @@ final class AttackTestSupport {
         final XMLReader reader = strictXMLReader(factory);
         liftEntityLimits(reader);
         return IS_ANDROID ? new PermissiveExpatReader(reader) : reader;
+    }
+
+    /**
+     * Builds a {@link SAXSource} wrapping the payload, without an explicit parser; used by the unconfigured-side TrAX controls.
+     */
+    private static SAXSource permissiveSaxSource(final String xml) {
+        return new SAXSource(permissiveReader(), new InputSource(new StringReader(xml)));
     }
 
     private static boolean probeAndroid() {
@@ -985,20 +985,20 @@ final class AttackTestSupport {
     }
 
     /**
-     * Builds an identity {@link Transformer} from {@code factory} with {@link #STRICT_REPORTER} installed on both the factory and the resulting transformer.
+     * Builds a {@link Transformer} from {@code templates} with {@link #STRICT_REPORTER} installed as its error listener.
      */
-    private static Transformer strictTransformer(final TransformerFactory factory) throws TransformerConfigurationException {
-        factory.setErrorListener(STRICT_REPORTER);
-        final Transformer transformer = factory.newTransformer();
+    private static Transformer strictTransformer(final Templates templates) throws TransformerConfigurationException {
+        final Transformer transformer = templates.newTransformer();
         transformer.setErrorListener(STRICT_REPORTER);
         return transformer;
     }
 
     /**
-     * Builds a {@link Transformer} from {@code templates} with {@link #STRICT_REPORTER} installed as its error listener.
+     * Builds an identity {@link Transformer} from {@code factory} with {@link #STRICT_REPORTER} installed on both the factory and the resulting transformer.
      */
-    private static Transformer strictTransformer(final Templates templates) throws TransformerConfigurationException {
-        final Transformer transformer = templates.newTransformer();
+    private static Transformer strictTransformer(final TransformerFactory factory) throws TransformerConfigurationException {
+        factory.setErrorListener(STRICT_REPORTER);
+        final Transformer transformer = factory.newTransformer();
         transformer.setErrorListener(STRICT_REPORTER);
         return transformer;
     }

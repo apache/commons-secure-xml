@@ -49,6 +49,16 @@ class TransformerHandlerTest {
     }
 
     @Test
+    void hardenedGetTransformerDoesNotLeakDocument() throws Exception {
+        // The f004 bypass: pull the inner Transformer out of the handler and transform directly; the floor must ride along.
+        final SAXTransformerFactory factory = SaxSurfaceTestSupport.hardenedFactory();
+        final TransformerHandler handler = factory.newTransformerHandler(AttackTestSupport.resourceSource("with-document.xsl"));
+        final StringWriter sink = new StringWriter();
+        handler.getTransformer().transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink));
+        assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "document() through getTransformer() leaked");
+    }
+
+    @Test
     void hardenedTransformerHandlerDoesNotLeakDocument() throws Exception {
         final SAXTransformerFactory factory = SaxSurfaceTestSupport.hardenedFactory();
         final TransformerHandler handler = factory.newTransformerHandler(AttackTestSupport.resourceSource("with-document.xsl"));
@@ -63,16 +73,6 @@ class TransformerHandlerTest {
         final TransformerHandler handler = factory.newTransformerHandler(templates);
         assertFalse(transformViaHandler(handler).contains(AttackTestSupport.LEAKED_MARKER),
                 "document() through TransformerHandler(Templates) leaked");
-    }
-
-    @Test
-    void hardenedGetTransformerDoesNotLeakDocument() throws Exception {
-        // The f004 bypass: pull the inner Transformer out of the handler and transform directly; the floor must ride along.
-        final SAXTransformerFactory factory = SaxSurfaceTestSupport.hardenedFactory();
-        final TransformerHandler handler = factory.newTransformerHandler(AttackTestSupport.resourceSource("with-document.xsl"));
-        final StringWriter sink = new StringWriter();
-        handler.getTransformer().transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink));
-        assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "document() through getTransformer() leaked");
     }
 
     @Test

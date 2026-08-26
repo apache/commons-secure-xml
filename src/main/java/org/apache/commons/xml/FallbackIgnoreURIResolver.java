@@ -78,10 +78,6 @@ final class FallbackIgnoreURIResolver implements URIResolver {
         this.emptySource = emptySource != null ? emptySource : () -> new DOMSource(EMPTY_DOCUMENT);
     }
 
-    void setDelegate(final URIResolver delegate) {
-        this.delegate = delegate;
-    }
-
     URIResolver getDelegate() {
         return delegate;
     }
@@ -97,5 +93,9 @@ final class FallbackIgnoreURIResolver implements URIResolver {
             throw new TransformerException(HardeningException.forbidden("uri", null, null, href, base));
         }
         return emptySource.get();
+    }
+
+    void setDelegate(final URIResolver delegate) {
+        this.delegate = delegate;
     }
 }

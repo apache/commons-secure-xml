@@ -67,34 +67,6 @@ class SchemaLocationSaxTest {
 
     private static final String INSTANCE = "schema-location-instance.xml";
 
-    @Test
-    void hardenedDoesNotFetchExternalSchema() throws Exception {
-        assumeTrue(supportsSchemaLanguage(), "parser does not support JAXP 1.2 schema-language XSD validation");
-        final SAXParser parser = newValidatingParser(XmlFactories.newSAXParserFactory());
-        // The schemaLocation reference resolves to empty rather than being fetched. Either the empty schema fails the validating parse (acceptable), or the
-        // parse completes but the schema's default leak attribute is never augmented onto the element. Either way the marker must not be observed.
-        final LeakCapturingHandler handler = new LeakCapturingHandler();
-        try {
-            parse(parser, handler);
-        } catch (final Exception blocked) {
-            // Acceptable: the empty schema was rejected at parse time, so nothing was fetched or augmented.
-        }
-        assertNull(handler.leak, "Hardened parse must not augment the external schema's default attribute onto the element.");
-    }
-
-    @Test
-    void unconfiguredFetchesExternalSchema() throws Exception {
-        assumeTrue(supportsSchemaLanguage(), "parser does not support JAXP 1.2 schema-language XSD validation");
-        final SAXParserFactory factory = SAXParserFactory.newInstance();
-        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
-        final SAXParser parser = newValidatingParser(factory);
-        // Positive control: without hardening the external schema is fetched and its default attribute is augmented onto the root element.
-        final LeakCapturingHandler handler = new LeakCapturingHandler();
-        parse(parser, handler);
-        assertEquals(LEAKED_MARKER, handler.leak,
-                "Permissive parse should have fetched the external schema and augmented its default attribute onto the element.");
-    }
-
     private static SAXParser newValidatingParser(final SAXParserFactory factory) throws Exception {
         factory.setNamespaceAware(true);
         factory.setValidating(true);
@@ -123,5 +95,33 @@ class SchemaLocationSaxTest {
         } catch (final Exception e) {
             return false;
         }
+    }
+
+    @Test
+    void hardenedDoesNotFetchExternalSchema() throws Exception {
+        assumeTrue(supportsSchemaLanguage(), "parser does not support JAXP 1.2 schema-language XSD validation");
+        final SAXParser parser = newValidatingParser(XmlFactories.newSAXParserFactory());
+        // The schemaLocation reference resolves to empty rather than being fetched. Either the empty schema fails the validating parse (acceptable), or the
+        // parse completes but the schema's default leak attribute is never augmented onto the element. Either way the marker must not be observed.
+        final LeakCapturingHandler handler = new LeakCapturingHandler();
+        try {
+            parse(parser, handler);
+        } catch (final Exception blocked) {
+            // Acceptable: the empty schema was rejected at parse time, so nothing was fetched or augmented.
+        }
+        assertNull(handler.leak, "Hardened parse must not augment the external schema's default attribute onto the element.");
+    }
+
+    @Test
+    void unconfiguredFetchesExternalSchema() throws Exception {
+        assumeTrue(supportsSchemaLanguage(), "parser does not support JAXP 1.2 schema-language XSD validation");
+        final SAXParserFactory factory = SAXParserFactory.newInstance();
+        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
+        final SAXParser parser = newValidatingParser(factory);
+        // Positive control: without hardening the external schema is fetched and its default attribute is augmented onto the root element.
+        final LeakCapturingHandler handler = new LeakCapturingHandler();
+        parse(parser, handler);
+        assertEquals(LEAKED_MARKER, handler.leak,
+                "Permissive parse should have fetched the external schema and augmented its default attribute onto the element.");
     }
 }

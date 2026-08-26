@@ -38,12 +38,6 @@ final class FallbackIgnoreLSResourceResolver implements LSResourceResolver {
     /** DOM Level 3 Load/Save implementation used to build the empty input for unresolved lookups. */
     private static final DOMImplementationLS DOM_LS = domImplementationLS();
 
-    private LSResourceResolver delegate;
-
-    FallbackIgnoreLSResourceResolver(final LSResourceResolver delegate) {
-        this.delegate = delegate;
-    }
-
     private static DOMImplementationLS domImplementationLS() {
         try {
             return (DOMImplementationLS) DOMImplementationRegistry.newInstance().getDOMImplementation("LS");
@@ -52,7 +46,9 @@ final class FallbackIgnoreLSResourceResolver implements LSResourceResolver {
         }
     }
 
-    void setDelegate(final LSResourceResolver delegate) {
+    private LSResourceResolver delegate;
+
+    FallbackIgnoreLSResourceResolver(final LSResourceResolver delegate) {
         this.delegate = delegate;
     }
 
@@ -79,5 +75,9 @@ final class FallbackIgnoreLSResourceResolver implements LSResourceResolver {
         empty.setSystemId(systemId);
         empty.setBaseURI(baseURI);
         return empty;
+    }
+
+    void setDelegate(final LSResourceResolver delegate) {
+        this.delegate = delegate;
     }
 }

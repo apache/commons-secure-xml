@@ -44,18 +44,6 @@ import net.sf.saxon.xpath.XPathFactoryImpl;
 final class SaxonProvider {
 
     /**
-     * Tells whether the factory class is Saxon's, by package prefix, so public subclasses such as {@code net.sf.saxon.BasicTransformerFactory} route to the
-     * same locked-down {@link Configuration} as the factory registered for JAXP lookup.
-     *
-     * @param factoryClass The factory implementation class.
-     * @return Whether the class lives in Saxon's open-source or commercial packages.
-     */
-    static boolean isSaxon(final Class<?> factoryClass) {
-        final String name = factoryClass.getName();
-        return name.startsWith("net.sf.saxon.") || name.startsWith("com.saxonica.");
-    }
-
-    /**
      * A Saxon {@link Configuration} carrying the vendor-specific restrictions that the standard JAXP knobs cannot express.
      *
      * <p>The ignore-all {@link javax.xml.transform.URIResolver} floor is not one of them: it is installed from outside by the shared
@@ -123,15 +111,6 @@ final class SaxonProvider {
         }
     }
 
-    /**
-     * The empty-{@link Source} shape Saxon's consumers expect, for the {@link FallbackIgnoreURIResolver} floor the TrAX wrapper installs.
-     *
-     * @return a supplier for Saxon's empty {@link Source}.
-     */
-    static Supplier<Source> emptySourceSupplier() {
-        return EmptySource::getInstance;
-    }
-
     static TransformerFactory configure(final TransformerFactory factory) {
         try {
             return SaxonProviderConfigurer.configure(factory);
@@ -154,6 +133,27 @@ final class SaxonProvider {
             // Unlikely, but protects method execution from missing optional dependency
             throw new IllegalStateException(e);
         }
+    }
+
+    /**
+     * The empty-{@link Source} shape Saxon's consumers expect, for the {@link FallbackIgnoreURIResolver} floor the TrAX wrapper installs.
+     *
+     * @return a supplier for Saxon's empty {@link Source}.
+     */
+    static Supplier<Source> emptySourceSupplier() {
+        return EmptySource::getInstance;
+    }
+
+    /**
+     * Tells whether the factory class is Saxon's, by package prefix, so public subclasses such as {@code net.sf.saxon.BasicTransformerFactory} route to the
+     * same locked-down {@link Configuration} as the factory registered for JAXP lookup.
+     *
+     * @param factoryClass The factory implementation class.
+     * @return Whether the class lives in Saxon's open-source or commercial packages.
+     */
+    static boolean isSaxon(final Class<?> factoryClass) {
+        final String name = factoryClass.getName();
+        return name.startsWith("net.sf.saxon.") || name.startsWith("com.saxonica.");
     }
 
     private SaxonProvider() {

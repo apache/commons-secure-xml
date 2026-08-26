@@ -71,53 +71,6 @@ import org.xml.sax.XMLReader;
  */
 final class HardeningTransformerFactory extends SAXTransformerFactory {
 
-    private final SAXTransformerFactory delegate;
-
-    /** Empty-{@link Source} supplier for the resolver floor, threaded onto every produced Templates/Transformer; {@code null} means the default empty DOM. */
-    private final Supplier<Source> emptySource;
-
-    private final FallbackIgnoreURIResolver floor;
-
-    HardeningTransformerFactory(final SAXTransformerFactory delegate) {
-        this(delegate, null);
-    }
-
-    HardeningTransformerFactory(final SAXTransformerFactory delegate, final Supplier<Source> emptySource) {
-        this.delegate = delegate;
-        this.emptySource = emptySource;
-        this.floor = new FallbackIgnoreURIResolver(null, emptySource);
-        // Compile-time block for xsl:import/xsl:include and document(); a caller-set resolver is routed through the floor rather than replacing it.
-        delegate.setURIResolver(floor);
-    }
-
-    @Override
-    public void setURIResolver(final URIResolver resolver) {
-        floor.setDelegate(resolver);
-    }
-
-    @Override
-    public URIResolver getURIResolver() {
-        return floor.getDelegate();
-    }
-
-    @Override
-    public Source getAssociatedStylesheet(final Source source, final String media, final String title, final String charset)
-            throws TransformerConfigurationException {
-        // Xalan's getAssociatedStylesheet drops a SAXSource's reader and self-provisions its own to scan for xml-stylesheet PIs (XALANJ-2849).
-        final Source hardened = isXalan(delegate) ? hardenSourceToDom(source) : SAXParserHardener.hardenSource(source);
-        return delegate.getAssociatedStylesheet(hardened, media, title, charset);
-    }
-
-    /**
-     * Whether the delegate is Apache Xalan (either its interpretive or its XSLTC factory), whose {@code getAssociatedStylesheet} ignores a SAXSource reader.
-     *
-     * @param factory The delegate factory.
-     * @return Whether the delegate is an {@code org.apache.xalan.} implementation.
-     */
-    private static boolean isXalan(final SAXTransformerFactory factory) {
-        return factory.getClass().getName().startsWith("org.apache.xalan.");
-    }
-
     /**
      * Parses a reader-less source into a DOM through a hardened, namespace-aware {@link javax.xml.parsers.DocumentBuilder} and returns a {@link DOMSource}
      * carrying its system id, so the consumer walks the tree instead of provisioning its own reader. Any other source is left to
@@ -144,10 +97,82 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
         return SAXParserHardener.hardenSource(source);
     }
 
+    /**
+     * Whether the delegate is Apache Xalan (either its interpretive or its XSLTC factory), whose {@code getAssociatedStylesheet} ignores a SAXSource reader.
+     *
+     * @param factory The delegate factory.
+     * @return Whether the delegate is an {@code org.apache.xalan.} implementation.
+     */
+    private static boolean isXalan(final SAXTransformerFactory factory) {
+        return factory.getClass().getName().startsWith("org.apache.xalan.");
+    }
+
+    private static Templates unwrap(final Templates templates) {
+        return templates instanceof HardeningTemplates ? ((HardeningTemplates) templates).getDelegate() : templates;
+    }
+
+    private final SAXTransformerFactory delegate;
+
+    /** Empty-{@link Source} supplier for the resolver floor, threaded onto every produced Templates/Transformer; {@code null} means the default empty DOM. */
+    private final Supplier<Source> emptySource;
+
+    private final FallbackIgnoreURIResolver floor;
+
+    HardeningTransformerFactory(final SAXTransformerFactory delegate) {
+        this(delegate, null);
+    }
+
+    HardeningTransformerFactory(final SAXTransformerFactory delegate, final Supplier<Source> emptySource) {
+        this.delegate = delegate;
+        this.emptySource = emptySource;
+        this.floor = new FallbackIgnoreURIResolver(null, emptySource);
+        // Compile-time block for xsl:import/xsl:include and document(); a caller-set resolver is routed through the floor rather than replacing it.
+        delegate.setURIResolver(floor);
+    }
+
+    @Override
+    public Source getAssociatedStylesheet(final Source source, final String media, final String title, final String charset)
+            throws TransformerConfigurationException {
+        // Xalan's getAssociatedStylesheet drops a SAXSource's reader and self-provisions its own to scan for xml-stylesheet PIs (XALANJ-2849).
+        final Source hardened = isXalan(delegate) ? hardenSourceToDom(source) : SAXParserHardener.hardenSource(source);
+        return delegate.getAssociatedStylesheet(hardened, media, title, charset);
+    }
+
+    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
+    @Override
+    public Object getAttribute(final String name) {
+        return delegate.getAttribute(name);
+    }
+
+    @Override
+    public ErrorListener getErrorListener() {
+        return delegate.getErrorListener();
+    }
+
+    @Override
+    public boolean getFeature(final String name) {
+        return delegate.getFeature(name);
+    }
+
+    @Override
+    public URIResolver getURIResolver() {
+        return floor.getDelegate();
+    }
+
+    private TransformerHandler hardenHandler(final TransformerHandler handler) {
+        return handler == null ? null : new HardeningTransformerHandler(handler, getURIResolver(), emptySource);
+    }
+
     @Override
     public Templates newTemplates(final Source source) throws TransformerConfigurationException {
         final Templates templates = delegate.newTemplates(SAXParserHardener.hardenSource(source));
         return templates == null ? null : new HardeningTemplates(templates, getURIResolver(), emptySource);
+    }
+
+    @Override
+    public TemplatesHandler newTemplatesHandler() throws TransformerConfigurationException {
+        final TemplatesHandler handler = delegate.newTemplatesHandler();
+        return handler == null ? null : new HardeningTemplatesHandler(handler, getURIResolver(), emptySource);
     }
 
     @Override
@@ -180,12 +205,6 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
     }
 
     @Override
-    public TemplatesHandler newTemplatesHandler() throws TransformerConfigurationException {
-        final TemplatesHandler handler = delegate.newTemplatesHandler();
-        return handler == null ? null : new HardeningTemplatesHandler(handler, getURIResolver(), emptySource);
-    }
-
-    @Override
     public XMLFilter newXMLFilter(final Source source) throws TransformerConfigurationException {
         final Templates templates = newTemplates(source);
         return templates == null ? null : new HardeningXMLFilter((HardeningTemplates) templates);
@@ -195,30 +214,6 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
     public XMLFilter newXMLFilter(final Templates templates) throws TransformerConfigurationException {
         return new HardeningXMLFilter(templates instanceof HardeningTemplates ? (HardeningTemplates) templates
                 : new HardeningTemplates(templates, getURIResolver(), emptySource));
-    }
-
-    private TransformerHandler hardenHandler(final TransformerHandler handler) {
-        return handler == null ? null : new HardeningTransformerHandler(handler, getURIResolver(), emptySource);
-    }
-
-    private static Templates unwrap(final Templates templates) {
-        return templates instanceof HardeningTemplates ? ((HardeningTemplates) templates).getDelegate() : templates;
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
-    @Override
-    public Object getAttribute(final String name) {
-        return delegate.getAttribute(name);
-    }
-
-    @Override
-    public ErrorListener getErrorListener() {
-        return delegate.getErrorListener();
-    }
-
-    @Override
-    public boolean getFeature(final String name) {
-        return delegate.getFeature(name);
     }
 
     @Override
@@ -236,4 +231,9 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
         delegate.setFeature(name, value);
     }
     // </editor-fold>
+
+    @Override
+    public void setURIResolver(final URIResolver resolver) {
+        floor.setDelegate(resolver);
+    }
 }

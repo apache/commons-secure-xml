@@ -45,15 +45,6 @@ class SaxonAlternateFactoryTest {
 
     private static final String BASIC_FACTORY_CLASS = "net.sf.saxon.BasicTransformerFactory";
 
-    /** Instantiates {@code BasicTransformerFactory} reflectively, so this test compiles and loads without Saxon on the classpath. */
-    private static TransformerFactory basicSaxonFactory() {
-        try {
-            return (TransformerFactory) Class.forName(BASIC_FACTORY_CLASS).getDeclaredConstructor().newInstance();
-        } catch (final ReflectiveOperationException e) {
-            throw new AssertionError("Cannot instantiate " + BASIC_FACTORY_CLASS, e);
-        }
-    }
-
     private static void assumeSaxonPresent() {
         boolean present;
         try {
@@ -63,6 +54,15 @@ class SaxonAlternateFactoryTest {
             present = false;
         }
         Assumptions.assumeTrue(present, "Saxon is not on the classpath");
+    }
+
+    /** Instantiates {@code BasicTransformerFactory} reflectively, so this test compiles and loads without Saxon on the classpath. */
+    private static TransformerFactory basicSaxonFactory() {
+        try {
+            return (TransformerFactory) Class.forName(BASIC_FACTORY_CLASS).getDeclaredConstructor().newInstance();
+        } catch (final ReflectiveOperationException e) {
+            throw new AssertionError("Cannot instantiate " + BASIC_FACTORY_CLASS, e);
+        }
     }
 
     /** A {@code collection()} over the test fixtures whose {@code referenced.xml} carries {@link AttackTestSupport#LEAKED_MARKER}. */

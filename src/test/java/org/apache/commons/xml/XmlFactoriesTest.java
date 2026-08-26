@@ -49,12 +49,10 @@ class XmlFactoriesTest {
             "<?xml version=\"1.0\"?>\n<root><child>hello</child></root>\n";
 
     @Test
-    void newDocumentBuilderFactoryReturnsFreshInstance() {
-        final DocumentBuilderFactory a = XmlFactories.newDocumentBuilderFactory();
-        final DocumentBuilderFactory b = XmlFactories.newDocumentBuilderFactory();
-        assertNotNull(a);
-        assertNotNull(b);
-        assertNotSame(a, b);
+    void benignDocumentParses() throws Exception {
+        final Document doc = XmlFactories.newDocumentBuilderFactory().newDocumentBuilder().parse(new InputSource(new StringReader(BENIGN_XML)));
+        assertNotNull(doc);
+        assertNotNull(doc.getDocumentElement());
     }
 
     @Test
@@ -72,10 +70,12 @@ class XmlFactoriesTest {
     }
 
     @Test
-    void benignDocumentParses() throws Exception {
-        final Document doc = XmlFactories.newDocumentBuilderFactory().newDocumentBuilder().parse(new InputSource(new StringReader(BENIGN_XML)));
-        assertNotNull(doc);
-        assertNotNull(doc.getDocumentElement());
+    void newDocumentBuilderFactoryReturnsFreshInstance() {
+        final DocumentBuilderFactory a = XmlFactories.newDocumentBuilderFactory();
+        final DocumentBuilderFactory b = XmlFactories.newDocumentBuilderFactory();
+        assertNotNull(a);
+        assertNotNull(b);
+        assertNotSame(a, b);
     }
 
     @Test
@@ -88,12 +88,11 @@ class XmlFactoriesTest {
     }
 
     @Test
-    void newXMLInputFactoryReturnsFreshInstance() {
-        final XMLInputFactory a = XmlFactories.newXMLInputFactory();
-        final XMLInputFactory b = XmlFactories.newXMLInputFactory();
+    void newSchemaFactoryReturnsFreshInstance() throws Exception {
+        final SchemaFactory a = XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        final SchemaFactory b = XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         assertNotSame(a, b);
-        assertEquals(Boolean.TRUE, a.getProperty(XMLInputFactory.SUPPORT_DTD));
-        assertEquals(Boolean.FALSE, a.getProperty(XMLInputFactory.IS_VALIDATING));
+        assertTrue(a.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 
     @Test
@@ -104,17 +103,18 @@ class XmlFactoriesTest {
     }
 
     @Test
-    void newXPathFactoryReturnsFreshInstance() throws Exception {
-        final XPathFactory a = XmlFactories.newXPathFactory();
-        final XPathFactory b = XmlFactories.newXPathFactory();
+    void newXMLInputFactoryReturnsFreshInstance() {
+        final XMLInputFactory a = XmlFactories.newXMLInputFactory();
+        final XMLInputFactory b = XmlFactories.newXMLInputFactory();
         assertNotSame(a, b);
-        assertTrue(a.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        assertEquals(Boolean.TRUE, a.getProperty(XMLInputFactory.SUPPORT_DTD));
+        assertEquals(Boolean.FALSE, a.getProperty(XMLInputFactory.IS_VALIDATING));
     }
 
     @Test
-    void newSchemaFactoryReturnsFreshInstance() throws Exception {
-        final SchemaFactory a = XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        final SchemaFactory b = XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+    void newXPathFactoryReturnsFreshInstance() throws Exception {
+        final XPathFactory a = XmlFactories.newXPathFactory();
+        final XPathFactory b = XmlFactories.newXPathFactory();
         assertNotSame(a, b);
         assertTrue(a.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }

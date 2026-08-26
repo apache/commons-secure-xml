@@ -38,14 +38,14 @@ class DenyUnresolvedTest {
 
     private static final String SYSTEM_ID = "http://invalid.example.invalid/external.dtd";
 
-    @BeforeEach
-    void enableThrowOnUnresolved() {
-        System.setProperty(XmlFactories.THROW_ON_UNRESOLVED, "true");
-    }
-
     @AfterEach
     void clearThrowOnUnresolved() {
         System.clearProperty(XmlFactories.THROW_ON_UNRESOLVED);
+    }
+
+    @BeforeEach
+    void enableThrowOnUnresolved() {
+        System.setProperty(XmlFactories.THROW_ON_UNRESOLVED, "true");
     }
 
     @Test

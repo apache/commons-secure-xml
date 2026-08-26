@@ -100,6 +100,39 @@ class ShadingFootprintTest {
     private static Clazzpath clazzpath;
     private static Path classesDir;
 
+    /**
+     * Sums the uncompressed {@code .class} file sizes of a closure's classes, as they would land in a shaded jar.
+     */
+    private static long bytesOf(final Set<String> simpleNames) {
+        long total = 0;
+        for (final String name : simpleNames) {
+            try {
+                total += Files.size(classesDir.resolve("org/apache/commons/xml/" + name + ".class"));
+            } catch (final IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+        return total;
+    }
+
+    /**
+     * Transitive class closure of {@code PKG + simpleName}, restricted to this library's own package and reported by simple name.
+     */
+    private static Set<String> closureOf(final String simpleName) {
+        final Clazz entry = clazzpath.getClazz(PKG + simpleName);
+        if (entry == null) {
+            throw new IllegalStateException("Not on the compiled classpath: " + PKG + simpleName);
+        }
+        final Set<String> names = new TreeSet<>();
+        names.add(strip(entry.getName()));
+        for (final Clazz dependency : entry.getTransitiveDependencies()) {
+            if (dependency.getName().startsWith(PKG)) {
+                names.add(strip(dependency.getName()));
+            }
+        }
+        return names;
+    }
+
     @BeforeAll
     static void indexCompiledClasses() throws Exception {
         classesDir = Paths.get(HardeningException.class.getProtectionDomain().getCodeSource().getLocation().toURI());
@@ -123,14 +156,41 @@ class ShadingFootprintTest {
         System.out.print(report);
     }
 
+    /**
+     * {@link #SAX_PARSER_HARDENER} plus the extra names; used where an entry point's closure is the SAX path plus its own classes.
+     */
+    private static Set<String> saxParsersHardenerPlus(final String... more) {
+        final Set<String> union = new TreeSet<>(SAX_PARSER_HARDENER);
+        union.addAll(Arrays.asList(more));
+        return union;
+    }
+
+    private static Set<String> set(final String... names) {
+        return new TreeSet<>(Arrays.asList(names));
+    }
+
+    private static String strip(final String qualifiedName) {
+        return qualifiedName.substring(PKG.length());
+    }
+
     @Test
     void documentBuilderHardenerFootprint() {
         assertEquals(DOCUMENT_BUILDER_HARDENER, closureOf("DocumentBuilderHardener"));
     }
 
     @Test
+    void onlyXmlFactoriesPullsTheWholeLibrary() {
+        assertEquals(LIBRARY_CLASS_COUNT, closureOf("XmlFactories").size(), "XmlFactories closure size drifted");
+    }
+
+    @Test
     void saxParserHardenerFootprint() {
         assertEquals(SAX_PARSER_HARDENER, closureOf("SAXParserHardener"));
+    }
+
+    @Test
+    void schemaHardenerFootprint() {
+        assertEquals(SCHEMA_HARDENER, closureOf("SchemaHardener"));
     }
 
     @Test
@@ -146,65 +206,5 @@ class ShadingFootprintTest {
     @Test
     void xPathHardenerFootprint() {
         assertEquals(XPATH_HARDENER, closureOf("XPathHardener"));
-    }
-
-    @Test
-    void schemaHardenerFootprint() {
-        assertEquals(SCHEMA_HARDENER, closureOf("SchemaHardener"));
-    }
-
-    @Test
-    void onlyXmlFactoriesPullsTheWholeLibrary() {
-        assertEquals(LIBRARY_CLASS_COUNT, closureOf("XmlFactories").size(), "XmlFactories closure size drifted");
-    }
-
-    /**
-     * Transitive class closure of {@code PKG + simpleName}, restricted to this library's own package and reported by simple name.
-     */
-    private static Set<String> closureOf(final String simpleName) {
-        final Clazz entry = clazzpath.getClazz(PKG + simpleName);
-        if (entry == null) {
-            throw new IllegalStateException("Not on the compiled classpath: " + PKG + simpleName);
-        }
-        final Set<String> names = new TreeSet<>();
-        names.add(strip(entry.getName()));
-        for (final Clazz dependency : entry.getTransitiveDependencies()) {
-            if (dependency.getName().startsWith(PKG)) {
-                names.add(strip(dependency.getName()));
-            }
-        }
-        return names;
-    }
-
-    /**
-     * Sums the uncompressed {@code .class} file sizes of a closure's classes, as they would land in a shaded jar.
-     */
-    private static long bytesOf(final Set<String> simpleNames) {
-        long total = 0;
-        for (final String name : simpleNames) {
-            try {
-                total += Files.size(classesDir.resolve("org/apache/commons/xml/" + name + ".class"));
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        }
-        return total;
-    }
-
-    private static String strip(final String qualifiedName) {
-        return qualifiedName.substring(PKG.length());
-    }
-
-    private static Set<String> set(final String... names) {
-        return new TreeSet<>(Arrays.asList(names));
-    }
-
-    /**
-     * {@link #SAX_PARSER_HARDENER} plus the extra names; used where an entry point's closure is the SAX path plus its own classes.
-     */
-    private static Set<String> saxParsersHardenerPlus(final String... more) {
-        final Set<String> union = new TreeSet<>(SAX_PARSER_HARDENER);
-        union.addAll(Arrays.asList(more));
-        return union;
     }
 }

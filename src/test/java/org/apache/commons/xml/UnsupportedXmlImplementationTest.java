@@ -43,6 +43,16 @@ class UnsupportedXmlImplementationTest {
     public static final class FakeDocumentBuilderFactory extends DocumentBuilderFactory {
 
         @Override
+        public Object getAttribute(final String name) {
+            return null;
+        }
+
+        @Override
+        public boolean getFeature(final String name) {
+            return false;
+        }
+
+        @Override
         public DocumentBuilder newDocumentBuilder() {
             throw new UnsupportedOperationException();
         }
@@ -53,18 +63,8 @@ class UnsupportedXmlImplementationTest {
         }
 
         @Override
-        public Object getAttribute(final String name) {
-            return null;
-        }
-
-        @Override
         public void setFeature(final String name, final boolean value) throws ParserConfigurationException {
             throw new ParserConfigurationException("feature not recognized: " + name);
-        }
-
-        @Override
-        public boolean getFeature(final String name) {
-            return false;
         }
     }
 
@@ -74,6 +74,11 @@ class UnsupportedXmlImplementationTest {
     public static final class FakeSAXParserFactory extends SAXParserFactory {
 
         @Override
+        public boolean getFeature(final String name) throws SAXNotSupportedException {
+            throw new SAXNotSupportedException("feature not recognized: " + name);
+        }
+
+        @Override
         public SAXParser newSAXParser() {
             throw new UnsupportedOperationException();
         }
@@ -81,11 +86,6 @@ class UnsupportedXmlImplementationTest {
         @Override
         public void setFeature(final String name, final boolean value) throws SAXNotRecognizedException {
             throw new SAXNotRecognizedException("feature not recognized: " + name);
-        }
-
-        @Override
-        public boolean getFeature(final String name) throws SAXNotSupportedException {
-            throw new SAXNotSupportedException("feature not recognized: " + name);
         }
     }
 

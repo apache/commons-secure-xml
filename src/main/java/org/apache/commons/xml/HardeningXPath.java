@@ -78,6 +78,12 @@ final class HardeningXPath implements XPath {
     }
 
     @Override
+    public XPathExpression compile(final String expression) throws XPathExpressionException {
+        final XPathExpression compiled = delegate.compile(expression);
+        return compiled == null ? null : new HardeningXPathExpression(compiled);
+    }
+
+    @Override
     public String evaluate(final String expression, final InputSource source) throws XPathExpressionException {
         return delegate.evaluate(expression, parse(source));
     }
@@ -85,12 +91,6 @@ final class HardeningXPath implements XPath {
     @Override
     public Object evaluate(final String expression, final InputSource source, final QName returnType) throws XPathExpressionException {
         return delegate.evaluate(expression, parse(source), returnType);
-    }
-
-    @Override
-    public XPathExpression compile(final String expression) throws XPathExpressionException {
-        final XPathExpression compiled = delegate.compile(expression);
-        return compiled == null ? null : new HardeningXPathExpression(compiled);
     }
 
     @Override

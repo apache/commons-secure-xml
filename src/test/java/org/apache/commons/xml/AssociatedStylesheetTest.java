@@ -41,6 +41,14 @@ import org.junit.jupiter.api.Test;
 @Tag("trax")
 class AssociatedStylesheetTest {
 
+    /** The PI was found (non-null); where the engine exposes a system id, it points at the declared stylesheet. */
+    private static void assertAssociatedStylesheet(final Source associated) {
+        assertNotNull(associated, "expected the associated stylesheet PI to be found");
+        if (associated.getSystemId() != null) {
+            assertTrue(associated.getSystemId().endsWith("included.xsl"), "unexpected associated stylesheet: " + associated.getSystemId());
+        }
+    }
+
     private static TransformerFactory hardenedFactory() {
         final TransformerFactory factory = XmlFactories.newTransformerFactory();
         factory.setErrorListener(AttackTestSupport.STRICT_REPORTER);
@@ -63,14 +71,6 @@ class AssociatedStylesheetTest {
         final Source associated = hardenedFactory()
                 .getAssociatedStylesheet(AttackTestSupport.resourceSource("associated-stylesheet-plain.xml"), null, null, null);
         assertAssociatedStylesheet(associated);
-    }
-
-    /** The PI was found (non-null); where the engine exposes a system id, it points at the declared stylesheet. */
-    private static void assertAssociatedStylesheet(final Source associated) {
-        assertNotNull(associated, "expected the associated stylesheet PI to be found");
-        if (associated.getSystemId() != null) {
-            assertTrue(associated.getSystemId().endsWith("included.xsl"), "unexpected associated stylesheet: " + associated.getSystemId());
-        }
     }
 
     @Test

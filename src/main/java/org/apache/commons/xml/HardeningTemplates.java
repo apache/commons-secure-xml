@@ -60,6 +60,13 @@ final class HardeningTemplates implements Templates {
         return delegate;
     }
 
+    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
+    @Override
+    public Properties getOutputProperties() {
+        return delegate.getOutputProperties();
+    }
+    // </editor-fold>
+
     @Override
     public Transformer newTransformer() throws TransformerConfigurationException {
         final Transformer transformer = delegate.newTransformer();
@@ -68,11 +75,4 @@ final class HardeningTemplates implements Templates {
         }
         return new HardeningTransformer(transformer, uriResolver, emptySource);
     }
-
-    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
-    @Override
-    public Properties getOutputProperties() {
-        return delegate.getOutputProperties();
-    }
-    // </editor-fold>
 }

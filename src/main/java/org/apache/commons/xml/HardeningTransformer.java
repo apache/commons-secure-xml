@@ -53,32 +53,6 @@ final class HardeningTransformer extends Transformer {
         delegate.setURIResolver(floor);
     }
 
-    @Override
-    public void reset() {
-        delegate.reset();
-        floor.setDelegate(uriResolver);
-        delegate.setURIResolver(floor);
-    }
-
-    @Override
-    public void setURIResolver(final URIResolver resolver) {
-        floor.setDelegate(resolver);
-    }
-
-    @Override
-    public URIResolver getURIResolver() {
-        return floor.getDelegate();
-    }
-
-    @Override
-    public void transform(final Source xmlSource, final Result outputTarget) throws TransformerException {
-        try {
-            delegate.transform(SAXParserHardener.hardenSource(xmlSource), outputTarget);
-        } catch (final TransformerConfigurationException e) {
-            throw new TransformerException(e);
-        }
-    }
-
     // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
     @Override
     public void clearParameters() {
@@ -106,6 +80,18 @@ final class HardeningTransformer extends Transformer {
     }
 
     @Override
+    public URIResolver getURIResolver() {
+        return floor.getDelegate();
+    }
+
+    @Override
+    public void reset() {
+        delegate.reset();
+        floor.setDelegate(uriResolver);
+        delegate.setURIResolver(floor);
+    }
+
+    @Override
     public void setErrorListener(final ErrorListener listener) {
         delegate.setErrorListener(listener);
     }
@@ -125,4 +111,18 @@ final class HardeningTransformer extends Transformer {
         delegate.setParameter(name, value);
     }
     // </editor-fold>
+
+    @Override
+    public void setURIResolver(final URIResolver resolver) {
+        floor.setDelegate(resolver);
+    }
+
+    @Override
+    public void transform(final Source xmlSource, final Result outputTarget) throws TransformerException {
+        try {
+            delegate.transform(SAXParserHardener.hardenSource(xmlSource), outputTarget);
+        } catch (final TransformerConfigurationException e) {
+            throw new TransformerException(e);
+        }
+    }
 }

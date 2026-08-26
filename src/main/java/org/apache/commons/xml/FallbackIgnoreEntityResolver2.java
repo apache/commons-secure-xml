@@ -53,11 +53,6 @@ import org.xml.sax.ext.EntityResolver2;
 class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
 
     /**
-     * Caller-supplied resolver consulted first, or {@code null} for a pure ignore-all floor.
-     */
-    private EntityResolver delegate;
-
-    /**
      * Resolves {@code systemId} against {@code baseURI}.
      *
      * @param baseURI  The absolute base URI to resolve against, or {@code null} if none is available.
@@ -76,33 +71,17 @@ class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
         }
     }
 
-    FallbackIgnoreEntityResolver2(final EntityResolver delegate) {
-        this.delegate = delegate;
-    }
-
     /**
-     * Replaces the caller resolver consulted ahead of the floor; lets a single floor instance back successive {@code setEntityResolver} calls.
-     *
-     * @param delegate The caller-supplied resolver, or {@code null} for a pure ignore-all floor.
+     * Caller-supplied resolver consulted first, or {@code null} for a pure ignore-all floor.
      */
-    final void setDelegate(final EntityResolver delegate) {
+    private EntityResolver delegate;
+
+    FallbackIgnoreEntityResolver2(final EntityResolver delegate) {
         this.delegate = delegate;
     }
 
     final EntityResolver getDelegate() {
         return delegate;
-    }
-
-    @Override
-    public final InputSource resolveEntity(final String publicId, final String systemId) throws SAXException, IOException {
-        return resolveEntity(null, publicId, null, systemId);
-    }
-
-    @Override
-    public final InputSource resolveEntity(final String name, final String publicId, final String baseURI, final String systemId)
-            throws SAXException, IOException {
-        final InputSource resolved = resolveWithDelegate(name, publicId, baseURI, systemId);
-        return resolved != null ? resolved : onUnresolved(name, publicId, baseURI, systemId);
     }
 
     /**
@@ -129,6 +108,18 @@ class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
         return empty;
     }
 
+    @Override
+    public final InputSource resolveEntity(final String publicId, final String systemId) throws SAXException, IOException {
+        return resolveEntity(null, publicId, null, systemId);
+    }
+
+    @Override
+    public final InputSource resolveEntity(final String name, final String publicId, final String baseURI, final String systemId)
+            throws SAXException, IOException {
+        final InputSource resolved = resolveWithDelegate(name, publicId, baseURI, systemId);
+        return resolved != null ? resolved : onUnresolved(name, publicId, baseURI, systemId);
+    }
+
     private InputSource resolveWithDelegate(final String name, final String publicId, final String baseURI,
             final String systemId) throws SAXException, IOException {
         if (delegate != null) {
@@ -137,5 +128,14 @@ class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
                     delegate.resolveEntity(publicId, absolutize(baseURI, systemId));
         }
         return null;
+    }
+
+    /**
+     * Replaces the caller resolver consulted ahead of the floor; lets a single floor instance back successive {@code setEntityResolver} calls.
+     *
+     * @param delegate The caller-supplied resolver, or {@code null} for a pure ignore-all floor.
+     */
+    final void setDelegate(final EntityResolver delegate) {
+        this.delegate = delegate;
     }
 }

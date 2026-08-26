@@ -87,20 +87,6 @@ class ResetHardeningTest {
     }
 
     @Test
-    @Tag("schema")
-    void validatorResetKeepsResourceResolverFloor() throws Exception {
-        // A Schema built without sources validates against the instance's xsi:schemaLocation hints, so the resolver floor is the only barrier between the
-        // validator and the external schema fetch.
-        final Validator validator = XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema().newValidator();
-        AttackTestSupport.assumeDoesNotThrow(validator::reset);
-        validator.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
-        // schema-location-instance.xml hints at schema-location.xsd, which declares its root: a validator whose floor was stripped fetches it and validates
-        // cleanly, while the floor resolves the hint to empty content, which fails the validation.
-        AttackTestSupport.assertParseFails(() -> validator.validate(AttackTestSupport.resourceSource("schema-location-instance.xml")),
-                "Validator after reset", SAXException.class, SecurityException.class);
-    }
-
-    @Test
     @Tag("trax")
     void transformerResetKeepsUriResolverFloor() throws Exception {
         // with-document.xsl copies document('referenced.xml') into the output at transform time, so a transformer whose floor was stripped leaks the marker.
@@ -114,5 +100,19 @@ class ResetHardeningTest {
             return; // Acceptable: rejected at transform rather than resolved to empty.
         }
         assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "document() leaked after reset:\n" + sink);
+    }
+
+    @Test
+    @Tag("schema")
+    void validatorResetKeepsResourceResolverFloor() throws Exception {
+        // A Schema built without sources validates against the instance's xsi:schemaLocation hints, so the resolver floor is the only barrier between the
+        // validator and the external schema fetch.
+        final Validator validator = XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema().newValidator();
+        AttackTestSupport.assumeDoesNotThrow(validator::reset);
+        validator.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
+        // schema-location-instance.xml hints at schema-location.xsd, which declares its root: a validator whose floor was stripped fetches it and validates
+        // cleanly, while the floor resolves the hint to empty content, which fails the validation.
+        AttackTestSupport.assertParseFails(() -> validator.validate(AttackTestSupport.resourceSource("schema-location-instance.xml")),
+                "Validator after reset", SAXException.class, SecurityException.class);
     }
 }
