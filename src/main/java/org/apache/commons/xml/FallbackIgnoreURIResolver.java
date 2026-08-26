@@ -59,7 +59,7 @@ final class FallbackIgnoreURIResolver implements URIResolver {
         try {
             return DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
         } catch (final ParserConfigurationException e) {
-            throw new IllegalStateException(e);
+            throw new HardeningException("A DocumentBuilder cannot be created which satisfies the configuration requested.", e);
         }
     }
 
