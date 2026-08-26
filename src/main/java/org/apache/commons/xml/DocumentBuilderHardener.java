@@ -64,8 +64,8 @@ final class DocumentBuilderHardener {
      * @param factory The factory to harden.
      * @param feature The feature to set.
      * @param value   The value to set.
-     * @throws HardeningException Thrown if this {@link XPathFactory} or the {@code XPath}s it creates cannot support this feature or if {@code feature} is
-     *                            {@code null}.
+     * @throws HardeningException Thrown if this {@link XPathFactory} or the {@code XPath}s it creates cannot support this feature.
+     * @throws NullPointerException If the {@code feature} parameter is null.
      */
     private static void setFeature(final DocumentBuilderFactory factory, final String feature, final boolean value) {
         try {
