@@ -53,13 +53,13 @@ final class FallbackIgnoreURIResolver implements URIResolver {
      * (XSLTC rejects it for {@code document()} and for an ignored {@code xsl:include}/{@code xsl:import}), so the default supplier answers with a well-formed
      * empty document that evaluates to no content. It is never mutated, so one instance serves every resolution.
      */
-    private static final Document EMPTY_DOCUMENT = newEmptyDocument();
+    private static final Document EMPTY_DOCUMENT;
 
-    private static Document newEmptyDocument() {
+    static {
         try {
-            return DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+            EMPTY_DOCUMENT = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
         } catch (final ParserConfigurationException e) {
-            throw new HardeningException("A DocumentBuilder cannot be created which satisfies the configuration requested.", e);
+            throw new ExceptionInInitializerError(e);
         }
     }
 
