@@ -122,13 +122,16 @@ final class SAXParserHardener {
 
     /**
      * Rewrites a {@link Source} so that any SAX parsing it triggers runs through a hardened {@link XMLReader}.
-     *
-     * <p>Only a {@link StreamSource} or a {@link SAXSource} without a reader is enriched with a hardened, namespace-aware reader; other source kinds are returned
-     * as-is. Used by the TrAX and schema wrappers to route every source they parse through the SAX hardening path.</p>
+     * <p>
+     * Only a {@link StreamSource} or a {@link SAXSource} without a reader is enriched with a hardened, namespace-aware reader; other source kinds are returned
+     * as-is. Used by the TrAX and schema wrappers to route every source they parse through the SAX hardening path.
+     * </p>
      *
      * @param source the source to harden; never {@code null}.
      * @return a hardened source.
      * @throws TransformerConfigurationException if a hardened reader cannot be obtained.
+     * @throws FactoryConfigurationError         Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                           configuration error} or if the implementation is not available or cannot be instantiated.
      */
     static Source hardenSource(final Source source) throws TransformerConfigurationException {
         if (source instanceof StreamSource || source instanceof SAXSource && ((SAXSource) source).getXMLReader() == null) {
@@ -143,6 +146,8 @@ final class SAXParserHardener {
      *
      * @return a hardened reader.
      * @throws TransformerConfigurationException if a hardened reader cannot be obtained.
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      */
     static XMLReader newHardenedReader() throws TransformerConfigurationException {
         try {

@@ -20,6 +20,7 @@ package org.apache.commons.xml;
 import java.io.IOException;
 import java.util.Objects;
 
+import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.sax.SAXResult;
@@ -55,6 +56,12 @@ final class HardeningXMLFilter extends XMLFilterImpl {
         this.templates = Objects.requireNonNull(templates, "templates");
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     */
     @Override
     public void parse(final InputSource input) throws SAXException, IOException {
         final ContentHandler handler = getContentHandler();

@@ -82,7 +82,7 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
      * @param source The source to scan for an associated stylesheet.
      * @return A {@link DOMSource} for a reader-less source, otherwise the result of {@link SAXParserHardener#hardenSource(Source)}.
      * @throws TransformerConfigurationException if the source cannot be parsed.
-     * @throws FactoryConfigurationError Thrown from {@link DocumentBuilderFactory} in case of a {@link java.util.ServiceConfigurationError service
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
      *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      */
     private static Source hardenSourceToDom(final Source source) throws TransformerConfigurationException {
@@ -154,7 +154,7 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
     /**
      * {@inheritDoc}
      *
-     * @throws FactoryConfigurationError Thrown from {@link DocumentBuilderFactory} in case of a {@link java.util.ServiceConfigurationError service
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
      *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      */
     @Override
@@ -189,6 +189,12 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
         return handler == null ? null : new HardeningTransformerHandler(handler, getURIResolver(), emptySource);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     */
     @Override
     public Templates newTemplates(final Source source) throws TransformerConfigurationException {
         final Templates templates = delegate.newTemplates(SAXParserHardener.hardenSource(source));
@@ -208,6 +214,12 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
         return transformer == null ? null : new HardeningTransformer(transformer, getURIResolver(), emptySource);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     */
     @Override
     public Transformer newTransformer(final Source source) throws TransformerConfigurationException {
         final Transformer transformer = delegate.newTransformer(SAXParserHardener.hardenSource(source));
@@ -219,6 +231,12 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
         return hardenHandler(delegate.newTransformerHandler());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     */
     @Override
     public TransformerHandler newTransformerHandler(final Source source) throws TransformerConfigurationException {
         return hardenHandler(delegate.newTransformerHandler(SAXParserHardener.hardenSource(source)));
@@ -230,6 +248,12 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
         return hardenHandler(delegate.newTransformerHandler(unwrap(templates)));
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     */
     @Override
     public XMLFilter newXMLFilter(final Source source) throws TransformerConfigurationException {
         final Templates templates = newTemplates(source);
