@@ -17,6 +17,7 @@
 
 package org.apache.commons.xml;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.FactoryConfigurationError;
@@ -94,7 +95,9 @@ public final class XmlFactories {
      * </p>
      *
      * @return A hardened factory.
-     * @throws IllegalStateException     if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException     Thrown if a (non-Andoid) factory cannot support the secure processing feature
+     *                                   {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
      * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
      *                                   implementation is not available or cannot be instantiated.
      */
