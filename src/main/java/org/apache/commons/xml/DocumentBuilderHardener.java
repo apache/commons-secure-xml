@@ -21,8 +21,6 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathFactory;
-
 import org.xml.sax.EntityResolver;
 
 /**
@@ -45,6 +43,13 @@ final class DocumentBuilderHardener {
     /** Class name of Android's Harmony-based {@link DocumentBuilderFactory}, which exposes no hardening surface. */
     private static final String ANDROID_DOCUMENT_BUILDER_FACTORY = "org.apache.harmony.xml.parsers.DocumentBuilderFactoryImpl";
 
+    /**
+     * Hardens the given factory, returning a hardened wrapper if necessary.
+     *
+     * @param factory The factory to harden.
+     * @return A new hardened factory or the original factory, as-is, if it is a known Android factory.
+     * @throws HardeningException Thrown if a (non-Andoid) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
+     */
     static DocumentBuilderFactory harden(final DocumentBuilderFactory factory) {
         // Android exposes no FSP, ACCESS_EXTERNAL_* or attribute API, and KXmlParser drops user-defined entities; nothing to apply.
         if (ANDROID_DOCUMENT_BUILDER_FACTORY.equals(factory.getClass().getName())) {
@@ -64,8 +69,8 @@ final class DocumentBuilderHardener {
      * @param factory The factory to harden.
      * @param feature The feature to set.
      * @param value   The value to set.
-     * @throws HardeningException Thrown if this {@link XPathFactory} or the {@code XPath}s it creates cannot support this feature.
-     * @throws NullPointerException If the {@code feature} parameter is null.
+     * @throws HardeningException   Thrown if this factory or the {@code XPath}s it creates cannot support this feature.
+     * @throws NullPointerException Thrown if the {@code feature} parameter is null.
      */
     private static void setFeature(final DocumentBuilderFactory factory, final String feature, final boolean value) {
         try {
