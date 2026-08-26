@@ -25,17 +25,18 @@ import javax.xml.stream.XMLStreamException;
 
 /**
  * {@link XMLResolver} floor: consults an optional caller-supplied resolver and ignores (resolves to empty) whatever the caller does not resolve.
- *
- * <p>The StAX counterpart of {@link FallbackIgnoreEntityResolver2}, installed on each entity-resolution hook. The hardened {@link javax.xml.stream.XMLInputFactory}
- * wrapper routes a caller-set resolver through {@link #setDelegate} rather than letting it replace the floor. A caller opts a specific entity in by returning
- * a non-{@code null} result; anything left unresolved resolves to an empty input, so the external resource is neither fetched nor leaked and the parse
- * continues with no replacement content.</p>
+ * <p>
+ * The StAX counterpart of {@link FallbackIgnoreEntityResolver2}, installed on each entity-resolution hook. The hardened
+ * {@link javax.xml.stream.XMLInputFactory} wrapper routes a caller-set resolver through {@link #setDelegate} rather than letting it replace the floor. A caller
+ * opts a specific entity in by returning a non-{@code null} result; anything left unresolved resolves to an empty input, so the external resource is neither
+ * fetched nor leaked and the parse continues with no replacement content.
+ * </p>
  */
 final class FallbackIgnoreXMLResolver implements XMLResolver {
 
     /**
-     * Empty {@link ByteArrayInputStream} shared across every call. {@code read()} on a zero-length array always returns {@code -1}, so reusing the instance
-     * is safe even though the type is technically stateful.
+     * Empty {@link ByteArrayInputStream} shared across every call. {@code read()} on a zero-length array always returns {@code -1}, so reusing the instance is
+     * safe even though the type is technically stateful.
      */
     private static final InputStream EMPTY = new ByteArrayInputStream(new byte[0]);
 
@@ -71,6 +72,11 @@ final class FallbackIgnoreXMLResolver implements XMLResolver {
         return EMPTY;
     }
 
+    /**
+     * Sets the delegate to consult first, replacing any previous delegate, may be {@code null}.
+     *
+     * @param delegate The delegate to consult first, replacing any previous delegate.
+     */
     void setDelegate(final XMLResolver delegate) {
         this.delegate = delegate;
     }

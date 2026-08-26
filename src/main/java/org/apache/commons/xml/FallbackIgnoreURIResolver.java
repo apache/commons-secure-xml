@@ -112,6 +112,11 @@ final class FallbackIgnoreURIResolver implements URIResolver {
         return emptySource.get();
     }
 
+    /**
+     * Sets the delegate to consult first, replacing any previous delegate. A {@code null} value removes the delegate and leaves a pure ignore-all floor.
+     *
+     * @param delegate The delegate to consult first, or {@code null} for a pure ignore-all floor.
+     */
     void setDelegate(final URIResolver delegate) {
         this.delegate = delegate;
     }
