@@ -33,7 +33,7 @@ import javax.xml.xpath.XPathFactory;
  *         is the XPath counterpart of the Saxon exception in {@link TransformerHardener}, kept as a documented package-prefix exception because the required
  *         hardening surface is reachable only through a vendor API.</li>
  *     <li><strong>FODP</strong> ({@code jdk.xml.overrideDefaultParser}, set to {@code false}): best-effort. On the stock JDK it pins the internal parser lookup to
- *         the bundled SAX parser, blocking a sysprop swap to a third-party parser (defense-in-depth); Xalan rejects the feature and is left unchanged.</li>
+ *         the bundled SAX parser, blocking a system property swap to a third-party parser (defense-in-depth); Xalan rejects the feature and is left unchanged.</li>
  *     <li><strong>FSP</strong> ({@link XMLConstants#FEATURE_SECURE_PROCESSING}): required. It is the only knob both the stock JDK and Xalan XPath engines expose,
  *         and switches on their secure-processing limits. {@link XPathFactory} has no attribute API for finer control.</li>
  *     <li><strong>{@link HardeningXPathFactory}</strong>: required. FSP governs only the engine, not the parser it provisions internally for the
@@ -44,7 +44,7 @@ import javax.xml.xpath.XPathFactory;
 final class XPathHardener {
 
     /**
-     * {@code jdk.xml.overrideDefaultParser}: pin to the JDK's bundled SAX parser; defense-in-depth against a sysprop swap to a third-party parser.
+     * {@code jdk.xml.overrideDefaultParser}: pin to the JDK's bundled SAX parser; defense-in-depth against a system property swap to a third-party parser.
      */
     private static final String FEATURE_OVERRIDE_DEFAULT_PARSER = "jdk.xml.overrideDefaultParser";
 
