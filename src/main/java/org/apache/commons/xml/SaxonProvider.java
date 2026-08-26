@@ -94,6 +94,12 @@ final class SaxonProvider {
         }
     }
 
+    /**
+     * Sole holder of Saxon symbolic references, so that the outer class verifies without Saxon on the classpath.
+     *
+     * <p>{@link SaxonProvider#isSaxon} runs on every harden call, Saxon present or not, and the JVM verifier may load classes eagerly to prove class-typed
+     * assignability; keeping every Saxon reference in this nested class defers that loading until a Saxon factory has actually been recognized.</p>
+     */
     private static final class SaxonProviderConfigurer {
 
         private static TransformerFactory configure(final TransformerFactory factory) {
@@ -109,6 +115,10 @@ final class SaxonProvider {
             ((XPathFactoryImpl) factory).setConfiguration(config);
             return factory;
         }
+
+        private static Supplier<Source> emptySourceSupplier() {
+            return EmptySource::getInstance;
+        }
     }
 
     static TransformerFactory configure(final TransformerFactory factory) {
@@ -117,9 +127,6 @@ final class SaxonProvider {
         } catch (final ClassCastException e) {
             // A Saxon-package factory the configurer cannot lock down; refuse it rather than returning it unhardened.
             throw new HardeningException("Unsupported Saxon TransformerFactory " + factory.getClass().getName(), e);
-        } catch (final LinkageError e) {
-            // Unlikely, but protects method execution from missing optional dependency
-            throw new IllegalStateException(e);
         }
     }
 
@@ -129,9 +136,6 @@ final class SaxonProvider {
         } catch (final ClassCastException e) {
             // A Saxon-package factory the configurer cannot lock down; refuse it rather than returning it unhardened.
             throw new HardeningException("Unsupported Saxon XPathFactory " + factory.getClass().getName(), e);
-        } catch (final LinkageError e) {
-            // Unlikely, but protects method execution from missing optional dependency
-            throw new IllegalStateException(e);
         }
     }
 
@@ -141,7 +145,7 @@ final class SaxonProvider {
      * @return a supplier for Saxon's empty {@link Source}.
      */
     static Supplier<Source> emptySourceSupplier() {
-        return EmptySource::getInstance;
+        return SaxonProviderConfigurer.emptySourceSupplier();
     }
 
     /**
