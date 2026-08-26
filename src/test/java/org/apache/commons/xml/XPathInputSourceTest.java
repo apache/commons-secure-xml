@@ -53,16 +53,14 @@ class XPathInputSourceTest {
     void hardenedXPathEvaluateDoesNotLeak() throws Exception {
         // Deterministic on every engine: the entity is declared in the internal subset and the floor resolves only its
         // external content — to empty replacement text — so the pre-parse completes and the reference expands to nothing.
-        final String result = assertDoesNotThrow(
-                () -> XmlFactories.newXPathFactory().newXPath().evaluate(EXPRESSION, AttackTestSupport.inputSource(entityPayload())));
+        final String result = XmlFactories.newXPathFactory().newXPath().evaluate(EXPRESSION, AttackTestSupport.inputSource(entityPayload()));
         assertFalse(result.contains(AttackTestSupport.LEAKED_MARKER), "external entity leaked into the XPath result: " + result);
     }
 
     @Test
     void hardenedXPathExpressionEvaluateDoesNotLeak() throws Exception {
         // Same declared-entity outcome as above on the compiled-expression entry point.
-        final String result = assertDoesNotThrow(
-                () -> XmlFactories.newXPathFactory().newXPath().compile(EXPRESSION).evaluate(AttackTestSupport.inputSource(entityPayload())));
+        final String result = XmlFactories.newXPathFactory().newXPath().compile(EXPRESSION).evaluate(AttackTestSupport.inputSource(entityPayload()));
         assertFalse(result.contains(AttackTestSupport.LEAKED_MARKER), "external entity leaked into the compiled XPath result: " + result);
     }
 
