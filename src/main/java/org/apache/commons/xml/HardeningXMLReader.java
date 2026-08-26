@@ -18,6 +18,7 @@
 package org.apache.commons.xml;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import org.xml.sax.ContentHandler;
 import org.xml.sax.DTDHandler;
@@ -45,8 +46,14 @@ class HardeningXMLReader implements XMLReader {
 
     private final FallbackIgnoreEntityResolver2 floor;
 
+    /**
+     * Constructs a new instance.
+     *
+     * @param delegate the delegate to wrap; must not be {@code null}.
+     * @throws NullPointerException if {@code delegate} is {@code null}.
+     */
     HardeningXMLReader(final XMLReader delegate) {
-        this.delegate = delegate;
+        this.delegate = Objects.requireNonNull(delegate, "delegate");
         this.floor = new FallbackIgnoreEntityResolver2(null);
         delegate.setEntityResolver(floor);
     }

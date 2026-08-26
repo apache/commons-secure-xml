@@ -18,6 +18,7 @@
 package org.apache.commons.xml;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.validation.Schema;
@@ -42,8 +43,14 @@ final class HardeningDocumentBuilder extends DocumentBuilder {
 
     private final FallbackIgnoreEntityResolver2 floor = new FallbackIgnoreEntityResolver2(null);
 
+    /**
+     * Constructs a new instance.
+     *
+     * @param delegate the delegate to wrap; must not be {@code null}.
+     * @throws NullPointerException if {@code delegate} is {@code null}.
+     */
     HardeningDocumentBuilder(final DocumentBuilder delegate) {
-        this.delegate = delegate;
+        this.delegate = Objects.requireNonNull(delegate, "delegate");
         delegate.setEntityResolver(floor);
     }
 

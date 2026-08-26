@@ -17,22 +17,30 @@
 
 package org.apache.commons.xml;
 
+import java.util.Objects;
+
 import javax.xml.validation.Schema;
 import javax.xml.validation.Validator;
 import javax.xml.validation.ValidatorHandler;
 
 /**
  * {@link Schema} wrapper that hardens every {@link Validator} and {@link ValidatorHandler} the inner Schema produces: each {@link Validator} is wrapped in
- * {@link HardeningValidator} (which rewrites the Source through {@link SAXParserHardener#hardenSource(javax.xml.transform.Source)} and installs the resolver floor), and
- * each {@link ValidatorHandler} is wrapped in a {@link HardeningValidatorHandler} that keeps the same ignore-all resolver floor so {@code xsi:schemaLocation} is
- * not resolved during SAX-driven validation.
+ * {@link HardeningValidator} (which rewrites the Source through {@link SAXParserHardener#hardenSource(javax.xml.transform.Source)} and installs the resolver
+ * floor), and each {@link ValidatorHandler} is wrapped in a {@link HardeningValidatorHandler} that keeps the same ignore-all resolver floor so
+ * {@code xsi:schemaLocation} is not resolved during SAX-driven validation.
  */
 final class HardeningSchema extends Schema {
 
     private final Schema delegate;
 
+    /**
+     * Constructs a new instance.
+     *
+     * @param delegate the delegate to wrap; must not be {@code null}.
+     * @throws NullPointerException if {@code delegate} is {@code null}.
+     */
     HardeningSchema(final Schema delegate) {
-        this.delegate = delegate;
+        this.delegate = Objects.requireNonNull(delegate, "delegate");
     }
 
     @Override

@@ -17,6 +17,8 @@
 
 package org.apache.commons.xml;
 
+import java.util.Objects;
+
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.validation.Schema;
@@ -69,8 +71,14 @@ final class HardeningSchemaFactory extends SchemaFactory {
 
     private final FallbackIgnoreLSResourceResolver floor = new FallbackIgnoreLSResourceResolver(null);
 
+    /**
+     * Constructs a new instance.
+     *
+     * @param delegate the delegate to wrap; must not be {@code null}.
+     * @throws NullPointerException if {@code delegate} is {@code null}.
+     */
     HardeningSchemaFactory(final SchemaFactory delegate) {
-        this.delegate = delegate;
+        this.delegate = Objects.requireNonNull(delegate, "delegate");
         // Compile-time block for xs:import/include/redefine; the wrappers carry the rest (per-product resolver, source rewriting, limits via the reader).
         delegate.setResourceResolver(floor);
     }

@@ -17,6 +17,7 @@
 
 package org.apache.commons.xml;
 
+import java.util.Objects;
 import java.util.Properties;
 import java.util.function.Supplier;
 
@@ -30,24 +31,35 @@ import javax.xml.transform.URIResolver;
 
 /**
  * {@link Transformer} wrapper that rewrites the Source on every {@link Transformer#transform(Source, Result)} call through
- * {@link SAXParserHardener#hardenSource(Source)} before delegating, and keeps an ignore-all {@link URIResolver} floor so runtime {@code document()} calls a caller does not
- * resolve return empty rather than being fetched.
- *
- * <p>The floor is installed on the delegate transformer at construction, seeded with the factory's compile-time resolver; {@link #setURIResolver(URIResolver)}
+ * {@link SAXParserHardener#hardenSource(Source)} before delegating, and keeps an ignore-all {@link URIResolver} floor so runtime {@code document()} calls a
+ * caller does not resolve return empty rather than being fetched.
+ * <p>
+ * The floor is installed on the delegate transformer at construction, seeded with the factory's compile-time resolver; {@link #setURIResolver(URIResolver)}
  * routes a caller's resolver through it rather than replacing it, so the block cannot be dropped. {@link #reset()} re-establishes the floor, seeded again with
- * the factory's compile-time resolver, matching the just-constructed state.</p>
+ * the factory's compile-time resolver, matching the just-constructed state.
+ * </p>
  */
 final class HardeningTransformer extends Transformer {
 
     private final Transformer delegate;
 
-    /** Compile-time URIResolver snapshot the floor is seeded with, both at construction and again on {@link #reset()}. */
+    /**
+     * Compile-time URIResolver snapshot the floor is seeded with, both at construction and again on {@link #reset()}.
+     */
     private final URIResolver uriResolver;
 
     private final FallbackIgnoreURIResolver floor;
 
+    /**
+     * Constructs a new instance.
+     *
+     * @param delegate    the delegate to wrap; must not be {@code null}.
+     * @param uriResolver the compile-time URIResolver snapshot to seed the floor with; may be {@code null}.
+     * @param emptySource the empty-{@link Source} supplier for the produced Transformers
+     * @throws NullPointerException if {@code delegate} is {@code null}.
+     */
     HardeningTransformer(final Transformer delegate, final URIResolver uriResolver, final Supplier<Source> emptySource) {
-        this.delegate = delegate;
+        this.delegate = Objects.requireNonNull(delegate, "delegate");
         this.uriResolver = uriResolver;
         this.floor = new FallbackIgnoreURIResolver(uriResolver, emptySource);
         delegate.setURIResolver(floor);
@@ -109,7 +121,6 @@ final class HardeningTransformer extends Transformer {
     public void setParameter(final String name, final Object value) {
         delegate.setParameter(name, value);
     }
-
 
     @Override
     public void setURIResolver(final URIResolver resolver) {

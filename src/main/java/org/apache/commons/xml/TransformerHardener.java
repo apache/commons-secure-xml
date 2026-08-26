@@ -51,7 +51,7 @@ final class TransformerHardener {
         setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
         if (SaxonProvider.isSaxon(factory.getClass())) {
             // Saxon keeps its vendor Configuration for the channels JAXP cannot close,
-            // then goes through the same wrapper as every other impl for the URIResolver floor;
+            // then goes through the same wrapper as every other implementation for the URIResolver floor;
             // EmptySource is the empty-source shape Saxon's consumers expect.
             return new HardeningTransformerFactory((SAXTransformerFactory) SaxonProvider.configure(factory), SaxonProvider.emptySourceSupplier());
         }

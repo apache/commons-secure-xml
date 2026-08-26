@@ -17,6 +17,7 @@
 
 package org.apache.commons.xml;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import javax.xml.transform.Result;
@@ -42,11 +43,21 @@ final class HardeningTransformerHandler implements TransformerHandler {
 
     private final TransformerHandler delegate;
 
-    /** Wraps the handler's LIVE transformer; constructing it installs the resolver floor that the handler's own transform then runs under. */
+    /**
+     * Wraps the handler's LIVE transformer; constructing it installs the resolver floor that the handler's own transform then runs under.
+     */
     private final HardeningTransformer transformer;
 
+    /**
+     * Constructs a new instance.
+     *
+     * @param delegate the delegate to wrap; must not be {@code null}.
+     * @param uriResolver the compile-time URIResolver snapshot to restore onto the live transformer; may be {@code null}.
+     * @param emptySource the empty-{@link Source} supplier for the produced Transformer's floor; {@code null} means the default empty DOM.
+     * @throws NullPointerException if {@code delegate} is {@code null}.
+     */
     HardeningTransformerHandler(final TransformerHandler delegate, final URIResolver uriResolver, final Supplier<Source> emptySource) {
-        this.delegate = delegate;
+        this.delegate = Objects.requireNonNull(delegate, "delegate");
         this.transformer = new HardeningTransformer(delegate.getTransformer(), uriResolver, emptySource);
     }
 

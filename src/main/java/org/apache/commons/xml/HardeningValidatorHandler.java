@@ -17,6 +17,8 @@
 
 package org.apache.commons.xml;
 
+import java.util.Objects;
+
 import javax.xml.validation.TypeInfoProvider;
 import javax.xml.validation.ValidatorHandler;
 
@@ -41,8 +43,14 @@ final class HardeningValidatorHandler extends ValidatorHandler {
 
     private final FallbackIgnoreLSResourceResolver floor = new FallbackIgnoreLSResourceResolver(null);
 
+    /**
+     * Constructs a new instance.
+     *
+     * @param delegate the delegate to wrap; must not be {@code null}.
+     * @throws NullPointerException if {@code delegate} is {@code null}.
+     */
     HardeningValidatorHandler(final ValidatorHandler delegate) {
-        this.delegate = delegate;
+        this.delegate = Objects.requireNonNull(delegate, "delegate");
         delegate.setResourceResolver(floor);
     }
 

@@ -18,6 +18,7 @@
 package org.apache.commons.xml;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -44,8 +45,14 @@ final class HardeningXMLFilter extends XMLFilterImpl {
 
     private final HardeningTemplates templates;
 
+    /**
+     * Constructs a new instance.
+     *
+     * @param templates the delegate to wrap; must not be {@code null}.
+     * @throws NullPointerException if {@code delegate} is {@code null}.
+     */
     HardeningXMLFilter(final HardeningTemplates templates) {
-        this.templates = templates;
+        this.templates = Objects.requireNonNull(templates, "templates");
     }
 
     @Override

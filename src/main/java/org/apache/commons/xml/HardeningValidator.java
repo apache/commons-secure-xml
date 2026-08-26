@@ -18,6 +18,7 @@
 package org.apache.commons.xml;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
@@ -41,8 +42,14 @@ final class HardeningValidator extends Validator {
 
     private final FallbackIgnoreLSResourceResolver floor = new FallbackIgnoreLSResourceResolver(null);
 
+    /**
+     * Constructs a new instance.
+     *
+     * @param delegate the delegate to wrap; must not be {@code null}.
+     * @throws NullPointerException if {@code delegate} is {@code null}.
+     */
     HardeningValidator(final Validator delegate) {
-        this.delegate = delegate;
+        this.delegate = Objects.requireNonNull(delegate, "delegate");
         // Block xsi:schemaLocation resolution; neither the JDK nor Xerces reliably propagates the factory's resolver to its Validators. The floor is a
         // non-removable lower bound: a caller opts specific lookups in by setting their own resolver, but cannot drop the ignore-all block.
         delegate.setResourceResolver(floor);

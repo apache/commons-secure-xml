@@ -36,6 +36,12 @@ final class HardeningXPathFactory extends XPathFactory {
 
     private final XPathFactory delegate;
 
+    /**
+     * Constructs a new instance.
+     *
+     * @param delegate the delegate to wrap; must not be {@code null}.
+     * @throws NullPointerException if {@code delegate} is {@code null}.
+     */
     HardeningXPathFactory(final XPathFactory delegate) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
     }

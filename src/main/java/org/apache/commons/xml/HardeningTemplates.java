@@ -17,6 +17,7 @@
 
 package org.apache.commons.xml;
 
+import java.util.Objects;
 import java.util.Properties;
 import java.util.function.Supplier;
 
@@ -29,24 +30,37 @@ import javax.xml.transform.URIResolver;
 /**
  * {@link Templates} wrapper whose only purpose is to return a {@link HardeningTransformer} from {@link Templates#newTransformer()}, with the factory's
  * compile-time {@link URIResolver} pre-installed.
- *
- * <p>Both Apache Xalan 2.7 and stock-JDK XSLTC fail to propagate the factory's URIResolver through {@code Templates.newTransformer()}: the produced runtime
+ * <p>
+ * Both Apache Xalan 2.7 and stock-JDK XSLTC fail to propagate the factory's URIResolver through {@code Templates.newTransformer()}: the produced runtime
  * Transformer has a null URIResolver unless the caller sets one, leaving runtime {@code document()} calls unguarded. Snapshotting the resolver at compile time
  * and restoring it onto the runtime Transformer matches the JAXP-conformant intuition that the factory's resolver is the default for any Transformer the
- * factory ultimately produces.</p>
+ * factory ultimately produces.
+ * </p>
  */
 final class HardeningTemplates implements Templates {
 
     private final Templates delegate;
 
-    /** Compile-time URIResolver snapshot; the underlying impl does not propagate the factory's resolver onto Transformers obtained from Templates. */
+    /**
+     * Compile-time URIResolver snapshot; the underlying implementation does not propagate the factory's resolver onto Transformers obtained from Templates.
+     */
     private final URIResolver uriResolver;
 
-    /** Empty-{@link Source} supplier for the produced Transformer's floor; {@code null} means the default empty DOM. */
+    /**
+     * Empty-{@link Source} supplier for the produced Transformer's floor; {@code null} means the default empty DOM.
+     */
     private final Supplier<Source> emptySource;
 
+    /**
+     * Constructs a new instance.
+     *
+     * @param delegate    the delegate to wrap; must not be {@code null}.
+     * @param uriResolver the compile-time URIResolver snapshot to restore onto Transformers produced from the compiled Templates; may be {@code null}.
+     * @param emptySource the empty-{@link Source} supplier for the produced Transformers
+     * @throws NullPointerException if {@code delegate} is {@code null}.
+     */
     HardeningTemplates(final Templates delegate, final URIResolver uriResolver, final Supplier<Source> emptySource) {
-        this.delegate = delegate;
+        this.delegate = Objects.requireNonNull(delegate, "delegate");
         this.uriResolver = uriResolver;
         this.emptySource = emptySource;
     }
@@ -64,7 +78,6 @@ final class HardeningTemplates implements Templates {
     public Properties getOutputProperties() {
         return delegate.getOutputProperties();
     }
-
 
     @Override
     public Transformer newTransformer() throws TransformerConfigurationException {

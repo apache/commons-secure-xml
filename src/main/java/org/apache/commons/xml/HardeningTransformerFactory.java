@@ -18,6 +18,7 @@
 package org.apache.commons.xml;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -53,7 +54,8 @@ import org.xml.sax.XMLReader;
  * <ol>
  *   <li>{@link HardeningTransformerFactory} rewrites the Source on every entry point that compiles a stylesheet or transforms a one-shot input.</li>
  *   <li>{@link HardeningTemplates} returns a {@link HardeningTransformer} from {@link Templates#newTransformer()} so runtime source parsing is also covered, and
- *       restores the factory's URIResolver onto the produced Transformer (which the underlying impl typically does not propagate through {@code Templates}).</li>
+ *       restores the factory's URIResolver onto the produced Transformer (which the underlying implementation typically does not propagate through
+ *       {@code Templates}).</li>
  *   <li>{@link HardeningTransformer} rewrites the Source on every {@link Transformer#transform(Source, javax.xml.transform.Result)} call.</li>
  * </ol>
  *
@@ -113,17 +115,33 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
 
     private final SAXTransformerFactory delegate;
 
-    /** Empty-{@link Source} supplier for the resolver floor, threaded onto every produced Templates/Transformer; {@code null} means the default empty DOM. */
+    /**
+     * Empty-{@link Source} supplier for the resolver floor, threaded onto every produced Templates/Transformer; {@code null} means the default empty DOM.
+     */
     private final Supplier<Source> emptySource;
 
     private final FallbackIgnoreURIResolver floor;
 
+    /**
+     * Constructs a new instance.
+     *
+     * @param delegate the delegate to wrap; must not be {@code null}.
+     * @throws NullPointerException if {@code delegate} is {@code null}.
+     */
     HardeningTransformerFactory(final SAXTransformerFactory delegate) {
         this(delegate, null);
     }
 
+    /**
+     * Constructs a new instance.
+     *
+     * @param delegate    the delegate to wrap; must not be {@code null}.
+     * @param emptySource the empty-{@link Source} supplier for the resolver floor, threaded onto every produced Templates/Transformer; {@code null} means the
+     *                    default empty DOM.
+     * @throws NullPointerException if {@code delegate} is {@code null}.
+     */
     HardeningTransformerFactory(final SAXTransformerFactory delegate, final Supplier<Source> emptySource) {
-        this.delegate = delegate;
+        this.delegate = Objects.requireNonNull(delegate, "delegate");
         this.emptySource = emptySource;
         this.floor = new FallbackIgnoreURIResolver(null, emptySource);
         // Compile-time block for xsl:import/xsl:include and document(); a caller-set resolver is routed through the floor rather than replacing it.

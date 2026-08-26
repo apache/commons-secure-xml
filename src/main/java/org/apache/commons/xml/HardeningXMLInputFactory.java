@@ -19,6 +19,7 @@ package org.apache.commons.xml;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.util.Objects;
 
 import javax.xml.stream.EventFilter;
 import javax.xml.stream.StreamFilter;
@@ -64,8 +65,14 @@ final class HardeningXMLInputFactory extends XMLInputFactory {
 
     private final XMLInputFactory delegate;
 
+    /**
+     * Constructs a new instance.
+     *
+     * @param delegate the delegate to wrap; must not be {@code null}.
+     * @throws NullPointerException if {@code delegate} is {@code null}.
+     */
     HardeningXMLInputFactory(final XMLInputFactory delegate) {
-        this.delegate = delegate;
+        this.delegate = Objects.requireNonNull(delegate, "delegate");
         delegate.setXMLResolver(new FallbackIgnoreXMLResolver(null));
     }
 

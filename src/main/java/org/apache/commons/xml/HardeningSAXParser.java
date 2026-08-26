@@ -17,6 +17,8 @@
 
 package org.apache.commons.xml;
 
+import java.util.Objects;
+
 import javax.xml.parsers.SAXParser;
 import javax.xml.validation.Schema;
 
@@ -45,8 +47,14 @@ final class HardeningSAXParser extends SAXParser {
     private XMLReader hardenedReader;
     private Parser hardenedParser;
 
+    /**
+     * Constructs a new instance.
+     *
+     * @param delegate the delegate to wrap; must not be {@code null}.
+     * @throws NullPointerException if {@code delegate} is {@code null}.
+     */
     HardeningSAXParser(final SAXParser delegate) {
-        this.delegate = delegate;
+        this.delegate = Objects.requireNonNull(delegate, "delegate");
     }
 
     @Override

@@ -17,6 +17,8 @@
 
 package org.apache.commons.xml;
 
+import java.util.Objects;
+
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -38,8 +40,14 @@ final class HardeningSAXParserFactory extends SAXParserFactory {
 
     private final SAXParserFactory delegate;
 
+    /**
+     * Constructs a new instance.
+     *
+     * @param delegate the delegate to wrap; must not be {@code null}.
+     * @throws NullPointerException if {@code delegate} is {@code null}.
+     */
     HardeningSAXParserFactory(final SAXParserFactory delegate) {
-        this.delegate = delegate;
+        this.delegate = Objects.requireNonNull(delegate, "delegate");
     }
 
     @Override

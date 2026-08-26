@@ -17,6 +17,8 @@
 
 package org.apache.commons.xml;
 
+import java.util.Objects;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -35,8 +37,14 @@ final class HardeningDocumentBuilderFactory extends DocumentBuilderFactory {
 
     private final DocumentBuilderFactory delegate;
 
+    /**
+     * Constructs a new instance.
+     *
+     * @param delegate the delegate to wrap; must not be {@code null}.
+     * @throws NullPointerException if {@code delegate} is {@code null}.
+     */
     HardeningDocumentBuilderFactory(final DocumentBuilderFactory delegate) {
-        this.delegate = delegate;
+        this.delegate = Objects.requireNonNull(delegate, "delegate");
     }
 
     @Override

@@ -17,6 +17,7 @@
 
 package org.apache.commons.xml;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import javax.xml.transform.Source;
@@ -40,14 +41,26 @@ final class HardeningTemplatesHandler implements TemplatesHandler {
 
     private final TemplatesHandler delegate;
 
-    /** Compile-time URIResolver snapshot, restored onto Transformers produced from the compiled Templates. */
+    /**
+     * Compile-time URIResolver snapshot, restored onto Transformers produced from the compiled Templates.
+     */
     private final URIResolver uriResolver;
 
-    /** Empty-{@link Source} supplier for the produced Templates' floor; {@code null} means the default empty DOM. */
+    /**
+     * Empty-{@link Source} supplier for the produced Templates' floor; {@code null} means the default empty DOM.
+     */
     private final Supplier<Source> emptySource;
 
+    /**
+     * Constructs a new instance.
+     *
+     * @param delegate the delegate to wrap; must not be {@code null}.
+     * @param uriResolver the compile-time URIResolver snapshot to restore onto Transformers produced from the compiled Templates; may be {@code null}.
+     * @param emptySource the empty-{@link Source} supplier for the produced Templates.
+     * @throws NullPointerException if {@code delegate} is {@code null}.
+     */
     HardeningTemplatesHandler(final TemplatesHandler delegate, final URIResolver uriResolver, final Supplier<Source> emptySource) {
-        this.delegate = delegate;
+        this.delegate = Objects.requireNonNull(delegate, "delegate");
         this.uriResolver = uriResolver;
         this.emptySource = emptySource;
     }
