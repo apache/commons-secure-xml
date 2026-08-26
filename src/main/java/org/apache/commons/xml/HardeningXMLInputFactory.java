@@ -124,7 +124,6 @@ final class HardeningXMLInputFactory extends XMLInputFactory {
         return delegate.createXMLStreamReader(stream, encoding);
     }
 
-    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
     @Override
     public XMLStreamReader createXMLStreamReader(final Reader reader) throws XMLStreamException {
         return delegate.createXMLStreamReader(reader);
@@ -149,7 +148,7 @@ final class HardeningXMLInputFactory extends XMLInputFactory {
     public XMLEventAllocator getEventAllocator() {
         return delegate.getEventAllocator();
     }
-    // </editor-fold>
+
 
     @Override
     public Object getProperty(final String name) {

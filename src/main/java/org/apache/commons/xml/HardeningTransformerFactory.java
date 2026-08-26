@@ -138,7 +138,6 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
         return delegate.getAssociatedStylesheet(hardened, media, title, charset);
     }
 
-    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
     @Override
     public Object getAttribute(final String name) {
         return delegate.getAttribute(name);
@@ -230,7 +229,7 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
     public void setFeature(final String name, final boolean value) throws TransformerConfigurationException {
         delegate.setFeature(name, value);
     }
-    // </editor-fold>
+
 
     @Override
     public void setURIResolver(final URIResolver resolver) {

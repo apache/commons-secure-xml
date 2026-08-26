@@ -51,7 +51,6 @@ class HardeningXMLReader implements XMLReader {
         delegate.setEntityResolver(floor);
     }
 
-    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
     @Override
     public ContentHandler getContentHandler() {
         return delegate.getContentHandler();
@@ -121,5 +120,5 @@ class HardeningXMLReader implements XMLReader {
     public void setProperty(final String name, final Object value) throws SAXNotRecognizedException, SAXNotSupportedException {
         delegate.setProperty(name, value);
     }
-    // </editor-fold>
+
 }

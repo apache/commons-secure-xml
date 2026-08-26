@@ -53,7 +53,6 @@ final class HardeningTransformer extends Transformer {
         delegate.setURIResolver(floor);
     }
 
-    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
     @Override
     public void clearParameters() {
         delegate.clearParameters();
@@ -110,7 +109,7 @@ final class HardeningTransformer extends Transformer {
     public void setParameter(final String name, final Object value) {
         delegate.setParameter(name, value);
     }
-    // </editor-fold>
+
 
     @Override
     public void setURIResolver(final URIResolver resolver) {

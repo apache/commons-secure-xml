@@ -99,7 +99,6 @@ final class HardeningTemplatesHandler implements TemplatesHandler {
         delegate.setDocumentLocator(locator);
     }
 
-    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
     @Override
     public void setSystemId(final String systemID) {
         delegate.setSystemId(systemID);
@@ -109,7 +108,7 @@ final class HardeningTemplatesHandler implements TemplatesHandler {
     public void skippedEntity(final String name) throws SAXException {
         delegate.skippedEntity(name);
     }
-    // </editor-fold>
+
 
     @Override
     public void startDocument() throws SAXException {

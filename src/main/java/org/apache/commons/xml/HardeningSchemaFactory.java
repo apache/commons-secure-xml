@@ -75,7 +75,6 @@ final class HardeningSchemaFactory extends SchemaFactory {
         delegate.setResourceResolver(floor);
     }
 
-    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
     @Override
     public ErrorHandler getErrorHandler() {
         return delegate.getErrorHandler();
@@ -125,7 +124,7 @@ final class HardeningSchemaFactory extends SchemaFactory {
     public void setProperty(final String name, final Object object) throws SAXNotRecognizedException, SAXNotSupportedException {
         delegate.setProperty(name, object);
     }
-    // </editor-fold>
+
 
     @Override
     public void setResourceResolver(final LSResourceResolver resourceResolver) {

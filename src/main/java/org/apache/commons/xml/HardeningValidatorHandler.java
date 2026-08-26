@@ -106,7 +106,6 @@ final class HardeningValidatorHandler extends ValidatorHandler {
         delegate.processingInstruction(target, data);
     }
 
-    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
     @Override
     public void setContentHandler(final ContentHandler receiver) {
         delegate.setContentHandler(receiver);
@@ -141,7 +140,7 @@ final class HardeningValidatorHandler extends ValidatorHandler {
     public void skippedEntity(final String name) throws SAXException {
         delegate.skippedEntity(name);
     }
-    // </editor-fold>
+
 
     @Override
     public void startDocument() throws SAXException {

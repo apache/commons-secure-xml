@@ -59,7 +59,7 @@ final class HardeningTransformerHandler implements TransformerHandler {
     public void comment(final char[] ch, final int start, final int length) throws SAXException {
         delegate.comment(ch, start, length);
     }
-    // </editor-fold>
+
 
     @Override
     public void endCDATA() throws SAXException {
@@ -121,7 +121,6 @@ final class HardeningTransformerHandler implements TransformerHandler {
         delegate.setDocumentLocator(locator);
     }
 
-    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
     @Override
     public void setResult(final Result result) {
         delegate.setResult(result);

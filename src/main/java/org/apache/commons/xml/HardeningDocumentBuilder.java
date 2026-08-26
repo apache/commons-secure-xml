@@ -56,7 +56,7 @@ final class HardeningDocumentBuilder extends DocumentBuilder {
     public Schema getSchema() {
         return delegate.getSchema();
     }
-    // </editor-fold>
+
 
     @Override
     public boolean isNamespaceAware() {
@@ -78,7 +78,6 @@ final class HardeningDocumentBuilder extends DocumentBuilder {
         return delegate.newDocument();
     }
 
-    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
     @Override
     public Document parse(final InputSource is) throws SAXException, IOException {
         return delegate.parse(is);

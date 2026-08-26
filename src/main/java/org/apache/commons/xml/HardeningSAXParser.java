@@ -60,7 +60,6 @@ final class HardeningSAXParser extends SAXParser {
         return hardenedParser;
     }
 
-    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
     @Override
     public Object getProperty(final String name) throws SAXNotRecognizedException, SAXNotSupportedException {
         return delegate.getProperty(name);
@@ -107,5 +106,5 @@ final class HardeningSAXParser extends SAXParser {
     public void setProperty(final String name, final Object value) throws SAXNotRecognizedException, SAXNotSupportedException {
         delegate.setProperty(name, value);
     }
-    // </editor-fold>
+
 }

@@ -39,7 +39,6 @@ final class HardeningDocumentBuilderFactory extends DocumentBuilderFactory {
         this.delegate = delegate;
     }
 
-    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
     @Override
     public Object getAttribute(final String name) {
         return delegate.getAttribute(name);
@@ -144,5 +143,5 @@ final class HardeningDocumentBuilderFactory extends DocumentBuilderFactory {
     public void setXIncludeAware(final boolean state) {
         delegate.setXIncludeAware(state);
     }
-    // </editor-fold>
+
 }

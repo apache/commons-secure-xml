@@ -42,7 +42,6 @@ final class HardeningSAXParserFactory extends SAXParserFactory {
         this.delegate = delegate;
     }
 
-    // <editor-fold defaultstate="collapsed" desc="Trivial delegation">
     @Override
     public boolean getFeature(final String name) throws ParserConfigurationException, SAXNotRecognizedException, SAXNotSupportedException {
         return delegate.getFeature(name);
@@ -97,5 +96,5 @@ final class HardeningSAXParserFactory extends SAXParserFactory {
     public void setXIncludeAware(final boolean state) {
         delegate.setXIncludeAware(state);
     }
-    // </editor-fold>
+
 }
