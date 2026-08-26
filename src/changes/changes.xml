@@ -36,6 +36,7 @@ The <action> type attribute can be add, update, fix, or remove.
         Secure-by-default JAXP factory creation via XmlFactories, with implementation-specific hardening recipes for the
         stock JDK, Android, Apache Xalan, Apache Xerces, Woodstox, and Saxon-HE.
       </action>
+      <action type="fix" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Parse a Source opted in by a caller-supplied URIResolver using a hardened parser.</action>
     </release>
   </body>
 </document>
