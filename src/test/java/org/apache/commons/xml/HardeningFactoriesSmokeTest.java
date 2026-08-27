@@ -226,6 +226,70 @@ class HardeningFactoriesSmokeTest {
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 
+    // The newNSInstance family (Java 13) falls back to enabling namespace awareness on the corresponding newInstance lookup, the behavior the JAXP methods
+    // are specified to have, so the non-default variants work on every platform including Android.
+    @Test
+    @Tag("dom")
+    void newNSInstanceDocumentBuilderFactoryIsNamespaceAware() throws Exception {
+        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newNSInstance();
+        assertTrue(factory.isNamespaceAware());
+        assertNotNull(factory.newDocumentBuilder().parse(new InputSource(new StringReader(BENIGN_XML))).getDocumentElement());
+        if (!AttackTestSupport.IS_ANDROID) {
+            assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        }
+    }
+
+    @Test
+    @Tag("dom")
+    void newDefaultNSInstanceDocumentBuilderFactoryIsNamespaceAware() throws Exception {
+        if (AttackTestSupport.IS_ANDROID) {
+            assertThrows(FactoryConfigurationError.class, HardeningDocumentBuilderFactory::newDefaultNSInstance);
+            return;
+        }
+        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newDefaultNSInstance();
+        assertTrue(factory.isNamespaceAware());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    @Tag("sax")
+    void newNSInstanceSAXParserFactoryIsNamespaceAware() throws Exception {
+        final SAXParserFactory factory = HardeningSAXParserFactory.newNSInstance();
+        assertTrue(factory.isNamespaceAware());
+        factory.newSAXParser().parse(new InputSource(new StringReader(BENIGN_XML)), new DefaultHandler());
+        if (!AttackTestSupport.IS_ANDROID) {
+            assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        }
+    }
+
+    @Test
+    @Tag("sax")
+    void newDefaultNSInstanceSAXParserFactoryIsNamespaceAware() throws Exception {
+        if (AttackTestSupport.IS_ANDROID) {
+            assertThrows(FactoryConfigurationError.class, HardeningSAXParserFactory::newDefaultNSInstance);
+            return;
+        }
+        final SAXParserFactory factory = HardeningSAXParserFactory.newDefaultNSInstance();
+        assertTrue(factory.isNamespaceAware());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void explicitClassNameNSDocumentBuilderFactoryIsNamespaceAware() throws Exception {
+        final Class<?> impl = DocumentBuilderFactory.newInstance().getClass();
+        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newNSInstance(impl.getName(), impl.getClassLoader());
+        assertTrue(factory.isNamespaceAware());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void explicitClassNameNSSAXParserFactoryIsNamespaceAware() throws Exception {
+        final Class<?> impl = SAXParserFactory.newInstance().getClass();
+        final SAXParserFactory factory = HardeningSAXParserFactory.newNSInstance(impl.getName(), impl.getClassLoader());
+        assertTrue(factory.isNamespaceAware());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
     @Test
     void newDefaultInstanceSchemaFactoryIsHardened() throws Exception {
         final SchemaFactory factory = HardeningSchemaFactory.newDefaultInstance();

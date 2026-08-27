@@ -66,6 +66,13 @@ public final class HardeningSAXParserFactory {
 
     private static final MethodHandle NEW_DEFAULT_INSTANCE = findStatic("newDefaultInstance", MethodType.methodType(SAXParserFactory.class));
 
+    private static final MethodHandle NEW_DEFAULT_NS_INSTANCE = findStatic("newDefaultNSInstance", MethodType.methodType(SAXParserFactory.class));
+
+    private static final MethodHandle NEW_NS_INSTANCE = findStatic("newNSInstance", MethodType.methodType(SAXParserFactory.class));
+
+    private static final MethodHandle NEW_NS_INSTANCE_BY_CLASS_NAME = findStatic("newNSInstance",
+            MethodType.methodType(SAXParserFactory.class, String.class, ClassLoader.class));
+
     private static MethodHandle findStatic(final String name, final MethodType type) {
         try {
             return MethodHandles.publicLookup().findStatic(SAXParserFactory.class, name, type);
@@ -185,6 +192,36 @@ public final class HardeningSAXParserFactory {
     }
 
     /**
+     * Returns a new, hardened, namespace-aware {@link SAXParserFactory} of the system-default implementation.
+     * <p>
+     * Obtained as by {@code SAXParserFactory.newDefaultNSInstance()} where the platform provides it (Java 13 or later), and by enabling namespace awareness on
+     * {@link #newDefaultInstance()} otherwise, the behavior the JAXP method is specified to have.
+     * </p>
+     *
+     * @return A hardened, namespace-aware factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation
+     *                                   (for example Android).
+     */
+    public static SAXParserFactory newDefaultNSInstance() {
+        if (NEW_DEFAULT_NS_INSTANCE != null) {
+            final SAXParserFactory factory;
+            try {
+                factory = (SAXParserFactory) NEW_DEFAULT_NS_INSTANCE.invokeExact();
+            } catch (final FactoryConfigurationError e) {
+                throw e;
+            } catch (final Throwable e) {
+                // Unreachable: the looked-up method declares no other exceptions.
+                throw new IllegalStateException(e);
+            }
+            return harden(factory);
+        }
+        final SAXParserFactory factory = newDefaultInstance();
+        factory.setNamespaceAware(true);
+        return factory;
+    }
+
+    /**
      * Creates a new hardened, namespace-aware {@link XMLReader} for the TrAX wrappers to parse sources with.
      *
      * @return a hardened reader.
@@ -225,6 +262,67 @@ public final class HardeningSAXParserFactory {
      */
     public static SAXParserFactory newInstance(final String factoryClassName, final ClassLoader classLoader) {
         return harden(SAXParserFactory.newInstance(factoryClassName, classLoader));
+    }
+
+    /**
+     * Returns a new, hardened, namespace-aware {@link SAXParserFactory}.
+     * <p>
+     * Obtained as by {@code SAXParserFactory.newNSInstance()} where the platform provides it (Java 13 or later), and by enabling namespace awareness on
+     * {@link #newInstance()} otherwise, the behavior the JAXP method is specified to have.
+     * </p>
+     *
+     * @return A hardened, namespace-aware factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown from {@link SAXParserFactory} in case of a {@link java.util.ServiceConfigurationError service configuration
+     *                                   error} or if the implementation is not available or cannot be instantiated.
+     */
+    public static SAXParserFactory newNSInstance() {
+        if (NEW_NS_INSTANCE != null) {
+            final SAXParserFactory factory;
+            try {
+                factory = (SAXParserFactory) NEW_NS_INSTANCE.invokeExact();
+            } catch (final FactoryConfigurationError e) {
+                throw e;
+            } catch (final Throwable e) {
+                // Unreachable: the looked-up method declares no other exceptions.
+                throw new IllegalStateException(e);
+            }
+            return harden(factory);
+        }
+        final SAXParserFactory factory = newInstance();
+        factory.setNamespaceAware(true);
+        return factory;
+    }
+
+    /**
+     * Returns a new, hardened, namespace-aware {@link SAXParserFactory} of the given implementation class.
+     * <p>
+     * Obtained as by {@code SAXParserFactory.newNSInstance(String, ClassLoader)} where the platform provides it (Java 13 or later), and by enabling namespace
+     * awareness on {@link #newInstance(String, ClassLoader)} otherwise, the behavior the JAXP method is specified to have.
+     * </p>
+     *
+     * @param factoryClassName The fully qualified class name of the {@link SAXParserFactory} implementation.
+     * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
+     * @return A hardened, namespace-aware factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
+     */
+    public static SAXParserFactory newNSInstance(final String factoryClassName, final ClassLoader classLoader) {
+        if (NEW_NS_INSTANCE_BY_CLASS_NAME != null) {
+            final SAXParserFactory factory;
+            try {
+                factory = (SAXParserFactory) NEW_NS_INSTANCE_BY_CLASS_NAME.invokeExact(factoryClassName, classLoader);
+            } catch (final FactoryConfigurationError e) {
+                throw e;
+            } catch (final Throwable e) {
+                // Unreachable: the looked-up method declares no other exceptions.
+                throw new IllegalStateException(e);
+            }
+            return harden(factory);
+        }
+        final SAXParserFactory factory = newInstance(factoryClassName, classLoader);
+        factory.setNamespaceAware(true);
+        return factory;
     }
 
     private static void setFeature(final SAXParserFactory factory, final String feature, final boolean value) {

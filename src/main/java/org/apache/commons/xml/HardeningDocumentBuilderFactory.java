@@ -56,6 +56,13 @@ public final class HardeningDocumentBuilderFactory {
 
     private static final MethodHandle NEW_DEFAULT_INSTANCE = findStatic("newDefaultInstance", MethodType.methodType(DocumentBuilderFactory.class));
 
+    private static final MethodHandle NEW_DEFAULT_NS_INSTANCE = findStatic("newDefaultNSInstance", MethodType.methodType(DocumentBuilderFactory.class));
+
+    private static final MethodHandle NEW_NS_INSTANCE = findStatic("newNSInstance", MethodType.methodType(DocumentBuilderFactory.class));
+
+    private static final MethodHandle NEW_NS_INSTANCE_BY_CLASS_NAME = findStatic("newNSInstance",
+            MethodType.methodType(DocumentBuilderFactory.class, String.class, ClassLoader.class));
+
     private static MethodHandle findStatic(final String name, final MethodType type) {
         try {
             return MethodHandles.publicLookup().findStatic(DocumentBuilderFactory.class, name, type);
@@ -128,6 +135,36 @@ public final class HardeningDocumentBuilderFactory {
     }
 
     /**
+     * Returns a new, hardened, namespace-aware {@link DocumentBuilderFactory} of the system-default implementation.
+     * <p>
+     * Obtained as by {@code DocumentBuilderFactory.newDefaultNSInstance()} where the platform provides it (Java 13 or later), and by enabling namespace
+     * awareness on {@link #newDefaultInstance()} otherwise, the behavior the JAXP method is specified to have.
+     * </p>
+     *
+     * @return A hardened, namespace-aware factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation
+     *                                   (for example Android).
+     */
+    public static DocumentBuilderFactory newDefaultNSInstance() {
+        if (NEW_DEFAULT_NS_INSTANCE != null) {
+            final DocumentBuilderFactory factory;
+            try {
+                factory = (DocumentBuilderFactory) NEW_DEFAULT_NS_INSTANCE.invokeExact();
+            } catch (final FactoryConfigurationError e) {
+                throw e;
+            } catch (final Throwable e) {
+                // Unreachable: the looked-up method declares no other exceptions.
+                throw new IllegalStateException(e);
+            }
+            return harden(factory);
+        }
+        final DocumentBuilderFactory factory = newDefaultInstance();
+        factory.setNamespaceAware(true);
+        return factory;
+    }
+
+    /**
      * Returns a new, hardened {@link DocumentBuilderFactory}.
      *
      * @return A hardened factory.
@@ -154,6 +191,67 @@ public final class HardeningDocumentBuilderFactory {
      */
     public static DocumentBuilderFactory newInstance(final String factoryClassName, final ClassLoader classLoader) {
         return harden(DocumentBuilderFactory.newInstance(factoryClassName, classLoader));
+    }
+
+    /**
+     * Returns a new, hardened, namespace-aware {@link DocumentBuilderFactory}.
+     * <p>
+     * Obtained as by {@code DocumentBuilderFactory.newNSInstance()} where the platform provides it (Java 13 or later), and by enabling namespace awareness on
+     * {@link #newInstance()} otherwise, the behavior the JAXP method is specified to have.
+     * </p>
+     *
+     * @return A hardened, namespace-aware factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
+     *                                   implementation is not available or cannot be instantiated.
+     */
+    public static DocumentBuilderFactory newNSInstance() {
+        if (NEW_NS_INSTANCE != null) {
+            final DocumentBuilderFactory factory;
+            try {
+                factory = (DocumentBuilderFactory) NEW_NS_INSTANCE.invokeExact();
+            } catch (final FactoryConfigurationError e) {
+                throw e;
+            } catch (final Throwable e) {
+                // Unreachable: the looked-up method declares no other exceptions.
+                throw new IllegalStateException(e);
+            }
+            return harden(factory);
+        }
+        final DocumentBuilderFactory factory = newInstance();
+        factory.setNamespaceAware(true);
+        return factory;
+    }
+
+    /**
+     * Returns a new, hardened, namespace-aware {@link DocumentBuilderFactory} of the given implementation class.
+     * <p>
+     * Obtained as by {@code DocumentBuilderFactory.newNSInstance(String, ClassLoader)} where the platform provides it (Java 13 or later), and by enabling
+     * namespace awareness on {@link #newInstance(String, ClassLoader)} otherwise, the behavior the JAXP method is specified to have.
+     * </p>
+     *
+     * @param factoryClassName The fully qualified class name of the {@link DocumentBuilderFactory} implementation.
+     * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
+     * @return A hardened, namespace-aware factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
+     */
+    public static DocumentBuilderFactory newNSInstance(final String factoryClassName, final ClassLoader classLoader) {
+        if (NEW_NS_INSTANCE_BY_CLASS_NAME != null) {
+            final DocumentBuilderFactory factory;
+            try {
+                factory = (DocumentBuilderFactory) NEW_NS_INSTANCE_BY_CLASS_NAME.invokeExact(factoryClassName, classLoader);
+            } catch (final FactoryConfigurationError e) {
+                throw e;
+            } catch (final Throwable e) {
+                // Unreachable: the looked-up method declares no other exceptions.
+                throw new IllegalStateException(e);
+            }
+            return harden(factory);
+        }
+        final DocumentBuilderFactory factory = newInstance(factoryClassName, classLoader);
+        factory.setNamespaceAware(true);
+        return factory;
     }
 
     /**
