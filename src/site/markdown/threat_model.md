@@ -40,12 +40,12 @@ a finding that falls under [What is out of scope](#what-is-out-of-scope) will be
 
 ### Scope and intended use
 
-This library is a helper for **safely creating JAXP factories**. Each `XmlFactories.newXxxFactory()` method returns a
+This library is a helper for **safely creating JAXP factories**. Each `XxxFactory.newYyy()` method returns a
 new, hardened factory whose parsers reject the common XML attacks (external entity / DTD resolution, XXE, SSRF through
 external references, and entity-expansion denial of service such as Billion Laughs). The exact guarantee each factory
 makes is documented in the Javadoc:
 
-https://commons.apache.org/sandbox/commons-xml/apidocs/org/apache/commons/xml/factory/XmlFactories.html
+https://commons.apache.org/sandbox/commons-xml/apidocs/org/apache/commons/xml/package-summary.html
 
 The hardening applies to the factory and to the parsers, readers, transformers, validators, schemas and XPath objects it produces.
 It governs what those objects read;
@@ -59,7 +59,7 @@ document tries to reach through an entity, DTD, schema, stylesheet, or XInclude 
 exists to stop that untrusted document from reading local resources, reaching the network, or exhausting
 memory or CPU.
 
-The trust boundary is the factory as returned by `XmlFactories`. The XML handed to a parser, reader,
+The trust boundary is the factory as returned by `org.apache.commons.xml`. The XML handed to a parser, reader,
 transformer, validator or schema produced by that factory is **untrusted**; the configuration of the factory
 is **trusted**, and keeping it as delivered is the caller's responsibility. A caller running in the same
 process can always reconfigure or replace the factory, so such a caller is not an adversary this model
@@ -77,7 +77,7 @@ because your reader's settings are indistinguishable from configuration you chos
 
 ### What is in scope
 
-- The hardening recipes applied by `XmlFactories`.
+- The hardening recipes applied by `org.apache.commons.xml`.
   Every implementation of JAXP 1.4 or later is in scope,
   as long as it respects the contract of the features, attributes, and properties the recipes use.
   An implementation that cannot accept a required setting makes the factory method throw
@@ -85,7 +85,7 @@ because your reader's settings are indistinguishable from configuration you chos
 
   The recipes for Android's Expat/KXmlParser are applied as best-effort and carry no guarantee
   (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)).
-- A factory returned by `XmlFactories`, used as delivered, that fails to provide a guarantee the Javadoc states it
+- A factory returned by `org.apache.commons.xml`, used as delivered, that fails to provide a guarantee the Javadoc states it
   provides. The guarantee covers the documented entry points of each returned factory type,
   including the `SAXTransformerFactory` extension methods when the returned `TransformerFactory` exposes them.
 
@@ -95,7 +95,7 @@ The library does not open network connections,
 spawn processes,
 install signal handlers,
 or read environment variables of its own:
-each `XmlFactories` method only configures and returns a JAXP factory.
+each `org.apache.commons.xml` factory method only configures and returns a JAXP factory.
 Which hardening recipe applies depends on the JAXP implementation present on the classpath.
 
 **Supported runtimes**
@@ -234,13 +234,13 @@ and reports against a factory reconfigured in any of the ways below are out of s
   `StreamSource(systemId)`, a `SAXSource` built from a system id) is fetched as-is by the JAXP implementation without
   consulting the hardening layer. Restrict it yourself if the URI is untrusted.
 - **Caller-supplied parser instances.**
-  A parser built outside `XmlFactories` and handed to a produced instance is used as configured:
+  A parser built outside `org.apache.commons.xml` and handed to a produced instance is used as configured:
   a `SAXSource` carrying its own `XMLReader`,
   a `StAXSource` carrying a stream or event reader,
   or a `DOMSource` holding a document parsed elsewhere.
   Its settings are yours, including permissive ones.
   To parse with your own reader under the hardening guarantees,
-  obtain it from `XmlFactories.newSAXParserFactory()`
+  obtain it from `HardeningSAXParserFactory.newInstance()`
   before wrapping it in a `SAXSource`.
 - The behavior of a JAXP implementation that does not respect the contract of the settings a hardening recipe requires
   (the factory method throws rather than returning an unhardened factory),
@@ -270,7 +270,7 @@ re-establishing any protection you remove.
 XML-security scanners and static analyzers routinely flag the parsers this library produces. The following
 are **not** vulnerabilities under this model:
 
-- A claim that a factory or instance produced by `XmlFactories` is unsafe, without showing that a reserved
+- A claim that a factory or instance produced by `org.apache.commons.xml` is unsafe, without showing that a reserved
   setting was loosened, a resolver was installed, or an untrusted top-level URI was passed (see
   [Assumptions about the environment](#assumptions-about-the-environment) and
   [What is out of scope](#what-is-out-of-scope)). As delivered, the instance is hardened; the bare presence
@@ -296,7 +296,7 @@ are **not** vulnerabilities under this model:
   instruction of a stylesheet
   (see **Transform output destinations** under [What is out of scope](#what-is-out-of-scope)).
 - Reports in a JAXP implementation that does not respect the contract of the settings a hardening recipe
-  requires: `XmlFactories` throws rather than returning an unhardened factory, so there is no instance to attack.
+  requires: `org.apache.commons.xml` factory method throws rather than returning an unhardened factory, so there is no instance to attack.
 
 ### Triage dispositions
 
@@ -314,7 +314,7 @@ A report judged against this model receives exactly one of:
 ### Conditions that would change this model
 
 Revise this model when any of the following change:
-a new `XmlFactories` factory method or other public surface;
+a new `org.apache.commons.xml` factory or other public surface;
 support for a JAXP implementation beyond those listed under [What is in scope](#what-is-in-scope);
 a change to the supported runtimes (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment));
 a new reserved setting;

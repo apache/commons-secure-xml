@@ -30,6 +30,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
@@ -50,7 +51,7 @@ import org.xml.sax.XMLReader;
  *
  * <p>Used by providers whose underlying TrAX implementation pulls a new {@code SAXParserFactory.newInstance()} for any Source that is not already a
  * {@link SAXSource} carrying its own {@link XMLReader}, and only sets {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING FSP} on the resulting reader.
- * Wrapping the factory and rewriting the Source upstream guarantees the parse runs through an {@link XmlFactories}-hardened reader instead.</p>
+ * Wrapping the factory and rewriting the Source upstream guarantees the parse runs through an {@link org.apache.commons.xml}-hardened reader instead.</p>
  *
  * <p>Three layers cooperate:</p>
  * <ol>
@@ -69,11 +70,13 @@ import org.xml.sax.XMLReader;
  * <h2>Caveats</h2>
  * <ul>
  *   <li>A {@link SAXSource} that carries its own {@link XMLReader} is trusted as-is: the caller is expected to supply a hardened reader (via
- *       {@link XmlFactories#newSAXParserFactory()}) in that case. The same applies to the SAX events a caller feeds into a handler, and to a parent reader a
+ *       {@link HardeningSAXParserFactory#newInstance()}) in that case. The same applies to the SAX events a caller feeds into a handler, and to a parent reader a
  *       caller sets on a returned {@link XMLFilter}.</li>
  * </ul>
+ *
+ * @see org.apache.commons.xml
  */
-final class HardeningTransformerFactory extends SAXTransformerFactory {
+public final class HardeningTransformerFactory extends SAXTransformerFactory {
 
     /**
      * Parses a reader-less source into a DOM through a hardened, namespace-aware {@link javax.xml.parsers.DocumentBuilder} and returns a {@link DOMSource}
@@ -287,5 +290,32 @@ final class HardeningTransformerFactory extends SAXTransformerFactory {
     @Override
     public void setURIResolver(final URIResolver resolver) {
         floor.setDelegate(resolver);
+    }
+
+    /**
+     * Returns a new, hardened {@link TransformerFactory}.
+     * <p>
+     * Beyond the three universal guarantees on {@link org.apache.commons.xml}: {@code xsl:import}, {@code xsl:include} and {@code document()} URIs are not resolved.
+     * </p>
+     * <p>
+     * The guarantees govern what the transform reads, not what it writes: an output instruction like {@code xsl:result-document} still writes wherever the
+     * stylesheet directs, so an untrusted stylesheet's output destinations must be restricted outside the library.
+     * </p>
+     * <p>
+     * The guarantees apply to every parser the factory creates internally for the standard {@link TransformerFactory} entry points: stylesheet compilation
+     * ({@link TransformerFactory#newTemplates(javax.xml.transform.Source) newTemplates(Source)},
+     * {@link TransformerFactory#newTransformer(javax.xml.transform.Source) newTransformer(Source)}) and source-document reading at
+     * {@code Transformer.transform(Source, Result)} time.
+     * </p>
+     * <p>
+     * The {@link javax.xml.transform.sax.SAXTransformerFactory} extension methods ({@code newTransformerHandler(..)}, {@code newTemplatesHandler()},
+     * {@code newXMLFilter(..)}), if reachable by casting the returned factory, produce objects carrying the same guarantees.
+     * </p>
+     *
+     * @return A hardened factory.
+     * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
+     */
+    public static TransformerFactory newInstance() {
+        return TransformerHardener.harden(TransformerFactory.newInstance());
     }
 }

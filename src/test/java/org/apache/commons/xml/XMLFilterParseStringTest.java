@@ -53,7 +53,7 @@ class XMLFilterParseStringTest {
 
     @Test
     void hardenedFilterParseStringDoesNotLeakExternalEntity(@TempDir final Path tmpDir) throws Exception {
-        final SAXTransformerFactory factory = (SAXTransformerFactory) XmlFactories.newTransformerFactory();
+        final SAXTransformerFactory factory = (SAXTransformerFactory) HardeningTransformerFactory.newInstance();
         final Templates templates = factory.newTemplates(new StreamSource(new StringReader(IDENTITY_XSLT)));
         final XMLFilter filter = factory.newXMLFilter(templates);
         final Path tmp = Files.createTempFile(tmpDir, "xmlfilter", ".xml");

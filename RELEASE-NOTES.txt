@@ -29,7 +29,7 @@ First release.
 New features
 ------------
 
-*                  Secure-by-default JAXP factory creation via XmlFactories, with implementation-specific hardening recipes for the
+*                  Secure-by-default JAXP factory creation via org.apache.commons.xml, with implementation-specific hardening recipes for the
                    stock JDK, Android, Apache Xalan, Apache Xerces, Woodstox, and Saxon-HE.
 
 

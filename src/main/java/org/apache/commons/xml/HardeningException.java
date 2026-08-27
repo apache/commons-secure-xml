@@ -47,7 +47,7 @@ final class HardeningException extends IllegalStateException {
      */
     static String forbidden(final String type, final String namespace, final String publicId, final String systemId, final String baseURI) {
         return String.format("External resource fetch forbidden by %s: type=%s, namespace=%s, publicId=%s, systemId=%s, baseURI=%s",
-                XmlFactories.THROW_ON_UNRESOLVED, type, namespace, publicId, systemId, baseURI);
+                HardeningException.THROW_ON_UNRESOLVED, type, namespace, publicId, systemId, baseURI);
     }
 
     /**
@@ -66,13 +66,22 @@ final class HardeningException extends IllegalStateException {
     /**
      * Whether unresolved external references must be rejected instead of resolved to empty content.
      *
-     * <p>Read per resolution, so the {@value XmlFactories#THROW_ON_UNRESOLVED} system property also toggles factories that already exist.</p>
+     * <p>Read per resolution, so the {@value HardeningException#THROW_ON_UNRESOLVED} system property also toggles factories that already exist.</p>
      *
-     * @return {@code true} when the {@value XmlFactories#THROW_ON_UNRESOLVED} system property is set.
+     * @return {@code true} when the {@value HardeningException#THROW_ON_UNRESOLVED} system property is set.
      */
     static boolean throwOnUnresolved() {
-        return Boolean.getBoolean(XmlFactories.THROW_ON_UNRESOLVED);
+        return Boolean.getBoolean(HardeningException.THROW_ON_UNRESOLVED);
     }
+
+    /**
+     * System property that switches unresolved external references from the default empty resolution to a thrown exception.
+     * <p>
+     * How to enable: set {@code -Dorg.apache.commons.xml.throwOnUnresolved=true}. The property is read at resolution time, so it also applies to factories
+     * created before it was set; references resolved by a caller-supplied resolver are unaffected.
+     * </p>
+     */
+    static final String THROW_ON_UNRESOLVED = "org.apache.commons.xml.throwOnUnresolved";
 
     HardeningException(final String message, final Throwable cause) {
         super(message, cause);
