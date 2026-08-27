@@ -18,6 +18,9 @@
 package org.apache.commons.xml;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -74,6 +77,21 @@ import org.xml.sax.XMLReader;
  */
 public final class HardeningTransformerFactory {
 
+    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
+    private static final String JDK_TRANSFORMER_FACTORY = "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl";
+
+    private static final MethodHandle NEW_DEFAULT_INSTANCE = findNewDefaultInstance();
+
+    private static MethodHandle findNewDefaultInstance() {
+        try {
+            return MethodHandles.publicLookup().findStatic(TransformerFactory.class, "newDefaultInstance",
+                    MethodType.methodType(TransformerFactory.class));
+        } catch (final ReflectiveOperationException e) {
+            // The method is absent: the running platform predates it.
+            return null;
+        }
+    }
+
     /**
      * Capability-driven hardening for any {@link TransformerFactory} on the classpath.
      *
@@ -109,6 +127,36 @@ public final class HardeningTransformerFactory {
         // Required: source/stylesheet parsing provisions its own SAX reader otherwise; the wrapper routes every Source through a hardened one and installs the
         // ignore-all URIResolver floor (blocking xsl:import/include at compile time and document() at runtime) that a caller-set resolver cannot remove.
         return new Wrapper((SAXTransformerFactory) factory);
+    }
+
+    /**
+     * Returns a new, hardened {@link TransformerFactory} of the system-default implementation.
+     * <p>
+     * Obtained as by {@code TransformerFactory.newDefaultInstance()} where the platform provides it (Java 9 or later), and by instantiating the JDK's built-in
+     * implementation directly on Java 8.
+     * </p>
+     *
+     * @return A hardened factory.
+     * @throws IllegalStateException                Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws TransformerFactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in
+     *                                                implementation (for example Android).
+     */
+    public static TransformerFactory newDefaultInstance() {
+        if (NEW_DEFAULT_INSTANCE != null) {
+            final TransformerFactory factory;
+            try {
+                factory = (TransformerFactory) NEW_DEFAULT_INSTANCE.invokeExact();
+            } catch (final TransformerFactoryConfigurationError e) {
+                throw e;
+            } catch (final Throwable e) {
+                // Unreachable: the looked-up method declares no other exceptions.
+                throw new IllegalStateException(e);
+            }
+            return harden(factory);
+        }
+        // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead. Where that class does not exist either (for
+        // example Android), the lookup miss surfaces as TransformerFactoryConfigurationError, like any newInstance miss.
+        return newInstance(JDK_TRANSFORMER_FACTORY, null);
     }
 
     /**

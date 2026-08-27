@@ -54,7 +54,9 @@ limitations under the License.
     <!-- OSGi bundle metadata: override commons-parent's org.apache.commons.* defaults. -->
     <commons.osgi.symbolicName>org.apache.commons.xml</commons.osgi.symbolicName>
     <commons.osgi.export>org.apache.commons.xml.*;version=${project.version};-noimport:=true</commons.osgi.export>
+    <!-- The negation drops the JDK-internal package bnd infers from the reflective Java 8 fallback in HardeningXMLInputFactory.newDefaultFactory(). -->
     <commons.osgi.import>
+      !com.sun.xml.internal.stream,
       net.sf.saxon.*;resolution:=optional,
       org.apache.xerces.*;resolution:=optional,
       *

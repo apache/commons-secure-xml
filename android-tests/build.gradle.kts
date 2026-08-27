@@ -31,7 +31,8 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        minSdk = 19
+        // java.lang.invoke, used by the newDefault* and newNS* lookups, exists from API level 26.
+        minSdk = 26
         // androidx.test runner; Mannodermaus's android-junit5 plugin slots a JUnit 5 RunnerBuilder under it so AndroidJUnitRunner picks up Jupiter tests.
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

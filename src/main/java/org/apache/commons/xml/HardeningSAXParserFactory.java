@@ -17,6 +17,9 @@
 
 package org.apache.commons.xml;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.Objects;
 
 import javax.xml.XMLConstants;
@@ -58,6 +61,19 @@ public final class HardeningSAXParserFactory {
     private static final String ANDROID_EXPAT_READER = "org.apache.harmony.xml.ExpatReader";
     /** Class name of Android's Harmony-based {@link SAXParserFactory}, backed by the native Expat parser. */
     private static final String ANDROID_SAX_PARSER_FACTORY = "org.apache.harmony.xml.parsers.SAXParserFactoryImpl";
+    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
+    private static final String JDK_SAX_PARSER_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl";
+
+    private static final MethodHandle NEW_DEFAULT_INSTANCE = findStatic("newDefaultInstance", MethodType.methodType(SAXParserFactory.class));
+
+    private static MethodHandle findStatic(final String name, final MethodType type) {
+        try {
+            return MethodHandles.publicLookup().findStatic(SAXParserFactory.class, name, type);
+        } catch (final ReflectiveOperationException e) {
+            // The method is absent: the running platform predates it.
+            return null;
+        }
+    }
 
     /**
      * Capability-driven hardening for any {@link SAXParserFactory} on the classpath.
@@ -136,6 +152,36 @@ public final class HardeningSAXParserFactory {
         // That floor blocks external DTD, entity, schema and xi:include fetches in one place: no ACCESS_EXTERNAL_* properties are needed here.
         // Callers can chain their resolvers, but not override the floor.
         return new HardeningXMLReader(reader);
+    }
+
+    /**
+     * Returns a new, hardened {@link SAXParserFactory} of the system-default implementation.
+     * <p>
+     * Obtained as by {@code SAXParserFactory.newDefaultInstance()} where the platform provides it (Java 9 or later), and by
+     * instantiating the JDK's built-in implementation directly on Java 8.
+     * </p>
+     *
+     * @return A hardened factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation
+     *                                   (for example Android).
+     */
+    public static SAXParserFactory newDefaultInstance() {
+        if (NEW_DEFAULT_INSTANCE != null) {
+            final SAXParserFactory factory;
+            try {
+                factory = (SAXParserFactory) NEW_DEFAULT_INSTANCE.invokeExact();
+            } catch (final FactoryConfigurationError e) {
+                throw e;
+            } catch (final Throwable e) {
+                // Unreachable: the looked-up method declares no other exceptions.
+                throw new IllegalStateException(e);
+            }
+            return harden(factory);
+        }
+        // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead. Where that class does not exist either (for
+        // example Android), the lookup miss surfaces as the factory's own FactoryConfigurationError, like any newInstance miss.
+        return newInstance(JDK_SAX_PARSER_FACTORY, null);
     }
 
     /**

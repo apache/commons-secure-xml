@@ -17,6 +17,9 @@
 
 package org.apache.commons.xml;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.Objects;
 
 import javax.xml.XMLConstants;
@@ -44,6 +47,21 @@ import javax.xml.xpath.XPathVariableResolver;
  * @see org.apache.commons.xml
  */
 public final class HardeningXPathFactory {
+
+    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
+    private static final String JDK_XPATH_FACTORY = "com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl";
+
+    private static final MethodHandle NEW_DEFAULT_INSTANCE = findNewDefaultInstance();
+
+    private static MethodHandle findNewDefaultInstance() {
+        try {
+            return MethodHandles.publicLookup().findStatic(XPathFactory.class, "newDefaultInstance",
+                    MethodType.methodType(XPathFactory.class));
+        } catch (final ReflectiveOperationException e) {
+            // The method is absent: the running platform predates it.
+            return null;
+        }
+    }
 
     /**
      * Capability-driven hardening for any {@link XPathFactory} on the classpath.
@@ -81,6 +99,41 @@ public final class HardeningXPathFactory {
         setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
         // Required: FSP does not reach the parser the engine provisions for InputSource-taking evaluate calls; the wrapper parses those itself.
         return new Wrapper(factory);
+    }
+
+    /**
+     * Returns a new, hardened {@link XPathFactory} of the system-default implementation, supporting the default XPath object model.
+     * <p>
+     * Obtained as by {@code XPathFactory.newDefaultInstance()} where the platform provides it (Java 9 or later), and by instantiating the JDK's built-in
+     * implementation directly on Java 8.
+     * </p>
+     *
+     * @return A hardened factory.
+     * @throws IllegalStateException Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws RuntimeException      Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation (for
+     *                               example Android).
+     */
+    public static XPathFactory newDefaultInstance() {
+        if (NEW_DEFAULT_INSTANCE != null) {
+            final XPathFactory factory;
+            try {
+                factory = (XPathFactory) NEW_DEFAULT_INSTANCE.invokeExact();
+            } catch (final RuntimeException e) {
+                throw e;
+            } catch (final Throwable e) {
+                // Unreachable: the looked-up method declares no other exceptions.
+                throw new IllegalStateException(e);
+            }
+            return harden(factory);
+        }
+        try {
+            // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead.
+            return newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI, JDK_XPATH_FACTORY, null);
+        } catch (final XPathFactoryConfigurationException e) {
+            // newDefaultInstance declares no checked exception; mirror XPathFactory.newInstance(), which reports a default-model miss as a RuntimeException.
+            throw new RuntimeException(
+                    "Neither XPathFactory.newDefaultInstance() nor " + JDK_XPATH_FACTORY + " is available", e);
+        }
     }
 
     /**

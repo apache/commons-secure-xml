@@ -33,7 +33,7 @@
  * </ul>
  * <p>
  * These guarantees are defined on OpenJDK 8 or later (and JDK distributions built from it). No version of Android supports
- * {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING}, so on Android (API level 19 or later) the hardening is applied as best-effort without a guarantee,
+ * {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING}, so on Android (API level 26 or later) the hardening is applied as best-effort without a guarantee,
  * tested as complete starting with API level 33; see the threat model's "Assumptions about the environment".
  * </p>
  * <p>

@@ -66,7 +66,7 @@ so the parse continues without it
 
 ### Supported runtimes
 
-The library requires OpenJDK 8 or later (or a JDK distribution built from it), or Android API level 19 or later.
+The library requires OpenJDK 8 or later (or a JDK distribution built from it), or Android API level 26 or later.
 
 The security guarantees are defined only on the OpenJDK family
 (see the [Threat Model](threat_model.html)).

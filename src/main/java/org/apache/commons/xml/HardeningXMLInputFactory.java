@@ -19,10 +19,13 @@ package org.apache.commons.xml;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.Objects;
 
-import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.stream.EventFilter;
+import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.StreamFilter;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -53,6 +56,20 @@ public final class HardeningXMLInputFactory {
     static final String WSTX_ENTITY_RESOLVER = "com.ctc.wstx.entityResolver";
     /** Woodstox property: resolver consulted for undeclared entity references. */
     static final String WSTX_UNDECLARED_ENTITY_RESOLVER = "com.ctc.wstx.undeclaredEntityResolver";
+    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultFactory()}. */
+    private static final String JDK_XML_INPUT_FACTORY = "com.sun.xml.internal.stream.XMLInputFactoryImpl";
+
+    private static final MethodHandle NEW_DEFAULT_FACTORY = findNewDefaultFactory();
+
+    private static MethodHandle findNewDefaultFactory() {
+        try {
+            return MethodHandles.publicLookup().findStatic(XMLInputFactory.class, "newDefaultFactory",
+                    MethodType.methodType(XMLInputFactory.class));
+        } catch (final ReflectiveOperationException e) {
+            // The method is absent: the running platform predates it.
+            return null;
+        }
+    }
 
     /**
      * Capability-driven hardening for any {@link XMLInputFactory} (StAX) on the classpath.
@@ -67,6 +84,40 @@ public final class HardeningXMLInputFactory {
     static XMLInputFactory harden(final XMLInputFactory factory) {
         // The wrapper installs the non-removable ignore-all resolver floor that resolves every external DTD and entity to empty content.
         return new Wrapper(factory);
+    }
+
+    /**
+     * Returns a new, hardened {@link XMLInputFactory} of the system-default implementation.
+     * <p>
+     * Obtained as by {@code XMLInputFactory.newDefaultFactory()} where the platform provides it (Java 9 or later), and by instantiating the JDK's built-in
+     * implementation directly on Java 8.
+     * </p>
+     *
+     * @return A hardened factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultFactory()} nor the JDK's built-in implementation
+     *                                   (for example Android).
+     */
+    public static XMLInputFactory newDefaultFactory() {
+        if (NEW_DEFAULT_FACTORY != null) {
+            final XMLInputFactory factory;
+            try {
+                factory = (XMLInputFactory) NEW_DEFAULT_FACTORY.invokeExact();
+            } catch (final FactoryConfigurationError e) {
+                throw e;
+            } catch (final Throwable e) {
+                // Unreachable: the looked-up method declares no other exceptions.
+                throw new IllegalStateException(e);
+            }
+            return harden(factory);
+        }
+        try {
+            // Java 8: the method does not exist, and XMLInputFactory has no class-name-taking lookup; instantiate the JDK's built-in default directly.
+            return harden((XMLInputFactory) Class.forName(JDK_XML_INPUT_FACTORY).getConstructor().newInstance());
+        } catch (final ReflectiveOperationException e) {
+            // Where the class does not exist either (for example Android), report the miss like any StAX factory lookup: with FactoryConfigurationError.
+            throw new FactoryConfigurationError(e, "Neither XMLInputFactory.newDefaultFactory() nor " + JDK_XML_INPUT_FACTORY + " is available");
+        }
     }
 
     /**
