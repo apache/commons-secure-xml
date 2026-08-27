@@ -396,6 +396,73 @@ limitations under the License.
   </reporting>
   <profiles>
     <!--
+      Multi-Release jar layers: the `src/main/java9` and `src/main/java13` roots hold full copies of the Safe* factory
+      classes extended with the JAXP factory methods introduced in those Java versions, compiled into
+      `META-INF/versions/{9,13}` of the regular output directory. Each layer needs a matching javac, so on older JDKs
+      the corresponding profile stays inactive and the jar simply ships without that layer. The `Multi-Release`
+      manifest attribute is added by moditect (commons-parent `java-9-up` profile) at package time.
+    -->
+    <profile>
+      <id>java9-multi-release</id>
+      <activation>
+        <jdk>[9,)</jdk>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>compile-java9</id>
+                <phase>compile</phase>
+                <goals>
+                  <goal>compile</goal>
+                </goals>
+                <configuration>
+                  <release>9</release>
+                  <multiReleaseOutput>true</multiReleaseOutput>
+                  <compileSourceRoots>
+                    <compileSourceRoot>${project.basedir}/src/main/java9</compileSourceRoot>
+                  </compileSourceRoots>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>java13-multi-release</id>
+      <activation>
+        <jdk>[13,)</jdk>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>compile-java13</id>
+                <phase>compile</phase>
+                <goals>
+                  <goal>compile</goal>
+                </goals>
+                <configuration>
+                  <release>13</release>
+                  <multiReleaseOutput>true</multiReleaseOutput>
+                  <compileSourceRoots>
+                    <compileSourceRoot>${project.basedir}/src/main/java13</compileSourceRoot>
+                  </compileSourceRoots>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <!--
       Regression guard for the generated OSGi and JPMS descriptors.
       The JPMS test requires JDK 9+
     -->

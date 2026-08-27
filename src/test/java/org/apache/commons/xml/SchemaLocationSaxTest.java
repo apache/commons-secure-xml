@@ -100,7 +100,7 @@ class SchemaLocationSaxTest {
     @Test
     void hardenedDoesNotFetchExternalSchema() throws Exception {
         assumeTrue(supportsSchemaLanguage(), "parser does not support JAXP 1.2 schema-language XSD validation");
-        final SAXParser parser = newValidatingParser(XmlFactories.newSAXParserFactory());
+        final SAXParser parser = newValidatingParser(SafeSAXParserFactory.newInstance());
         // The schemaLocation reference resolves to empty rather than being fetched. Either the empty schema fails the validating parse (acceptable), or the
         // parse completes but the schema's default leak attribute is never augmented onto the element. Either way the marker must not be observed.
         final LeakCapturingHandler handler = new LeakCapturingHandler();

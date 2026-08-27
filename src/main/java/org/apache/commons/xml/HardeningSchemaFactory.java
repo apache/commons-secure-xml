@@ -34,7 +34,7 @@ import org.xml.sax.SAXNotSupportedException;
 
 /**
  * Capability-driven hardening wrapper for any {@link SchemaFactory} on the classpath, the same recipe for every implementation. It is the entry point reached
- * by {@link XmlFactories#newSchemaFactory(String)}; there is no per-implementation branching, no {@code FEATURE_SECURE_PROCESSING} and no limit configuration on the
+ * by {@link SafeSchemaFactory#newInstance(String)}; there is no per-implementation branching, no {@code FEATURE_SECURE_PROCESSING} and no limit configuration on the
  * factory itself.
  *
  * <p>Three layers cooperate:</p>

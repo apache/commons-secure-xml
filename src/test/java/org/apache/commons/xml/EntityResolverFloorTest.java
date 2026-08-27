@@ -119,20 +119,20 @@ class EntityResolverFloorTest {
     }
 
     private static XMLInputFactory externalEntityStaxFactory() {
-        final XMLInputFactory factory = XmlFactories.newXMLInputFactory();
+        final XMLInputFactory factory = SafeXMLInputFactory.newFactory();
         factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, true);
         factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, true);
         return factory;
     }
 
     private static DocumentBuilder hardenedBuilder() throws Exception {
-        final DocumentBuilder builder = XmlFactories.newDocumentBuilderFactory().newDocumentBuilder();
+        final DocumentBuilder builder = SafeDocumentBuilderFactory.newInstance().newDocumentBuilder();
         builder.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
         return builder;
     }
 
     private static XMLReader hardenedReader() throws Exception {
-        final XMLReader reader = XmlFactories.newSAXParserFactory().newSAXParser().getXMLReader();
+        final XMLReader reader = SafeSAXParserFactory.newInstance().newSAXParser().getXMLReader();
         reader.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
         return reader;
     }
@@ -144,7 +144,7 @@ class EntityResolverFloorTest {
      * implementation cannot quietly recover from a floor resolution while the test asserts clean completion.
      */
     private static TransformerFactory hardenedTransformerFactory() {
-        final TransformerFactory factory = XmlFactories.newTransformerFactory();
+        final TransformerFactory factory = SafeTransformerFactory.newInstance();
         factory.setErrorListener(AttackTestSupport.STRICT_REPORTER);
         return factory;
     }
@@ -168,7 +168,7 @@ class EntityResolverFloorTest {
     }
 
     private static DocumentBuilder xIncludeAwareBuilder() throws Exception {
-        final DocumentBuilderFactory factory = XmlFactories.newDocumentBuilderFactory();
+        final DocumentBuilderFactory factory = SafeDocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         AttackTestSupport.assumeDoesNotThrow(() -> factory.setXIncludeAware(true));
         final DocumentBuilder builder = factory.newDocumentBuilder();
@@ -177,7 +177,7 @@ class EntityResolverFloorTest {
     }
 
     private static XMLReader xIncludeAwareReader() throws Exception {
-        final SAXParserFactory factory = XmlFactories.newSAXParserFactory();
+        final SAXParserFactory factory = SafeSAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
         AttackTestSupport.assumeDoesNotThrow(() -> factory.setXIncludeAware(true));
         final XMLReader reader = factory.newSAXParser().getXMLReader();
@@ -227,7 +227,7 @@ class EntityResolverFloorTest {
     void saxParseWithHandlerDoesNotBypass() throws Exception {
         // SAXParser.parse(source, handler) installs the handler as the reader's entity resolver; the handler does not resolve it (returns null), so the
         // ignore-all floor must still resolve the external entity to empty rather than letting the parser fetch it.
-        final SAXParser parser = XmlFactories.newSAXParserFactory().newSAXParser();
+        final SAXParser parser = SafeSAXParserFactory.newInstance().newSAXParser();
         final StringBuilder text = new StringBuilder();
         try {
             parser.parse(AttackTestSupport.inputSource(entityPayload(ALLOWED)), AttackTestSupport.capturingHandler(text));
@@ -276,7 +276,7 @@ class EntityResolverFloorTest {
     @Tag("schema")
     void schemaDeniesUnlisted() {
         assertParseFails(() -> {
-            final SchemaFactory factory = XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            final SchemaFactory factory = SafeSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             factory.setResourceResolver((type, namespaceURI, publicId, systemId, baseURI) -> null);
             factory.newSchema(AttackTestSupport.resourceSource("with-import.xsd"));
         }, "Schema import", SAXException.class, SecurityException.class);
@@ -287,7 +287,7 @@ class EntityResolverFloorTest {
     void schemaFetchesIdentifierOnlyOptIn() {
         // A non-null return is an opt-in even without content: the implementation fetches the named resource itself, mirroring the entity floor's contract.
         assertParseSucceeds(() -> {
-            final SchemaFactory factory = XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            final SchemaFactory factory = SafeSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             factory.setResourceResolver((type, namespaceURI, publicId, systemId, baseURI) ->
                     systemId != null && systemId.endsWith("included.xsd") ? identifierOnlyLsInput(ALLOWED_SCHEMA) : null);
             factory.newSchema(AttackTestSupport.resourceSource("with-import.xsd"));
@@ -299,7 +299,7 @@ class EntityResolverFloorTest {
     void schemaResolvesAllowListed() {
         // with-import.xsd references an element defined only in the imported included.xsd, so it compiles only if the import is resolved.
         assertParseSucceeds(() -> {
-            final SchemaFactory factory = XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            final SchemaFactory factory = SafeSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             factory.setResourceResolver(SCHEMA_ALLOW_LIST);
             factory.newSchema(AttackTestSupport.resourceSource("with-import.xsd"));
         }, "Schema import via caller resolver");
@@ -336,7 +336,7 @@ class EntityResolverFloorTest {
     @Test
     @Tag("stax")
     void staxGetXMLResolverReportsCallerUnwrapped() {
-        final XMLInputFactory factory = XmlFactories.newXMLInputFactory();
+        final XMLInputFactory factory = SafeXMLInputFactory.newFactory();
         final XMLResolver caller = (publicID, systemID, baseURI, namespace) -> null;
         factory.setXMLResolver(caller);
         assertSame(caller, factory.getXMLResolver(), "getXMLResolver should report the caller's resolver, not the floor wrapper");

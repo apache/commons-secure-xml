@@ -43,7 +43,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 /**
- * Tests that XInclude resolution is blocked by default on factories from {@link XmlFactories}, and that callers can
+ * Tests that XInclude resolution is blocked by default on factories from {@link SafeDocumentBuilderFactory} and {@link SafeSAXParserFactory}, and that callers can
  * allow-list specific resources via an {@link EntityResolver}.
  *
  * <p>Each case is exercised in both {@code parse="xml"} and {@code parse="text"} modes, and for both DOM and SAX
@@ -187,7 +187,7 @@ class XIncludeTest {
     void hardenedDomBlocksParseText() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_TEXT, "text"));
 
-        final DocumentBuilderFactory factory = XmlFactories.newDocumentBuilderFactory();
+        final DocumentBuilderFactory factory = SafeDocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         final Document doc = factory.newDocumentBuilder().parse(input);
@@ -201,7 +201,7 @@ class XIncludeTest {
     void hardenedDomBlocksParseXml() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_XML, "xml"));
 
-        final DocumentBuilderFactory factory = XmlFactories.newDocumentBuilderFactory();
+        final DocumentBuilderFactory factory = SafeDocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         assertThrows(SAXException.class, () -> {
@@ -215,7 +215,7 @@ class XIncludeTest {
     void hardenedDomNullResolverDoesNotLeak() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_XML, "xml"));
 
-        final DocumentBuilderFactory factory = XmlFactories.newDocumentBuilderFactory();
+        final DocumentBuilderFactory factory = SafeDocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         final DocumentBuilder builder = factory.newDocumentBuilder();
@@ -229,7 +229,7 @@ class XIncludeTest {
     void hardenedDomWithAllowListResolvesParseText() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_TEXT, "text"));
 
-        final DocumentBuilderFactory factory = XmlFactories.newDocumentBuilderFactory();
+        final DocumentBuilderFactory factory = SafeDocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         final DocumentBuilder builder = factory.newDocumentBuilder();
@@ -248,7 +248,7 @@ class XIncludeTest {
     void hardenedDomWithAllowListResolvesParseXml() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_XML, "xml"));
 
-        final DocumentBuilderFactory factory = XmlFactories.newDocumentBuilderFactory();
+        final DocumentBuilderFactory factory = SafeDocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         final DocumentBuilder builder = factory.newDocumentBuilder();
@@ -263,7 +263,7 @@ class XIncludeTest {
     void hardenedSaxBlocksParseText() throws Exception {
         final String input = xiIncludeXml(REFERENCED_TEXT, "text");
 
-        final SAXParserFactory factory = XmlFactories.newSAXParserFactory();
+        final SAXParserFactory factory = SafeSAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         final String captured = captureCharacters(factory.newSAXParser().getXMLReader(), input);
@@ -276,7 +276,7 @@ class XIncludeTest {
     void hardenedSaxBlocksParseXml() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_XML, "xml"));
 
-        final SAXParserFactory factory = XmlFactories.newSAXParserFactory();
+        final SAXParserFactory factory = SafeSAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         assertThrows(SAXException.class, () -> {
@@ -290,7 +290,7 @@ class XIncludeTest {
     void hardenedSaxNullResolverDoesNotLeak() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_XML, "xml"));
 
-        final SAXParserFactory factory = XmlFactories.newSAXParserFactory();
+        final SAXParserFactory factory = SafeSAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         final XMLReader reader = factory.newSAXParser().getXMLReader();
@@ -304,7 +304,7 @@ class XIncludeTest {
     void hardenedSaxWithAllowListResolvesParseText() throws Exception {
         final String input = xiIncludeXml(REFERENCED_TEXT, "text");
 
-        final SAXParserFactory factory = XmlFactories.newSAXParserFactory();
+        final SAXParserFactory factory = SafeSAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         final XMLReader reader = factory.newSAXParser().getXMLReader();
@@ -319,7 +319,7 @@ class XIncludeTest {
     void hardenedSaxWithAllowListResolvesParseXml() throws Exception {
         final String input = xiIncludeXml(REFERENCED_XML, "xml");
 
-        final SAXParserFactory factory = XmlFactories.newSAXParserFactory();
+        final SAXParserFactory factory = SafeSAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         final XMLReader reader = factory.newSAXParser().getXMLReader();

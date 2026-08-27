@@ -59,7 +59,7 @@ class ResetHardeningTest {
     @Tag("dom")
     void documentBuilderResetKeepsEntityResolverFloor() throws Exception {
         Assumptions.assumeTrue(AttackTestSupport.DOM_RESOLVES_INTERNAL_ENTITIES, "platform DOM does not resolve user-defined entities");
-        final DocumentBuilder builder = XmlFactories.newDocumentBuilderFactory().newDocumentBuilder();
+        final DocumentBuilder builder = SafeDocumentBuilderFactory.newInstance().newDocumentBuilder();
         AttackTestSupport.assumeDoesNotThrow(builder::reset);
         try {
             final Document doc = builder.parse(AttackTestSupport.inputSource(entityPayload(UNLISTED)));
@@ -72,7 +72,7 @@ class ResetHardeningTest {
     @Test
     @Tag("sax")
     void saxParserResetKeepsEntityResolverFloor() throws Exception {
-        final SAXParser parser = XmlFactories.newSAXParserFactory().newSAXParser();
+        final SAXParser parser = SafeSAXParserFactory.newInstance().newSAXParser();
         // Materialize the hardened reader before the reset, so a stale cached wrapper would be observable.
         parser.getXMLReader();
         AttackTestSupport.assumeDoesNotThrow(parser::reset);
@@ -90,7 +90,7 @@ class ResetHardeningTest {
     @Tag("trax")
     void transformerResetKeepsUriResolverFloor() throws Exception {
         // with-document.xsl copies document('referenced.xml') into the output at transform time, so a transformer whose floor was stripped leaks the marker.
-        final Transformer transformer = XmlFactories.newTransformerFactory()
+        final Transformer transformer = SafeTransformerFactory.newInstance()
                 .newTemplates(AttackTestSupport.resourceSource("with-document.xsl")).newTransformer();
         AttackTestSupport.assumeDoesNotThrow(transformer::reset);
         final StringWriter sink = new StringWriter();
@@ -107,7 +107,7 @@ class ResetHardeningTest {
     void validatorResetKeepsResourceResolverFloor() throws Exception {
         // A Schema built without sources validates against the instance's xsi:schemaLocation hints, so the resolver floor is the only barrier between the
         // validator and the external schema fetch.
-        final Validator validator = XmlFactories.newSchemaFactory(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema().newValidator();
+        final Validator validator = SafeSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema().newValidator();
         AttackTestSupport.assumeDoesNotThrow(validator::reset);
         validator.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
         // schema-location-instance.xml hints at schema-location.xsd, which declares its root: a validator whose floor was stripped fetches it and validates

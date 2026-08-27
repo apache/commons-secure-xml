@@ -39,7 +39,7 @@ final class SaxSurfaceTestSupport {
 
     /** Feeds the input's SAX events into the handler through a hardened, namespace-aware reader. */
     static void feed(final ContentHandler handler, final InputSource input) throws Exception {
-        final SAXParserFactory factory = XmlFactories.newSAXParserFactory();
+        final SAXParserFactory factory = SafeSAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
         final XMLReader reader = factory.newSAXParser().getXMLReader();
         reader.setContentHandler(handler);
@@ -49,7 +49,7 @@ final class SaxSurfaceTestSupport {
 
     /** The hardened factory, as its runtime {@link SAXTransformerFactory} type. */
     static SAXTransformerFactory hardenedFactory() {
-        return (SAXTransformerFactory) XmlFactories.newTransformerFactory();
+        return (SAXTransformerFactory) SafeTransformerFactory.newInstance();
     }
 
     /** Opens a fixture under {@code leaked/} as an {@link InputSource} preserving its system id, so relative hrefs resolve normally. */

@@ -50,7 +50,7 @@ import org.xml.sax.XMLReader;
  *
  * <p>Used by providers whose underlying TrAX implementation pulls a new {@code SAXParserFactory.newInstance()} for any Source that is not already a
  * {@link SAXSource} carrying its own {@link XMLReader}, and only sets {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING FSP} on the resulting reader.
- * Wrapping the factory and rewriting the Source upstream guarantees the parse runs through an {@link XmlFactories}-hardened reader instead.</p>
+ * Wrapping the factory and rewriting the Source upstream guarantees the parse runs through a {@link SafeSAXParserFactory}-hardened reader instead.</p>
  *
  * <p>Three layers cooperate:</p>
  * <ol>
@@ -69,7 +69,7 @@ import org.xml.sax.XMLReader;
  * <h2>Caveats</h2>
  * <ul>
  *   <li>A {@link SAXSource} that carries its own {@link XMLReader} is trusted as-is: the caller is expected to supply a hardened reader (via
- *       {@link XmlFactories#newSAXParserFactory()}) in that case. The same applies to the SAX events a caller feeds into a handler, and to a parent reader a
+ *       {@link SafeSAXParserFactory#newInstance()}) in that case. The same applies to the SAX events a caller feeds into a handler, and to a parent reader a
  *       caller sets on a returned {@link XMLFilter}.</li>
  * </ul>
  */
