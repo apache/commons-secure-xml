@@ -44,6 +44,28 @@ import javax.xml.transform.Source;
  */
 public final class HardeningXMLInputFactory {
 
+    /** Woodstox property: resolver consulted for the external DTD subset. */
+    static final String WSTX_DTD_RESOLVER = "com.ctc.wstx.dtdResolver";
+    /** Woodstox property: resolver consulted for declared external general entities. */
+    static final String WSTX_ENTITY_RESOLVER = "com.ctc.wstx.entityResolver";
+    /** Woodstox property: resolver consulted for undeclared entity references. */
+    static final String WSTX_UNDECLARED_ENTITY_RESOLVER = "com.ctc.wstx.undeclaredEntityResolver";
+
+    /**
+     * Capability-driven hardening for any {@link XMLInputFactory} (StAX) on the classpath.
+     *
+     * <p>One recipe covers both the JDK Zephyr and Woodstox: the wrapper installs a non-removable {@link FallbackIgnoreXMLResolver} floor on
+     * every entity-resolution hook, leaving the standard {@code SUPPORT_DTD} / {@code IS_SUPPORTING_EXTERNAL_ENTITIES} defaults untouched; see the wrapper's
+     * Javadoc for the per-implementation hook routing.</p>
+     *
+     * @param factory the factory to harden; never {@code null}.
+     * @return a hardened factory.
+     */
+    static XMLInputFactory harden(final XMLInputFactory factory) {
+        // The wrapper installs the non-removable ignore-all resolver floor that resolves every external DTD and entity to empty content.
+        return new Wrapper(factory);
+    }
+
     /**
      * Returns a new, hardened {@link XMLInputFactory}.
      * <p>
@@ -55,17 +77,7 @@ public final class HardeningXMLInputFactory {
      * @throws FactoryConfigurationError Thrown if an instance of this factory cannot be loaded.
      */
     public static XMLInputFactory newInstance() {
-        return StaxHardener.harden(XMLInputFactory.newInstance());
-    }
-
-    /**
-     * Wraps a prepared delegate in the hardening wrapper; called by the hardener once the required settings are applied.
-     *
-     * @param delegate the delegate to wrap; must not be {@code null}.
-     * @return The hardened factory.
-     */
-    static XMLInputFactory wrap(final XMLInputFactory delegate) {
-        return new Wrapper(delegate);
+        return harden(XMLInputFactory.newInstance());
     }
 
     private HardeningXMLInputFactory() {
@@ -77,7 +89,7 @@ public final class HardeningXMLInputFactory {
      * non-removable by the caller.
      *
      * <p>The constructor installs the floor through {@code setXMLResolver}, which every implementation routes external resolution through (Woodstox fans it out to
-     * both its DTD-subset and entity resolvers). Woodstox keeps one hook outside that fan-out, {@value StaxHardener#WSTX_UNDECLARED_ENTITY_RESOLVER}, which is
+     * both its DTD-subset and entity resolvers). Woodstox keeps one hook outside that fan-out, {@value HardeningXMLInputFactory#WSTX_UNDECLARED_ENTITY_RESOLVER}, which is
      * deliberately left empty: emptying the external subset leaves any entity it declared undeclared, and Woodstox then rejects the reference. The rejection is
      * implementation-prescribed and keeps the resource just as unfetched as the empty resolution the other implementations produce; a caller who wants those
      * references resolved can still set the property, and their resolver lands behind a floor like on every other resolver hook.</p>
@@ -96,9 +108,9 @@ public final class HardeningXMLInputFactory {
 
         private static boolean isResolverProperty(final String name) {
             return XMLInputFactory.RESOLVER.equals(name)
-                    || StaxHardener.WSTX_DTD_RESOLVER.equals(name)
-                    || StaxHardener.WSTX_ENTITY_RESOLVER.equals(name)
-                    || StaxHardener.WSTX_UNDECLARED_ENTITY_RESOLVER.equals(name);
+                    || WSTX_DTD_RESOLVER.equals(name)
+                    || WSTX_ENTITY_RESOLVER.equals(name)
+                    || WSTX_UNDECLARED_ENTITY_RESOLVER.equals(name);
         }
 
 

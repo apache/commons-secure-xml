@@ -45,6 +45,21 @@ import org.xml.sax.SAXNotSupportedException;
 public final class HardeningSchemaFactory {
 
     /**
+     * Hardening for any {@link SchemaFactory} on the classpath.
+     *
+     * <p>Unlike the other factory types there is no per-implementation branching and no feature or limit configuration on the factory itself: schema compilation
+     * and validation reach external resources only through the resolver hook, so wrapping the factory with a non-removable ignore-all resolver floor is enough on
+     * every implementation. The reader used to parse schema and instance documents is hardened separately, through
+     * {@link HardeningSAXParserFactory#harden(javax.xml.transform.Source)}.</p>
+     *
+     * @param factory the factory to harden; never {@code null}.
+     * @return a hardened factory.
+     */
+    static SchemaFactory harden(final SchemaFactory factory) {
+        return new Wrapper(factory);
+    }
+
+    /**
      * Returns a new, hardened {@link SchemaFactory} for the given schema language.
      * <p>
      * Beyond the three universal guarantees on {@link org.apache.commons.xml}:
@@ -65,17 +80,7 @@ public final class HardeningSchemaFactory {
      * @throws SchemaFactoryConfigurationError Thrown if a configuration error is encountered.
      */
     public static SchemaFactory newInstance(final String schemaLanguage) {
-        return new Wrapper(SchemaFactory.newInstance(schemaLanguage));
-    }
-
-    /**
-     * Wraps a prepared delegate in the hardening wrapper; called by the hardener once the required settings are applied.
-     *
-     * @param delegate the delegate to wrap; must not be {@code null}.
-     * @return The hardened factory.
-     */
-    static SchemaFactory wrap(final SchemaFactory delegate) {
-        return new Wrapper(delegate);
+        return harden(SchemaFactory.newInstance(schemaLanguage));
     }
 
     private HardeningSchemaFactory() {
@@ -91,14 +96,14 @@ public final class HardeningSchemaFactory {
      * <ol>
      *   <li>{@link HardeningSchemaFactory} installs an ignore-all {@link FallbackIgnoreLSResourceResolver} floor on the factory (blocking
      *       {@code xs:import}/{@code xs:include}/{@code xs:redefine} at compile time) and rewrites the Source on every {@code newSchema(Source[])} entry point
-     *       through {@link SAXParserHardener#hardenSource(Source)}.</li>
+     *       through {@link HardeningSAXParserFactory#harden(Source)}.</li>
      *   <li>{@link HardeningSchema} wraps every Validator/ValidatorHandler the inner Schema produces and re-installs the floor on each (blocking
      *       {@code xsi:schemaLocation} at validation time), since neither the JDK nor Xerces reliably propagates it through {@code Schema}.</li>
      *   <li>{@link HardeningValidator} rewrites the Source on every {@link Validator#validate(Source)} call.</li>
      * </ol>
      *
      * <p>
-     * The hardened reader supplied by {@link SAXParserHardener#hardenSource(Source)} already carries {@code FEATURE_SECURE_PROCESSING} and the processing limits, so a
+     * The hardened reader supplied by {@link HardeningSAXParserFactory#harden(Source)} already carries {@code FEATURE_SECURE_PROCESSING} and the processing limits, so a
      * DOCTYPE, external entity or Billion Laughs payload in the schema or instance document is bounded there rather than on this factory. The JAXP 1.5
      * {@code ACCESS_EXTERNAL_*} properties are deliberately not set: the resolver floor already blocks the same fetches on every implementation, and the JDK 8
      * {@code SchemaFactory} has a bug whereby those properties keep blocking even when a caller's own resolver would grant the access. The floor is a non-removable
@@ -111,7 +116,7 @@ public final class HardeningSchemaFactory {
     private static final class Wrapper extends SchemaFactory {
 
         /**
-         * Hardens every schema source through {@link SAXParserHardener#hardenSource(Source)}.
+         * Hardens every schema source through {@link HardeningSAXParserFactory#harden(Source)}.
          *
          * @param schemas the schema sources to harden; must not be {@code null}.
          * @return a new array of hardened sources.
@@ -123,7 +128,7 @@ public final class HardeningSchemaFactory {
             final Source[] hardened = new Source[schemas.length];
             try {
                 for (int i = 0; i < schemas.length; i++) {
-                    hardened[i] = SAXParserHardener.hardenSource(schemas[i]);
+                    hardened[i] = HardeningSAXParserFactory.harden(schemas[i]);
                 }
             } catch (final TransformerConfigurationException e) {
                 throw new SAXException("Failed to harden schema source", e);

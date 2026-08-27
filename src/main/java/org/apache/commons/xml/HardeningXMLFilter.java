@@ -70,7 +70,7 @@ final class HardeningXMLFilter extends XMLFilterImpl {
         }
         if (getParent() == null) {
             try {
-                setParent(SAXParserHardener.newHardenedReader());
+                setParent(HardeningSAXParserFactory.newHardenedReader());
             } catch (final TransformerException e) {
                 throw new SAXException(e);
             }

@@ -39,6 +39,41 @@ import org.xml.sax.EntityResolver;
  */
 public final class HardeningDocumentBuilderFactory {
 
+    /** Class name of Android's Harmony-based {@link DocumentBuilderFactory}, which exposes no hardening surface. */
+    private static final String ANDROID_DOCUMENT_BUILDER_FACTORY = "org.apache.harmony.xml.parsers.DocumentBuilderFactoryImpl";
+
+    /**
+     * Capability-driven hardening for any {@link DocumentBuilderFactory} on the classpath.
+     *
+     * <p>Rather than branching on the implementation class, this method probes what the factory supports and adapts:</p>
+     * <ul>
+     *     <li><strong>Android</strong> (Harmony / KXmlParser): recognized by class name and left untouched. It exposes no {@link XMLConstants#FEATURE_SECURE_PROCESSING
+     *         FSP}, no JAXP 1.5 {@code ACCESS_EXTERNAL_*} and no attribute API at all, while KXmlParser silently drops user-defined entities, so there is nothing to
+     *         apply.</li>
+     *     <li><strong>FSP</strong>: required. It switches on the implementation's built-in security manager, which is what carries the processing limits.</li>
+     *     <li><strong>Ignore-all resolver floor</strong>: every produced {@link DocumentBuilder} is wrapped by the nested wrapper, which keeps an
+     *         ignore-all {@link EntityResolver} floor. That floor blocks external DTD, entity, schema and {@code xi:include} fetches in one place: the stock JDK's
+     *         XInclude processor ignores {@code ACCESS_EXTERNAL_*} and consults the {@link EntityResolver} instead, so no {@code ACCESS_EXTERNAL_*} attributes are
+     *         needed here. A caller can chain its own resolver onto the floor to allow-list resources, but cannot remove it.</li>
+     * </ul>
+     *
+     * @param factory The factory to harden.
+     * @return A new hardened factory or the original factory, as-is, if it is a known Android factory.
+     * @throws HardeningException Thrown if a (non-Andoid) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
+     */
+    static DocumentBuilderFactory harden(final DocumentBuilderFactory factory) {
+        // Android exposes no FSP, ACCESS_EXTERNAL_* or attribute API, and KXmlParser drops user-defined entities; nothing to apply.
+        if (ANDROID_DOCUMENT_BUILDER_FACTORY.equals(factory.getClass().getName())) {
+            return factory;
+        }
+        // Required: enables the implementation's security manager, which carries the limits.
+        setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        // Required: the wrapper installs an ignore-all EntityResolver floor on every DocumentBuilder.
+        // That floor blocks external DTD, entity, schema and xi:include fetches in one place: no ACCESS_EXTERNAL_* attributes are needed here.
+        // Callers can chain their resolvers, but not override the floor.
+        return new Wrapper(factory);
+    }
+
     /**
      * Returns a new, hardened {@link DocumentBuilderFactory}.
      * <p>
@@ -57,17 +92,24 @@ public final class HardeningDocumentBuilderFactory {
      *                                   implementation is not available or cannot be instantiated.
      */
     public static DocumentBuilderFactory newInstance() {
-        return DocumentBuilderHardener.harden(DocumentBuilderFactory.newInstance());
+        return harden(DocumentBuilderFactory.newInstance());
     }
 
     /**
-     * Wraps a prepared delegate in the hardening wrapper; called by the hardener once the required settings are applied.
+     * Sets a feature on the given factory, throwing a {@link HardeningException} if the implementation does not recognize it.
      *
-     * @param delegate the delegate to wrap; must not be {@code null}.
-     * @return The hardened factory.
+     * @param factory The factory to harden.
+     * @param feature The feature to set.
+     * @param value   The value to set.
+     * @throws HardeningException   Thrown if this factory or the {@code XPath}s it creates cannot support this feature.
+     * @throws NullPointerException Thrown if the {@code feature} parameter is null.
      */
-    static DocumentBuilderFactory wrap(final DocumentBuilderFactory delegate) {
-        return new Wrapper(delegate);
+    private static void setFeature(final DocumentBuilderFactory factory, final String feature, final boolean value) {
+        try {
+            factory.setFeature(feature, value);
+        } catch (final ParserConfigurationException e) {
+            throw HardeningException.settingFailed("feature", feature, factory, e);
+        }
     }
 
     private HardeningDocumentBuilderFactory() {

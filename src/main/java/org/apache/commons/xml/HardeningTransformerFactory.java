@@ -57,6 +57,43 @@ import org.xml.sax.XMLReader;
 public final class HardeningTransformerFactory {
 
     /**
+     * Capability-driven hardening for any {@link TransformerFactory} on the classpath.
+     *
+     * <p>Rather than branching on the implementation class, this method probes what the factory supports and adapts:</p>
+     * <ul>
+     *     <li><strong>Saxon</strong> ({@code net.sf.saxon}): recognized by package prefix and handed to {@link SaxonProvider#configure(TransformerFactory)} for the
+     *         channels the standard JAXP knobs cannot close (reflection-based extension functions, the collection finder, the internal SAX parser). It is then
+     *         wrapped like every other implementation to install the {@link FallbackIgnoreURIResolver} floor; the only
+     *         difference is the empty-{@link Source} shape the floor returns, {@code EmptySource} for Saxon rather than the default empty DOM document.</li>
+     *     <li><strong>FSP</strong> ({@link XMLConstants#FEATURE_SECURE_PROCESSING}): required. On XSLTC it enables the runtime evaluator limits; on Xalan it disables
+     *         reflection-based extension functions.</li>
+     *     <li><strong>{@link FallbackIgnoreURIResolver} floor</strong>: required. An ignore-all {@link URIResolver} floor, installed by
+     *         the nested wrapper and carried onto every produced {@link Transformer}, resolves {@code xsl:import}/{@code xsl:include} at compile
+     *         time and {@code document()} at runtime to an empty document, the one channel both XSLTC and Xalan route through. A caller-set {@link URIResolver} is
+     *         routed through the floor rather than replacing it, so a caller can opt a specific URI in but cannot reopen the fetch.</li>
+     *     <li><strong>The nested wrapper</strong>: required. Both implementations fall back to {@code SAXParserFactory.newInstance()} to parse a
+     *         stylesheet or source document that does not carry its own reader, and only set FSP on it; wrapping the factory rewrites every {@link Source} through an
+     *         {@link org.apache.commons.xml}-hardened reader instead.</li>
+     * </ul>
+     *
+     * @param factory the factory to harden; never {@code null}.
+     * @return a hardened factory.
+     */
+    static TransformerFactory harden(final TransformerFactory factory) {
+        // Required: enables secure processing (XSLTC runtime limits; Xalan's extension-function block).
+        setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        if (SaxonProvider.isSaxon(factory.getClass())) {
+            // Saxon keeps its vendor Configuration for the channels JAXP cannot close,
+            // then goes through the same wrapper as every other implementation for the URIResolver floor;
+            // EmptySource is the empty-source shape Saxon's consumers expect.
+            return new Wrapper((SAXTransformerFactory) SaxonProvider.configure(factory), SaxonProvider.emptySourceSupplier());
+        }
+        // Required: source/stylesheet parsing provisions its own SAX reader otherwise; the wrapper routes every Source through a hardened one and installs the
+        // ignore-all URIResolver floor (blocking xsl:import/include at compile time and document() at runtime) that a caller-set resolver cannot remove.
+        return new Wrapper((SAXTransformerFactory) factory);
+    }
+
+    /**
      * Returns a new, hardened {@link TransformerFactory}.
      * <p>
      * Beyond the three universal guarantees on {@link org.apache.commons.xml}: {@code xsl:import}, {@code xsl:include} and {@code document()} URIs are not resolved.
@@ -80,28 +117,15 @@ public final class HardeningTransformerFactory {
      * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
      */
     public static TransformerFactory newInstance() {
-        return TransformerHardener.harden(TransformerFactory.newInstance());
+        return harden(TransformerFactory.newInstance());
     }
 
-    /**
-     * Wraps a prepared delegate in the hardening wrapper; called by the hardener once the required settings are applied.
-     *
-     * @param delegate the delegate to wrap; must not be {@code null}.
-     * @return The hardened factory.
-     */
-    static TransformerFactory wrap(final SAXTransformerFactory delegate) {
-        return new Wrapper(delegate);
-    }
-
-    /**
-     * Wraps a prepared delegate in the hardening wrapper; called by the hardener once the required settings are applied.
-     *
-     * @param delegate    the delegate to wrap; must not be {@code null}.
-     * @param emptySource supplies the empty document a denied fetch resolves to; may be {@code null} for the default empty DOM document.
-     * @return The hardened factory.
-     */
-    static TransformerFactory wrap(final SAXTransformerFactory delegate, final Supplier<Source> emptySource) {
-        return new Wrapper(delegate, emptySource);
+    private static void setFeature(final TransformerFactory factory, final String feature, final boolean value) {
+        try {
+            factory.setFeature(feature, value);
+        } catch (final Exception e) {
+            throw HardeningException.settingFailed("feature", feature, factory, e);
+        }
     }
 
     private HardeningTransformerFactory() {
@@ -109,7 +133,7 @@ public final class HardeningTransformerFactory {
     }
 
     /**
-     * {@link javax.xml.transform.TransformerFactory} wrapper that rewrites every Source-taking entry point through {@link SAXParserHardener#hardenSource(Source)} before
+     * {@link TransformerFactory} wrapper that rewrites every Source-taking entry point through {@link HardeningSAXParserFactory#harden(Source)} before
      * delegating.
      *
      * <p>Used by providers whose underlying TrAX implementation pulls a new {@code SAXParserFactory.newInstance()} for any Source that is not already a
@@ -144,10 +168,10 @@ public final class HardeningTransformerFactory {
         /**
          * Parses a reader-less source into a DOM through a hardened, namespace-aware {@link javax.xml.parsers.DocumentBuilder} and returns a {@link DOMSource}
          * carrying its system id, so the consumer walks the tree instead of provisioning its own reader. Any other source is left to
-         * {@link SAXParserHardener#hardenSource(Source)}.
+         * {@link HardeningSAXParserFactory#harden(Source)}.
          *
          * @param source The source to scan for an associated stylesheet.
-         * @return A {@link DOMSource} for a reader-less source, otherwise the result of {@link SAXParserHardener#hardenSource(Source)}.
+         * @return A {@link DOMSource} for a reader-less source, otherwise the result of {@link HardeningSAXParserFactory#harden(Source)}.
          * @throws TransformerConfigurationException if the source cannot be parsed.
          * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
          *                                   configuration error} or if the implementation is not available or cannot be instantiated.
@@ -158,7 +182,7 @@ public final class HardeningTransformerFactory {
                 final InputSource inputSource = SAXSource.sourceToInputSource(source);
                 if (inputSource != null) {
                     try {
-                        final DocumentBuilderFactory factory = DocumentBuilderHardener.harden(DocumentBuilderFactory.newInstance());
+                        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.harden(DocumentBuilderFactory.newInstance());
                         factory.setNamespaceAware(true);
                         final Document document = factory.newDocumentBuilder().parse(inputSource);
                         return new DOMSource(document, inputSource.getSystemId());
@@ -167,7 +191,7 @@ public final class HardeningTransformerFactory {
                     }
                 }
             }
-            return SAXParserHardener.hardenSource(source);
+            return HardeningSAXParserFactory.harden(source);
         }
 
         /**
@@ -229,7 +253,7 @@ public final class HardeningTransformerFactory {
         public Source getAssociatedStylesheet(final Source source, final String media, final String title, final String charset)
                 throws TransformerConfigurationException {
             // Xalan's getAssociatedStylesheet drops a SAXSource's reader and self-provisions its own to scan for xml-stylesheet PIs (XALANJ-2849).
-            final Source hardened = isXalan(delegate) ? hardenSourceToDom(source) : SAXParserHardener.hardenSource(source);
+            final Source hardened = isXalan(delegate) ? hardenSourceToDom(source) : HardeningSAXParserFactory.harden(source);
             return delegate.getAssociatedStylesheet(hardened, media, title, charset);
         }
 
@@ -265,7 +289,7 @@ public final class HardeningTransformerFactory {
          */
         @Override
         public Templates newTemplates(final Source source) throws TransformerConfigurationException {
-            final Templates templates = delegate.newTemplates(SAXParserHardener.hardenSource(source));
+            final Templates templates = delegate.newTemplates(HardeningSAXParserFactory.harden(source));
             return templates == null ? null : new HardeningTemplates(templates, getURIResolver(), emptySource);
         }
 
@@ -290,7 +314,7 @@ public final class HardeningTransformerFactory {
          */
         @Override
         public Transformer newTransformer(final Source source) throws TransformerConfigurationException {
-            final Transformer transformer = delegate.newTransformer(SAXParserHardener.hardenSource(source));
+            final Transformer transformer = delegate.newTransformer(HardeningSAXParserFactory.harden(source));
             return transformer == null ? null : new HardeningTransformer(transformer, getURIResolver(), emptySource);
         }
 
@@ -307,7 +331,7 @@ public final class HardeningTransformerFactory {
          */
         @Override
         public TransformerHandler newTransformerHandler(final Source source) throws TransformerConfigurationException {
-            return hardenHandler(delegate.newTransformerHandler(SAXParserHardener.hardenSource(source)));
+            return hardenHandler(delegate.newTransformerHandler(HardeningSAXParserFactory.harden(source)));
         }
 
         @Override

@@ -91,7 +91,7 @@ import org.xml.sax.helpers.XMLFilterImpl;
 final class AttackTestSupport {
 
     /**
-     * Test-only permissive counterpart of {@code SAXParserHardener.HardeningExpatXMLReader}: a pass-through Expat wrapper that rejects the
+     * Test-only permissive counterpart of {@code HardeningSAXParserFactory.HardeningExpatXMLReader}: a pass-through Expat wrapper that rejects the
      * {@code namespace-prefixes} feature eagerly (so a probing TrAX identity transformer falls back instead of failing the whole parse) but installs no ignore-all
      * resolver floor, so the unconfigured/positive controls stay permissive.
      */
@@ -691,7 +691,7 @@ final class AttackTestSupport {
     /**
      * Asserts a hardened-in-place XMLReader parse of the payload throws.
      *
-     * <p>{@link XMLReader#parse(InputSource)} on a raw reader hardened via {@link SAXParserHardener#hardenReader(XMLReader)}; only a thrown exception passes.</p>
+     * <p>{@link XMLReader#parse(InputSource)} on a raw reader hardened via {@link HardeningSAXParserFactory#harden(XMLReader)}; only a thrown exception passes.</p>
      */
     static void assertXmlReaderBlocks(final String payload) {
         assertParseFails(() -> consumeXmlReader(rawHardenedReader(), payload), "XMLReader", SAXException.class);
@@ -707,7 +707,7 @@ final class AttackTestSupport {
     /**
      * Asserts a hardened-in-place XMLReader parse completes without throwing and without leaked content.
      *
-     * <p>{@link XMLReader#parse(InputSource)} on a raw reader hardened via {@link SAXParserHardener#hardenReader(XMLReader)}; use this when the hardening contract
+     * <p>{@link XMLReader#parse(InputSource)} on a raw reader hardened via {@link HardeningSAXParserFactory#harden(XMLReader)}; use this when the hardening contract
      * guarantees the parse succeeds but never resolves the external resource.</p>
      */
     static void assertXmlReaderDoesNotLeak(final String payload) {
@@ -717,7 +717,7 @@ final class AttackTestSupport {
     /**
      * Asserts a hardened-in-place XMLReader parse succeeds.
      *
-     * <p>{@link XMLReader#parse(InputSource)} on a raw reader hardened via {@link SAXParserHardener#hardenReader(XMLReader)}; positive control for DOCTYPE-only
+     * <p>{@link XMLReader#parse(InputSource)} on a raw reader hardened via {@link HardeningSAXParserFactory#harden(XMLReader)}; positive control for DOCTYPE-only
      * payloads.</p>
      */
     static void assertXmlReaderParses(final String payload) {
@@ -926,13 +926,13 @@ final class AttackTestSupport {
         }
     }
 
-    /** Builds a raw {@link XMLReader} from a deliberately permissive {@link SAXParserFactory} and hardens it via {@link SAXParserHardener#hardenReader(XMLReader)}. */
+    /** Builds a raw {@link XMLReader} from a deliberately permissive {@link SAXParserFactory} and hardens it via {@link HardeningSAXParserFactory#harden(XMLReader)}. */
     private static XMLReader rawHardenedReader() throws Exception {
         final SAXParserFactory factory = SAXParserFactory.newInstance();
         if (!IS_ANDROID) {
             factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
         }
-        return SAXParserHardener.hardenReader(factory.newSAXParser().getXMLReader());
+        return HardeningSAXParserFactory.harden(factory.newSAXParser().getXMLReader());
     }
 
     /** Opens the named test resource as a {@link StreamSource} preserving its system id, so relative includes/imports/redefines resolve normally. */
