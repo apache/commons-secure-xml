@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.util.Objects;
 
+import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.stream.EventFilter;
 import javax.xml.stream.StreamFilter;
 import javax.xml.stream.XMLEventReader;
@@ -49,14 +50,30 @@ import javax.xml.transform.Source;
  * wrapped in a new floor. This matters because Woodstox does not chain resolvers: when a resolver returns {@code null}, {@code DefaultInputResolver} falls
  * through to fetching the systemId URL itself, so a caller-set resolver that returns {@code null} must still land behind the floor. {@link #getXMLResolver()} and
  * {@code getProperty} report the caller's resolver unwrapped.</p>
+ *
+ * @see org.apache.commons.xml
  */
-final class HardeningXMLInputFactory extends XMLInputFactory {
+public final class HardeningXMLInputFactory extends XMLInputFactory {
 
     private static boolean isResolverProperty(final String name) {
         return XMLInputFactory.RESOLVER.equals(name)
                 || StaxHardener.WSTX_DTD_RESOLVER.equals(name)
                 || StaxHardener.WSTX_ENTITY_RESOLVER.equals(name)
                 || StaxHardener.WSTX_UNDECLARED_ENTITY_RESOLVER.equals(name);
+    }
+
+    /**
+     * Returns a new, hardened {@link XMLInputFactory}.
+     * <p>
+     * The three universal guarantees on {@link org.apache.commons.xml} apply; StAX exposes no additional vectors beyond them.
+     * </p>
+     *
+     * @return A hardened factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if an instance of this factory cannot be loaded.
+     */
+    public static XMLInputFactory newInstance() {
+        return StaxHardener.harden(XMLInputFactory.newInstance());
     }
 
     private static XMLResolver unwrap(final XMLResolver resolver) {
@@ -151,11 +168,11 @@ final class HardeningXMLInputFactory extends XMLInputFactory {
         return delegate.createXMLStreamReader(systemId, reader);
     }
 
+
     @Override
     public XMLEventAllocator getEventAllocator() {
         return delegate.getEventAllocator();
     }
-
 
     @Override
     public Object getProperty(final String name) {

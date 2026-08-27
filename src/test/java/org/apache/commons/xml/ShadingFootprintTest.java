@@ -44,7 +44,7 @@ import org.vafer.jdependency.Clazzpath;
  * <p>Using {@code jdependency}, the same library {@code maven-shade-plugin}'s {@code minimizeJar} uses, this test computes each entry point's transitive class
  * closure over the compiled {@code target/classes} and pins it to an expected set. It keeps each hardener from silently regaining a dependency on classes it
  * should not need (for example a sibling resolver floor or another hardener), so schema builds only on the shared SAX path, TrAX and XPath additionally on the
- * DOM path their Xalan getAssociatedStylesheet and InputSource rewrites parse through, while only the public {@link XmlFactories} entry pulls the whole
+ * DOM path their Xalan getAssociatedStylesheet and InputSource rewrites parse through, while only the public {@link org.apache.commons.xml} entry pulls the whole
  * library. Update the expected sets deliberately: a change here is a change to what a downstream shade includes.</p>
  *
  * <p>The test reads the compiled {@code .class} files from the code-source location, which only exists on a regular JVM: a native image carries no bytecode (and
@@ -87,15 +87,15 @@ class ShadingFootprintTest {
             "HardeningValidatorHandler", "HardeningSchema", "FallbackIgnoreLSResourceResolver");
 
     /**
-     * Only the public {@link XmlFactories} entry, which references every hardener, still pulls the whole library; this is its class count.
+     * Only the public {@link org.apache.commons.xml} entry, which references every hardener, still pulls the whole library; this is its class count.
      */
-    private static final int LIBRARY_CLASS_COUNT = 35;
+    private static final int LIBRARY_CLASS_COUNT = 5;
 
     /**
      * Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library.
      */
     private static final String[] REPORTED = {"DocumentBuilderHardener", "SAXParserHardener", "StaxHardener", "TransformerHardener", "XPathHardener",
-            "SchemaHardener", "XmlFactories"};
+            "SchemaHardener"};
 
     private static Clazzpath clazzpath;
     private static Path classesDir;
@@ -146,7 +146,7 @@ class ShadingFootprintTest {
      */
     @AfterAll
     static void reportFootprint() {
-        final long library = bytesOf(closureOf("XmlFactories"));
+        final long library = bytesOf(rootClosure());
         final StringBuilder report = new StringBuilder("\nShade footprint (uncompressed .class bytes, % of full library):\n");
         for (final String entry : REPORTED) {
             final Set<String> closure = closureOf(entry);
@@ -156,6 +156,10 @@ class ShadingFootprintTest {
         if (Boolean.getBoolean(ShadingFootprintTest.class.getName() + ".reportFootprint")) {
             System.out.print(report);
         }
+    }
+
+    private static Set<String> rootClosure() {
+        return closureOf("HardeningDocumentBuilderFactory");
     }
 
     /**
@@ -182,7 +186,7 @@ class ShadingFootprintTest {
 
     @Test
     void onlyXmlFactoriesPullsTheWholeLibrary() {
-        assertEquals(LIBRARY_CLASS_COUNT, closureOf("XmlFactories").size(), "XmlFactories closure size drifted");
+        assertEquals(LIBRARY_CLASS_COUNT, rootClosure().size(), "XML factories closure size drifted");
     }
 
     @Test

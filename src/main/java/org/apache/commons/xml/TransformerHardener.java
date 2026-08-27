@@ -41,7 +41,7 @@ import javax.xml.transform.sax.SAXTransformerFactory;
  *         routed through the floor rather than replacing it, so a caller can opt a specific URI in but cannot reopen the fetch.</li>
  *     <li><strong>{@link HardeningTransformerFactory}</strong>: required. Both implementations fall back to {@code SAXParserFactory.newInstance()} to parse a
  *         stylesheet or source document that does not carry its own reader, and only set FSP on it; wrapping the factory rewrites every {@link Source} through an
- *         {@link XmlFactories}-hardened reader instead.</li>
+ *         {@link org.apache.commons.xml}-hardened reader instead.</li>
  * </ul>
  */
 final class TransformerHardener {

@@ -24,6 +24,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.SchemaFactoryConfigurationError;
 import javax.xml.validation.Validator;
 
 import org.w3c.dom.ls.LSResourceResolver;
@@ -34,7 +35,7 @@ import org.xml.sax.SAXNotSupportedException;
 
 /**
  * Capability-driven hardening wrapper for any {@link SchemaFactory} on the classpath, the same recipe for every implementation. It is the entry point reached
- * by {@link XmlFactories#newSchemaFactory(String)}; there is no per-implementation branching, no {@code FEATURE_SECURE_PROCESSING} and no limit configuration on the
+ * by {@link HardeningSchemaFactory#newInstance(String)}; there is no per-implementation branching, no {@code FEATURE_SECURE_PROCESSING} and no limit configuration on the
  * factory itself.
  *
  * <p>Three layers cooperate:</p>
@@ -47,14 +48,18 @@ import org.xml.sax.SAXNotSupportedException;
  *   <li>{@link HardeningValidator} rewrites the Source on every {@link Validator#validate(Source)} call.</li>
  * </ol>
  *
- * <p>The hardened reader supplied by {@link SAXParserHardener#hardenSource(Source)} already carries {@code FEATURE_SECURE_PROCESSING} and the processing limits, so a
+ * <p>
+ * The hardened reader supplied by {@link SAXParserHardener#hardenSource(Source)} already carries {@code FEATURE_SECURE_PROCESSING} and the processing limits, so a
  * DOCTYPE, external entity or Billion Laughs payload in the schema or instance document is bounded there rather than on this factory. The JAXP 1.5
  * {@code ACCESS_EXTERNAL_*} properties are deliberately not set: the resolver floor already blocks the same fetches on every implementation, and the JDK 8
  * {@code SchemaFactory} has a bug whereby those properties keep blocking even when a caller's own resolver would grant the access. The floor is a non-removable
  * lower bound: a caller-set {@link LSResourceResolver} is routed through it (opting a specific lookup in by returning a non-{@code null} result) rather than
- * replacing it, so hardening cannot be dropped by swapping the resolver.</p>
+ * replacing it, so hardening cannot be dropped by swapping the resolver.
+ * </p>
+ *
+ * @see org.apache.commons.xml
  */
-final class HardeningSchemaFactory extends SchemaFactory {
+public final class HardeningSchemaFactory extends SchemaFactory {
 
     /**
      * Hardens every schema source through {@link SAXParserHardener#hardenSource(Source)}.
@@ -75,6 +80,30 @@ final class HardeningSchemaFactory extends SchemaFactory {
             throw new SAXException("Failed to harden schema source", e);
         }
         return hardened;
+    }
+
+    /**
+     * Returns a new, hardened {@link SchemaFactory} for the given schema language.
+     * <p>
+     * Beyond the three universal guarantees on {@link org.apache.commons.xml}:
+     * </p>
+     * <ul>
+     * <li>{@code xs:import}, {@code xs:include} and {@code xs:redefine} schemaLocation URIs are not resolved during schema compilation, and</li>
+     * <li>{@code xsi:schemaLocation} / {@code xsi:noNamespaceSchemaLocation} hints in instance documents are not resolved during validation.</li>
+     * </ul>
+     * <p>
+     * The same guarantees apply to {@link javax.xml.validation.Validator} and {@link javax.xml.validation.ValidatorHandler} instances produced from the
+     * resulting {@link javax.xml.validation.Schema}.
+     * </p>
+     *
+     * @param schemaLanguage The schema language, as accepted by {@link SchemaFactory#newInstance(String)}.
+     * @return A hardened factory.
+     * @throws IllegalArgumentException        Thrown if no implementation of the schema language is available.
+     * @throws NullPointerException            Thrown if {@code schemaLanguage} is {@code null}.
+     * @throws SchemaFactoryConfigurationError Thrown if a configuration error is encountered.
+     */
+    public static SchemaFactory newInstance(final String schemaLanguage) {
+        return new HardeningSchemaFactory(SchemaFactory.newInstance(schemaLanguage));
     }
 
     private final SchemaFactory delegate;
@@ -144,11 +173,11 @@ final class HardeningSchemaFactory extends SchemaFactory {
         delegate.setFeature(name, value);
     }
 
+
     @Override
     public void setProperty(final String name, final Object object) throws SAXNotRecognizedException, SAXNotSupportedException {
         delegate.setProperty(name, object);
     }
-
 
     @Override
     public void setResourceResolver(final LSResourceResolver resourceResolver) {

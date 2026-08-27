@@ -149,7 +149,7 @@ limitations under the License.
         <artifactId>maven-surefire-plugin</artifactId>
         <!--
           Make the underlying JAXP factories as permissive as the JDK allows. Hardened factories produced by
-          XmlFactories should still block every attack the test suite throws at them; if a test passes only
+          org.apache.commons.xml should still block every attack the test suite throws at them; if a test passes only
           because the JDK's defaults intervened, we want it to fail here so the gap shows up.
 
           Inherited by every execution defined below.

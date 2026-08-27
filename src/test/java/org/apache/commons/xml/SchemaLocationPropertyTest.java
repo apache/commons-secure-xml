@@ -82,7 +82,7 @@ class SchemaLocationPropertyTest {
 
     private static DocumentBuilder hardenedValidatingDom(final String property, final String value) {
         return configureOrSkip(() -> {
-            final DocumentBuilderFactory factory = XmlFactories.newDocumentBuilderFactory();
+            final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
             factory.setValidating(true);
             factory.setAttribute(SCHEMA_LANGUAGE, XMLConstants.W3C_XML_SCHEMA_NS_URI);
@@ -93,7 +93,7 @@ class SchemaLocationPropertyTest {
 
     private static XMLReader hardenedValidatingSax(final String property, final String value) {
         return configureOrSkip(() -> {
-            final SAXParserFactory factory = XmlFactories.newSAXParserFactory();
+            final SAXParserFactory factory = HardeningSAXParserFactory.newInstance();
             factory.setNamespaceAware(true);
             factory.setValidating(true);
             final SAXParser parser = factory.newSAXParser();

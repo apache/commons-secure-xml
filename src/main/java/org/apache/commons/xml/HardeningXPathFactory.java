@@ -31,8 +31,10 @@ import javax.xml.xpath.XPathVariableResolver;
  * <p>Required because {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING} on the factory governs only the XPath engine: the stock JDK and Apache Xalan
  * implement the {@link org.xml.sax.InputSource}-taking {@code evaluate} entry points by provisioning an internal document parser the feature does not reach.
  * The wrapper performs that document build itself through a hardened parser instead; see {@link HardeningXPath}.</p>
+ *
+ * @see org.apache.commons.xml
  */
-final class HardeningXPathFactory extends XPathFactory {
+public final class HardeningXPathFactory extends XPathFactory {
 
     private final XPathFactory delegate;
 
@@ -75,5 +77,24 @@ final class HardeningXPathFactory extends XPathFactory {
     @Override
     public void setXPathVariableResolver(final XPathVariableResolver resolver) {
         delegate.setXPathVariableResolver(resolver);
+    }
+
+    /**
+     * Returns a new, hardened {@link XPathFactory} for the default XPath object model.
+     * <p>
+     * Beyond the three universal guarantees on {@link org.apache.commons.xml}, URI-fetching XPath 3.1+ functions ({@code doc()}, {@code collection()},
+     * {@code unparsed-text()}) are not resolved.
+     * </p>
+     * <p>
+     * The guarantees also cover the document parse behind {@code XPath.evaluate(String, InputSource)} and {@code XPathExpression.evaluate(InputSource)}: the
+     * input document is built through a hardened, namespace-aware {@link javax.xml.parsers.DocumentBuilder} instead of the engine's internal parser.
+     * </p>
+     *
+     * @return A hardened factory.
+     * @throws IllegalStateException Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws RuntimeException      Thrown if there is a failure in creating an {@link XPathFactory} for the default object model.
+     */
+    public static XPathFactory newXPathFactory() {
+        return XPathHardener.harden(XPathFactory.newInstance());
     }
 }

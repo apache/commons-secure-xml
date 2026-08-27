@@ -19,8 +19,10 @@ package org.apache.commons.xml;
 
 import java.util.Objects;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.validation.Schema;
 
@@ -28,12 +30,36 @@ import org.xml.sax.EntityResolver;
 
 /**
  * {@link DocumentBuilderFactory} wrapper that keeps an ignore-all {@link EntityResolver} floor on every {@link DocumentBuilder} produced.
- *
- * <p>Wraps each produced builder in a {@link HardeningDocumentBuilder}; required when the underlying factory carries no resolver of its own and does not honor
+ * <p>
+ * Wraps each produced builder in a {@link HardeningDocumentBuilder}; required when the underlying factory carries no resolver of its own and does not honor
  * JAXP 1.5 {@code ACCESS_EXTERNAL_*} (e.g. the external Xerces distribution). A caller-set resolver is routed through the floor rather than replacing it. Kept
- * as a standalone wrapper so any hardener can reuse the floor.</p>
+ * as a standalone wrapper so any hardener can reuse the floor.
+ * </p>
+ *
+ * @see org.apache.commons.xml
  */
-final class HardeningDocumentBuilderFactory extends DocumentBuilderFactory {
+public final class HardeningDocumentBuilderFactory extends DocumentBuilderFactory {
+
+    /**
+     * Returns a new, hardened {@link DocumentBuilderFactory}.
+     * <p>
+     * Beyond the three universal guarantees on {@link org.apache.commons.xml}, XInclude resolution is denied by default. When
+     * {@link DocumentBuilderFactory#setXIncludeAware(boolean) setXIncludeAware(true)} is called on the returned factory, the parser will process
+     * {@code xi:include} elements but every external resource lookup is rejected. To permit specific trusted resources, install an
+     * {@link org.xml.sax.EntityResolver EntityResolver} on the {@link DocumentBuilder} that allow-lists them; any href the resolver does not explicitly allow
+     * stays blocked.
+     * </p>
+     *
+     * @return A hardened factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException     Thrown if a (non-Andoid) factory cannot support the secure processing feature
+     *                                   {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
+     *                                   implementation is not available or cannot be instantiated.
+     */
+    public static DocumentBuilderFactory newInstance() {
+        return DocumentBuilderHardener.harden(DocumentBuilderFactory.newInstance());
+    }
 
     private final DocumentBuilderFactory delegate;
 
