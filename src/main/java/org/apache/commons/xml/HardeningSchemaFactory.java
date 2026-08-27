@@ -36,6 +36,17 @@ import org.xml.sax.SAXNotSupportedException;
 /**
  * Creates new, hardened {@link SchemaFactory} instances.
  * <p>
+ * Beyond the three universal guarantees on {@link org.apache.commons.xml}:
+ * </p>
+ * <ul>
+ * <li>{@code xs:import}, {@code xs:include} and {@code xs:redefine} schemaLocation URIs are not resolved during schema compilation, and</li>
+ * <li>{@code xsi:schemaLocation} / {@code xsi:noNamespaceSchemaLocation} hints in instance documents are not resolved during validation.</li>
+ * </ul>
+ * <p>
+ * The same guarantees apply to {@link javax.xml.validation.Validator} and {@link javax.xml.validation.ValidatorHandler} instances produced from the
+ * resulting {@link javax.xml.validation.Schema}.
+ * </p>
+ * <p>
  * Not a {@link SchemaFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-hardened factory through this class
  * by calling an inherited method such as {@code newDefaultInstance()}. The hardened factories are instances of a nested, non-public wrapper class.
  * </p>
@@ -61,17 +72,6 @@ public final class HardeningSchemaFactory {
 
     /**
      * Returns a new, hardened {@link SchemaFactory} for the given schema language.
-     * <p>
-     * Beyond the three universal guarantees on {@link org.apache.commons.xml}:
-     * </p>
-     * <ul>
-     * <li>{@code xs:import}, {@code xs:include} and {@code xs:redefine} schemaLocation URIs are not resolved during schema compilation, and</li>
-     * <li>{@code xsi:schemaLocation} / {@code xsi:noNamespaceSchemaLocation} hints in instance documents are not resolved during validation.</li>
-     * </ul>
-     * <p>
-     * The same guarantees apply to {@link javax.xml.validation.Validator} and {@link javax.xml.validation.ValidatorHandler} instances produced from the
-     * resulting {@link javax.xml.validation.Schema}.
-     * </p>
      *
      * @param schemaLanguage The schema language, as accepted by {@link SchemaFactory#newInstance(String)}.
      * @return A hardened factory.
@@ -81,6 +81,21 @@ public final class HardeningSchemaFactory {
      */
     public static SchemaFactory newInstance(final String schemaLanguage) {
         return harden(SchemaFactory.newInstance(schemaLanguage));
+    }
+
+    /**
+     * Returns a new, hardened {@link SchemaFactory} of the given implementation class.
+     *
+     * @param schemaLanguage   The schema language, as accepted by {@link SchemaFactory#newInstance(String)}.
+     * @param factoryClassName The fully qualified class name of the {@link SchemaFactory} implementation.
+     * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
+     * @return A hardened factory.
+     * @throws IllegalArgumentException Thrown if {@code factoryClassName} is {@code null}, or if the factory class cannot be loaded or instantiated, or does
+     *                                  not support {@code schemaLanguage}.
+     * @throws NullPointerException     Thrown if {@code schemaLanguage} is {@code null}.
+     */
+    public static SchemaFactory newInstance(final String schemaLanguage, final String factoryClassName, final ClassLoader classLoader) {
+        return harden(SchemaFactory.newInstance(schemaLanguage, factoryClassName, classLoader));
     }
 
     private HardeningSchemaFactory() {

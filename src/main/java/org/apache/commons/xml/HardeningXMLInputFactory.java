@@ -36,6 +36,9 @@ import javax.xml.transform.Source;
 /**
  * Creates new, hardened {@link XMLInputFactory} instances.
  * <p>
+ * The three universal guarantees on {@link org.apache.commons.xml} apply; StAX exposes no additional vectors beyond them.
+ * </p>
+ * <p>
  * Not a {@link XMLInputFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-hardened factory through this class
  * by calling an inherited method such as {@code newDefaultFactory()}. The hardened factories are instances of a nested, non-public wrapper class.
  * </p>
@@ -67,10 +70,33 @@ public final class HardeningXMLInputFactory {
     }
 
     /**
+     * Returns a new, hardened {@link XMLInputFactory}, as by {@link XMLInputFactory#newFactory()}.
+     *
+     * @return A hardened factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if an instance of this factory cannot be loaded.
+     */
+    public static XMLInputFactory newFactory() {
+        // XMLInputFactory.newInstance, not newFactory: the same specified lookup, but Android's StAX API predates newFactory.
+        return harden(XMLInputFactory.newInstance());
+    }
+
+    /**
+     * Returns a new, hardened {@link XMLInputFactory} resolved from the given factory id.
+     *
+     * @param factoryId   The name of the factory to find; a system property or service id to look up, not the class name of the implementation.
+     * @param classLoader The class loader used in the lookup; {@code null} means the current thread's context class loader.
+     * @return A hardened factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown in case of a service configuration error or if the implementation is not available or cannot be instantiated.
+     * @throws NullPointerException      Thrown if {@code factoryId} is {@code null}.
+     */
+    public static XMLInputFactory newFactory(final String factoryId, final ClassLoader classLoader) {
+        return harden(XMLInputFactory.newFactory(factoryId, classLoader));
+    }
+
+    /**
      * Returns a new, hardened {@link XMLInputFactory}.
-     * <p>
-     * The three universal guarantees on {@link org.apache.commons.xml} apply; StAX exposes no additional vectors beyond them.
-     * </p>
      *
      * @return A hardened factory.
      * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.

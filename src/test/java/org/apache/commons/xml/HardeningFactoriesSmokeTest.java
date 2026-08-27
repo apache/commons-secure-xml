@@ -21,12 +21,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.StringReader;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.transform.TransformerFactory;
@@ -130,5 +132,68 @@ class HardeningFactoriesSmokeTest {
         final XPathFactory b = HardeningXPathFactory.newInstance();
         assertNotSame(a, b);
         assertTrue(a.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    // The explicit-class-name tests discover the runtime default implementation through the raw JAXP factory,
+    // so they stay portable across the JAXP implementations of the surefire matrix.
+    @Test
+    void explicitClassNameDocumentBuilderFactoryIsHardened() throws Exception {
+        final Class<?> impl = DocumentBuilderFactory.newInstance().getClass();
+        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newInstance(impl.getName(), impl.getClassLoader());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void explicitClassNameSAXParserFactoryIsHardened() throws Exception {
+        final Class<?> impl = SAXParserFactory.newInstance().getClass();
+        final SAXParserFactory factory = HardeningSAXParserFactory.newInstance(impl.getName(), impl.getClassLoader());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void explicitClassNameSchemaFactoryIsHardened() throws Exception {
+        final Class<?> impl = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).getClass();
+        final SchemaFactory factory = HardeningSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI, impl.getName(), impl.getClassLoader());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void explicitClassNameTransformerFactoryIsHardened() {
+        final Class<?> impl = TransformerFactory.newInstance().getClass();
+        final TransformerFactory factory = HardeningTransformerFactory.newInstance(impl.getName(), impl.getClassLoader());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void explicitClassNameXPathFactoryIsHardened() throws Exception {
+        final Class<?> impl = XPathFactory.newInstance().getClass();
+        final XPathFactory factory = HardeningXPathFactory.newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI, impl.getName(), impl.getClassLoader());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void newFactoryReturnsFreshInstance() {
+        final XMLInputFactory a = HardeningXMLInputFactory.newFactory();
+        final XMLInputFactory b = HardeningXMLInputFactory.newFactory();
+        assertNotSame(a, b);
+        assertEquals(Boolean.TRUE, a.getProperty(XMLInputFactory.SUPPORT_DTD));
+    }
+
+    @Test
+    void factoryIdXMLInputFactoryIsHardened() {
+        final String factoryId = "org.apache.commons.xml.test.staxFactory";
+        // XMLInputFactory.newInstance, not newFactory: Android's StAX API predates newFactory, and this file also compiles against android.jar.
+        System.setProperty(factoryId, XMLInputFactory.newInstance().getClass().getName());
+        try {
+            final XMLInputFactory factory = HardeningXMLInputFactory.newFactory(factoryId, getClass().getClassLoader());
+            assertEquals(Boolean.TRUE, factory.getProperty(XMLInputFactory.SUPPORT_DTD));
+        } finally {
+            System.clearProperty(factoryId);
+        }
+    }
+
+    @Test
+    void unknownFactoryClassNameThrows() {
+        assertThrows(FactoryConfigurationError.class, () -> HardeningDocumentBuilderFactory.newInstance("no.such.FactoryClass", null));
     }
 }

@@ -31,6 +31,13 @@ import org.xml.sax.EntityResolver;
 /**
  * Creates new, hardened {@link DocumentBuilderFactory} instances.
  * <p>
+ * Beyond the three universal guarantees on {@link org.apache.commons.xml}, XInclude resolution is denied by default. When
+ * {@link DocumentBuilderFactory#setXIncludeAware(boolean) setXIncludeAware(true)} is called on the returned factory, the parser will process
+ * {@code xi:include} elements but every external resource lookup is rejected. To permit specific trusted resources, install an
+ * {@link org.xml.sax.EntityResolver EntityResolver} on the {@link DocumentBuilder} that allow-lists them; any href the resolver does not explicitly allow
+ * stays blocked.
+ * </p>
+ * <p>
  * Not a {@link DocumentBuilderFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-hardened factory through this class
  * by calling an inherited method such as {@code newDefaultInstance()}. The hardened factories are instances of a nested, non-public wrapper class.
  * </p>
@@ -76,13 +83,6 @@ public final class HardeningDocumentBuilderFactory {
 
     /**
      * Returns a new, hardened {@link DocumentBuilderFactory}.
-     * <p>
-     * Beyond the three universal guarantees on {@link org.apache.commons.xml}, XInclude resolution is denied by default. When
-     * {@link DocumentBuilderFactory#setXIncludeAware(boolean) setXIncludeAware(true)} is called on the returned factory, the parser will process
-     * {@code xi:include} elements but every external resource lookup is rejected. To permit specific trusted resources, install an
-     * {@link org.xml.sax.EntityResolver EntityResolver} on the {@link DocumentBuilder} that allow-lists them; any href the resolver does not explicitly allow
-     * stays blocked.
-     * </p>
      *
      * @return A hardened factory.
      * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
@@ -93,6 +93,21 @@ public final class HardeningDocumentBuilderFactory {
      */
     public static DocumentBuilderFactory newInstance() {
         return harden(DocumentBuilderFactory.newInstance());
+    }
+
+    /**
+     * Returns a new, hardened {@link DocumentBuilderFactory} of the given implementation class.
+     *
+     * @param factoryClassName The fully qualified class name of the {@link DocumentBuilderFactory} implementation.
+     * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
+     * @return A hardened factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException     Thrown if a (non-Andoid) factory cannot support the secure processing feature
+     *                                   {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
+     * @throws FactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
+     */
+    public static DocumentBuilderFactory newInstance(final String factoryClassName, final ClassLoader classLoader) {
+        return harden(DocumentBuilderFactory.newInstance(factoryClassName, classLoader));
     }
 
     /**

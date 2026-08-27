@@ -40,6 +40,12 @@ import org.xml.sax.XMLReader;
 /**
  * Creates new, hardened {@link SAXParserFactory} instances.
  * <p>
+ * Beyond the three universal guarantees on {@link org.apache.commons.xml}, XInclude resolution is denied by default. When
+ * {@link SAXParserFactory#setXIncludeAware(boolean) setXIncludeAware(true)} is called on the returned factory, the parser will process {@code xi:include}
+ * elements but every external resource lookup is rejected. To permit specific trusted resources, install an {@link org.xml.sax.EntityResolver
+ * EntityResolver} on the {@link org.xml.sax.XMLReader} that allow-lists them; any href the resolver does not explicitly allow stays blocked.
+ * </p>
+ * <p>
  * Not a {@link SAXParserFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-hardened factory through this class
  * by calling an inherited method such as {@code newDefaultInstance()}. The hardened factories are instances of a nested, non-public wrapper class.
  * </p>
@@ -152,12 +158,6 @@ public final class HardeningSAXParserFactory {
 
     /**
      * Returns a new, hardened {@link SAXParserFactory}.
-     * <p>
-     * Beyond the three universal guarantees on {@link org.apache.commons.xml}, XInclude resolution is denied by default. When
-     * {@link SAXParserFactory#setXIncludeAware(boolean) setXIncludeAware(true)} is called on the returned factory, the parser will process {@code xi:include}
-     * elements but every external resource lookup is rejected. To permit specific trusted resources, install an {@link org.xml.sax.EntityResolver
-     * EntityResolver} on the {@link org.xml.sax.XMLReader} that allow-lists them; any href the resolver does not explicitly allow stays blocked.
-     * </p>
      *
      * @return A hardened factory.
      * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
@@ -166,6 +166,19 @@ public final class HardeningSAXParserFactory {
      */
     public static SAXParserFactory newInstance() {
         return harden(SAXParserFactory.newInstance());
+    }
+
+    /**
+     * Returns a new, hardened {@link SAXParserFactory} of the given implementation class.
+     *
+     * @param factoryClassName The fully qualified class name of the {@link SAXParserFactory} implementation.
+     * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
+     * @return A hardened factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
+     */
+    public static SAXParserFactory newInstance(final String factoryClassName, final ClassLoader classLoader) {
+        return harden(SAXParserFactory.newInstance(factoryClassName, classLoader));
     }
 
     private static void setFeature(final SAXParserFactory factory, final String feature, final boolean value) {
