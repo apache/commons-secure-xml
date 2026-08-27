@@ -61,7 +61,7 @@ final class DocumentBuilderHardener {
         // Required: HardeningDocumentBuilderFactory installs an ignore-all EntityResolver floor on every DocumentBuilder.
         // That floor blocks external DTD, entity, schema and xi:include fetches in one place: no ACCESS_EXTERNAL_* attributes are needed here.
         // Callers can chain their resolvers, but not override the floor.
-        return new HardeningDocumentBuilderFactory(factory);
+        return HardeningDocumentBuilderFactory.wrap(factory);
     }
 
     /**

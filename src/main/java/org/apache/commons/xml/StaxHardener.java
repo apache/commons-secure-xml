@@ -39,7 +39,7 @@ final class StaxHardener {
 
     static XMLInputFactory harden(final XMLInputFactory factory) {
         // HardeningXMLInputFactory installs the non-removable ignore-all resolver floor that resolves every external DTD and entity to empty content.
-        return new HardeningXMLInputFactory(factory);
+        return HardeningXMLInputFactory.wrap(factory);
     }
 
     private StaxHardener() {

@@ -91,7 +91,7 @@ final class SAXParserHardener {
             setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
         }
         // The per-parse hardening (limits, entity blocking, Android fixups) lives in hardenReader() because SAXParserFactory has no property API.
-        return new HardeningSAXParserFactory(factory);
+        return HardeningSAXParserFactory.wrap(factory);
     }
 
     /**

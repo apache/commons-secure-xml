@@ -53,11 +53,11 @@ final class TransformerHardener {
             // Saxon keeps its vendor Configuration for the channels JAXP cannot close,
             // then goes through the same wrapper as every other implementation for the URIResolver floor;
             // EmptySource is the empty-source shape Saxon's consumers expect.
-            return new HardeningTransformerFactory((SAXTransformerFactory) SaxonProvider.configure(factory), SaxonProvider.emptySourceSupplier());
+            return HardeningTransformerFactory.wrap((SAXTransformerFactory) SaxonProvider.configure(factory), SaxonProvider.emptySourceSupplier());
         }
         // Required: source/stylesheet parsing provisions its own SAX reader otherwise; the wrapper routes every Source through a hardened one and installs the
         // ignore-all URIResolver floor (blocking xsl:import/include at compile time and document() at runtime) that a caller-set resolver cannot remove.
-        return new HardeningTransformerFactory((SAXTransformerFactory) factory);
+        return HardeningTransformerFactory.wrap((SAXTransformerFactory) factory);
     }
 
     private static void setFeature(final TransformerFactory factory, final String feature, final boolean value) {
