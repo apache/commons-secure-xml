@@ -50,7 +50,7 @@ public final class SecureXPathFactory {
     /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
     private static final String JDK_XPATH_FACTORY = "com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl";
 
-    private static final MethodHandle NEW_DEFAULT_INSTANCE = MethodHandleFactory.findStatic(XPathFactory.class, "newDefaultInstance",
+    private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(XPathFactory.class, "newDefaultInstance",
             MethodType.methodType(XPathFactory.class));
 
     /**
@@ -100,10 +100,10 @@ public final class SecureXPathFactory {
      *                               example Android).
      */
     public static XPathFactory newDefaultInstance() {
-        if (NEW_DEFAULT_INSTANCE != null) {
+        if (MH_newDefaultInstance != null) {
             final XPathFactory factory;
             try {
-                factory = (XPathFactory) NEW_DEFAULT_INSTANCE.invokeExact();
+                factory = (XPathFactory) MH_newDefaultInstance.invokeExact();
             } catch (final RuntimeException e) {
                 throw e;
             } catch (final Throwable e) {
