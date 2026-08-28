@@ -37,7 +37,7 @@ import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.xml.sax.XMLReader;
 
 /**
- * Checks that {@code jdk.xml.overrideDefaultParser} selects which hardened parser family performs the source rewrites on factories that recognize the feature.
+ * Checks that {@code jdk.xml.overrideDefaultParser} selects which secure parser family performs the source rewrites on factories that recognize the feature.
  *
  * <p>The wrapped implementations' internal parsers are never used — the wrappers parse every source themselves — so instead of configuring the delegate the
  * wrappers read the feature: {@code false} (the JDK's default) pins the platform's built-in parser, {@code true} (or a delegate that does not recognize the
