@@ -519,42 +519,42 @@ final class AttackTestSupport {
     /**
      * Asserts a hardened StAX parse of the payload throws.
      *
-     * <p>{@link XMLStreamReader} and {@link XMLEventReader} from {@link HardeningXMLInputFactory#newInstance()}; both flavors are exercised and either must
+     * <p>{@link XMLStreamReader} and {@link XMLEventReader} from {@link SecureXMLInputFactory#newInstance()}; both flavors are exercised and either must
      * throw.</p>
      */
     static void assertStaxBlocks(final String payload) {
-        assertParseFails(() -> consumeStreamReader(HardeningXMLInputFactory.newInstance(), payload), "StAX stream", XMLStreamException.class);
-        assertParseFails(() -> consumeEventReader(HardeningXMLInputFactory.newInstance(), payload), "StAX event", XMLStreamException.class);
+        assertParseFails(() -> consumeStreamReader(SecureXMLInputFactory.newInstance(), payload), "StAX stream", XMLStreamException.class);
+        assertParseFails(() -> consumeEventReader(SecureXMLInputFactory.newInstance(), payload), "StAX event", XMLStreamException.class);
     }
 
     /**
      * Asserts a hardened StAX parse (stream and event) either blocks at parse or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
      */
     static void assertStaxBlocksOrDoesNotLeak(final String payload) {
-        assertNoLeakOrThrows(() -> captureStaxStreamText(HardeningXMLInputFactory.newInstance(), payload), "StAX stream", XMLStreamException.class);
-        assertNoLeakOrThrows(() -> captureStaxEventText(HardeningXMLInputFactory.newInstance(), payload), "StAX event", XMLStreamException.class);
+        assertNoLeakOrThrows(() -> captureStaxStreamText(SecureXMLInputFactory.newInstance(), payload), "StAX stream", XMLStreamException.class);
+        assertNoLeakOrThrows(() -> captureStaxEventText(SecureXMLInputFactory.newInstance(), payload), "StAX event", XMLStreamException.class);
     }
 
     /**
      * Asserts a hardened StAX parse completes without throwing and without leaked content.
      *
-     * <p>{@link XMLStreamReader} and {@link XMLEventReader} from {@link HardeningXMLInputFactory#newInstance()}; both flavors are exercised. Use this when the
+     * <p>{@link XMLStreamReader} and {@link XMLEventReader} from {@link SecureXMLInputFactory#newInstance()}; both flavors are exercised. Use this when the
      * hardening guarantee is "the parse succeeds but never resolves the external resource", for example, when the JDK's {@code ignore-external-dtd} property silently
      * skips the external subset.</p>
      */
     static void assertStaxDoesNotLeak(final String payload) {
-        assertNoLeakStrict(() -> captureStaxStreamText(HardeningXMLInputFactory.newInstance(), payload), "StAX stream");
-        assertNoLeakStrict(() -> captureStaxEventText(HardeningXMLInputFactory.newInstance(), payload), "StAX event");
+        assertNoLeakStrict(() -> captureStaxStreamText(SecureXMLInputFactory.newInstance(), payload), "StAX stream");
+        assertNoLeakStrict(() -> captureStaxEventText(SecureXMLInputFactory.newInstance(), payload), "StAX event");
     }
 
     /**
      * Asserts a hardened StAX parse succeeds.
      *
-     * <p>{@link XMLStreamReader} and {@link XMLEventReader} from {@link HardeningXMLInputFactory#newInstance()}; positive control for DOCTYPE-only payloads.</p>
+     * <p>{@link XMLStreamReader} and {@link XMLEventReader} from {@link SecureXMLInputFactory#newInstance()}; positive control for DOCTYPE-only payloads.</p>
      */
     static void assertStaxParses(final String payload) {
-        assertParseSucceeds(() -> consumeStreamReader(HardeningXMLInputFactory.newInstance(), payload), "StAX stream");
-        assertParseSucceeds(() -> consumeEventReader(HardeningXMLInputFactory.newInstance(), payload), "StAX event");
+        assertParseSucceeds(() -> consumeStreamReader(SecureXMLInputFactory.newInstance(), payload), "StAX stream");
+        assertParseSucceeds(() -> consumeEventReader(SecureXMLInputFactory.newInstance(), payload), "StAX event");
     }
 
     /**

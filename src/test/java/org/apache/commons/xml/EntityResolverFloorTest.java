@@ -119,7 +119,7 @@ class EntityResolverFloorTest {
     }
 
     private static XMLInputFactory externalEntityStaxFactory() {
-        final XMLInputFactory factory = HardeningXMLInputFactory.newInstance();
+        final XMLInputFactory factory = SecureXMLInputFactory.newInstance();
         factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, true);
         factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, true);
         return factory;
@@ -336,7 +336,7 @@ class EntityResolverFloorTest {
     @Test
     @Tag("stax")
     void staxGetXMLResolverReportsCallerUnwrapped() {
-        final XMLInputFactory factory = HardeningXMLInputFactory.newInstance();
+        final XMLInputFactory factory = SecureXMLInputFactory.newInstance();
         final XMLResolver caller = (publicID, systemID, baseURI, namespace) -> null;
         factory.setXMLResolver(caller);
         assertSame(caller, factory.getXMLResolver(), "getXMLResolver should report the caller's resolver, not the floor wrapper");

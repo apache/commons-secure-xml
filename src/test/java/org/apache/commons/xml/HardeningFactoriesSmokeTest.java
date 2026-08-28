@@ -62,7 +62,7 @@ class HardeningFactoriesSmokeTest {
         assertFalse(SAXParserFactory.class.isAssignableFrom(SecureSAXParserFactory.class));
         assertFalse(SchemaFactory.class.isAssignableFrom(SecureSchemaFactory.class));
         assertFalse(TransformerFactory.class.isAssignableFrom(SecureTransformerFactory.class));
-        assertFalse(XMLInputFactory.class.isAssignableFrom(HardeningXMLInputFactory.class));
+        assertFalse(XMLInputFactory.class.isAssignableFrom(SecureXMLInputFactory.class));
         assertFalse(XPathFactory.class.isAssignableFrom(HardeningXPathFactory.class));
     }
 
@@ -121,8 +121,8 @@ class HardeningFactoriesSmokeTest {
 
     @Test
     void newXMLInputFactoryReturnsFreshInstance() {
-        final XMLInputFactory a = HardeningXMLInputFactory.newInstance();
-        final XMLInputFactory b = HardeningXMLInputFactory.newInstance();
+        final XMLInputFactory a = SecureXMLInputFactory.newInstance();
+        final XMLInputFactory b = SecureXMLInputFactory.newInstance();
         assertNotSame(a, b);
         assertEquals(Boolean.TRUE, a.getProperty(XMLInputFactory.SUPPORT_DTD));
         assertEquals(Boolean.FALSE, a.getProperty(XMLInputFactory.IS_VALIDATING));
@@ -175,8 +175,8 @@ class HardeningFactoriesSmokeTest {
 
     @Test
     void newFactoryReturnsFreshInstance() {
-        final XMLInputFactory a = HardeningXMLInputFactory.newFactory();
-        final XMLInputFactory b = HardeningXMLInputFactory.newFactory();
+        final XMLInputFactory a = SecureXMLInputFactory.newFactory();
+        final XMLInputFactory b = SecureXMLInputFactory.newFactory();
         assertNotSame(a, b);
         assertEquals(Boolean.TRUE, a.getProperty(XMLInputFactory.SUPPORT_DTD));
     }
@@ -187,7 +187,7 @@ class HardeningFactoriesSmokeTest {
         // XMLInputFactory.newInstance, not newFactory: Android's StAX API predates newFactory, and this file also compiles against android.jar.
         System.setProperty(factoryId, XMLInputFactory.newInstance().getClass().getName());
         try {
-            final XMLInputFactory factory = HardeningXMLInputFactory.newFactory(factoryId, getClass().getClassLoader());
+            final XMLInputFactory factory = SecureXMLInputFactory.newFactory(factoryId, getClass().getClassLoader());
             assertEquals(Boolean.TRUE, factory.getProperty(XMLInputFactory.SUPPORT_DTD));
         } finally {
             System.clearProperty(factoryId);
@@ -304,7 +304,7 @@ class HardeningFactoriesSmokeTest {
 
     @Test
     void newDefaultFactoryXMLInputFactoryIsHardened() {
-        final XMLInputFactory factory = HardeningXMLInputFactory.newDefaultFactory();
+        final XMLInputFactory factory = SecureXMLInputFactory.newDefaultFactory();
         assertEquals(Boolean.TRUE, factory.getProperty(XMLInputFactory.SUPPORT_DTD));
     }
 

@@ -47,7 +47,7 @@ import javax.xml.transform.Source;
  *
  * @see org.apache.commons.xml
  */
-public final class HardeningXMLInputFactory {
+public final class SecureXMLInputFactory {
 
     /** Woodstox property: resolver consulted for the external DTD subset. */
     static final String WSTX_DTD_RESOLVER = "com.ctc.wstx.dtdResolver";
@@ -147,7 +147,7 @@ public final class HardeningXMLInputFactory {
         return harden(XMLInputFactory.newInstance());
     }
 
-    private HardeningXMLInputFactory() {
+    private SecureXMLInputFactory() {
         // static only
     }
 
@@ -156,7 +156,7 @@ public final class HardeningXMLInputFactory {
      * non-removable by the caller.
      *
      * <p>The constructor installs the floor through {@code setXMLResolver}, which every implementation routes external resolution through (Woodstox fans it out to
-     * both its DTD-subset and entity resolvers). Woodstox keeps one hook outside that fan-out, {@value HardeningXMLInputFactory#WSTX_UNDECLARED_ENTITY_RESOLVER}, which is
+     * both its DTD-subset and entity resolvers). Woodstox keeps one hook outside that fan-out, {@value SecureXMLInputFactory#WSTX_UNDECLARED_ENTITY_RESOLVER}, which is
      * deliberately left empty: emptying the external subset leaves any entity it declared undeclared, and Woodstox then rejects the reference. The rejection is
      * implementation-prescribed and keeps the resource just as unfetched as the empty resolution the other implementations produce; a caller who wants those
      * references resolved can still set the property, and their resolver lands behind a floor like on every other resolver hook.</p>

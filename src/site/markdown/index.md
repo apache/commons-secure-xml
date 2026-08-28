@@ -104,7 +104,7 @@ HardeningSAXParserFactory.newInstance().newSAXParser().parse(inputStream, myDefa
 
 ```java
 import javax.xml.stream.XMLStreamReader;
-import org.apache.commons.xml.HardeningXMLInputFactory;
+import org.apache.commons.xml.SecureXMLInputFactory;
 
 XMLStreamReader reader = HardeningXMLInputFactory.newInstance().createXMLStreamReader(inputStream);
 ```

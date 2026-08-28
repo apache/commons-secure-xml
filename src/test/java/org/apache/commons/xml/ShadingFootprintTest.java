@@ -83,9 +83,9 @@ class ShadingFootprintTest {
     private static final Set<String> XML_INPUT_FACTORY = set(
             "FallbackIgnoreXMLResolver",
             "SecureException",
-            "HardeningXMLInputFactory",
-            "HardeningXMLInputFactory$1",
-            "HardeningXMLInputFactory$Wrapper",
+            "SecureXMLInputFactory",
+            "SecureXMLInputFactory$1",
+            "SecureXMLInputFactory$Wrapper",
             "MethodHandleFactory");
     // @formatter:on
 
@@ -177,7 +177,7 @@ class ShadingFootprintTest {
     /**
      * Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library.
      */
-    private static final String[] REPORTED = {"SecureDocumentBuilderFactory", "SecureSAXParserFactory", "HardeningXMLInputFactory",
+    private static final String[] REPORTED = {"SecureDocumentBuilderFactory", "SecureSAXParserFactory", "SecureXMLInputFactory",
             "SecureTransformerFactory", "HardeningXPathFactory", "SecureSchemaFactory"};
 
     private static Clazzpath clazzpath;
@@ -284,7 +284,7 @@ class ShadingFootprintTest {
 
     @Test
     void xmlInputFactoryFootprint() {
-        assertEquals(XML_INPUT_FACTORY, closureOf("HardeningXMLInputFactory"));
+        assertEquals(XML_INPUT_FACTORY, closureOf("SecureXMLInputFactory"));
     }
 
     @Test
