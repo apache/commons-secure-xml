@@ -22,8 +22,8 @@
  * caching.
  * </p>
  * <p>
- * A returned factory is not necessarily an instance of the underlying implementation — it might be (and usually is) a wrapper around it, so it cannot be cast
- * to the implementation's own class. Everything else about the implementation's behavior is preserved — features, properties, and attributes delegate to it —
+ * A returned factory is not necessarily an instance of the underlying implementation. It might be (and usually is) a wrapper around it, so it cannot be cast
+ * to the implementation's own class. Everything else about the implementation's behavior is preserved: features, properties, and attributes delegate to it,
  * and only the security behavior is hardened.
  * </p>
  * <p>
