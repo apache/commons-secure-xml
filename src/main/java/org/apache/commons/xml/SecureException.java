@@ -18,7 +18,7 @@
 package org.apache.commons.xml;
 
 /**
- * Thrown when a factory cannot be hardened.
+ * Thrown when a factory cannot be made secure.
  *
  * <p>Two failure modes share this type:</p>
  * <ul>
