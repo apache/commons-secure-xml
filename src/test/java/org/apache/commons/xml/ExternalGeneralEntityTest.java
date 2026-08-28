@@ -25,11 +25,11 @@ import org.junit.jupiter.api.Test;
  * Checks whether parsers can pull in an external general entity declared inline in the internal subset.
  *
  * <p>The wrapper declares {@code <!ENTITY xxe SYSTEM "file:.../referenced.txt">} and uses {@code &xxe;} in the body. The general entity expands to the
- * content of {@code src/test/resources/leaked/referenced.txt} when the external reference is resolved. A hardened parser keeps the entity declared but
+ * content of {@code src/test/resources/leaked/referenced.txt} when the external reference is resolved. A secure parser keeps the entity declared but
  * resolves its content to empty, so the parse completes without the file's content; an unconfigured parser fetches the file, the entity resolves, and the
  * parse succeeds.</p>
  *
- * <p>Each parser type is exercised twice as a pair (unconfigured factory, expected to parse; hardened factory, expected to complete without leaked
+ * <p>Each parser type is exercised twice as a pair (unconfigured factory, expected to parse; secure factory, expected to complete without leaked
  * content):</p>
  *
  * <ul>
