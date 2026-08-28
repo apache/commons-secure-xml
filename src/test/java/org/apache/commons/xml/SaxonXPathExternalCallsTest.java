@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Test;
  *
  * <p>Saxon ships several XPath 3.1 functions that open arbitrary URIs during evaluation. None require a context node; each is triggered purely by the string
  * URI it receives. They are <em>not</em> classified as extension functions in Saxon's vocabulary, so disabling {@code ALLOW_EXTERNAL_FUNCTIONS} is not enough
- * to block them; a complete hardening has to close the URI-resolution path.</p>
+ * to block them; a complete secure has to close the URI-resolution path.</p>
  *
  * <p>Each fixture under {@code src/test/resources/leaked/} contains the {@link #MARKER} string. The tests dispatch the URI-fetching function at the file's URL
  * and check whether the marker reaches the result.</p>
@@ -61,7 +61,7 @@ class SaxonXPathExternalCallsTest {
         try {
             result = evaluateAsString(factory, expression);
         } catch (final Exception e) {
-            return; // hardening blocked at evaluation; acceptable outcome.
+            return; // secure blocked at evaluation; acceptable outcome.
         }
         assertFalse(result.contains(MARKER),
                 "Securing did not block the external reference; result contained marker '" + MARKER + "'.\nFull result:\n" + result);
