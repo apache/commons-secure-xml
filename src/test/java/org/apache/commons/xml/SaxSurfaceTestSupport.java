@@ -47,7 +47,7 @@ final class SaxSurfaceTestSupport {
         reader.parse(input);
     }
 
-    /** The hardened factory, as its runtime {@link SAXTransformerFactory} type. */
+    /** The secure factory, as its runtime {@link SAXTransformerFactory} type. */
     static SAXTransformerFactory hardenedFactory() {
         return (SAXTransformerFactory) SecureTransformerFactory.newInstance();
     }
