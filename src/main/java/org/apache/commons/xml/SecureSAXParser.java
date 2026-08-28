@@ -30,15 +30,15 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderAdapter;
 
 /**
- * {@link SAXParser} that exposes a hardened {@link XMLReader} and a matching SAX 1 {@link Parser}.
+ * {@link SAXParser} that exposes a secure {@link XMLReader} and a matching SAX 1 {@link Parser}.
  *
- * <p>Both views are produced from the same hardened reader, so a caller reaching the parser through either the SAX 2 ({@link #getXMLReader()}) or the legacy
+ * <p>Both views are produced from the same secure reader, so a caller reaching the parser through either the SAX 2 ({@link #getXMLReader()}) or the legacy
  * SAX 1 ({@link #getParser()}) path gets the same hardening. The SAX 1 view matters because some consumers, such as Xalan's identity transformer, still ask
  * for a {@link Parser}.</p>
  *
- * <p>The hardened reader is computed lazily on first access and cached: hardening an {@link XMLReader} can install a new wrapper (Android's Expat path), so
+ * <p>The secure reader is computed lazily on first access and cached: hardening an {@link XMLReader} can install a new wrapper (Android's Expat path), so
  * every parse must run through the same instance. The {@code parse(...)} overloads inherited from {@link SAXParser} dispatch virtually to {@link #getXMLReader()}
- * and {@link #getParser()}, so they too run through the hardened views without further overrides.</p>
+ * and {@link #getParser()}, so they too run through the secure views without further overrides.</p>
  */
 final class SecureSAXParser extends SAXParser {
 
@@ -62,7 +62,7 @@ final class SecureSAXParser extends SAXParser {
     public Parser getParser() throws SAXException {
         if (hardenedParser == null) {
             final XMLReader reader = getXMLReader();
-            // Reuse the reader directly if it already is a SAX 1 parser; otherwise adapt it, so the SAX 1 path runs through the same hardened reader.
+            // Reuse the reader directly if it already is a SAX 1 parser; otherwise adapt it, so the SAX 1 path runs through the same secure reader.
             hardenedParser = reader instanceof Parser ? (Parser) reader : new XMLReaderAdapter(reader);
         }
         return hardenedParser;
