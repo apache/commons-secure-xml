@@ -36,13 +36,13 @@ import javax.xml.stream.util.XMLEventAllocator;
 import javax.xml.transform.Source;
 
 /**
- * Creates new, hardened {@link XMLInputFactory} instances.
+ * Creates new, secure {@link XMLInputFactory} instances.
  * <p>
  * The three universal guarantees on {@link org.apache.commons.xml} apply; StAX exposes no additional vectors beyond them.
  * </p>
  * <p>
  * Not a {@link XMLInputFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-hardened factory through this class
- * by calling an inherited method such as {@code newDefaultFactory()}. The hardened factories are instances of a nested, non-public wrapper class.
+ * by calling an inherited method such as {@code newDefaultFactory()}. The secure factories are instances of a nested, non-public wrapper class.
  * </p>
  *
  * @see org.apache.commons.xml
@@ -69,7 +69,7 @@ public final class SecureXMLInputFactory {
      * Javadoc for the per-implementation hook routing.</p>
      *
      * @param factory the factory to harden; never {@code null}.
-     * @return a hardened factory.
+     * @return a secure factory.
      */
     static XMLInputFactory secure(final XMLInputFactory factory) {
         // The wrapper installs the non-removable ignore-all resolver floor that resolves every external DTD and entity to empty content.
@@ -77,13 +77,13 @@ public final class SecureXMLInputFactory {
     }
 
     /**
-     * Returns a new, hardened {@link XMLInputFactory} of the system-default implementation.
+     * Returns a new, secure {@link XMLInputFactory} of the system-default implementation.
      * <p>
      * Obtained as by {@code XMLInputFactory.newDefaultFactory()} where the platform provides it (Java 9 or later), and by instantiating the JDK's built-in
      * implementation directly on Java 8.
      * </p>
      *
-     * @return A hardened factory.
+     * @return A secure factory.
      * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultFactory()} nor the JDK's built-in implementation
      *                                   (for example Android).
@@ -111,9 +111,9 @@ public final class SecureXMLInputFactory {
     }
 
     /**
-     * Returns a new, hardened {@link XMLInputFactory}, as by {@link XMLInputFactory#newFactory()}.
+     * Returns a new, secure {@link XMLInputFactory}, as by {@link XMLInputFactory#newFactory()}.
      *
-     * @return A hardened factory.
+     * @return A secure factory.
      * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown if an instance of this factory cannot be loaded.
      */
@@ -123,11 +123,11 @@ public final class SecureXMLInputFactory {
     }
 
     /**
-     * Returns a new, hardened {@link XMLInputFactory} resolved from the given factory id.
+     * Returns a new, secure {@link XMLInputFactory} resolved from the given factory id.
      *
      * @param factoryId   The name of the factory to find; a system property or service id to look up, not the class name of the implementation.
      * @param classLoader The class loader used in the lookup; {@code null} means the current thread's context class loader.
-     * @return A hardened factory.
+     * @return A secure factory.
      * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown in case of a service configuration error or if the implementation is not available or cannot be instantiated.
      * @throws NullPointerException      Thrown if {@code factoryId} is {@code null}.
@@ -137,9 +137,9 @@ public final class SecureXMLInputFactory {
     }
 
     /**
-     * Returns a new, hardened {@link XMLInputFactory}.
+     * Returns a new, secure {@link XMLInputFactory}.
      *
-     * @return A hardened factory.
+     * @return A secure factory.
      * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown if an instance of this factory cannot be loaded.
      */
