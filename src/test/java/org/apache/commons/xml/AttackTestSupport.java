@@ -61,9 +61,9 @@ import org.xml.sax.helpers.XMLFilterImpl;
  * <p>The hardened-side helpers come in three flavors, distinguished by their suffix:</p>
  *
  * <ul>
- *   <li>{@code assert*Blocks(...)} runs the payload through a hardened factory from {@link org.apache.commons.xml} and asserts the parse throws. Used when the hardening
+ *   <li>{@code assert*Blocks(...)} runs the payload through a secure factory from {@link org.apache.commons.xml} and asserts the parse throws. Used when the hardening
  *       layer is expected to reject the attack outright.</li>
- *   <li>{@code assert*DoesNotLeak(...)} runs the payload through a hardened factory and asserts the parse completes without throwing and without producing the
+ *   <li>{@code assert*DoesNotLeak(...)} runs the payload through a secure factory and asserts the parse completes without throwing and without producing the
  *       {@link #LEAKED_MARKER} string. Used when the hardening contract guarantees the parse succeeds but never resolves the external resource (for example,
  *       the ignore-all resolver floor resolving the external subset to empty content).</li>
  *   <li>{@code assert*BlocksOrDoesNotLeak(...)} accepts either of the previous two outcomes. Used where the same hardening contract surfaces differently across
@@ -113,7 +113,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Strict reporter installed on every hardened factory, parser, validator and transformer in the helpers below.
+     * Strict reporter installed on every secure factory, parser, validator and transformer in the helpers below.
      *
      * <p>The hardening layer signals every blocked external fetch and every SAX-fatal it could not silently skip via the standard JAXP error channels:
      * {@link ErrorListener#error(TransformerException)} / {@link ErrorListener#fatalError(TransformerException) fatalError} on the TrAX side and
@@ -194,7 +194,7 @@ final class AttackTestSupport {
     /**
      * Text planted in every fixture under {@code src/test/resources/leaked/}.
      *
-     * <p>Tests that capture a parser's output assert this string is absent: it can only appear if the hardened parser fetched the external resource, so its
+     * <p>Tests that capture a parser's output assert this string is absent: it can only appear if the secure parser fetched the external resource, so its
      * presence is the leak signal.</p>
      */
     static final String LEAKED_MARKER = "All your base are belong to us";
@@ -205,7 +205,7 @@ final class AttackTestSupport {
     private static final String WSTX_MAX_ENTITY_COUNT = "com.ctc.wstx.maxEntityCount";
 
     /**
-     * Asserts a hardened DOM parse of the payload throws.
+     * Asserts a secure DOM parse of the payload throws.
      *
      * <p>{@link DocumentBuilder#parse(InputSource)} via {@link SecureDocumentBuilderFactory#newInstance()}; only a thrown exception passes.</p>
      */
@@ -214,7 +214,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened DOM parse either blocks at parse or completes without leaked content.
+     * Asserts a secure DOM parse either blocks at parse or completes without leaked content.
      *
      * <p>Used for an external-resource payload whose outcome differs across implementations: one that resolves the reference to empty (the ignore-all floor) does
      * not leak, while one that rejects the unresolvable systemId throws instead. Both are acceptable.</p>
@@ -224,7 +224,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened DOM parse completes without throwing and without leaked content.
+     * Asserts a secure DOM parse completes without throwing and without leaked content.
      *
      * <p>{@link DocumentBuilder#parse(InputSource)} via {@link SecureDocumentBuilderFactory#newInstance()}; use this when the hardening guarantee is "the parse
      * succeeds but never resolves the external resource", for example, when the ignore-all resolver floor resolves the external subset to empty content.</p>
@@ -234,7 +234,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened DOM parse succeeds.
+     * Asserts a secure DOM parse succeeds.
      *
      * <p>{@link DocumentBuilder#parse(InputSource)} via {@link SecureDocumentBuilderFactory#newInstance()}; positive control for DOCTYPE-only payloads.</p>
      */
@@ -442,7 +442,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened SAX parse of the payload throws.
+     * Asserts a secure SAX parse of the payload throws.
      *
      * <p>{@link XMLReader#parse(InputSource)} on a parser from {@link SecureSAXParserFactory#newInstance()}; only a thrown exception passes.</p>
      */
@@ -451,14 +451,14 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened SAX parse either blocks at parse or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     * Asserts a secure SAX parse either blocks at parse or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
      */
     static void assertSaxBlocksOrDoesNotLeak(final String payload) {
         assertNoLeakOrThrows(() -> captureCharacters(strictXMLReader(SecureSAXParserFactory.newInstance()), payload), "SAX", SAXException.class);
     }
 
     /**
-     * Asserts a hardened SAX parse completes without throwing and without leaked content.
+     * Asserts a secure SAX parse completes without throwing and without leaked content.
      *
      * <p>{@link XMLReader#parse(InputSource)} on a parser from {@link SecureSAXParserFactory#newInstance()}; use this when the hardening guarantee is "the parse
      * succeeds but never resolves the external resource", for example, when the ignore-all resolver floor resolves the external subset to empty content.</p>
@@ -468,7 +468,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened SAX parse succeeds.
+     * Asserts a secure SAX parse succeeds.
      *
      * <p>{@link XMLReader#parse(InputSource)} on a parser from {@link SecureSAXParserFactory#newInstance()}; positive control for DOCTYPE-only payloads.</p>
      */
@@ -477,7 +477,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened Schema compilation throws.
+     * Asserts a secure Schema compilation throws.
      *
      * <p>{@link SchemaFactory#newSchema(Source)} via {@link SecureSchemaFactory#newInstance(String)}; only a thrown exception passes.</p>
      */
@@ -486,7 +486,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened Schema compile either blocks or completes: an unresolved import resolves to an empty schema (which may itself fail to compile) or is
+     * Asserts a secure Schema compile either blocks or completes: an unresolved import resolves to an empty schema (which may itself fail to compile) or is
      * rejected outright. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
      */
     static void assertSchemaBlocksOrDoesNotLeak(final Source xsd) {
@@ -497,7 +497,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened Schema compilation succeeds.
+     * Asserts a secure Schema compilation succeeds.
      *
      * <p>{@link SchemaFactory#newSchema(Source)} via {@link SecureSchemaFactory#newInstance(String)}; positive control for DOCTYPE-only payloads.</p>
      */
@@ -506,7 +506,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened Schema compilation completes without throwing.
+     * Asserts a secure Schema compilation completes without throwing.
      *
      * <p>{@link SchemaFactory#newSchema(Source)} via {@link SecureSchemaFactory#newInstance(String)}; use this when the hardening contract guarantees the compile
      * succeeds but never resolves the external resource (for example, {@code XERCES_LOAD_EXTERNAL_DTD=false} silently skipping the external subset, with the body's
@@ -517,7 +517,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened StAX parse of the payload throws.
+     * Asserts a secure StAX parse of the payload throws.
      *
      * <p>{@link XMLStreamReader} and {@link XMLEventReader} from {@link SecureXMLInputFactory#newInstance()}; both flavors are exercised and either must
      * throw.</p>
@@ -528,7 +528,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened StAX parse (stream and event) either blocks at parse or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     * Asserts a secure StAX parse (stream and event) either blocks at parse or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
      */
     static void assertStaxBlocksOrDoesNotLeak(final String payload) {
         assertNoLeakOrThrows(() -> captureStaxStreamText(SecureXMLInputFactory.newInstance(), payload), "StAX stream", XMLStreamException.class);
@@ -536,7 +536,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened StAX parse completes without throwing and without leaked content.
+     * Asserts a secure StAX parse completes without throwing and without leaked content.
      *
      * <p>{@link XMLStreamReader} and {@link XMLEventReader} from {@link SecureXMLInputFactory#newInstance()}; both flavors are exercised. Use this when the
      * hardening guarantee is "the parse succeeds but never resolves the external resource", for example, when the JDK's {@code ignore-external-dtd} property silently
@@ -548,7 +548,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened StAX parse succeeds.
+     * Asserts a secure StAX parse succeeds.
      *
      * <p>{@link XMLStreamReader} and {@link XMLEventReader} from {@link SecureXMLInputFactory#newInstance()}; positive control for DOCTYPE-only payloads.</p>
      */
@@ -558,7 +558,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened Templates compile-and-transform throws.
+     * Asserts a secure Templates compile-and-transform throws.
      *
      * <p>{@link TransformerFactory#newTemplates(Source)} via {@link SecureTransformerFactory#newInstance()} followed by transform; either step throwing
      * passes.</p>
@@ -575,14 +575,14 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened Templates compile-and-transform either blocks or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     * Asserts a secure Templates compile-and-transform either blocks or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
      */
     static void assertTemplatesBlocksOrDoesNotLeak(final Source xslt) {
         assertNoLeakOrThrows(() -> templatesCompileAndTransform(xslt), "Templates", TransformerException.class);
     }
 
     /**
-     * Asserts a hardened Templates compile-and-transform succeeds.
+     * Asserts a secure Templates compile-and-transform succeeds.
      *
      * <p>{@link TransformerFactory#newTemplates(Source)} via {@link SecureTransformerFactory#newInstance()} followed by transform; positive control for
      * DOCTYPE-only payloads.</p>
@@ -592,7 +592,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened Templates compile-and-transform completes without throwing and without leaked content.
+     * Asserts a secure Templates compile-and-transform completes without throwing and without leaked content.
      *
      * <p>{@link TransformerFactory#newTemplates(Source)} via {@link SecureTransformerFactory#newInstance()} followed by transform; use this when the hardening
      * contract guarantees the compile and transform succeed but never resolve the external resource.</p>
@@ -602,7 +602,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened identity Transformer of the payload throws.
+     * Asserts a secure identity Transformer of the payload throws.
      *
      * <p>{@link Transformer#transform(Source, javax.xml.transform.Result)} on the identity transformer from {@link SecureTransformerFactory#newInstance()}; only
      * a thrown exception passes.</p>
@@ -614,14 +614,14 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened identity Transformer either blocks or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     * Asserts a secure identity Transformer either blocks or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
      */
     static void assertTransformerBlocksOrDoesNotLeak(final String payload) {
         assertNoLeakOrThrows(() -> identityTransformAndCapture(payload), "Transformer", TransformerException.class);
     }
 
     /**
-     * Asserts a hardened identity Transformer completes without throwing and without leaked content.
+     * Asserts a secure identity Transformer completes without throwing and without leaked content.
      *
      * <p>{@link Transformer#transform(Source, javax.xml.transform.Result)} via {@link SecureTransformerFactory#newInstance()}; use this when the hardening
      * contract guarantees the transform succeeds but never resolves the external resource.</p>
@@ -631,7 +631,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened identity Transformer succeeds.
+     * Asserts a secure identity Transformer succeeds.
      *
      * <p>{@link Transformer#transform(Source, javax.xml.transform.Result)} on the identity transformer from {@link SecureTransformerFactory#newInstance()};
      * positive control for DOCTYPE-only payloads.</p>
@@ -641,7 +641,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened Validator validation throws.
+     * Asserts a secure Validator validation throws.
      *
      * <p>{@link Validator#validate(Source)} on a validator from {@link #BENIGN_SCHEMA} compiled via {@link SecureSchemaFactory#newInstance(String)}; only a thrown
      * exception passes (the schema is benign; the attack lives in the instance document).</p>
@@ -653,7 +653,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened Validator either blocks or completes without leaked content. The instance document's unresolvable external entity is either dropped
+     * Asserts a secure Validator either blocks or completes without leaked content. The instance document's unresolvable external entity is either dropped
      * (no leak) or rejected; a rejection surfaces as a SAX/security error or, where the parser attempts the unresolvable systemId directly, an
      * {@link IOException}. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
      */
@@ -665,7 +665,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened Validator validation completes without throwing.
+     * Asserts a secure Validator validation completes without throwing.
      *
      * <p>{@link Validator#validate(Source)} on a validator from {@link #BENIGN_SCHEMA} compiled via {@link SecureSchemaFactory#newInstance(String)}; use this when the
      * hardening contract guarantees the validate succeeds but never resolves the external resource.</p>
@@ -677,7 +677,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened Validator validation succeeds.
+     * Asserts a secure Validator validation succeeds.
      *
      * <p>{@link Validator#validate(Source)} on a validator from {@link #BENIGN_SCHEMA} compiled via {@link SecureSchemaFactory#newInstance(String)}; positive control
      * for DOCTYPE-only payloads.</p>
@@ -691,7 +691,7 @@ final class AttackTestSupport {
     /**
      * Asserts a hardened-in-place XMLReader parse of the payload throws.
      *
-     * <p>{@link XMLReader#parse(InputSource)} on a raw reader hardened via {@link SecureSAXParserFactory#secure(XMLReader)}; only a thrown exception passes.</p>
+     * <p>{@link XMLReader#parse(InputSource)} on a raw reader secure via {@link SecureSAXParserFactory#secure(XMLReader)}; only a thrown exception passes.</p>
      */
     static void assertXmlReaderBlocks(final String payload) {
         assertParseFails(() -> consumeXmlReader(rawSecureXMLReader(), payload), "XMLReader", SAXException.class);
@@ -707,7 +707,7 @@ final class AttackTestSupport {
     /**
      * Asserts a hardened-in-place XMLReader parse completes without throwing and without leaked content.
      *
-     * <p>{@link XMLReader#parse(InputSource)} on a raw reader hardened via {@link SecureSAXParserFactory#secure(XMLReader)}; use this when the hardening contract
+     * <p>{@link XMLReader#parse(InputSource)} on a raw reader secure via {@link SecureSAXParserFactory#secure(XMLReader)}; use this when the hardening contract
      * guarantees the parse succeeds but never resolves the external resource.</p>
      */
     static void assertXmlReaderDoesNotLeak(final String payload) {
@@ -717,7 +717,7 @@ final class AttackTestSupport {
     /**
      * Asserts a hardened-in-place XMLReader parse succeeds.
      *
-     * <p>{@link XMLReader#parse(InputSource)} on a raw reader hardened via {@link SecureSAXParserFactory#secure(XMLReader)}; positive control for DOCTYPE-only
+     * <p>{@link XMLReader#parse(InputSource)} on a raw reader secure via {@link SecureSAXParserFactory#secure(XMLReader)}; positive control for DOCTYPE-only
      * payloads.</p>
      */
     static void assertXmlReaderParses(final String payload) {
