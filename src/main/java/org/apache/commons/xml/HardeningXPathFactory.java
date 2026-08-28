@@ -67,10 +67,6 @@ public final class HardeningXPathFactory {
      *         documented package-prefix exception because the required hardening surface is reachable only through a vendor API.</li>
      *     <li><strong>FSP</strong> ({@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING}): required. It is the only knob both the stock JDK and Xalan XPath
      *         engines expose, and switches on their secure-processing limits. {@link XPathFactory} has no attribute API for finer control.</li>
-     *     <li><strong>FODP</strong> ({@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER}): read, not set. The engine's internal parser is never used (the
-     *         wrapper builds the {@link org.xml.sax.InputSource} documents itself), so on implementations that recognize the feature its value selects which
-     *         hardened parser family performs that build: the platform's built-in parser when {@code false} (the JDK's default), the pluggable lookup when
-     *         {@code true} or unrecognized.</li>
      *     <li><strong>The nested wrapper</strong>: required. FSP governs only the engine, not the parser it provisions internally for the
      *         {@link org.xml.sax.InputSource}-taking {@code evaluate} entry points; the wrapper performs that document build with a hardened parser instead, so
      *         the engine never parses.</li>

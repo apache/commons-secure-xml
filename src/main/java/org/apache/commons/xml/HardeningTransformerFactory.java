@@ -93,9 +93,6 @@ public final class HardeningTransformerFactory {
      *         difference is the empty-{@link Source} shape the floor returns, {@code EmptySource} for Saxon rather than the default empty DOM document.</li>
      *     <li><strong>FSP</strong> ({@link XMLConstants#FEATURE_SECURE_PROCESSING}): required. On XSLTC it enables the runtime evaluator limits; on Xalan it disables
      *         reflection-based extension functions.</li>
-     *     <li><strong>FODP</strong> ({@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER}): read, not set. The implementation's internal parsers are never
-     *         used (the wrapper rewrites every source), so on implementations that recognize the feature its value selects which hardened parser family performs
-     *         the rewrites: the platform's built-in parser when {@code false} (the JDK's default), the pluggable lookup when {@code true} or unrecognized.</li>
      *     <li><strong>{@link FallbackIgnoreURIResolver} floor</strong>: required. An ignore-all {@link URIResolver} floor, installed by
      *         the nested wrapper and carried onto every produced {@link Transformer}, resolves {@code xsl:import}/{@code xsl:include} at compile
      *         time and {@code document()} at runtime to an empty document, the one channel both XSLTC and Xalan route through. A caller-set {@link URIResolver} is
