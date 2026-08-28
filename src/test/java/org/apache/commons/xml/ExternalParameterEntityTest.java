@@ -36,13 +36,13 @@ import org.xml.sax.helpers.DefaultHandler;
  *
  * <p>The wrapper declares a parameter entity {@code %xxe;} pointing at {@code src/test/resources/leaked/referenced.dtd} and immediately references it in the
  * internal subset; once expanded, the entity declarations from {@code referenced.dtd} (in particular {@code <!ENTITY leaked "...">}) become part of the
- * document's DTD. Each wrapper body then references {@code &leaked;}, and a hardened parser resolves the parameter-entity expansion to empty, which leaves
- * {@code &leaked;} undeclared. This is the one payload in the suite with a genuinely undeclared entity, so the hardened outcome is dual: the parser either
+ * document's DTD. Each wrapper body then references {@code &leaked;}, and a secure parser resolves the parameter-entity expansion to empty, which leaves
+ * {@code &leaked;} undeclared. This is the one payload in the suite with a genuinely undeclared entity, so the secure outcome is dual: the parser either
  * skips the undefined reference (no leak) or rejects it (per XML 1.0 section 4.1 the reference is an unreported validity constraint here, but the JDK's parser
  * reports it as a well-formedness error and Woodstox rejects undeclared references unconditionally). Either way the external DTD is never fetched. An
  * unconfigured parser fetches and resolves it, and the parse succeeds.</p>
  *
- * <p>Each parser type is exercised twice as a pair (unconfigured factory, expected to parse; hardened factory, expected to block or complete without leaked
+ * <p>Each parser type is exercised twice as a pair (unconfigured factory, expected to parse; secure factory, expected to block or complete without leaked
  * content):</p>
  *
  * <ul>
