@@ -88,15 +88,6 @@ final class FallbackIgnoreURIResolver implements URIResolver {
     /**
      * Constructs a new resolver.
      *
-     * @param delegate optional caller-supplied resolver to consult first; may be {@code null}.
-     */
-    FallbackIgnoreURIResolver(final URIResolver delegate) {
-        this(delegate, null);
-    }
-
-    /**
-     * Constructs a new resolver.
-     *
      * @param delegate    the resolver to delegate resolution to.
      * @param emptySource the empty-{@link Source} supplier for the ignore outcome, or {@code null} for the default empty DOM document.
      */

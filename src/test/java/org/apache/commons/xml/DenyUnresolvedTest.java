@@ -56,7 +56,7 @@ class DenyUnresolvedTest {
                 "XMLResolver floor should throw on an unresolved entity");
         assertThrows(LSException.class, () -> new FallbackIgnoreLSResourceResolver(null).resolveResource(null, null, null, SYSTEM_ID, null),
                 "LSResourceResolver floor should throw on an unresolved resource");
-        assertThrows(TransformerException.class, () -> new FallbackIgnoreURIResolver(null).resolve(SYSTEM_ID, null),
+        assertThrows(TransformerException.class, () -> new FallbackIgnoreURIResolver(null, null).resolve(SYSTEM_ID, null),
                 "URIResolver floor should throw on an unresolved URI");
     }
 }
