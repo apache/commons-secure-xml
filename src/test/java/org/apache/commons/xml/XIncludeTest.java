@@ -178,10 +178,6 @@ class XIncludeTest {
                 "Baseline SAX parse=xml should leak marker; got: " + captured);
     }
 
-    //endregion
-
-    //region Hardened factory: the include is never fetched
-
     @Test
     @Tag("dom")
     void hardenedDomBlocksParseText() throws Exception {
@@ -238,10 +234,6 @@ class XIncludeTest {
         assertEquals(RESOLVED_MARKER, doc.getDocumentElement().getTextContent().trim(),
                 "DOM parse=text with allow-list should resolve to the resolver's content");
     }
-
-    //endregion
-
-    //region Hardened factory + allow-list resolver: allowed href works, non-allowed throws
 
     @Test
     @Tag("dom")

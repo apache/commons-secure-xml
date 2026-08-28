@@ -139,35 +139,35 @@ class HardeningFactoriesSmokeTest {
     // The explicit-class-name tests discover the runtime default implementation through the raw JAXP factory,
     // so they stay portable across the JAXP implementations of the surefire matrix.
     @Test
-    void explicitClassNameDocumentBuilderFactoryIsHardened() throws Exception {
+    void explicitClassNameDocumentBuilderFactoryIsSecure() throws Exception {
         final Class<?> impl = DocumentBuilderFactory.newInstance().getClass();
         final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance(impl.getName(), impl.getClassLoader());
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 
     @Test
-    void explicitClassNameSAXParserFactoryIsHardened() throws Exception {
+    void explicitClassNameSAXParserFactoryIsSecure() throws Exception {
         final Class<?> impl = SAXParserFactory.newInstance().getClass();
         final SAXParserFactory factory = SecureSAXParserFactory.newInstance(impl.getName(), impl.getClassLoader());
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 
     @Test
-    void explicitClassNameSchemaFactoryIsHardened() throws Exception {
+    void explicitClassNameSchemaFactoryIsSecure() throws Exception {
         final Class<?> impl = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).getClass();
         final SchemaFactory factory = SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI, impl.getName(), impl.getClassLoader());
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 
     @Test
-    void explicitClassNameTransformerFactoryIsHardened() {
+    void explicitClassNameTransformerFactoryIsSecure() {
         final Class<?> impl = TransformerFactory.newInstance().getClass();
         final TransformerFactory factory = SecureTransformerFactory.newInstance(impl.getName(), impl.getClassLoader());
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 
     @Test
-    void explicitClassNameXPathFactoryIsHardened() throws Exception {
+    void explicitClassNameXPathFactoryIsSecure() throws Exception {
         final Class<?> impl = XPathFactory.newInstance().getClass();
         final XPathFactory factory = SecureXPathFactory.newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI, impl.getName(), impl.getClassLoader());
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
@@ -182,7 +182,7 @@ class HardeningFactoriesSmokeTest {
     }
 
     @Test
-    void factoryIdXMLInputFactoryIsHardened() {
+    void factoryIdXMLInputFactoryIsSecure() {
         final String factoryId = "org.apache.commons.xml.test.staxFactory";
         // XMLInputFactory.newInstance, not newFactory: Android's StAX API predates newFactory, and this file also compiles against android.jar.
         System.setProperty(factoryId, XMLInputFactory.newInstance().getClass().getName());
@@ -291,25 +291,25 @@ class HardeningFactoriesSmokeTest {
     }
 
     @Test
-    void newDefaultInstanceSchemaFactoryIsHardened() throws Exception {
+    void newDefaultInstanceSchemaFactoryIsSecure() throws Exception {
         final SchemaFactory factory = SecureSchemaFactory.newDefaultInstance();
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 
     @Test
-    void newDefaultInstanceTransformerFactoryIsHardened() {
+    void newDefaultInstanceTransformerFactoryIsSecure() {
         final TransformerFactory factory = SecureTransformerFactory.newDefaultInstance();
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 
     @Test
-    void newDefaultFactoryXMLInputFactoryIsHardened() {
+    void newDefaultFactoryXMLInputFactoryIsSecure() {
         final XMLInputFactory factory = SecureXMLInputFactory.newDefaultFactory();
         assertEquals(Boolean.TRUE, factory.getProperty(XMLInputFactory.SUPPORT_DTD));
     }
 
     @Test
-    void newDefaultInstanceXPathFactoryIsHardened() throws Exception {
+    void newDefaultInstanceXPathFactoryIsSecure() throws Exception {
         final XPathFactory factory = SecureXPathFactory.newDefaultInstance();
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }

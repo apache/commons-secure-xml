@@ -366,7 +366,7 @@ class EntityResolverFloorTest {
 
     @Test
     @Tag("trax")
-    void transformerParsesOptedInDocumentHardened() {
+    void transformerParsesOptedInDocumentSecured() {
         // Same contract on the runtime document() channel, which reaches a different internal reader than the compile-time import.
         final TransformerFactory factory = hardenedTransformerFactory();
         factory.setURIResolver((href, base) ->
@@ -380,7 +380,7 @@ class EntityResolverFloorTest {
 
     @Test
     @Tag("trax")
-    void transformerParsesOptedInImportHardened() {
+    void transformerParsesOptedInImportSecured() {
         // The opted-in module carries an external DTD reference; parsed on the floor the DTD is empty, so its entity cannot expand into the output.
         final TransformerFactory factory = hardenedTransformerFactory();
         factory.setURIResolver((href, base) ->
