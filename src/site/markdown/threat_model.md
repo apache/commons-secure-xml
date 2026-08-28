@@ -38,7 +38,7 @@ It is versioned with the library: a report against a released version is triaged
 A finding that breaks something listed under [What is in scope](#what-is-in-scope) should be reported through the channel above;
 a finding that falls under [What is out of scope](#what-is-out-of-scope) will be closed citing this section.
 
-### Scope and intended use
+### Scope and Intended Use
 
 This library is a helper for **safely creating JAXP factories**. Each `XxxFactory.newYyy()` method returns a
 new, hardened factory whose parsers reject the common XML attacks (external entity / DTD resolution, XXE, SSRF through
@@ -52,7 +52,7 @@ It governs what those objects read;
 what a transform writes is the stylesheet author's capability
 (see **Transform output destinations** under [What is out of scope](#what-is-out-of-scope)).
 
-### Adversary model and trust boundary
+### Adversary Model and Trust Boundary
 
 The adversary is whoever controls the XML an application parses, together with any external system an XML
 document tries to reach through an entity, DTD, schema, stylesheet, or XInclude reference. The hardening
@@ -75,7 +75,7 @@ The library hardens what it creates;
 it does not re-harden what you built,
 because your reader's settings are indistinguishable from configuration you chose deliberately.
 
-### What is in scope
+### What is in Scope
 
 - The hardening recipes applied by `org.apache.commons.xml`.
   Every implementation of JAXP 1.4 or later is in scope,
@@ -89,7 +89,7 @@ because your reader's settings are indistinguishable from configuration you chos
   provides. The guarantee covers the documented entry points of each returned factory type,
   including the `SAXTransformerFactory` extension methods when the returned `TransformerFactory` exposes them.
 
-### Assumptions about the environment
+### Assumptions about the Environment
 
 The library does not open network connections,
 spawn processes,
@@ -141,7 +141,7 @@ On the supported runtimes (see **Supported runtimes** above),
 every one of these defaults still bounds entity expansion tightly enough to reject entity-expansion denial of service
 such as Billion Laughs.
 
-**Reserved settings (must not be loosened)**
+**Reserved Settings (must not be loosened)**
 
 The library MAY rely on the following features, attributes and properties staying as configured. They are reserved because
 they govern external resource access, DTD, entity or schema handling, the installation of a resolver, or processing
@@ -175,7 +175,7 @@ is reserved on the same terms.
 Installing a resolver through the typed `set*Resolver` methods, the `DefaultHandler` passed to `SAXParser.parse`, or the resolver properties listed under **Settings you may modify** does not loosen the hardening:
 those paths are wrapped by a non-removable floor.
 
-**Settings you may modify**
+**Settings You May Modify**
 
 The following are security-relevant but safe to change on a returned factory: the protection they appear to govern is
 enforced by the reserved settings above, which a caller cannot lift.
@@ -225,7 +225,7 @@ enforced by the reserved settings above, which a caller cannot lift.
   Whichever parser is selected, it is hardened,
   so the setting carries no security weight.
 
-### What is out of scope
+### What is Out of Scope
 
 A returned factory is hardened as delivered; reconfiguring it is a decision to take over hardening for that instance,
 and reports against a factory reconfigured in any of the ways below are out of scope.
@@ -266,12 +266,12 @@ and reports against a factory reconfigured in any of the ways below are out of s
   (an output resolver of the implementation, filesystem permissions, or process sandboxing).
   A path-traversal or file-write report through a stylesheet's output instructions is out of scope.
 
-### Downstream responsibility
+### Downstream Responsibility
 
 Use the factory as returned. If you reconfigure it, you take over hardening for that instance and are responsible for
 re-establishing any protection you remove.
 
-### Known non-findings
+### Known Non-Findings
 
 XML-security scanners and static analyzers routinely flag the parsers this library produces. The following
 are **not** vulnerabilities under this model:
@@ -304,7 +304,7 @@ are **not** vulnerabilities under this model:
 - Reports in a JAXP implementation that does not respect the contract of the settings a hardening recipe
   requires: `org.apache.commons.xml` factory method throws rather than returning an unhardened factory, so there is no instance to attack.
 
-### Triage dispositions
+### Triage Dispositions
 
 A report judged against this model receives exactly one of:
 
@@ -317,7 +317,7 @@ A report judged against this model receives exactly one of:
 | `OUT-OF-SCOPE: unsupported runtime` | The behavior is demonstrated only on a runtime the guarantees are not defined on, such as Android on any API level (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)). |
 | `MODEL-GAP` | The report fits none of the above. The model is then incomplete: revise it rather than making an ad-hoc call. |
 
-### Conditions that would change this model
+### Conditions That Would Change This Model
 
 Revise this model when any of the following change:
 a new `org.apache.commons.xml` factory or other public surface;

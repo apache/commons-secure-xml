@@ -64,7 +64,7 @@ it resolves to empty content,
 so the parse continues without it
 (see Configuration below).
 
-### Supported runtimes
+### Supported Runtimes
 
 The library requires OpenJDK 8 or later (or a JDK distribution built from it), or Android API level 26 or later.
 
@@ -76,14 +76,14 @@ so the library secures the platform's parsers as best-effort.
 Android's `XmlPullParser` API is not supported:
 it is not a JAXP API.
 
-### Supported implementations
+### Supported Implementations
 
 Out of the box the library recognizes the stock JDK JAXP implementations, Apache Xerces 2.x, Woodstox, and Saxon-HE. If
 a factory resolves to an implementation not covered by any bundled hardening recipe, every `org.apache.commons.xml` factory method throws
 `IllegalStateException` with a message naming the unsupported class. Adding support for a new JAXP implementation
 requires a code change to this library.
 
-**DOM parsing** via `DocumentBuilderFactory`:
+**DOM Parsing** via `DocumentBuilderFactory`:
 
 ```java
 import org.w3c.dom.Document;
@@ -92,7 +92,7 @@ import org.apache.commons.xml.SecureDocumentBuilderFactory;
 Document doc = HardeningDocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputStream);
 ```
 
-**SAX parsing** via `SAXParserFactory`:
+**SAX Parsing** via `SAXParserFactory`:
 
 ```java
 import org.apache.commons.xml.SecureSAXParserFactory;
@@ -100,7 +100,7 @@ import org.apache.commons.xml.SecureSAXParserFactory;
 HardeningSAXParserFactory.newInstance().newSAXParser().parse(inputStream, myDefaultHandler);
 ```
 
-**Streaming (StAX) parsing** via `XMLInputFactory`:
+**Streaming (StAX) Parsing** via `XMLInputFactory`:
 
 ```java
 import javax.xml.stream.XMLStreamReader;
@@ -109,7 +109,7 @@ import org.apache.commons.xml.SecureXMLInputFactory;
 XMLStreamReader reader = HardeningXMLInputFactory.newInstance().createXMLStreamReader(inputStream);
 ```
 
-**XSLT transforms** via `TransformerFactory`:
+**XSLT Transforms** via `TransformerFactory`:
 
 ```java
 import javax.xml.transform.stream.StreamSource;
@@ -121,7 +121,7 @@ HardeningTransformerFactory.newInstance()
         .transform(new StreamSource(inputStream), new StreamResult(outputStream));
 ```
 
-**XPath queries** via `XPathFactory`:
+**XPath Queries** via `XPathFactory`:
 
 ```java
 import javax.xml.xpath.XPathConstants;
@@ -133,7 +133,7 @@ NodeList hits = (NodeList) HardeningXPathFactory.newInstance()
         .evaluate("//item", doc, XPathConstants.NODESET);
 ```
 
-**W3C XML Schema validation** via `SchemaFactory`:
+**W3C XML Schema Validation** via `SchemaFactory`:
 
 ```java
 import javax.xml.XMLConstants;
@@ -146,7 +146,7 @@ HardeningSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         .validate(new StreamSource(inputStream));
 ```
 
-### Wrappers, not the original factories
+### Wrappers, not the Original Factories
 
 A returned factory is not necessarily an instance of the underlying implementation.
 It might be (and usually is) a wrapper around it,
@@ -167,7 +167,7 @@ and the library respects it:
 
 Whichever parser is selected, it is hardened.
 
-### Factory methods
+### Factory Methods
 
 Each factory class mirrors every static factory method its JAXP counterpart offers,
 so a hardened factory is a drop-in replacement at any construction site:
@@ -190,7 +190,7 @@ That suits a library with minimal XML requirements,
 which can parse with the well-known platform parser
 rather than delegate the choice of implementation to the application developer.
 
-### Stylesheets and schemas
+### Stylesheets and Schemas
 
 The hardening applies to documents parsed through the returned factory. Stylesheets given to
 `TransformerFactory.newTransformer(Source)` and schemas given to `SchemaFactory.newSchema(Source)` are read by a parser
@@ -202,7 +202,7 @@ the hardening governs reads only,
 so restrict output destinations yourself when running an untrusted stylesheet
 (see the [Threat Model](threat_model.html)).
 
-### Transformer handlers and filters
+### Transformer Handlers and Filters
 
 The `SAXTransformerFactory` extension methods, `newTransformerHandler(...)`, `newTemplatesHandler()` and `newXMLFilter(...)`,
 if reachable by casting the factory from `HardeningTransformerFactory.newInstance()`,
@@ -213,7 +213,7 @@ The SAX events you feed into a handler, and a parent reader you set on a filter,
 are your own configuration, like any caller-supplied parser.
 See the [Threat Model](threat_model.html) for the exact scope.
 
-### Caching and thread-safety
+### Caching and Thread-Safety
 
 There is no caching or pooling inside `org.apache.commons.xml`; callers on a hot path are responsible for their own caching. The
 returned factories inherit the thread-safety properties of the underlying JAXP implementation, which in practice means
