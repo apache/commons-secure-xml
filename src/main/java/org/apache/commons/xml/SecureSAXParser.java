@@ -40,7 +40,7 @@ import org.xml.sax.helpers.XMLReaderAdapter;
  * every parse must run through the same instance. The {@code parse(...)} overloads inherited from {@link SAXParser} dispatch virtually to {@link #getXMLReader()}
  * and {@link #getParser()}, so they too run through the hardened views without further overrides.</p>
  */
-final class HardeningSAXParser extends SAXParser {
+final class SecureSAXParser extends SAXParser {
 
     private final SAXParser delegate;
 
@@ -53,7 +53,7 @@ final class HardeningSAXParser extends SAXParser {
      * @param delegate the delegate to wrap; must not be {@code null}.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningSAXParser(final SAXParser delegate) {
+    SecureSAXParser(final SAXParser delegate) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
     }
 

@@ -346,7 +346,7 @@ public final class HardeningSAXParserFactory {
      * Universal SAX factory wrapper that funnels every produced parser through {@link HardeningSAXParserFactory#harden(XMLReader)}.
      * <p>
      * {@link SAXParserFactory} exposes only a feature API and no property API, so the per-parse hardening (limits, entity blocking, implementation-specific fixups)
-     * has to run on each {@link XMLReader} the factory produces. This wrapper returns a {@link HardeningSAXParser}, which applies that hardening lazily to both the
+     * has to run on each {@link XMLReader} the factory produces. This wrapper returns a {@link SecureSAXParser}, which applies that hardening lazily to both the
      * SAX 2 {@link XMLReader} and the SAX 1 {@link org.xml.sax.Parser} it exposes.
      * </p>
      *
@@ -393,7 +393,7 @@ public final class HardeningSAXParserFactory {
 
         @Override
         public SAXParser newSAXParser() throws ParserConfigurationException, SAXException {
-            return new HardeningSAXParser(delegate.newSAXParser());
+            return new SecureSAXParser(delegate.newSAXParser());
         }
 
         @Override
