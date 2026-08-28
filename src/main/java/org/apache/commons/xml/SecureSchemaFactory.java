@@ -50,7 +50,7 @@ import org.xml.sax.SAXNotSupportedException;
  * resulting {@link javax.xml.validation.Schema}.
  * </p>
  * <p>
- * Not a {@link SchemaFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-hardened factory through this class
+ * Not a {@link SchemaFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-secured factory through this class
  * by calling an inherited method such as {@code newDefaultInstance()}. The secure factories are instances of a nested, non-public wrapper class.
  * </p>
  *
