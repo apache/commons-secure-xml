@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 /**
- * Apache Commons XML provides secure-by-default JAXP factory creation for Java. A single method call returns a hardened JAXP factory that can be used to
+ * Apache Commons Secure XML provides secure-by-default JAXP factory creation for Java. A single method call returns a hardened JAXP factory that can be used to
  * <em>safely</em> parse XML files.
  * <p>
  * Every method returns <em>new, hardened</em> factory instances. No caching or pooling is performed; callers on a hot path are responsible for their own

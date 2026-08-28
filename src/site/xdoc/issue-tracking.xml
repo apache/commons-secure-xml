@@ -45,15 +45,15 @@ limitations under the License.
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 https://maven.apache.org/xsd/xdoc-2.0.xsd">
   <properties>
-    <title>Apache Commons XML Issue tracking</title>
+    <title>Apache Commons Secure XML Issue tracking</title>
     <author email="dev@commons.apache.org">Apache Commons Team</author>
   </properties>
   <body>
 
-    <section name="Apache Commons XML Issue tracking">
+    <section name="Apache Commons Secure XML Issue tracking">
       <p>
-      Apache Commons XML uses <a href="https://issues.apache.org/jira/">ASF JIRA</a> for tracking issues.
-      See the <a href="https://issues.apache.org/jira/browse/COMMONSXML">Apache Commons XML JIRA project page</a>.
+      Apache Commons Secure XML uses <a href="https://issues.apache.org/jira/">ASF JIRA</a> for tracking issues.
+      See the <a href="https://issues.apache.org/jira/browse/COMMONSXML">Apache Commons Secure XML JIRA project page</a>.
       </p>
 
       <p>
@@ -65,7 +65,7 @@ limitations under the License.
 
       <p>
       If you would like to report a bug, or raise an enhancement request with
-      Apache Commons XML please do the following:
+      Apache Commons Secure XML please do the following:
       </p>
       <ol>
         <li><a href="https://issues.apache.org/jira/secure/IssueNavigator.jspa?reset=true&amp;pid=${commons.jira.pid}&amp;sorter/field=issuekey&amp;sorter/order=DESC&amp;status=1&amp;status=3&amp;status=4">Search existing open bugs</a>.
@@ -83,7 +83,7 @@ limitations under the License.
       <ul>
         <li>the more information you provide, the better we can help you</li>
         <li>test cases are vital, particularly for any proposed enhancements</li>
-        <li>the developers of Apache Commons XML are all unpaid volunteers</li>
+        <li>the developers of Apache Commons Secure XML are all unpaid volunteers</li>
       </ul>
 
       <p>
@@ -95,9 +95,9 @@ limitations under the License.
       You may also find these links useful:
       </p>
       <ul>
-        <li><a href="https://issues.apache.org/jira/secure/IssueNavigator.jspa?reset=true&amp;pid=${commons.jira.pid}&amp;sorter/field=issuekey&amp;sorter/order=DESC&amp;status=1&amp;status=3&amp;status=4">All Open Apache Commons XML bugs</a></li>
-        <li><a href="https://issues.apache.org/jira/secure/IssueNavigator.jspa?reset=true&amp;pid=${commons.jira.pid}&amp;sorter/field=issuekey&amp;sorter/order=DESC&amp;status=5&amp;status=6">All Resolved Apache Commons XML bugs</a></li>
-        <li><a href="https://issues.apache.org/jira/secure/IssueNavigator.jspa?reset=true&amp;pid=${commons.jira.pid}&amp;sorter/field=issuekey&amp;sorter/order=DESC">All Apache Commons XML bugs</a></li>
+        <li><a href="https://issues.apache.org/jira/secure/IssueNavigator.jspa?reset=true&amp;pid=${commons.jira.pid}&amp;sorter/field=issuekey&amp;sorter/order=DESC&amp;status=1&amp;status=3&amp;status=4">All Open Apache Commons Secure XML bugs</a></li>
+        <li><a href="https://issues.apache.org/jira/secure/IssueNavigator.jspa?reset=true&amp;pid=${commons.jira.pid}&amp;sorter/field=issuekey&amp;sorter/order=DESC&amp;status=5&amp;status=6">All Resolved Apache Commons Secure XML bugs</a></li>
+        <li><a href="https://issues.apache.org/jira/secure/IssueNavigator.jspa?reset=true&amp;pid=${commons.jira.pid}&amp;sorter/field=issuekey&amp;sorter/order=DESC">All Apache Commons Secure XML bugs</a></li>
       </ul>
     </section>
   </body>

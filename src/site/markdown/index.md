@@ -15,12 +15,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Apache Commons XML
+# Apache Commons Secure XML
 
-Apache Commons XML is part of the
+Apache Commons Secure XML is part of the
 [Apache Commons](https://commons.apache.org/index.html) project.
 
-Apache Commons XML provides secure-by-default JAXP factory creation,
+Apache Commons Secure XML provides secure-by-default JAXP factory creation,
 abstracting over implementation-specific XXE hardening differences between the
 stock JDK and external JAXP implementations.
 

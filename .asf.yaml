@@ -26,7 +26,7 @@ notifications:
     pullrequests_bot_codecov-commenter: notifications@commons.apache.org
 
 github:
-  description: "Apache Commons XML"
+  description: "Apache Commons Secure XML"
   homepage: https://commons.apache.org/proper/commons-xml/
 
   pull_requests:

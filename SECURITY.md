@@ -14,8 +14,8 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-# Apache Commons XML Security Policy
+# Apache Commons Secure XML Security Policy
 
 Read the [Apache Commons Security Page](https://commons.apache.org/security.html).
 
-Read the [Apache Commons XML Threat Model](https://github.com/apache/commons-xml/blob/main/src/site/markdown/threat_model.md).
+Read the [Apache Commons Secure XML Threat Model](https://github.com/apache/commons-xml/blob/main/src/site/markdown/threat_model.md).

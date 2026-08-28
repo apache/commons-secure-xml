@@ -40,7 +40,7 @@
  |                                                                      |
  +======================================================================+
 --->
-Apache Commons XML
+Apache Commons Secure XML
 ===================
 
 [![Java CI](https://github.com/apache/commons-xml/actions/workflows/maven.yml/badge.svg)](https://github.com/apache/commons-xml/actions/workflows/maven.yml)
@@ -49,16 +49,16 @@ Apache Commons XML
 [![CodeQL](https://github.com/apache/commons-xml/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/apache/commons-xml/actions/workflows/codeql-analysis.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/apache/commons-xml/badge)](https://api.securityscorecards.dev/projects/github.com/apache/commons-xml)
 
-Apache Commons XML provides secure-by-default JAXP factory creation, abstracting over
+Apache Commons Secure XML provides secure-by-default JAXP factory creation, abstracting over
     implementation-specific XXE hardening differences between the stock JDK and external JAXP implementations
     (Android, Apache Xalan, Apache Xerces, Woodstox, Saxon-HE).
 
 Documentation
 -------------
 
-More information can be found on the [Apache Commons XML homepage](https://commons.apache.org/proper/commons-xml).
+More information can be found on the [Apache Commons Secure XML homepage](https://commons.apache.org/proper/commons-xml).
 The [Javadoc](https://commons.apache.org/proper/commons-xml/apidocs) can be browsed.
-Questions related to the usage of Apache Commons XML should be posted to the [user mailing list](https://commons.apache.org/mail-lists.html).
+Questions related to the usage of Apache Commons Secure XML should be posted to the [user mailing list](https://commons.apache.org/mail-lists.html).
 
 Getting the latest release
 --------------------------
@@ -105,7 +105,7 @@ See the `NOTICE.txt` file for required notices and attributions.
 
 Donating
 --------
-You like Apache Commons XML? Then [donate back to the ASF](https://www.apache.org/foundation/contributing.html) to support development.
+You like Apache Commons Secure XML? Then [donate back to the ASF](https://www.apache.org/foundation/contributing.html) to support development.
 
 Additional Resources
 --------------------

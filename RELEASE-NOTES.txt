@@ -14,12 +14,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-Apache Commons XML 1.0.0 Release Notes
+Apache Commons Secure XML 1.0.0 Release Notes
 --------------------------------------
 
-The Apache Commons XML team is pleased to announce the release of Apache Commons XML 1.0.0.
+The Apache Commons Secure XML team is pleased to announce the release of Apache Commons Secure XML 1.0.0.
 
-Apache Commons XML provides secure-by-default JAXP factory creation, abstracting over
+Apache Commons Secure XML provides secure-by-default JAXP factory creation, abstracting over
 implementation-specific XXE hardening differences between the stock JDK and external JAXP implementations
 (Android, Apache Xalan, Apache Xerces, Woodstox, Saxon-HE).
 
@@ -29,7 +29,7 @@ First release, requires Java 8 or above.
 New features
 ------------
 
-*                  This is the first release of Apache Commons XML. Thanks to Piotr P. Karwasz, Gary Gregory.
+*                  This is the first release of Apache Commons Secure XML. Thanks to Piotr P. Karwasz, Gary Gregory.
 *                  Add secure-by-default JAXP factory creation via org.apache.commons.xml, donated from the copernik-xml-factory project (https://github.com/copernik-eu/copernik-xml-factory) and covering the stock JDK, Android, Apache Xalan, Apache Xerces, Woodstox, and Saxon-HE. Thanks to Piotr P. Karwasz, Gary Gregory.
 * COMMONSXML-9:    Install a non-removable resolver floor on every resolver channel (EntityResolver, LSResourceResolver, URIResolver, and XMLResolver), routing caller-supplied resolvers through it as allow-lists. Thanks to Piotr P. Karwasz, Gary Gregory.
 *                  Harden the SAXTransformerFactory extension surface (TransformerHandler, TemplatesHandler, and XMLFilter) and TransformerFactory.getAssociatedStylesheet. Thanks to Piotr P. Karwasz, Gary Gregory.
@@ -58,8 +58,8 @@ Removed
 
 Historical list of changes: https://commons.apache.org/proper/commons-xml//changes.html
 
-For complete information on Apache Commons XML, including instructions on how to submit bug reports,
-patches, or suggestions for improvement, see the Apache Commons XML website:
+For complete information on Apache Commons Secure XML, including instructions on how to submit bug reports,
+patches, or suggestions for improvement, see the Apache Commons Secure XML website:
 
 https://commons.apache.org/proper/commons-xml/
 

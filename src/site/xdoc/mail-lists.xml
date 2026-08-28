@@ -43,14 +43,14 @@ limitations under the License.
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 https://maven.apache.org/xsd/xdoc-2.0.xsd">
   <properties>
-    <title>Apache Commons XML Mailing Lists</title>
+    <title>Apache Commons Secure XML Mailing Lists</title>
     <author email="dev@commons.apache.org">Apache Commons Team</author>
   </properties>
   <body>
 
     <section name="Overview">
       <p>
-        <a href="index.html">Apache Commons XML</a> shares mailing lists with all the other
+        <a href="index.html">Apache Commons Secure XML</a> shares mailing lists with all the other
         <a href="https://commons.apache.org/components.html">Commons Components</a>.
         To make it easier for people to only read messages related to components they are interested in,
         the convention in Commons is to prefix the subject line of messages with the component's name,
@@ -60,11 +60,11 @@ limitations under the License.
         <li>[xml] Problem with the ...</li>
       </ul>
       <p>
-        Questions related to the usage of Apache Commons XML should be posted to the
+        Questions related to the usage of Apache Commons Secure XML should be posted to the
         <a href="https://lists.apache.org/list.html?user@commons.apache.org">User List</a>.
         <br />
         The <a href="https://lists.apache.org/list.html?dev@commons.apache.org">Developer List</a>
-        is for questions and discussion related to the development of Apache Commons XML.
+        is for questions and discussion related to the development of Apache Commons Secure XML.
         <br />
         Please do not cross-post; developers are also subscribed to the user list.
         <br />
@@ -80,9 +80,9 @@ limitations under the License.
       </p>
     </section>
 
-    <section name="Apache Commons XML Mailing Lists">
+    <section name="Apache Commons Secure XML Mailing Lists">
       <p>
-        <strong>Please prefix the subject line of any messages for <a href="index.html">Apache Commons XML</a>
+        <strong>Please prefix the subject line of any messages for <a href="index.html">Apache Commons Secure XML</a>
         with <i>[xml]</i></strong> - <i>thanks!</i>
         <br />
         <br />
@@ -103,7 +103,7 @@ limitations under the License.
           <td>
             <strong>Commons User List</strong>
             <br /><br />
-            Questions on using Apache Commons XML.
+            Questions on using Apache Commons Secure XML.
             <br /><br />
           </td>
           <td><a href="mailto:user-subscribe@commons.apache.org">Subscribe</a></td>
@@ -122,7 +122,7 @@ limitations under the License.
           <td>
             <strong>Commons Developer List</strong>
             <br /><br />
-            Discussion of development of Apache Commons XML.
+            Discussion of development of Apache Commons Secure XML.
             <br /><br />
           </td>
           <td><a href="mailto:dev-subscribe@commons.apache.org">Subscribe</a></td>

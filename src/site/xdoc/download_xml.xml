@@ -60,11 +60,11 @@ limitations under the License.
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 https://maven.apache.org/xsd/xdoc-2.0.xsd">
   <properties>
-    <title>Download Apache Commons XML</title>
+    <title>Download Apache Commons Secure XML</title>
     <author email="dev@commons.apache.org">Apache Commons Team</author>
   </properties>
   <body>
-    <section name="Download Apache Commons XML">
+    <section name="Download Apache Commons Secure XML">
     <subsection name="Using a Mirror">
       <p>
         We recommend you use a mirror to download our release
@@ -115,7 +115,7 @@ limitations under the License.
       </p>
     </subsection>
     </section>
-    <section name="Apache Commons XML 1.0.0 (Java 8+)">
+    <section name="Apache Commons Secure XML 1.0.0 (Java 8+)">
       <subsection name="Binaries">
         <table>
           <tr>

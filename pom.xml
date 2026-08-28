@@ -25,10 +25,10 @@ limitations under the License.
   </parent>
   <artifactId>commons-xml</artifactId>
   <version>1.0.0-SNAPSHOT</version>
-  <name>Apache Commons XML</name>
+  <name>Apache Commons Secure XML</name>
   <url>https://commons.apache.org/proper/commons-xml/</url>
   <inceptionYear>2026</inceptionYear>
-  <description>Apache Commons XML provides secure-by-default JAXP factory creation, abstracting over
+  <description>Apache Commons Secure XML provides secure-by-default JAXP factory creation, abstracting over
     implementation-specific XXE hardening differences between the stock JDK and external JAXP implementations
     (Android, Apache Xalan, Apache Xerces, Woodstox, Saxon-HE).</description>
   <scm>
