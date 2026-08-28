@@ -39,7 +39,7 @@ import org.junit.jupiter.api.Test;
  * <p>Each fixture under {@code src/test/resources/leaked/} contains the {@link #MARKER} string. The tests dispatch the URI-fetching function at the file's URL
  * and check whether the marker reaches the result.</p>
  *
- * <p>Cases covered, each as a pair (unconfigured Saxon factory expected to leak, hardened Saxon factory expected to block):</p>
+ * <p>Cases covered, each as a pair (unconfigured Saxon factory expected to leak, secure Saxon factory expected to block):</p>
  *
  * <ul>
  *   <li>{@code doc(uri)} reading {@code referenced.xml}.</li>
