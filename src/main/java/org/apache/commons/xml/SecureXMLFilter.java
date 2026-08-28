@@ -42,7 +42,7 @@ import org.xml.sax.helpers.XMLFilterImpl;
  * caller has not set a parent (a caller-set parent is trusted configuration, used as-is), and the transformation runs on a {@link SecureTransformer}, so
  * runtime {@code document()} sits on the resolver floor.</p>
  */
-final class HardeningXMLFilter extends XMLFilterImpl {
+final class SecureXMLFilter extends XMLFilterImpl {
 
     private final SecureTemplates templates;
 
@@ -52,7 +52,7 @@ final class HardeningXMLFilter extends XMLFilterImpl {
      * @param templates the delegate to wrap; must not be {@code null}.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningXMLFilter(final SecureTemplates templates) {
+    SecureXMLFilter(final SecureTemplates templates) {
         this.templates = Objects.requireNonNull(templates, "templates");
     }
 

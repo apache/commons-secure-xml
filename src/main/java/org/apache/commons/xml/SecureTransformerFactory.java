@@ -203,7 +203,7 @@ public final class SecureTransformerFactory {
      *
      * <p>The {@link SAXTransformerFactory} extension products ride the same wrappers: {@code newTransformerHandler}/{@code newTemplatesHandler} products are
      * wrapped ({@link SecureTransformerHandler}, {@link SecureTemplatesHandler}) so the {@link Transformer}/{@link Templates} they expose carry the resolver
-     * floor, and {@code newXMLFilter} returns a {@link HardeningXMLFilter} composed from these wrappers instead of the implementation's filter, which would
+     * floor, and {@code newXMLFilter} returns a {@link SecureXMLFilter} composed from these wrappers instead of the implementation's filter, which would
      * self-provision an unhardened input reader.</p>
      *
      * <h2>Caveats</h2>
@@ -422,12 +422,12 @@ public final class SecureTransformerFactory {
         @Override
         public XMLFilter newXMLFilter(final Source source) throws TransformerConfigurationException {
             final Templates templates = newTemplates(source);
-            return templates == null ? null : new HardeningXMLFilter((SecureTemplates) templates);
+            return templates == null ? null : new SecureXMLFilter((SecureTemplates) templates);
         }
 
         @Override
         public XMLFilter newXMLFilter(final Templates templates) throws TransformerConfigurationException {
-            return new HardeningXMLFilter(templates instanceof SecureTemplates ? (SecureTemplates) templates
+            return new SecureXMLFilter(templates instanceof SecureTemplates ? (SecureTemplates) templates
                     : new SecureTemplates(templates, getURIResolver(), emptySource, overrideDefaultParser()));
         }
 
