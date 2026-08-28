@@ -174,7 +174,7 @@ public final class SecureSchemaFactory {
          *
          * @param schemas the schema sources to harden; must not be {@code null}.
          * @return a new array of secure sources.
-         * @throws SAXException if any source cannot be hardened.
+         * @throws SAXException if any source cannot be secure.
          * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
          *                                   configuration error} or if the implementation is not available or cannot be instantiated.
          */
