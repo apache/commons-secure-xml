@@ -327,7 +327,7 @@ public final class SecureXMLInputFactory {
      * every entity-resolution hook, leaving the standard {@code SUPPORT_DTD} / {@code IS_SUPPORTING_EXTERNAL_ENTITIES} defaults untouched; see the wrapper's
      * Javadoc for the per-implementation hook routing.</p>
      *
-     * @param factory the factory to harden; never {@code null}.
+     * @param factory the factory to secure; never {@code null}.
      * @return a secure factory.
      */
     static XMLInputFactory secure(final XMLInputFactory factory) {
