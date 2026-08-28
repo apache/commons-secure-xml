@@ -38,7 +38,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 /**
- * Checks that a hardened, schema-validating parser does not fetch a schema named only through a Xerces schema-location
+ * Checks that a secure, schema-validating parser does not fetch a schema named only through a Xerces schema-location
  * property: {@code external-noNamespaceSchemaLocation} (no-namespace schema) and {@code external-schemaLocation}
  * (namespaced schema).
  *
