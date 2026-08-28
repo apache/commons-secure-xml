@@ -89,6 +89,8 @@ final class SaxonProvider {
      */
     private static final class SecureConfiguration extends Configuration {
 
+        private static final String JDK_DEFAULT_PARSER = "#DEFAULT";
+
         /** Collection-level ignore: {@code fn:collection()} and {@code fn:uri-collection()} resolve to an empty collection instead of fetching. */
         private static final CollectionFinder EMPTY_COLLECTION_FINDER = (context, collectionURI) -> {
             if (SecureException.throwOnUnresolved()) {
@@ -104,8 +106,8 @@ final class SaxonProvider {
             //  fn:collection bypasses the resolver, closed by the empty collection finder.
             setCollectionFinder(EMPTY_COLLECTION_FINDER);
             // Use the parser below for both style and source:
-            setStyleParserClass("#DEFAULT");
-            setSourceParserClass("#DEFAULT");
+            setStyleParserClass(JDK_DEFAULT_PARSER);
+            setSourceParserClass(JDK_DEFAULT_PARSER);
         }
 
         /**
