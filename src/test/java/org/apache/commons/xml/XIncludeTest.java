@@ -323,7 +323,7 @@ class XIncludeTest {
 
     //endregion
 
-    //region hardenReader: reader with XInclude enabled before hardening is blocked (the internal recipe behind the secure factory and SaxonProvider)
+    //region hardenReader: reader with XInclude enabled before securing is blocked (the internal recipe behind the secure factory and SaxonProvider)
 
     @Test
     @Tag("sax")
