@@ -38,13 +38,13 @@ import org.junit.jupiter.api.Test;
  * <ul>
  *   <li>{@link #CONTENT_120K} ({@code 120,000}) on the JVM: above every JVM parser default.</li>
  *   <li>{@link #CONTENT_9M} ({@code 9,000,000}) on Android: above libexpat's 8 MiB billion-laughs activation threshold, the only defense there since the limit is
- *       not configurable. For that same reason the positive controls do not run on Android (see {@link #assumeEntityLimitConfigurable()}): a payload the hardened test
+ *       not configurable. For that same reason the positive controls do not run on Android (see {@link #assumeEntityLimitConfigurable()}): a payload the secure test
  *       blocks cannot be parsed even without hardening.</li>
  * </ul>
  *
  * <p>The XSLT payload spreads those same {@code 120,000} expansions over two literal result elements with content {@link #CONTENT_60K} rather than one text node,
  * because XSLTC caps a compiled literal at 65,535 bytes; see {@link #xsltPayload()}.
- * A parser counts expansions across the whole document, so the split changes nothing on the hardened side.</p>
+ * A parser counts expansions across the whole document, so the split changes nothing on the secure side.</p>
  *
  * <p>Why a single character {@code "A"}: it makes the expanded size equal the expansion count, so a payload's size maps directly onto each parser's limit, and
  * (being ASCII) onto XSLTC's byte-counted constant-pool ceiling as well.</p>
@@ -73,7 +73,7 @@ class BillionLaughsTest {
     /**
      * Skips a positive control on Android.
      *
-     * <p>The controls prove the hardened test blocked a payload that would otherwise parse, so they must use the very payload the hardened test blocks.
+     * <p>The controls prove the secure test blocked a payload that would otherwise parse, so they must use the very payload the secure test blocks.
      * On Android the entity-expansion limit is not configurable (libexpat's billion-laughs check cannot be lifted), so that payload
      * cannot be parsed even without hardening, leaving nothing to prove.</p>
      */
