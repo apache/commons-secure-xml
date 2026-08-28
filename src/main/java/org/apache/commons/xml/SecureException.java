@@ -22,8 +22,8 @@ package org.apache.commons.xml;
  *
  * <p>Two failure modes share this type:</p>
  * <ul>
- *   <li>No bundled hardening recipe matches the concrete factory class.</li>
- *   <li>A recipe tried to apply a hardening setting and the implementation rejected it.</li>
+ *   <li>No bundled secure recipe matches the concrete factory class.</li>
+ *   <li>A recipe tried to apply a secure setting and the implementation rejected it.</li>
  * </ul>
  *
  * <p>The message names the unsupported factory class or the specific feature, attribute or property that failed; the cause, when present, is the original
@@ -51,7 +51,7 @@ final class SecureException extends IllegalStateException {
     }
 
     /**
-     * Builds the standard exception for a rejected hardening setting.
+     * Builds the standard exception for a rejected secure setting.
      *
      * @param kind   the kind of setting: {@code "feature"}, {@code "attribute"} or {@code "property"}.
      * @param name   the name of the feature, attribute or property that could not be set.
