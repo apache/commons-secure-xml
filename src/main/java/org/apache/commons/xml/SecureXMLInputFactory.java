@@ -272,16 +272,7 @@ public final class SecureXMLInputFactory {
      */
     public static XMLInputFactory newDefaultFactory() {
         if (MH_newDefaultInstance != null) {
-            final XMLInputFactory factory;
-            try {
-                factory = (XMLInputFactory) MH_newDefaultInstance.invokeExact();
-            } catch (final FactoryConfigurationError e) {
-                throw e;
-            } catch (final Throwable e) {
-                // Unreachable: the looked-up method declares no other exceptions.
-                throw new IllegalStateException(e);
-            }
-            return secure(factory);
+            return secure(MethodHandleFactory.invokeExact(() -> (XMLInputFactory) MH_newDefaultInstance.invokeExact(), FactoryConfigurationError.class));
         }
         try {
             // Java 8: the method does not exist, and XMLInputFactory has no class-name-taking lookup; instantiate the JDK's built-in default directly.

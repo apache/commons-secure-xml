@@ -225,16 +225,7 @@ public final class SecureSchemaFactory {
      */
     public static SchemaFactory newDefaultInstance() {
         if (MH_newDefaultInstance != null) {
-            final SchemaFactory factory;
-            try {
-                factory = (SchemaFactory) MH_newDefaultInstance.invokeExact();
-            } catch (final SchemaFactoryConfigurationError e) {
-                throw e;
-            } catch (final Throwable e) {
-                // Unreachable: the looked-up method declares no other exceptions.
-                throw new IllegalStateException(e);
-            }
-            return secure(factory);
+            return secure(MethodHandleFactory.invokeExact(() -> (SchemaFactory) MH_newDefaultInstance.invokeExact(), SchemaFactoryConfigurationError.class));
         }
         // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead. Where that class does not exist either (for
         // example Android), the lookup miss surfaces as IllegalArgumentException, the error SchemaFactory.newInstance(String, String, ClassLoader) defines.

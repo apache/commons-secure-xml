@@ -63,7 +63,8 @@ class ShadingFootprintTest {
             "SecureDocumentBuilderFactory$1",
             "SecureDocumentBuilderFactory$Wrapper",
             "SecureException",
-            "MethodHandleFactory");
+            "MethodHandleFactory",
+            "MethodHandleFactory$ThrowableCallable");
     // @formatter:on
 
     // @formatter:off
@@ -76,7 +77,8 @@ class ShadingFootprintTest {
             "SecureSAXParserFactory$SecureExpatXMLReader",
             "SecureSAXParserFactory$Wrapper",
             "SecureXMLReader",
-            "MethodHandleFactory");
+            "MethodHandleFactory",
+            "MethodHandleFactory$ThrowableCallable");
     // @formatter:on
 
     // @formatter:off
@@ -86,7 +88,8 @@ class ShadingFootprintTest {
             "SecureXMLInputFactory",
             "SecureXMLInputFactory$1",
             "SecureXMLInputFactory$Wrapper",
-            "MethodHandleFactory");
+            "MethodHandleFactory",
+            "MethodHandleFactory$ThrowableCallable");
     // @formatter:on
 
     /**
@@ -132,6 +135,7 @@ class ShadingFootprintTest {
             "SecureDocumentBuilderFactory$1",
             "SecureDocumentBuilderFactory$Wrapper",
             "MethodHandleFactory",
+            "MethodHandleFactory$ThrowableCallable",
             "SecureException",
             "SecureSAXParser",
             "SecureSAXParserFactory",
@@ -172,7 +176,7 @@ class ShadingFootprintTest {
     /**
      * Class count of the {@link #rootClosure()} DOM entry point, the baseline the {@link #reportFootprint()} percentages are computed against.
      */
-    private static final int LIBRARY_CLASS_COUNT = 7;
+    private static final int LIBRARY_CLASS_COUNT = 8;
 
     /**
      * Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library.

@@ -26,6 +26,12 @@ import java.lang.invoke.MethodType;
  */
 class MethodHandleFactory {
 
+    @FunctionalInterface
+    interface ThrowableCallable<V> {
+
+        V call() throws Throwable;
+    }
+
     /**
      * Finds a static method handle for the given class, method name, and method type.
      *
@@ -33,7 +39,7 @@ class MethodHandleFactory {
      * @param name the name of the method.
      * @param type the method type.
      * @return the method handle, or {@code null} if not found.
-     * @throws SecurityException if a security manager is present and it <a href="MethodHandles.Lookup.html#secmgr">refuses access</a>.
+     * @throws SecurityException    if a security manager is present and it <a href="MethodHandles.Lookup.html#secmgr">refuses access</a>.
      * @throws NullPointerException if any argument is null.
      */
     static MethodHandle findStatic(final Class<?> refc, final String name, final MethodType type) {
@@ -41,6 +47,18 @@ class MethodHandleFactory {
             return MethodHandles.publicLookup().findStatic(refc, name, type);
         } catch (final ReflectiveOperationException e) {
             return null;
+        }
+    }
+
+    static <T, E extends Error> T invokeExact(final ThrowableCallable<T> methodHandle, final Class<E> rethrow) throws E {
+        try {
+            return methodHandle.call();
+        } catch (final Throwable e) {
+            if (e.getClass().isInstance(rethrow)) {
+                throw rethrow.cast(e);
+            }
+            // Unreachable: the looked-up method declares no other exceptions.
+            throw new IllegalStateException(e);
         }
     }
 }

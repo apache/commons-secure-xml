@@ -213,16 +213,7 @@ public final class SecureDocumentBuilderFactory {
      */
     public static DocumentBuilderFactory newDefaultInstance() {
         if (MH_newDefaultInstance != null) {
-            final DocumentBuilderFactory factory;
-            try {
-                factory = (DocumentBuilderFactory) MH_newDefaultInstance.invokeExact();
-            } catch (final FactoryConfigurationError e) {
-                throw e;
-            } catch (final Throwable e) {
-                // Unreachable: the looked-up method declares no other exceptions.
-                throw new IllegalStateException(e);
-            }
-            return secure(factory);
+            return secure(MethodHandleFactory.invokeExact(() -> (DocumentBuilderFactory) MH_newDefaultInstance.invokeExact(), FactoryConfigurationError.class));
         }
         // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead. Where that class does not exist either (for
         // example Android), the lookup miss surfaces as the factory's own FactoryConfigurationError, like any newInstance miss.

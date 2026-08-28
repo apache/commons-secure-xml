@@ -377,16 +377,7 @@ public final class SecureTransformerFactory {
      */
     public static TransformerFactory newDefaultInstance() {
         if (MH_newDefaultInstance != null) {
-            final TransformerFactory factory;
-            try {
-                factory = (TransformerFactory) MH_newDefaultInstance.invokeExact();
-            } catch (final TransformerFactoryConfigurationError e) {
-                throw e;
-            } catch (final Throwable e) {
-                // Unreachable: the looked-up method declares no other exceptions.
-                throw new IllegalStateException(e);
-            }
-            return secure(factory);
+            return secure(MethodHandleFactory.invokeExact(() -> (TransformerFactory) MH_newDefaultInstance.invokeExact(), TransformerFactoryConfigurationError.class));
         }
         // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead. Where that class does not exist either (for
         // example Android), the lookup miss surfaces as TransformerFactoryConfigurationError, like any newInstance miss.
