@@ -33,7 +33,7 @@ import org.xml.sax.SAXException;
  * {@link TemplatesHandler} wrapper whose only purpose is to return a {@link SecureTemplates} from {@link TemplatesHandler#getTemplates()}.
  *
  * <p>The handler itself only compiles: the caller drives the stylesheet's SAX events, and {@code xsl:include}/{@code xsl:import} hrefs already resolve through
- * the delegate factory's resolver, which is the hardening floor. What the raw handler lacks is the runtime side: the {@link Templates} it compiles produce
+ * the delegate factory's resolver, which is the secure floor. What the raw handler lacks is the runtime side: the {@link Templates} it compiles produce
  * Transformers without a {@link URIResolver} floor. Wrapping {@code getTemplates()} closes that, exactly as
  * {@link javax.xml.transform.TransformerFactory#newTemplates newTemplates} does.</p>
  */
