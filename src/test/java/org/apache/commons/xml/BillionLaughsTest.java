@@ -24,9 +24,9 @@ import org.junit.jupiter.api.Test;
 /**
  * Checks whether parsers reject a Billion Laughs payload (nested entity expansion in the internal DTD subset).
  *
- * <p>Each {@code hardened*} test asserts the library blocks the payload;
+ * <p>Each {@code secure*} test asserts the library blocks the payload;
  * its {@code unconfigured*} positive control asserts the same payload parses once the limit is disabled,
- * so a block reflects the hardening rather than a broken wrapper.
+ * so a block reflects the secure rather than a broken wrapper.
  * The library pins no custom entity-expansion limit; each parser keeps its own secure-processing default, which varies by implementation:
  * {@code 2,500} (stock JDK),
  * {@code 64,000} (external Xerces under {@code FEATURE_SECURE_PROCESSING}),
@@ -136,7 +136,7 @@ class BillionLaughsTest {
 
     @Test
     @Tag("dom")
-    void hardenedDomBlocks() {
+    void secureDomBlocks() {
         Assumptions.assumeTrue(AttackTestSupport.DOM_RESOLVES_INTERNAL_ENTITIES,
                 "Skipped: platform DOM does not resolve user-defined entities");
         AttackTestSupport.assertDomBlocks(xmlPayload());
@@ -144,43 +144,43 @@ class BillionLaughsTest {
 
     @Test
     @Tag("sax")
-    void hardenedSaxBlocks() {
+    void secureSaxBlocks() {
         AttackTestSupport.assertSaxBlocks(xmlPayload());
     }
 
     @Test
     @Tag("schema")
-    void hardenedSchemaBlocks() {
+    void secureSchemaBlocks() {
         AttackTestSupport.assertSchemaBlocks(AttackTestSupport.streamSource(xsdPayload()));
     }
 
     @Test
     @Tag("stax")
-    void hardenedStaxBlocks() {
+    void secureStaxBlocks() {
         AttackTestSupport.assertStaxBlocks(xmlPayload());
     }
 
     @Test
     @Tag("trax")
-    void hardenedTemplatesBlocks() {
+    void secureTemplatesBlocks() {
         AttackTestSupport.assertTemplatesBlocks(AttackTestSupport.streamSource(xsltPayload()));
     }
 
     @Test
     @Tag("trax")
-    void hardenedTransformerBlocks() {
+    void secureTransformerBlocks() {
         AttackTestSupport.assertTransformerBlocks(xmlPayload());
     }
 
     @Test
     @Tag("schema")
-    void hardenedValidatorBlocks() {
+    void secureValidatorBlocks() {
         AttackTestSupport.assertValidatorBlocks(xmlPayload());
     }
 
     @Test
     @Tag("sax")
-    void hardenedXmlReaderBlocks() {
+    void secureXmlReaderBlocks() {
         AttackTestSupport.assertXmlReaderBlocks(xmlPayload());
     }
 
