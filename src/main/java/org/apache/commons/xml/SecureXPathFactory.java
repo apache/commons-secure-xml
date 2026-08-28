@@ -36,7 +36,7 @@ import javax.xml.xpath.XPathVariableResolver;
  * </p>
  * <p>
  * The guarantees also cover the document parse behind {@code XPath.evaluate(String, InputSource)} and {@code XPathExpression.evaluate(InputSource)}: the
- * input document is built through a hardened, namespace-aware {@link javax.xml.parsers.DocumentBuilder} instead of the engine's internal parser.
+ * input document is built through a secure, namespace-aware {@link javax.xml.parsers.DocumentBuilder} instead of the engine's internal parser.
  * </p>
  * <p>
  * Not a {@link XPathFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-hardened factory through this class
@@ -73,7 +73,7 @@ public final class SecureXPathFactory {
      * </ul>
      *
      * @param factory The factory to harden.
-     * @return A new secure factory or the original factory, hardened, if it is a known Saxon factory.
+     * @return A new secure factory or the original factory, secure, if it is a known Saxon factory.
      * @throws SecureException Thrown if this {@link XPathFactory} or the {@code XPath}s it creates cannot support this feature.
      */
     static XPathFactory secure(final XPathFactory factory) {
