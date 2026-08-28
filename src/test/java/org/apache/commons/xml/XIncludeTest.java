@@ -327,7 +327,7 @@ class XIncludeTest {
 
     @Test
     @Tag("sax")
-    void hardenReaderAllowListResolvesParseXml() throws Exception {
+    void secureReaderAllowListResolvesParseXml() throws Exception {
         final String input = xiIncludeXml(REFERENCED_XML, "xml");
 
         final SAXParserFactory unhardenedFactory = SAXParserFactory.newInstance();
@@ -342,7 +342,7 @@ class XIncludeTest {
 
     @Test
     @Tag("sax")
-    void hardenReaderBlocksParseText() throws Exception {
+    void secureReaderBlocksParseText() throws Exception {
         final String input = xiIncludeXml(REFERENCED_TEXT, "text");
 
         final SAXParserFactory unhardenedFactory = SAXParserFactory.newInstance();
@@ -356,7 +356,7 @@ class XIncludeTest {
 
     @Test
     @Tag("sax")
-    void hardenReaderBlocksParseXml() throws Exception {
+    void secureReaderBlocksParseXml() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_XML, "xml"));
 
         // Reader from an unhardened factory that already has XInclude enabled

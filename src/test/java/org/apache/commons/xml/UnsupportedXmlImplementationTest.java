@@ -90,7 +90,7 @@ class UnsupportedXmlImplementationTest {
     }
 
     @Test
-    void hardenRejectsUnsecurableFactory() {
+    void secureRejectsUnsecurableFactory() {
         final IllegalStateException thrown = assertThrows(
                 IllegalStateException.class,
                 () -> SecureDocumentBuilderFactory.secure(new FakeDocumentBuilderFactory()));
@@ -100,7 +100,7 @@ class UnsupportedXmlImplementationTest {
     }
 
     @Test
-    void hardenRejectsUnsecurableSaxFactory() {
+    void secureRejectsUnsecurableSaxFactory() {
         final IllegalStateException thrown = assertThrows(
                 IllegalStateException.class,
                 () -> SecureSAXParserFactory.secure(new FakeSAXParserFactory()));
