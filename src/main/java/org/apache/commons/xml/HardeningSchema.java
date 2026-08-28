@@ -25,7 +25,7 @@ import javax.xml.validation.ValidatorHandler;
 
 /**
  * {@link Schema} wrapper that hardens every {@link Validator} and {@link ValidatorHandler} the inner Schema produces: each {@link Validator} is wrapped in
- * {@link HardeningValidator} (which rewrites the Source through {@link HardeningSAXParserFactory#harden(javax.xml.transform.Source)} and installs the resolver
+ * {@link HardeningValidator} (which rewrites the Source through {@link HardeningSAXParserFactory#harden(javax.xml.transform.Source, boolean)} and installs the resolver
  * floor), and each {@link ValidatorHandler} is wrapped in a {@link HardeningValidatorHandler} that keeps the same ignore-all resolver floor so
  * {@code xsi:schemaLocation} is not resolved during SAX-driven validation.
  */
@@ -34,18 +34,25 @@ final class HardeningSchema extends Schema {
     private final Schema delegate;
 
     /**
+     * Snapshot of the factory's {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} outcome, carried onto every produced Validator.
+     */
+    final boolean useDefaultParser;
+
+    /**
      * Constructs a new instance.
      *
-     * @param delegate the delegate to wrap; must not be {@code null}.
+     * @param delegate         the delegate to wrap; must not be {@code null}.
+     * @param useDefaultParser whether the produced Validators' source rewrites should pin the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningSchema(final Schema delegate) {
+    HardeningSchema(final Schema delegate, final boolean useDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
+        this.useDefaultParser = useDefaultParser;
     }
 
     @Override
     public Validator newValidator() {
-        return new HardeningValidator(delegate.newValidator());
+        return new HardeningValidator(delegate.newValidator(), useDefaultParser);
     }
 
     @Override

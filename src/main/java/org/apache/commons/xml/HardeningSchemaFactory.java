@@ -80,7 +80,7 @@ public final class HardeningSchemaFactory {
      * <p>Unlike the other factory types there is no per-implementation branching and no feature or limit configuration on the factory itself: schema compilation
      * and validation reach external resources only through the resolver hook, so wrapping the factory with a non-removable ignore-all resolver floor is enough on
      * every implementation. The reader used to parse schema and instance documents is hardened separately, through
-     * {@link HardeningSAXParserFactory#harden(javax.xml.transform.Source)}.</p>
+     * {@link HardeningSAXParserFactory#harden(javax.xml.transform.Source, boolean)}.</p>
      *
      * @param factory the factory to harden; never {@code null}.
      * @return a hardened factory.
@@ -160,14 +160,14 @@ public final class HardeningSchemaFactory {
      * <ol>
      *   <li>{@link HardeningSchemaFactory} installs an ignore-all {@link FallbackIgnoreLSResourceResolver} floor on the factory (blocking
      *       {@code xs:import}/{@code xs:include}/{@code xs:redefine} at compile time) and rewrites the Source on every {@code newSchema(Source[])} entry point
-     *       through {@link HardeningSAXParserFactory#harden(Source)}.</li>
+     *       through {@link HardeningSAXParserFactory#harden(Source, boolean)}.</li>
      *   <li>{@link HardeningSchema} wraps every Validator/ValidatorHandler the inner Schema produces and re-installs the floor on each (blocking
      *       {@code xsi:schemaLocation} at validation time), since neither the JDK nor Xerces reliably propagates it through {@code Schema}.</li>
      *   <li>{@link HardeningValidator} rewrites the Source on every {@link Validator#validate(Source)} call.</li>
      * </ol>
      *
      * <p>
-     * The hardened reader supplied by {@link HardeningSAXParserFactory#harden(Source)} already carries {@code FEATURE_SECURE_PROCESSING} and the processing limits, so a
+     * The hardened reader supplied by {@link HardeningSAXParserFactory#harden(Source, boolean)} already carries {@code FEATURE_SECURE_PROCESSING} and the processing limits, so a
      * DOCTYPE, external entity or Billion Laughs payload in the schema or instance document is bounded there rather than on this factory. The JAXP 1.5
      * {@code ACCESS_EXTERNAL_*} properties are deliberately not set: the resolver floor already blocks the same fetches on every implementation, and the JDK 8
      * {@code SchemaFactory} has a bug whereby those properties keep blocking even when a caller's own resolver would grant the access. The floor is a non-removable
@@ -180,7 +180,7 @@ public final class HardeningSchemaFactory {
     private static final class Wrapper extends SchemaFactory {
 
         /**
-         * Hardens every schema source through {@link HardeningSAXParserFactory#harden(Source)}.
+         * Hardens every schema source through {@link HardeningSAXParserFactory#harden(Source, boolean)}.
          *
          * @param schemas the schema sources to harden; must not be {@code null}.
          * @return a new array of hardened sources.
@@ -188,11 +188,12 @@ public final class HardeningSchemaFactory {
          * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
          *                                   configuration error} or if the implementation is not available or cannot be instantiated.
          */
-        private static Source[] harden(final Source[] schemas) throws SAXException {
+        private Source[] harden(final Source[] schemas) throws SAXException {
             final Source[] hardened = new Source[schemas.length];
+            final boolean useDefaultParser = useDefaultParser();
             try {
                 for (int i = 0; i < schemas.length; i++) {
-                    hardened[i] = HardeningSAXParserFactory.harden(schemas[i]);
+                    hardened[i] = HardeningSAXParserFactory.harden(schemas[i], useDefaultParser);
                 }
             } catch (final TransformerConfigurationException e) {
                 throw new SAXException("Failed to harden schema source", e);
@@ -244,7 +245,7 @@ public final class HardeningSchemaFactory {
 
         @Override
         public Schema newSchema() throws SAXException {
-            return new HardeningSchema(delegate.newSchema());
+            return new HardeningSchema(delegate.newSchema(), useDefaultParser());
         }
 
         /**
@@ -255,7 +256,22 @@ public final class HardeningSchemaFactory {
          */
         @Override
         public Schema newSchema(final Source[] schemas) throws SAXException {
-            return new HardeningSchema(delegate.newSchema(harden(schemas)));
+            return new HardeningSchema(delegate.newSchema(harden(schemas)), useDefaultParser());
+        }
+
+        /**
+         * Whether {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} on the delegate currently asks for the platform's built-in parser; the
+         * implementation's internal parsers are never used, so the feature instead selects which hardened parser family performs the source rewrites.
+         * An implementation that does not recognize the feature reports it by exception and keeps the pluggable lookup.
+         *
+         * @return Whether the rewrites should pin the platform's built-in parser.
+         */
+        private boolean useDefaultParser() {
+            try {
+                return !delegate.getFeature(HardeningSAXParserFactory.OVERRIDE_DEFAULT_PARSER);
+            } catch (final SAXNotRecognizedException | SAXNotSupportedException e) {
+                return false;
+            }
         }
 
         @Override

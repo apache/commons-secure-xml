@@ -161,7 +161,6 @@ produces, breaks the hardening for that instance.
 - `http://xml.org/sax/features/external-parameter-entities`
 - `javax.xml.stream.isSupportingExternalEntities`
 - `javax.xml.stream.supportDTD`
-- `jdk.xml.overrideDefaultParser`
 - the implementation's secure-processing limits (entity expansion, element depth, attribute count, and similar)
 
 This list is not exhaustive:
@@ -218,6 +217,14 @@ enforced by the reserved settings above, which a caller cannot lift.
   - `http://apache.org/xml/features/xinclude`.
 
   As in the previous case, you need to provide a secure resolver.
+
+- **Parser pinning.** You may set `jdk.xml.overrideDefaultParser` on a TrAX, XPath or schema factory that recognizes it.
+  The implementation's internal parsers are never used
+  (the hardening wrappers parse every source themselves),
+  so the feature carries no security weight here:
+  it selects which hardened parser family performs those parses —
+  the platform's built-in parser when `false` (the JDK's default),
+  the pluggable lookup when `true` or where the feature is not recognized.
 
 ### What is out of scope
 

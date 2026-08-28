@@ -39,13 +39,20 @@ final class HardeningXPathExpression implements XPathExpression {
     private final XPathExpression delegate;
 
     /**
+     * Snapshot of the factory's {@code jdk.xml.overrideDefaultParser} outcome, inherited from the {@link HardeningXPath} that compiled this expression.
+     */
+    private final boolean useDefaultParser;
+
+    /**
      * Constructs a new instance.
      *
-     * @param delegate the delegate to wrap; must not be {@code null}.
+     * @param delegate         the delegate to wrap; must not be {@code null}.
+     * @param useDefaultParser whether the {@link InputSource} document builds should pin the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningXPathExpression(final XPathExpression delegate) {
+    HardeningXPathExpression(final XPathExpression delegate, final boolean useDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
+        this.useDefaultParser = useDefaultParser;
     }
 
     /**
@@ -56,7 +63,7 @@ final class HardeningXPathExpression implements XPathExpression {
      */
     @Override
     public String evaluate(final InputSource source) throws XPathExpressionException {
-        return delegate.evaluate(HardeningXPath.parse(source));
+        return delegate.evaluate(HardeningXPath.parse(source, useDefaultParser));
     }
 
     /**
@@ -67,7 +74,7 @@ final class HardeningXPathExpression implements XPathExpression {
      */
     @Override
     public Object evaluate(final InputSource source, final QName returnType) throws XPathExpressionException {
-        return delegate.evaluate(HardeningXPath.parse(source), returnType);
+        return delegate.evaluate(HardeningXPath.parse(source, useDefaultParser), returnType);
     }
 
     @Override

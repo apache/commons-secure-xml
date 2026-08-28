@@ -34,7 +34,7 @@ import org.xml.sax.SAXNotSupportedException;
 
 /**
  * {@link Validator} wrapper that rewrites the Source on every {@link Validator#validate(Source)} and {@link Validator#validate(Source, Result)} call through
- * {@link HardeningSAXParserFactory#harden(Source)} before delegating, and keeps an ignore-all {@link LSResourceResolver} floor so {@code xsi:schemaLocation} is not resolved at
+ * {@link HardeningSAXParserFactory#harden(Source, boolean)} before delegating, and keeps an ignore-all {@link LSResourceResolver} floor so {@code xsi:schemaLocation} is not resolved at
  * validation time. {@link #reset()} re-establishes the bare ignore-all floor, matching the just-constructed state.
  */
 final class HardeningValidator extends Validator {
@@ -44,13 +44,21 @@ final class HardeningValidator extends Validator {
     private final FallbackIgnoreLSResourceResolver floor = new FallbackIgnoreLSResourceResolver(null);
 
     /**
+     * Snapshot of the factory's {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} outcome at creation, like the JDK copies the feature onto its
+     * validators.
+     */
+    private final boolean useDefaultParser;
+
+    /**
      * Constructs a new instance.
      *
-     * @param delegate the delegate to wrap; must not be {@code null}.
+     * @param delegate         the delegate to wrap; must not be {@code null}.
+     * @param useDefaultParser whether the source rewrites should pin the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningValidator(final Validator delegate) {
+    HardeningValidator(final Validator delegate, final boolean useDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
+        this.useDefaultParser = useDefaultParser;
         // Block xsi:schemaLocation resolution; neither the JDK nor Xerces reliably propagates the factory's resolver to its Validators. The floor is a
         // non-removable lower bound: a caller opts specific lookups in by setting their own resolver, but cannot drop the ignore-all block.
         delegate.setResourceResolver(floor);
@@ -113,7 +121,7 @@ final class HardeningValidator extends Validator {
     @Override
     public void validate(final Source source, final Result result) throws SAXException, IOException {
         try {
-            delegate.validate(HardeningSAXParserFactory.harden(source), result);
+            delegate.validate(HardeningSAXParserFactory.harden(source, useDefaultParser), result);
         } catch (final TransformerConfigurationException e) {
             throw new SAXException("Failed to harden source for validation", e);
         }

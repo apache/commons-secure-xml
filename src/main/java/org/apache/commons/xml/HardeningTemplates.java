@@ -52,17 +52,25 @@ final class HardeningTemplates implements Templates {
     private final Supplier<Source> emptySource;
 
     /**
+     * Snapshot of the factory's {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} outcome, carried onto every produced Transformer and self-provisioned
+     * filter reader.
+     */
+    final boolean useDefaultParser;
+
+    /**
      * Constructs a new instance.
      *
-     * @param delegate    the delegate to wrap; must not be {@code null}.
-     * @param uriResolver the compile-time URIResolver snapshot to restore onto Transformers produced from the compiled Templates; may be {@code null}.
-     * @param emptySource the empty-{@link Source} supplier for the produced Transformers
+     * @param delegate         the delegate to wrap; must not be {@code null}.
+     * @param uriResolver      the compile-time URIResolver snapshot to restore onto Transformers produced from the compiled Templates; may be {@code null}.
+     * @param emptySource      the empty-{@link Source} supplier for the produced Transformers
+     * @param useDefaultParser whether the produced Transformers' source rewrites should pin the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningTemplates(final Templates delegate, final URIResolver uriResolver, final Supplier<Source> emptySource) {
+    HardeningTemplates(final Templates delegate, final URIResolver uriResolver, final Supplier<Source> emptySource, final boolean useDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
         this.uriResolver = uriResolver;
         this.emptySource = emptySource;
+        this.useDefaultParser = useDefaultParser;
     }
 
     /**
@@ -85,6 +93,6 @@ final class HardeningTemplates implements Templates {
         if (transformer == null) {
             return null;
         }
-        return new HardeningTransformer(transformer, uriResolver, emptySource);
+        return new HardeningTransformer(transformer, uriResolver, emptySource, useDefaultParser);
     }
 }

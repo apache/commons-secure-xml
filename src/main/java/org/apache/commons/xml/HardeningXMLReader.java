@@ -63,6 +63,15 @@ class HardeningXMLReader implements XMLReader {
         return delegate.getContentHandler();
     }
 
+    /**
+     * Gets the wrapped reader, so tests can observe which parser implementation a rewrite picked.
+     *
+     * @return The wrapped reader.
+     */
+    XMLReader getDelegate() {
+        return delegate;
+    }
+
     @Override
     public DTDHandler getDTDHandler() {
         return delegate.getDTDHandler();

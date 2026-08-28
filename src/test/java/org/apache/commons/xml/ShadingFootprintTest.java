@@ -87,7 +87,7 @@ class ShadingFootprintTest {
     // @formatter:on
 
     /**
-     * TrAX, XPath and schema re-harden their sub-parsers through {@link HardeningSAXParserFactory#harden(Source)}, so each builds on the full SAX closure below;
+     * TrAX, XPath and schema re-harden their sub-parsers through {@link HardeningSAXParserFactory#harden(Source, boolean)}, so each builds on the full SAX closure below;
      * TrAX additionally parses the Xalan {@code getAssociatedStylesheet} source and XPath its InputSource-taking evaluate calls through the DOM entry point, so
      * their closures carry that set too.
      */

@@ -75,10 +75,12 @@ public final class HardeningXPathFactory {
      *         functions and reflection-based extension calls are reachable only through a locked-down Saxon {@code Configuration}, not the standard JAXP knobs; this
      *         is the XPath counterpart of the Saxon exception in {@link HardeningTransformerFactory#harden(javax.xml.transform.TransformerFactory)}, kept as a
      *         documented package-prefix exception because the required hardening surface is reachable only through a vendor API.</li>
-     *     <li><strong>FODP</strong> ({@code jdk.xml.overrideDefaultParser}, set to {@code false}): best-effort. On the stock JDK it pins the internal parser lookup to
-     *         the bundled SAX parser, blocking a system property swap to a third-party parser (defense-in-depth); Xalan rejects the feature and is left unchanged.</li>
      *     <li><strong>FSP</strong> ({@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING}): required. It is the only knob both the stock JDK and Xalan XPath
      *         engines expose, and switches on their secure-processing limits. {@link XPathFactory} has no attribute API for finer control.</li>
+     *     <li><strong>FODP</strong> ({@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER}): read, not set. The engine's internal parser is never used (the
+     *         wrapper builds the {@link org.xml.sax.InputSource} documents itself), so on implementations that recognize the feature its value selects which
+     *         hardened parser family performs that build: the platform's built-in parser when {@code false} (the JDK's default), the pluggable lookup when
+     *         {@code true} or unrecognized.</li>
      *     <li><strong>The nested wrapper</strong>: required. FSP governs only the engine, not the parser it provisions internally for the
      *         {@link org.xml.sax.InputSource}-taking {@code evaluate} entry points; the wrapper performs that document build with a hardened parser instead, so
      *         the engine never parses.</li>
@@ -93,8 +95,6 @@ public final class HardeningXPathFactory {
             // Saxon: only a locked-down Configuration can close its URI-fetching functions and extension-function surface.
             return SaxonProvider.configure(factory);
         }
-        // Best-effort: the stock JDK pins its bundled SAX parser (defense-in-depth); Xalan rejects the feature.
-        setOptionalFeature(factory, FEATURE_OVERRIDE_DEFAULT_PARSER, false);
         // Required: enables the engine's secure-processing limits; XPathFactory has no attribute API for finer control.
         setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
         // Required: FSP does not reach the parser the engine provisions for InputSource-taking evaluate calls; the wrapper parses those itself.
@@ -196,26 +196,6 @@ public final class HardeningXPathFactory {
         }
     }
 
-    /**
-     * Sets an optional feature on the given factory, ignoring it if the implementation does not recognize it.
-     *
-     * @param factory The factory to harden.
-     * @param feature The feature to set.
-     * @param value   The value to set.
-     */
-    private static void setOptionalFeature(final XPathFactory factory, final String feature, final boolean value) {
-        try {
-            factory.setFeature(feature, value);
-        } catch (final XPathFactoryConfigurationException e) {
-            // Ignored: the implementation does not recognize this optional feature.
-        }
-    }
-
-    /**
-     * {@code jdk.xml.overrideDefaultParser}: pin to the JDK's bundled SAX parser; defense-in-depth against a system property swap to a third-party parser.
-     */
-    private static final String FEATURE_OVERRIDE_DEFAULT_PARSER = "jdk.xml.overrideDefaultParser";
-
     private HardeningXPathFactory() {
         // static only
     }
@@ -256,12 +236,27 @@ public final class HardeningXPathFactory {
         @Override
         public XPath newXPath() {
             final XPath xpath = delegate.newXPath();
-            return xpath == null ? null : new HardeningXPath(xpath);
+            return xpath == null ? null : new HardeningXPath(xpath, useDefaultParser());
         }
 
         @Override
         public void setFeature(final String name, final boolean value) throws XPathFactoryConfigurationException {
             delegate.setFeature(name, value);
+        }
+
+        /**
+         * Whether {@code jdk.xml.overrideDefaultParser} on the delegate currently asks for the platform's built-in parser; the engine's internal parser is
+         * never used, so the feature instead selects which hardened parser family performs the {@link org.xml.sax.InputSource} document build. An
+         * implementation that does not recognize the feature reports it by exception and keeps the pluggable lookup.
+         *
+         * @return Whether the document builds should pin the platform's built-in parser.
+         */
+        private boolean useDefaultParser() {
+            try {
+                return !delegate.getFeature(HardeningSAXParserFactory.OVERRIDE_DEFAULT_PARSER);
+            } catch (final XPathFactoryConfigurationException e) {
+                return false;
+            }
         }
 
         @Override

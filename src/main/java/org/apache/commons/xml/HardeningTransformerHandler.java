@@ -54,11 +54,13 @@ final class HardeningTransformerHandler implements TransformerHandler {
      * @param delegate the delegate to wrap; must not be {@code null}.
      * @param uriResolver the compile-time URIResolver snapshot to restore onto the live transformer; may be {@code null}.
      * @param emptySource the empty-{@link Source} supplier for the produced Transformer's floor; {@code null} means the default empty DOM.
+     * @param useDefaultParser whether the live transformer's source rewrites should pin the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningTransformerHandler(final TransformerHandler delegate, final URIResolver uriResolver, final Supplier<Source> emptySource) {
+    HardeningTransformerHandler(final TransformerHandler delegate, final URIResolver uriResolver, final Supplier<Source> emptySource,
+            final boolean useDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
-        this.transformer = new HardeningTransformer(delegate.getTransformer(), uriResolver, emptySource);
+        this.transformer = new HardeningTransformer(delegate.getTransformer(), uriResolver, emptySource, useDefaultParser);
     }
 
     @Override

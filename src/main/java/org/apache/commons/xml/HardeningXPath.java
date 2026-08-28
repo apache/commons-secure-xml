@@ -55,7 +55,8 @@ final class HardeningXPath implements XPath {
      * Parses the source through a hardened, namespace-aware {@link javax.xml.parsers.DocumentBuilder}, mirroring the namespace awareness of the parser the
      * engine would have provisioned.
      *
-     * @param source The document to evaluate against.
+     * @param source           The document to evaluate against.
+     * @param useDefaultParser Whether the document build should pin the platform's built-in parser.
      * @return The parsed document.
      * @throws NullPointerException     if {@code source} is {@code null}, per the {@link XPath} contract.
      * @throws XPathExpressionException if the source cannot be parsed.
@@ -63,10 +64,10 @@ final class HardeningXPath implements XPath {
      *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      * @throws HardeningException Thrown if a (non-Andoid) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
      */
-    static Document parse(final InputSource source) throws XPathExpressionException {
+    static Document parse(final InputSource source, final boolean useDefaultParser) throws XPathExpressionException {
         Objects.requireNonNull(source, "source");
         try {
-            final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newNSInstance();
+            final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newNSInstance(useDefaultParser);
             return factory.newDocumentBuilder().parse(source);
         } catch (final ParserConfigurationException | SAXException | IOException e) {
             throw new XPathExpressionException(e);
@@ -76,19 +77,26 @@ final class HardeningXPath implements XPath {
     private final XPath delegate;
 
     /**
+     * Snapshot of the factory's {@code jdk.xml.overrideDefaultParser} outcome at creation, like the JDK copies the feature onto the XPath objects it creates.
+     */
+    final boolean useDefaultParser;
+
+    /**
      * Constructs a new instance.
      *
-     * @param delegate the delegate to wrap; must not be {@code null}.
+     * @param delegate         the delegate to wrap; must not be {@code null}.
+     * @param useDefaultParser whether the {@link InputSource} document builds should pin the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningXPath(final XPath delegate) {
+    HardeningXPath(final XPath delegate, final boolean useDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
+        this.useDefaultParser = useDefaultParser;
     }
 
     @Override
     public XPathExpression compile(final String expression) throws XPathExpressionException {
         final XPathExpression compiled = delegate.compile(expression);
-        return compiled == null ? null : new HardeningXPathExpression(compiled);
+        return compiled == null ? null : new HardeningXPathExpression(compiled, useDefaultParser);
     }
 
     /**
@@ -99,7 +107,7 @@ final class HardeningXPath implements XPath {
      */
     @Override
     public String evaluate(final String expression, final InputSource source) throws XPathExpressionException {
-        return delegate.evaluate(expression, parse(source));
+        return delegate.evaluate(expression, parse(source, useDefaultParser));
     }
 
     /**
@@ -110,7 +118,7 @@ final class HardeningXPath implements XPath {
      */
     @Override
     public Object evaluate(final String expression, final InputSource source, final QName returnType) throws XPathExpressionException {
-        return delegate.evaluate(expression, parse(source), returnType);
+        return delegate.evaluate(expression, parse(source, useDefaultParser), returnType);
     }
 
     @Override
