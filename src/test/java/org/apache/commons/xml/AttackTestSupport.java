@@ -61,7 +61,7 @@ import org.xml.sax.helpers.XMLFilterImpl;
  * <p>The secure-side helpers come in three flavors, distinguished by their suffix:</p>
  *
  * <ul>
- *   <li>{@code assert*Blocks(...)} runs the payload through a secure factory from {@link org.apache.commons.xml} and asserts the parse throws. Used when the hardening
+ *   <li>{@code assert*Blocks(...)} runs the payload through a secure factory from {@link org.apache.commons.xml} and asserts the parse throws. Used when the secure
  *       layer is expected to reject the attack outright.</li>
  *   <li>{@code assert*DoesNotLeak(...)} runs the payload through a secure factory and asserts the parse completes without throwing and without producing the
  *       {@link #LEAKED_MARKER} string. Used when the secure contract guarantees the parse succeeds but never resolves the external resource (for example,
@@ -595,7 +595,7 @@ final class AttackTestSupport {
     /**
      * Asserts a secure Templates compile-and-transform completes without throwing and without leaked content.
      *
-     * <p>{@link TransformerFactory#newTemplates(Source)} via {@link SecureTransformerFactory#newInstance()} followed by transform; use this when the hardening
+     * <p>{@link TransformerFactory#newTemplates(Source)} via {@link SecureTransformerFactory#newInstance()} followed by transform; use this when the secure
      * contract guarantees the compile and transform succeed but never resolve the external resource.</p>
      */
     static void assertTemplatesDoesNotLeak(final Source xslt) {
@@ -624,7 +624,7 @@ final class AttackTestSupport {
     /**
      * Asserts a secure identity Transformer completes without throwing and without leaked content.
      *
-     * <p>{@link Transformer#transform(Source, javax.xml.transform.Result)} via {@link SecureTransformerFactory#newInstance()}; use this when the hardening
+     * <p>{@link Transformer#transform(Source, javax.xml.transform.Result)} via {@link SecureTransformerFactory#newInstance()}; use this when the secure
      * contract guarantees the transform succeeds but never resolves the external resource.</p>
      */
     static void assertTransformerDoesNotLeak(final String payload) {
@@ -927,7 +927,7 @@ final class AttackTestSupport {
         }
     }
 
-    /** Builds a raw {@link XMLReader} from a deliberately permissive {@link SAXParserFactory} and hardens it via {@link SecureSAXParserFactory#secure(XMLReader)}. */
+    /** Builds a raw {@link XMLReader} from a deliberately permissive {@link SAXParserFactory} and secures it via {@link SecureSAXParserFactory#secure(XMLReader)}. */
     private static XMLReader rawSecureXMLReader() throws Exception {
         final SAXParserFactory factory = SAXParserFactory.newInstance();
         if (!IS_ANDROID) {
