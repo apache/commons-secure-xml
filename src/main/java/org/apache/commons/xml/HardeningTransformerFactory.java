@@ -97,7 +97,7 @@ public final class HardeningTransformerFactory {
      * Wraps a prepared delegate in the hardening wrapper; called by the hardener once the required settings are applied.
      *
      * @param delegate    the delegate to wrap; must not be {@code null}.
-     * @param emptySource supplies the empty document a denied fetch resolves to.
+     * @param emptySource supplies the empty document a denied fetch resolves to; may be {@code null} for the default empty DOM document.
      * @return The hardened factory.
      */
     static TransformerFactory wrap(final SAXTransformerFactory delegate, final Supplier<Source> emptySource) {
