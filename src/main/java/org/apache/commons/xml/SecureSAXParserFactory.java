@@ -333,7 +333,7 @@ public final class SecureSAXParserFactory {
      *         chain its own resolver onto the floor to allow-list resources, but cannot remove it.</li>
      * </ul>
      *
-     * @param factory the factory to harden; never {@code null}.
+     * @param factory the factory to secure; never {@code null}.
      * @return a secure factory.
      */
     static SAXParserFactory secure(final SAXParserFactory factory) {
@@ -352,7 +352,7 @@ public final class SecureSAXParserFactory {
      * as-is. Used by the TrAX and schema wrappers to route every source they parse through the SAX secure path.
      * </p>
      *
-     * @param source           the source to harden; never {@code null}.
+     * @param source           the source to secure; never {@code null}.
      * @param overrideDefaultParser whether {@value #OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
      * @return a secure source.
      * @throws TransformerConfigurationException if a secure reader cannot be obtained.
@@ -370,7 +370,7 @@ public final class SecureSAXParserFactory {
     /**
      * Secures an existing {@link XMLReader}.
      *
-     * @param reader The reader to harden; never {@code null}.
+     * @param reader The reader to secure; never {@code null}.
      * @return A secure reader.
      * @throws IllegalStateException if a required secure setting cannot be applied to the underlying implementation.
      */
