@@ -64,9 +64,9 @@ import org.xml.sax.helpers.XMLFilterImpl;
  *   <li>{@code assert*Blocks(...)} runs the payload through a secure factory from {@link org.apache.commons.xml} and asserts the parse throws. Used when the hardening
  *       layer is expected to reject the attack outright.</li>
  *   <li>{@code assert*DoesNotLeak(...)} runs the payload through a secure factory and asserts the parse completes without throwing and without producing the
- *       {@link #LEAKED_MARKER} string. Used when the hardening contract guarantees the parse succeeds but never resolves the external resource (for example,
+ *       {@link #LEAKED_MARKER} string. Used when the secure contract guarantees the parse succeeds but never resolves the external resource (for example,
  *       the ignore-all resolver floor resolving the external subset to empty content).</li>
- *   <li>{@code assert*BlocksOrDoesNotLeak(...)} accepts either of the previous two outcomes. Used where the same hardening contract surfaces differently across
+ *   <li>{@code assert*BlocksOrDoesNotLeak(...)} accepts either of the previous two outcomes. Used where the same secure contract surfaces differently across
  *       providers (for example, an entity declared in the emptied external subset is a fatal error on one implementation and a silently skipped reference on
  *       another).</li>
  * </ul>
@@ -78,7 +78,7 @@ import org.xml.sax.helpers.XMLFilterImpl;
  * <p>The permissive-side positive controls mirror the hardened-side verbs with an {@code assertPermissive*} prefix: {@code assertPermissive*Parses} for direct
  * parsing, {@code assertPermissive*Compiles} for {@link SchemaFactory} / {@link TransformerFactory} compilation, {@code assertPermissiveTransformerTransforms}
  * for {@code Transformer.transform}, {@code assertPermissiveValidatorValidates} for {@code Validator.validate}. Both sides perform the same operation; the
- * prefix marks which factory hardening level the assertion is set against.</p>
+ * prefix marks which factory secure level the assertion is set against.</p>
  *
  * <p>Schema and Templates assertions take a {@link Source} so the same helper covers both inline-string payloads and resource-backed wrappers; build the
  * source via {@link #streamSource(String)} for a string payload or {@link #resourceSource(String)} for a file under {@code src/test/resources/leaked/}. The
@@ -115,7 +115,7 @@ final class AttackTestSupport {
     /**
      * Strict reporter installed on every secure factory, parser, validator and transformer in the helpers below.
      *
-     * <p>The hardening layer signals every blocked external fetch and every SAX-fatal it could not silently skip via the standard JAXP error channels:
+     * <p>The secure layer signals every blocked external fetch and every SAX-fatal it could not silently skip via the standard JAXP error channels:
      * {@link ErrorListener#error(TransformerException)} / {@link ErrorListener#fatalError(TransformerException) fatalError} on the TrAX side and
      * {@link ErrorHandler#error(SAXParseException) error} / {@link ErrorHandler#fatalError(SAXParseException) fatalError} on the SAX side. Both Apache Xalan's
      * {@code DefaultErrorHandler(false)} and Saxon's {@code StandardErrorListener} are pathologically lenient defaults that swallow these events; SAX's
@@ -226,7 +226,7 @@ final class AttackTestSupport {
     /**
      * Asserts a secure DOM parse completes without throwing and without leaked content.
      *
-     * <p>{@link DocumentBuilder#parse(InputSource)} via {@link SecureDocumentBuilderFactory#newInstance()}; use this when the hardening guarantee is "the parse
+     * <p>{@link DocumentBuilder#parse(InputSource)} via {@link SecureDocumentBuilderFactory#newInstance()}; use this when the secure guarantee is "the parse
      * succeeds but never resolves the external resource", for example, when the ignore-all resolver floor resolves the external subset to empty content.</p>
      */
     static void assertDomDoesNotLeak(final String payload) {
@@ -251,7 +251,7 @@ final class AttackTestSupport {
      *
      * @param action      The parse to execute, returning the captured output text checked for {@link #LEAKED_MARKER}.
      * @param description short label naming the JAXP surface under test.
-     * @param expected    The exception types any of which the hardening layer may surface as a clean rejection.
+     * @param expected    The exception types any of which the secure layer may surface as a clean rejection.
      */
     @SafeVarargs
     private static void assertNoLeakOrThrows(final ThrowingSupplier<String> action, final String description, final Class<? extends Throwable>... expected) {
@@ -260,7 +260,7 @@ final class AttackTestSupport {
             output = action.get();
         } catch (final Throwable thrown) {
             if (Arrays.stream(expected).anyMatch(c -> c.isInstance(thrown))) {
-                return; // hardening blocked at parse; acceptable outcome.
+                return; // secure blocked at parse; acceptable outcome.
             }
             throw new AssertionError(blockedDescription(description) + " (got " + thrown.getClass().getName() + ")", thrown);
         }
@@ -272,7 +272,7 @@ final class AttackTestSupport {
      * Skeleton for every strict {@code assert*DoesNotLeak} helper.
      *
      * <p>Runs the action, lets any thrown exception fail the assertion, and asserts that the captured output omits {@link #LEAKED_MARKER}. Use this when the
-     * hardening contract guarantees "parses successfully without resolving the external resource"; use {@link #assertNoLeakOrThrows} when the contract is
+     * secure contract guarantees "parses successfully without resolving the external resource"; use {@link #assertNoLeakOrThrows} when the contract is
      * "either blocks at parse or completes without leaked content".</p>
      *
      * @param action      The parse to execute, returning the captured output text checked for {@link #LEAKED_MARKER}.
@@ -289,7 +289,7 @@ final class AttackTestSupport {
      *
      * @param action      The parse to execute.
      * @param description short label naming the JAXP surface under test.
-     * @param expected    The exception type the hardening layer is expected to surface.
+     * @param expected    The exception type the secure layer is expected to surface.
      */
     static void assertParseFails(final Executable action, final String description, final Class<? extends Throwable> expected) {
         assertThrows(expected, action, blockedDescription(description));
@@ -300,7 +300,7 @@ final class AttackTestSupport {
      *
      * @param action      The parse to execute.
      * @param description short label naming the JAXP surface under test.
-     * @param expected    The exception types any of which the hardening layer may surface.
+     * @param expected    The exception types any of which the secure layer may surface.
      */
     @SafeVarargs
     static void assertParseFails(final Executable action, final String description, final Class<? extends Throwable>... expected) {
@@ -460,7 +460,7 @@ final class AttackTestSupport {
     /**
      * Asserts a secure SAX parse completes without throwing and without leaked content.
      *
-     * <p>{@link XMLReader#parse(InputSource)} on a parser from {@link SecureSAXParserFactory#newInstance()}; use this when the hardening guarantee is "the parse
+     * <p>{@link XMLReader#parse(InputSource)} on a parser from {@link SecureSAXParserFactory#newInstance()}; use this when the secure guarantee is "the parse
      * succeeds but never resolves the external resource", for example, when the ignore-all resolver floor resolves the external subset to empty content.</p>
      */
     static void assertSaxDoesNotLeak(final String payload) {
@@ -508,7 +508,7 @@ final class AttackTestSupport {
     /**
      * Asserts a secure Schema compilation completes without throwing.
      *
-     * <p>{@link SchemaFactory#newSchema(Source)} via {@link SecureSchemaFactory#newInstance(String)}; use this when the hardening contract guarantees the compile
+     * <p>{@link SchemaFactory#newSchema(Source)} via {@link SecureSchemaFactory#newInstance(String)}; use this when the secure contract guarantees the compile
      * succeeds but never resolves the external resource (for example, {@code XERCES_LOAD_EXTERNAL_DTD=false} silently skipping the external subset, with the body's
      * undeclared entity reference dropped per XML 1.0 §4.1).</p>
      */
@@ -539,7 +539,7 @@ final class AttackTestSupport {
      * Asserts a secure StAX parse completes without throwing and without leaked content.
      *
      * <p>{@link XMLStreamReader} and {@link XMLEventReader} from {@link SecureXMLInputFactory#newInstance()}; both flavors are exercised. Use this when the
-     * hardening guarantee is "the parse succeeds but never resolves the external resource", for example, when the JDK's {@code ignore-external-dtd} property silently
+     * secure guarantee is "the parse succeeds but never resolves the external resource", for example, when the JDK's {@code ignore-external-dtd} property silently
      * skips the external subset.</p>
      */
     static void assertStaxDoesNotLeak(final String payload) {
@@ -668,7 +668,7 @@ final class AttackTestSupport {
      * Asserts a secure Validator validation completes without throwing.
      *
      * <p>{@link Validator#validate(Source)} on a validator from {@link #BENIGN_SCHEMA} compiled via {@link SecureSchemaFactory#newInstance(String)}; use this when the
-     * hardening contract guarantees the validate succeeds but never resolves the external resource.</p>
+     * secure contract guarantees the validate succeeds but never resolves the external resource.</p>
      */
     static void assertValidatorDoesNotLeak(final String xml) {
         assertParseSucceeds(
@@ -707,7 +707,7 @@ final class AttackTestSupport {
     /**
      * Asserts a hardened-in-place XMLReader parse completes without throwing and without leaked content.
      *
-     * <p>{@link XMLReader#parse(InputSource)} on a raw reader secure via {@link SecureSAXParserFactory#secure(XMLReader)}; use this when the hardening contract
+     * <p>{@link XMLReader#parse(InputSource)} on a raw reader secure via {@link SecureSAXParserFactory#secure(XMLReader)}; use this when the secure contract
      * guarantees the parse succeeds but never resolves the external resource.</p>
      */
     static void assertXmlReaderDoesNotLeak(final String payload) {
