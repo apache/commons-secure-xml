@@ -119,7 +119,7 @@ class ShadingFootprintTest {
             "SecureXMLReader",
             "SaxonProvider",
             "SaxonProvider$1",
-            "SaxonProvider$HardenedConfiguration",
+            "SaxonProvider$SecureConfiguration",
             "SaxonProvider$SaxonProviderConfigurer");
     // @formatter:on
 
@@ -146,7 +146,7 @@ class ShadingFootprintTest {
             "SecureXPathFactory$Wrapper",
             "SaxonProvider",
             "SaxonProvider$1",
-            "SaxonProvider$HardenedConfiguration",
+            "SaxonProvider$SecureConfiguration",
             "SaxonProvider$SaxonProviderConfigurer");
     // @formatter:on
 

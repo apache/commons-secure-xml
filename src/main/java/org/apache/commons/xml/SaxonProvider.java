@@ -60,7 +60,7 @@ final class SaxonProvider {
      *       sidestep the URI restrictions.</li>
      * </ol>
      */
-    private static final class HardenedConfiguration extends Configuration {
+    private static final class SecureConfiguration extends Configuration {
 
         /** Collection-level ignore: {@code fn:collection()} and {@code fn:uri-collection()} resolve to an empty collection instead of fetching. */
         private static final CollectionFinder EMPTY_COLLECTION_FINDER = (context, collectionURI) -> {
@@ -70,7 +70,7 @@ final class SaxonProvider {
             return CollectionFn.EMPTY_COLLECTION;
         };
 
-        private HardenedConfiguration() {
+        private SecureConfiguration() {
             // Extension-function layer: turn off Saxon's reflection-based extension calls. Without this an attacker could bypass URI restrictions through
             // user-supplied Java extensions.
             setBooleanProperty(Feature.ALLOW_EXTERNAL_FUNCTIONS, false);
@@ -104,12 +104,12 @@ final class SaxonProvider {
 
         private static TransformerFactory configure(final TransformerFactory factory) {
             // The URIResolver floor is installed by the SecureTransformerFactory wrapper that SecureTransformerFactory.harden puts around this factory.
-            ((SaxonTransformerFactory) factory).setConfiguration(new HardenedConfiguration());
+            ((SaxonTransformerFactory) factory).setConfiguration(new SecureConfiguration());
             return factory;
         }
 
         private static XPathFactory configure(final XPathFactory factory) {
-            final HardenedConfiguration config = new HardenedConfiguration();
+            final SecureConfiguration config = new SecureConfiguration();
             // XPath has no factory wrapper, so the ignore-all floor lives on the Configuration; reuse FallbackIgnoreURIResolver, adapted to a ResourceResolver.
             config.setResourceResolver(new ResourceResolverWrappingURIResolver(new FallbackIgnoreURIResolver(null, emptySourceSupplier(), () -> false)));
             ((XPathFactoryImpl) factory).setConfiguration(config);
