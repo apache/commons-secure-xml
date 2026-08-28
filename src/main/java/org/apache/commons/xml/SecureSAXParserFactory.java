@@ -64,7 +64,7 @@ public final class SecureSAXParserFactory {
     private static final String JDK_SAX_PARSER_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl";
 
     /**
-     * The JDK feature governing whether an implementation's internal parser lookup may resolve a third-party parser. The hardening wrappers parse every source
+     * The JDK feature governing whether an implementation's internal parser lookup may resolve a third-party parser. The secure wrappers parse every source
      * themselves, so instead of configuring the implementation the TrAX, XPath and schema wrappers read this feature and pick the rewrite parser accordingly.
      */
     static final String OVERRIDE_DEFAULT_PARSER = "jdk.xml.overrideDefaultParser";
@@ -76,7 +76,7 @@ public final class SecureSAXParserFactory {
             MethodType.methodType(SAXParserFactory.class));
 
     /**
-     * Capability-driven hardening for any {@link SAXParserFactory} on the classpath.
+     * Capability-driven securing for any {@link SAXParserFactory} on the classpath.
      *
      * <p>Rather than branching on the implementation class, this method probes what the parser supports and adapts. Because
      * {@link SAXParserFactory} exposes only a feature API and no property API, the per-parse configuration runs on each {@link XMLReader} the factory produces,
@@ -103,7 +103,7 @@ public final class SecureSAXParserFactory {
         if (!ANDROID_SAX_PARSER_FACTORY.equals(factory.getClass().getName())) {
             setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
         }
-        // The per-parse hardening (limits, entity blocking, Android fixups) lives in secure(XMLReader) because SAXParserFactory has no property API.
+        // The per-parse securing (limits, entity blocking, Android fixups) lives in secure(XMLReader) because SAXParserFactory has no property API.
         return new Wrapper(factory);
     }
 
@@ -111,7 +111,7 @@ public final class SecureSAXParserFactory {
      * Rewrites a {@link Source} so that any SAX parsing it triggers runs through a secure {@link XMLReader}.
      * <p>
      * Only a {@link StreamSource} or a {@link SAXSource} without a reader is enriched with a hardened, namespace-aware reader; other source kinds are returned
-     * as-is. Used by the TrAX and schema wrappers to route every source they parse through the SAX hardening path.
+     * as-is. Used by the TrAX and schema wrappers to route every source they parse through the SAX secure path.
      * </p>
      *
      * @param source           the source to harden; never {@code null}.
@@ -134,7 +134,7 @@ public final class SecureSAXParserFactory {
      *
      * @param reader The reader to harden; never {@code null}.
      * @return A secure reader.
-     * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException if a required secure setting cannot be applied to the underlying implementation.
      */
     static XMLReader secure(final XMLReader reader) {
         if (reader instanceof SecureXMLReader) {
@@ -174,7 +174,7 @@ public final class SecureSAXParserFactory {
      * </p>
      *
      * @return A secure factory.
-     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation
      *                                   (for example Android).
      */
@@ -201,7 +201,7 @@ public final class SecureSAXParserFactory {
      * {@link #newDefaultInstance()}, the behavior {@code SAXParserFactory.newDefaultNSInstance()} (Java 13 or later) is specified to have.
      *
      * @return A hardened, namespace-aware factory.
-     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation
      *                                   (for example Android).
      */
@@ -231,7 +231,7 @@ public final class SecureSAXParserFactory {
      * Returns a new, secure {@link SAXParserFactory}.
      *
      * @return A secure factory.
-     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown from {@link SAXParserFactory} in case of a {@link java.util.ServiceConfigurationError service configuration
      *                                   error} or if the implementation is not available or cannot be instantiated.
      */
@@ -245,7 +245,7 @@ public final class SecureSAXParserFactory {
      * @param factoryClassName The fully qualified class name of the {@link SAXParserFactory} implementation.
      * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
      * @return A secure factory.
-     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
      */
     public static SAXParserFactory newInstance(final String factoryClassName, final ClassLoader classLoader) {
@@ -257,7 +257,7 @@ public final class SecureSAXParserFactory {
      * {@code SAXParserFactory.newNSInstance()} (Java 13 or later) is specified to have.
      *
      * @return A hardened, namespace-aware factory.
-     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown from {@link SAXParserFactory} in case of a {@link java.util.ServiceConfigurationError service configuration
      *                                   error} or if the implementation is not available or cannot be instantiated.
      */
@@ -275,7 +275,7 @@ public final class SecureSAXParserFactory {
      *
      * @param overrideDefaultParser whether {@value #OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
      * @return A hardened, namespace-aware factory.
-     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
      *                                   implementation is not available or cannot be instantiated.
      */
@@ -290,7 +290,7 @@ public final class SecureSAXParserFactory {
      * @param factoryClassName The fully qualified class name of the {@link SAXParserFactory} implementation.
      * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
      * @return A hardened, namespace-aware factory.
-     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
      */
     public static SAXParserFactory newNSInstance(final String factoryClassName, final ClassLoader classLoader) {
@@ -345,8 +345,8 @@ public final class SecureSAXParserFactory {
     /**
      * Universal SAX factory wrapper that funnels every produced parser through {@link SecureSAXParserFactory#secure(XMLReader)}.
      * <p>
-     * {@link SAXParserFactory} exposes only a feature API and no property API, so the per-parse hardening (limits, entity blocking, implementation-specific fixups)
-     * has to run on each {@link XMLReader} the factory produces. This wrapper returns a {@link SecureSAXParser}, which applies that hardening lazily to both the
+     * {@link SAXParserFactory} exposes only a feature API and no property API, so the per-parse secure (limits, entity blocking, implementation-specific fixups)
+     * has to run on each {@link XMLReader} the factory produces. This wrapper returns a {@link SecureSAXParser}, which applies that securing lazily to both the
      * SAX 2 {@link XMLReader} and the SAX 1 {@link org.xml.sax.Parser} it exposes.
      * </p>
      *
