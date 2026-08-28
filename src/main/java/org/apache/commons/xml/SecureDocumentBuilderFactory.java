@@ -132,10 +132,10 @@ public final class SecureDocumentBuilderFactory {
     }
 
     /**
-     * Returns a new, hardened, namespace-aware {@link DocumentBuilderFactory} of the system-default implementation, enabling namespace awareness on
+     * Returns a new, secure, namespace-aware {@link DocumentBuilderFactory} of the system-default implementation, enabling namespace awareness on
      * {@link #newDefaultInstance()}, the behavior {@code DocumentBuilderFactory.newDefaultNSInstance()} (Java 13 or later) is specified to have.
      *
-     * @return A hardened, namespace-aware factory.
+     * @return A secure, namespace-aware factory.
      * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation
      *                                   (for example Android).
@@ -174,10 +174,10 @@ public final class SecureDocumentBuilderFactory {
     }
 
     /**
-     * Returns a new, hardened, namespace-aware {@link DocumentBuilderFactory}, enabling namespace awareness on {@link #newInstance()}, the behavior
+     * Returns a new, secure, namespace-aware {@link DocumentBuilderFactory}, enabling namespace awareness on {@link #newInstance()}, the behavior
      * {@code DocumentBuilderFactory.newNSInstance()} (Java 13 or later) is specified to have.
      *
-     * @return A hardened, namespace-aware factory.
+     * @return A secure, namespace-aware factory.
      * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
      *                                   implementation is not available or cannot be instantiated.
@@ -187,7 +187,7 @@ public final class SecureDocumentBuilderFactory {
     }
 
     /**
-     * Returns the hardened, namespace-aware factory the Source-rewriting wrappers parse with.
+     * Returns the secure, namespace-aware factory the Source-rewriting wrappers parse with.
      * <p>
      * While {@code overrideDefaultParser} is {@code false} the factory is the JDK's "default parser" factory, determined the way the JDK itself determines it: the built-in
      * implementation, unless the {@value #DOM_FACTORY_ID} system property is set — that property is the JDK's own mechanism for
@@ -195,7 +195,7 @@ public final class SecureDocumentBuilderFactory {
      * </p>
      *
      * @param overrideDefaultParser whether {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
-     * @return A hardened, namespace-aware factory.
+     * @return A secure, namespace-aware factory.
      * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
      *                                   implementation is not available or cannot be instantiated.
@@ -205,13 +205,13 @@ public final class SecureDocumentBuilderFactory {
     }
 
     /**
-     * Returns a new, hardened, namespace-aware {@link DocumentBuilderFactory} of the given implementation class, enabling namespace awareness on
+     * Returns a new, secure, namespace-aware {@link DocumentBuilderFactory} of the given implementation class, enabling namespace awareness on
      * {@link #newInstance(String, ClassLoader)}, the behavior {@code DocumentBuilderFactory.newNSInstance(String, ClassLoader)} (Java 13 or later) is specified
      * to have.
      *
      * @param factoryClassName The fully qualified class name of the {@link DocumentBuilderFactory} implementation.
      * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
-     * @return A hardened, namespace-aware factory.
+     * @return A secure, namespace-aware factory.
      * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
      */
