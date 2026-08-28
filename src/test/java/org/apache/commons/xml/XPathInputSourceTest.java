@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
  *
  * <p>The stock JDK and Apache Xalan implement the {@link org.xml.sax.InputSource}-taking {@code evaluate} entry points by provisioning an internal document
  * parser that {@code FEATURE_SECURE_PROCESSING} on the {@link XPathFactory} does not reach. The {@link SecureXPathFactory} wrapper parses the input
- * through a hardened {@code DocumentBuilder} instead, so the external reference resolves to empty on the floor, while the
+ * through a secure {@code DocumentBuilder} instead, so the external reference resolves to empty on the floor, while the
  * evaluation itself still works. Tagged {@code xpath}, so it runs under test-stockjdk, test-jdk-xerces, test-xalan and test-xalan-xerces; the Saxon engine takes the separate
  * {@code SaxonProvider} path covered by {@code SaxonXPathExternalCallsTest}.</p>
  */
@@ -58,7 +58,7 @@ class XPathInputSourceTest {
 
     @Test
     void hardenedXPathEvaluatesPlainDocument() throws Exception {
-        // Positive control: the hardened pre-parse still evaluates an entity-free document end to end.
+        // Positive control: the secure pre-parse still evaluates an entity-free document end to end.
         final String result = SecureXPathFactory.newInstance().newXPath().evaluate(EXPRESSION,
                 AttackTestSupport.inputSource(AttackTestSupport.xmlBody("plain text")));
         assertEquals("plain text", result, "hardened XPath should evaluate a plain document");
