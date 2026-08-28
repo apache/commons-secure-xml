@@ -25,12 +25,12 @@ import org.junit.jupiter.api.Test;
  * Checks whether parsers can pull in an external DTD declared via {@code <!DOCTYPE root SYSTEM "...">}.
  *
  * <p>The wrapper points at {@code src/test/resources/leaked/referenced.dtd}, which declares a {@code leaked} entity. Each wrapper body references
- * {@code &leaked;}, so the entity can only resolve if the DTD is actually fetched: a hardened parser resolves the external subset to empty, leaving
+ * {@code &leaked;}, so the entity can only resolve if the DTD is actually fetched: a secure parser resolves the external subset to empty, leaving
  * {@code &leaked;} undeclared, and skips the undefined reference (per XML 1.0 section 4.1 an undeclared reference is a validity constraint when the DOCTYPE
  * has a system identifier, so a non-validating parse completes); an unconfigured parser fetches the DTD, the entity resolves, and the parse succeeds. The one
  * exception is Woodstox, which rejects undeclared references unconditionally, so the StAX case accepts a block as well.</p>
  *
- * <p>Each parser type is exercised twice as a pair (unconfigured factory, expected to parse; hardened factory, expected to complete without leaked
+ * <p>Each parser type is exercised twice as a pair (unconfigured factory, expected to parse; secure factory, expected to complete without leaked
  * content):</p>
  *
  * <ul>
