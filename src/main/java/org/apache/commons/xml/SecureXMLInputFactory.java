@@ -62,7 +62,7 @@ public final class SecureXMLInputFactory {
             MethodType.methodType(XMLInputFactory.class));
 
     /**
-     * Capability-driven hardening for any {@link XMLInputFactory} (StAX) on the classpath.
+     * Capability-driven secure for any {@link XMLInputFactory} (StAX) on the classpath.
      *
      * <p>One recipe covers both the JDK Zephyr and Woodstox: the wrapper installs a non-removable {@link FallbackIgnoreXMLResolver} floor on
      * every entity-resolution hook, leaving the standard {@code SUPPORT_DTD} / {@code IS_SUPPORTING_EXTERNAL_ENTITIES} defaults untouched; see the wrapper's
@@ -84,7 +84,7 @@ public final class SecureXMLInputFactory {
      * </p>
      *
      * @return A secure factory.
-     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultFactory()} nor the JDK's built-in implementation
      *                                   (for example Android).
      */
@@ -114,7 +114,7 @@ public final class SecureXMLInputFactory {
      * Returns a new, secure {@link XMLInputFactory}, as by {@link XMLInputFactory#newFactory()}.
      *
      * @return A secure factory.
-     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown if an instance of this factory cannot be loaded.
      */
     public static XMLInputFactory newFactory() {
@@ -128,7 +128,7 @@ public final class SecureXMLInputFactory {
      * @param factoryId   The name of the factory to find; a system property or service id to look up, not the class name of the implementation.
      * @param classLoader The class loader used in the lookup; {@code null} means the current thread's context class loader.
      * @return A secure factory.
-     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown in case of a service configuration error or if the implementation is not available or cannot be instantiated.
      * @throws NullPointerException      Thrown if {@code factoryId} is {@code null}.
      */
@@ -140,7 +140,7 @@ public final class SecureXMLInputFactory {
      * Returns a new, secure {@link XMLInputFactory}.
      *
      * @return A secure factory.
-     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown if an instance of this factory cannot be loaded.
      */
     public static XMLInputFactory newInstance() {
