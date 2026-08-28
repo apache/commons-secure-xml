@@ -211,7 +211,7 @@ public final class SecureXPathFactory {
      *         the engine never parses.</li>
      * </ul>
      *
-     * @param factory The factory to harden.
+     * @param factory The factory to secure.
      * @return A new secure factory or the original factory, secure, if it is a known Saxon factory.
      * @throws SecureException Thrown if this {@link XPathFactory} or the {@code XPath}s it creates cannot support this feature.
      */
@@ -229,7 +229,7 @@ public final class SecureXPathFactory {
     /**
      * Sets a feature on the given factory, throwing a {@link SecureException} if the implementation does not recognize it.
      *
-     * @param factory The factory to harden.
+     * @param factory The factory to secure.
      * @param feature The feature to set.
      * @param value   The value to set.
      * @throws SecureException Thrown if this {@link XPathFactory} or the {@code XPath}s it creates cannot support this feature or if {@code feature} is
