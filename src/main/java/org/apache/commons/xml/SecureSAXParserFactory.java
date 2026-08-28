@@ -124,7 +124,7 @@ public final class SecureSAXParserFactory {
     static Source secure(final Source source, final boolean overrideDefaultParser) throws TransformerConfigurationException {
         if (source instanceof StreamSource || source instanceof SAXSource && ((SAXSource) source).getXMLReader() == null) {
             final InputSource inputSource = SAXSource.sourceToInputSource(source);
-            return inputSource == null ? source : new SAXSource(newHardenedReader(overrideDefaultParser), inputSource);
+            return inputSource == null ? source : new SAXSource(newSecureXMLReader(overrideDefaultParser), inputSource);
         }
         return source;
     }
@@ -219,7 +219,7 @@ public final class SecureSAXParserFactory {
      * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
      *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      */
-    static XMLReader newHardenedReader(final boolean overrideDefaultParser) throws TransformerConfigurationException {
+    static XMLReader newSecureXMLReader(final boolean overrideDefaultParser) throws TransformerConfigurationException {
         try {
             return newNSInstance(overrideDefaultParser).newSAXParser().getXMLReader();
         } catch (final ParserConfigurationException | SAXException e) {

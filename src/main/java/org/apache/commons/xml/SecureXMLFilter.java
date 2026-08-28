@@ -70,7 +70,7 @@ final class SecureXMLFilter extends XMLFilterImpl {
         }
         if (getParent() == null) {
             try {
-                setParent(SecureSAXParserFactory.newHardenedReader(templates.overrideDefaultParser));
+                setParent(SecureSAXParserFactory.newSecureXMLReader(templates.overrideDefaultParser));
             } catch (final TransformerException e) {
                 throw new SAXException(e);
             }
