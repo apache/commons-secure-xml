@@ -90,7 +90,7 @@ class ResetHardeningTest {
     @Tag("trax")
     void transformerResetKeepsUriResolverFloor() throws Exception {
         // with-document.xsl copies document('referenced.xml') into the output at transform time, so a transformer whose floor was stripped leaks the marker.
-        final Transformer transformer = HardeningTransformerFactory.newInstance()
+        final Transformer transformer = SecureTransformerFactory.newInstance()
                 .newTemplates(AttackTestSupport.resourceSource("with-document.xsl")).newTransformer();
         AttackTestSupport.assumeDoesNotThrow(transformer::reset);
         final StringWriter sink = new StringWriter();

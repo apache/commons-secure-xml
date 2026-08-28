@@ -144,7 +144,7 @@ class EntityResolverFloorTest {
      * implementation cannot quietly recover from a floor resolution while the test asserts clean completion.
      */
     private static TransformerFactory hardenedTransformerFactory() {
-        final TransformerFactory factory = HardeningTransformerFactory.newInstance();
+        final TransformerFactory factory = SecureTransformerFactory.newInstance();
         factory.setErrorListener(AttackTestSupport.STRICT_REPORTER);
         return factory;
     }

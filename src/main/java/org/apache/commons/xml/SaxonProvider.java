@@ -47,7 +47,7 @@ final class SaxonProvider {
      * A Saxon {@link Configuration} carrying the vendor-specific restrictions that the standard JAXP knobs cannot express.
      *
      * <p>The ignore-all {@link javax.xml.transform.URIResolver} floor is not one of them: it is installed from outside by the shared
-     * {@link HardeningTransformerFactory} wrapper (TrAX) or on the Configuration for the XPath path (see {@link SaxonProviderConfigurer#configure(XPathFactory)}),
+     * {@link SecureTransformerFactory} wrapper (TrAX) or on the Configuration for the XPath path (see {@link SaxonProviderConfigurer#configure(XPathFactory)}),
      * so both cases reuse {@link FallbackIgnoreURIResolver}. What remains here is Saxon-only:</p>
      *
      * <ol>
@@ -103,7 +103,7 @@ final class SaxonProvider {
     private static final class SaxonProviderConfigurer {
 
         private static TransformerFactory configure(final TransformerFactory factory) {
-            // The URIResolver floor is installed by the HardeningTransformerFactory wrapper that HardeningTransformerFactory.harden puts around this factory.
+            // The URIResolver floor is installed by the SecureTransformerFactory wrapper that SecureTransformerFactory.harden puts around this factory.
             ((SaxonTransformerFactory) factory).setConfiguration(new HardenedConfiguration());
             return factory;
         }

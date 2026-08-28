@@ -111,9 +111,9 @@ class ShadingFootprintTest {
             "SecureTemplates",
             "SecureTemplatesHandler",
             "SecureTransformer",
-            "HardeningTransformerFactory",
-            "HardeningTransformerFactory$1",
-            "HardeningTransformerFactory$Wrapper",
+            "SecureTransformerFactory",
+            "SecureTransformerFactory$1",
+            "SecureTransformerFactory$Wrapper",
             "HardeningTransformerHandler",
             "HardeningXMLFilter",
             "HardeningXMLReader",
@@ -178,7 +178,7 @@ class ShadingFootprintTest {
      * Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library.
      */
     private static final String[] REPORTED = {"SecureDocumentBuilderFactory", "SecureSAXParserFactory", "HardeningXMLInputFactory",
-            "HardeningTransformerFactory", "HardeningXPathFactory", "SecureSchemaFactory"};
+            "SecureTransformerFactory", "HardeningXPathFactory", "SecureSchemaFactory"};
 
     private static Clazzpath clazzpath;
     private static Path classesDir;
@@ -289,7 +289,7 @@ class ShadingFootprintTest {
 
     @Test
     void transformerFactoryFootprint() {
-        assertEquals(TRANSFORMER_FACTORY, closureOf("HardeningTransformerFactory"));
+        assertEquals(TRANSFORMER_FACTORY, closureOf("SecureTransformerFactory"));
     }
 
     @Test

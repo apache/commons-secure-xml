@@ -50,7 +50,7 @@ class AssociatedStylesheetTest {
     }
 
     private static TransformerFactory hardenedFactory() {
-        final TransformerFactory factory = HardeningTransformerFactory.newInstance();
+        final TransformerFactory factory = SecureTransformerFactory.newInstance();
         factory.setErrorListener(AttackTestSupport.STRICT_REPORTER);
         return factory;
     }

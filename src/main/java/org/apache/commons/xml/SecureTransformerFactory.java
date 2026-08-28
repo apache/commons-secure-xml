@@ -74,7 +74,7 @@ import org.xml.sax.XMLReader;
  *
  * @see org.apache.commons.xml
  */
-public final class HardeningTransformerFactory {
+public final class SecureTransformerFactory {
 
     /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
     private static final String JDK_TRANSFORMER_FACTORY = "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl";
@@ -180,7 +180,7 @@ public final class HardeningTransformerFactory {
         }
     }
 
-    private HardeningTransformerFactory() {
+    private SecureTransformerFactory() {
         // static only
     }
 
@@ -194,7 +194,7 @@ public final class HardeningTransformerFactory {
      *
      * <p>Three layers cooperate:</p>
      * <ol>
-     *   <li>{@link HardeningTransformerFactory} rewrites the Source on every entry point that compiles a stylesheet or transforms a one-shot input.</li>
+     *   <li>{@link SecureTransformerFactory} rewrites the Source on every entry point that compiles a stylesheet or transforms a one-shot input.</li>
      *   <li>{@link SecureTemplates} returns a {@link SecureTransformer} from {@link Templates#newTransformer()} so runtime source parsing is also covered, and
      *       restores the factory's URIResolver onto the produced Transformer (which the underlying implementation typically does not propagate through
      *       {@code Templates}).</li>

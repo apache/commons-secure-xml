@@ -114,7 +114,7 @@ XMLStreamReader reader = HardeningXMLInputFactory.newInstance().createXMLStreamR
 ```java
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.transform.stream.StreamResult;
-import org.apache.commons.xml.HardeningTransformerFactory;
+import org.apache.commons.xml.SecureTransformerFactory;
 
 HardeningTransformerFactory.newInstance()
         .newTransformer(new StreamSource(stylesheet))

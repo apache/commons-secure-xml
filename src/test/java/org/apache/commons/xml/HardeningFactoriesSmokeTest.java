@@ -61,7 +61,7 @@ class HardeningFactoriesSmokeTest {
         assertFalse(DocumentBuilderFactory.class.isAssignableFrom(SecureDocumentBuilderFactory.class));
         assertFalse(SAXParserFactory.class.isAssignableFrom(SecureSAXParserFactory.class));
         assertFalse(SchemaFactory.class.isAssignableFrom(SecureSchemaFactory.class));
-        assertFalse(TransformerFactory.class.isAssignableFrom(HardeningTransformerFactory.class));
+        assertFalse(TransformerFactory.class.isAssignableFrom(SecureTransformerFactory.class));
         assertFalse(XMLInputFactory.class.isAssignableFrom(HardeningXMLInputFactory.class));
         assertFalse(XPathFactory.class.isAssignableFrom(HardeningXPathFactory.class));
     }
@@ -114,8 +114,8 @@ class HardeningFactoriesSmokeTest {
 
     @Test
     void newTransformerFactoryReturnsFreshInstance() {
-        final TransformerFactory a = HardeningTransformerFactory.newInstance();
-        final TransformerFactory b = HardeningTransformerFactory.newInstance();
+        final TransformerFactory a = SecureTransformerFactory.newInstance();
+        final TransformerFactory b = SecureTransformerFactory.newInstance();
         assertNotSame(a, b);
     }
 
@@ -162,7 +162,7 @@ class HardeningFactoriesSmokeTest {
     @Test
     void explicitClassNameTransformerFactoryIsHardened() {
         final Class<?> impl = TransformerFactory.newInstance().getClass();
-        final TransformerFactory factory = HardeningTransformerFactory.newInstance(impl.getName(), impl.getClassLoader());
+        final TransformerFactory factory = SecureTransformerFactory.newInstance(impl.getName(), impl.getClassLoader());
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 
@@ -298,7 +298,7 @@ class HardeningFactoriesSmokeTest {
 
     @Test
     void newDefaultInstanceTransformerFactoryIsHardened() {
-        final TransformerFactory factory = HardeningTransformerFactory.newDefaultInstance();
+        final TransformerFactory factory = SecureTransformerFactory.newDefaultInstance();
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 

@@ -560,12 +560,12 @@ final class AttackTestSupport {
     /**
      * Asserts a hardened Templates compile-and-transform throws.
      *
-     * <p>{@link TransformerFactory#newTemplates(Source)} via {@link HardeningTransformerFactory#newInstance()} followed by transform; either step throwing
+     * <p>{@link TransformerFactory#newTemplates(Source)} via {@link SecureTransformerFactory#newInstance()} followed by transform; either step throwing
      * passes.</p>
      */
     static void assertTemplatesBlocks(final Source xslt) {
         assertParseFails(() -> {
-            final Templates templates = strictTemplates(HardeningTransformerFactory.newInstance(), xslt);
+            final Templates templates = strictTemplates(SecureTransformerFactory.newInstance(), xslt);
             // Xalan returns `null` if the template fails
             if (templates == null) {
                 throw new TransformerException("Transformer factory returned null");
@@ -584,7 +584,7 @@ final class AttackTestSupport {
     /**
      * Asserts a hardened Templates compile-and-transform succeeds.
      *
-     * <p>{@link TransformerFactory#newTemplates(Source)} via {@link HardeningTransformerFactory#newInstance()} followed by transform; positive control for
+     * <p>{@link TransformerFactory#newTemplates(Source)} via {@link SecureTransformerFactory#newInstance()} followed by transform; positive control for
      * DOCTYPE-only payloads.</p>
      */
     static void assertTemplatesCompiles(final Source xslt) {
@@ -594,7 +594,7 @@ final class AttackTestSupport {
     /**
      * Asserts a hardened Templates compile-and-transform completes without throwing and without leaked content.
      *
-     * <p>{@link TransformerFactory#newTemplates(Source)} via {@link HardeningTransformerFactory#newInstance()} followed by transform; use this when the hardening
+     * <p>{@link TransformerFactory#newTemplates(Source)} via {@link SecureTransformerFactory#newInstance()} followed by transform; use this when the hardening
      * contract guarantees the compile and transform succeed but never resolve the external resource.</p>
      */
     static void assertTemplatesDoesNotLeak(final Source xslt) {
@@ -604,12 +604,12 @@ final class AttackTestSupport {
     /**
      * Asserts a hardened identity Transformer of the payload throws.
      *
-     * <p>{@link Transformer#transform(Source, javax.xml.transform.Result)} on the identity transformer from {@link HardeningTransformerFactory#newInstance()}; only
+     * <p>{@link Transformer#transform(Source, javax.xml.transform.Result)} on the identity transformer from {@link SecureTransformerFactory#newInstance()}; only
      * a thrown exception passes.</p>
      */
     static void assertTransformerBlocks(final String payload) {
         assertParseFails(
-                () -> strictTransformer(HardeningTransformerFactory.newInstance()).transform(streamSource(payload), new StreamResult(new StringWriter())),
+                () -> strictTransformer(SecureTransformerFactory.newInstance()).transform(streamSource(payload), new StreamResult(new StringWriter())),
                 "Transformer", TransformerException.class);
     }
 
@@ -623,7 +623,7 @@ final class AttackTestSupport {
     /**
      * Asserts a hardened identity Transformer completes without throwing and without leaked content.
      *
-     * <p>{@link Transformer#transform(Source, javax.xml.transform.Result)} via {@link HardeningTransformerFactory#newInstance()}; use this when the hardening
+     * <p>{@link Transformer#transform(Source, javax.xml.transform.Result)} via {@link SecureTransformerFactory#newInstance()}; use this when the hardening
      * contract guarantees the transform succeeds but never resolves the external resource.</p>
      */
     static void assertTransformerDoesNotLeak(final String payload) {
@@ -633,7 +633,7 @@ final class AttackTestSupport {
     /**
      * Asserts a hardened identity Transformer succeeds.
      *
-     * <p>{@link Transformer#transform(Source, javax.xml.transform.Result)} on the identity transformer from {@link HardeningTransformerFactory#newInstance()};
+     * <p>{@link Transformer#transform(Source, javax.xml.transform.Result)} on the identity transformer from {@link SecureTransformerFactory#newInstance()};
      * positive control for DOCTYPE-only payloads.</p>
      */
     static void assertTransformerTransforms(final String payload) {
@@ -845,7 +845,7 @@ final class AttackTestSupport {
 
     private static String identityTransformAndCapture(final String payload) throws TransformerException {
         final StringWriter sink = new StringWriter();
-        strictTransformer(HardeningTransformerFactory.newInstance()).transform(streamSource(payload), new StreamResult(sink));
+        strictTransformer(SecureTransformerFactory.newInstance()).transform(streamSource(payload), new StreamResult(sink));
         return sink.toString();
     }
 
@@ -1042,7 +1042,7 @@ final class AttackTestSupport {
 
     private static String templatesCompileAndTransform(final Source xslt) throws TransformerException {
         final StringWriter sink = new StringWriter();
-        final Templates templates = strictTemplates(HardeningTransformerFactory.newInstance(), xslt);
+        final Templates templates = strictTemplates(SecureTransformerFactory.newInstance(), xslt);
         // Xalan returns `null` if the template fails
         if (templates != null) {
             strictTransformer(templates).transform(streamSource("<root/>"), new StreamResult(sink));

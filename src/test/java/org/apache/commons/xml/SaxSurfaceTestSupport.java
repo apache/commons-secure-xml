@@ -49,7 +49,7 @@ final class SaxSurfaceTestSupport {
 
     /** The hardened factory, as its runtime {@link SAXTransformerFactory} type. */
     static SAXTransformerFactory hardenedFactory() {
-        return (SAXTransformerFactory) HardeningTransformerFactory.newInstance();
+        return (SAXTransformerFactory) SecureTransformerFactory.newInstance();
     }
 
     /** Opens a fixture under {@code leaked/} as an {@link InputSource} preserving its system id, so relative hrefs resolve normally. */

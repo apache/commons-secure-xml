@@ -63,7 +63,7 @@ public final class HardeningXPathFactory {
      *     <li><strong>Saxon</strong> ({@code net.sf.saxon}): recognized by package prefix and handed to {@link SaxonProvider#configure(XPathFactory)}, so any public
      *         subclass routes to the same recipe as the registered factory. Its URI-fetching
      *         functions and reflection-based extension calls are reachable only through a locked-down Saxon {@code Configuration}, not the standard JAXP knobs; this
-     *         is the XPath counterpart of the Saxon exception in {@link HardeningTransformerFactory#harden(javax.xml.transform.TransformerFactory)}, kept as a
+     *         is the XPath counterpart of the Saxon exception in {@link SecureTransformerFactory#harden(javax.xml.transform.TransformerFactory)}, kept as a
      *         documented package-prefix exception because the required hardening surface is reachable only through a vendor API.</li>
      *     <li><strong>FSP</strong> ({@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING}): required. It is the only knob both the stock JDK and Xalan XPath
      *         engines expose, and switches on their secure-processing limits. {@link XPathFactory} has no attribute API for finer control.</li>

@@ -88,7 +88,7 @@ class OverrideDefaultParserTest {
     @Test
     void transformerFactoryReadsFeatureAtCreation() throws Exception {
         assumeFalse(AttackTestSupport.IS_ANDROID);
-        final TransformerFactory factory = HardeningTransformerFactory.newDefaultInstance();
+        final TransformerFactory factory = SecureTransformerFactory.newDefaultInstance();
         assertFalse(factory.getFeature(FEATURE));
         assertFalse(((SecureTemplates) factory.newTemplates(AttackTestSupport.streamSource(AttackTestSupport.xsltBody("probe")))).overrideDefaultParser);
         factory.setFeature(FEATURE, true);
@@ -101,7 +101,7 @@ class OverrideDefaultParserTest {
     @DisabledInNativeImage
     void transformSucceedsUnderBothParserFamilies() throws Exception {
         assumeFalse(AttackTestSupport.IS_ANDROID);
-        final TransformerFactory factory = HardeningTransformerFactory.newDefaultInstance();
+        final TransformerFactory factory = SecureTransformerFactory.newDefaultInstance();
         // Feature false (the JDK's default): stylesheet and source parse through the pinned platform parser.
         assertTrue(transform(factory, "pinned").contains("pinned"));
         factory.setFeature(FEATURE, true);
