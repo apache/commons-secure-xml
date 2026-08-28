@@ -199,7 +199,7 @@ public final class HardeningTransformerFactory {
          * @param delegate the delegate to wrap; must not be {@code null}.
          * @throws NullPointerException if {@code delegate} is {@code null}.
          */
-        Wrapper(final SAXTransformerFactory delegate) {
+        private Wrapper(final SAXTransformerFactory delegate) {
             this(delegate, null);
         }
 
@@ -211,7 +211,7 @@ public final class HardeningTransformerFactory {
          *                    default empty DOM.
          * @throws NullPointerException if {@code delegate} is {@code null}.
          */
-        Wrapper(final SAXTransformerFactory delegate, final Supplier<Source> emptySource) {
+        private Wrapper(final SAXTransformerFactory delegate, final Supplier<Source> emptySource) {
             this.delegate = Objects.requireNonNull(delegate, "delegate");
             this.emptySource = emptySource;
             this.floor = new FallbackIgnoreURIResolver(null, emptySource);

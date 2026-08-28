@@ -88,7 +88,7 @@ public final class HardeningXPathFactory {
          * @param delegate the delegate to wrap; must not be {@code null}.
          * @throws NullPointerException if {@code delegate} is {@code null}.
          */
-        Wrapper(final XPathFactory delegate) {
+        private Wrapper(final XPathFactory delegate) {
             this.delegate = Objects.requireNonNull(delegate, "delegate");
         }
 

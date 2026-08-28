@@ -142,7 +142,7 @@ public final class HardeningSchemaFactory {
          * @param delegate the delegate to wrap; must not be {@code null}.
          * @throws NullPointerException if {@code delegate} is {@code null}.
          */
-        Wrapper(final SchemaFactory delegate) {
+        private Wrapper(final SchemaFactory delegate) {
             this.delegate = Objects.requireNonNull(delegate, "delegate");
             // Compile-time block for xs:import/include/redefine; the wrappers carry the rest (per-product resolver, source rewriting, limits via the reader).
             delegate.setResourceResolver(floor);

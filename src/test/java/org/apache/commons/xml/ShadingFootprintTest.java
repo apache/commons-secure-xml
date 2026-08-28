@@ -55,44 +55,131 @@ class ShadingFootprintTest {
 
     private static final String PKG = "org.apache.commons.xml.";
 
-    /**
-     * Shared exception carrying the {@code settingFailed} message helper; pulled in by every hardener that applies a JAXP setting.
-     */
-    private static final String HARDENING_EXCEPTION = "HardeningException";
+    // @formatter:off
+    private static final Set<String> DOCUMENT_BUILDER_HARDENER = set(
+            "DocumentBuilderHardener",
+            "FallbackIgnoreEntityResolver2",
+            "HardeningDocumentBuilder",
+            "HardeningDocumentBuilderFactory",
+            "HardeningDocumentBuilderFactory$1",
+            "HardeningDocumentBuilderFactory$Wrapper",
+            "HardeningException");
+    // @formatter:on
 
-    private static final Set<String> DOCUMENT_BUILDER_HARDENER = set("DocumentBuilderHardener", "HardeningDocumentBuilder", "HardeningDocumentBuilderFactory",
-            "HardeningDocumentBuilderFactory$Wrapper", HARDENING_EXCEPTION, "FallbackIgnoreEntityResolver2");
+    // @formatter:off
+    private static final Set<String> SAX_PARSER_HARDENER = set(
+            "FallbackIgnoreEntityResolver2",
+            "HardeningException",
+            "HardeningSAXParser",
+            "HardeningSAXParserFactory",
+            "HardeningSAXParserFactory$1",
+            "HardeningSAXParserFactory$Wrapper",
+            "HardeningXMLReader",
+            "SAXParserHardener",
+            "SAXParserHardener$HardeningExpatXMLReader");
+    // @formatter:on
 
-    private static final Set<String> SAX_PARSER_HARDENER = set("SAXParserHardener",
-            "SAXParserHardener$HardeningExpatXMLReader", "HardeningSAXParser", "HardeningSAXParserFactory", "HardeningSAXParserFactory$Wrapper",
-            "HardeningXMLReader", HARDENING_EXCEPTION, "FallbackIgnoreEntityResolver2");
-
-    private static final Set<String> STAX_HARDENER = set("StaxHardener", "HardeningXMLInputFactory", "HardeningXMLInputFactory$Wrapper",
-            "FallbackIgnoreXMLResolver", HARDENING_EXCEPTION);
+    // @formatter:off
+    private static final Set<String> STAX_HARDENER = set(
+            "FallbackIgnoreXMLResolver",
+            "HardeningException",
+            "HardeningXMLInputFactory",
+            "HardeningXMLInputFactory$1",
+            "HardeningXMLInputFactory$Wrapper",
+            "StaxHardener");
+    // @formatter:on
 
     /**
      * TrAX, XPath and schema re-harden their sub-parsers through {@link SAXParserHardener#hardenSource(Source)}, so each builds on the full SAX closure below;
      * TrAX additionally parses the Xalan {@code getAssociatedStylesheet} source and XPath its InputSource-taking evaluate calls through the DOM hardener, so
      * their closures carry that set too.
      */
-    private static final Set<String> TRANSFORMER_HARDENER = saxParsersHardenerPlus("TransformerHardener", "HardeningTransformerFactory",
-            "HardeningTransformerFactory$Wrapper", "HardeningTransformer", "HardeningTransformerHandler", "HardeningTemplates", "HardeningTemplatesHandler",
-            "HardeningXMLFilter", "FallbackIgnoreURIResolver", "SaxonProvider", "SaxonProvider$1", "SaxonProvider$HardenedConfiguration"
-            , "SaxonProvider$SaxonProviderConfigurer", "DocumentBuilderHardener", "HardeningDocumentBuilder", "HardeningDocumentBuilderFactory",
-            "HardeningDocumentBuilderFactory$Wrapper");
+    // @formatter:off
+    private static final Set<String> TRANSFORMER_HARDENER = saxParsersHardenerPlus(
+            "DocumentBuilderHardener",
+            "FallbackIgnoreEntityResolver2",
+            "FallbackIgnoreURIResolver",
+            "HardeningDocumentBuilder",
+            "HardeningDocumentBuilderFactory",
+            "HardeningDocumentBuilderFactory$1",
+            "HardeningDocumentBuilderFactory$Wrapper",
+            "HardeningException",
+            "HardeningSAXParser",
+            "HardeningSAXParserFactory",
+            "HardeningSAXParserFactory$1",
+            "HardeningSAXParserFactory$Wrapper",
+            "HardeningTemplates",
+            "HardeningTemplatesHandler",
+            "HardeningTransformer",
+            "HardeningTransformerFactory",
+            "HardeningTransformerFactory$1",
+            "HardeningTransformerFactory$Wrapper",
+            "HardeningTransformerHandler",
+            "HardeningXMLFilter",
+            "HardeningXMLReader",
+            "SAXParserHardener",
+            "SAXParserHardener$HardeningExpatXMLReader",
+            "SaxonProvider",
+            "SaxonProvider$1",
+            "SaxonProvider$HardenedConfiguration",
+            "SaxonProvider$SaxonProviderConfigurer",
+            "TransformerHardener");
+    // @formatter:on
 
-    private static final Set<String> XPATH_HARDENER = saxParsersHardenerPlus("XPathHardener", "FallbackIgnoreURIResolver", "SaxonProvider",
-            "SaxonProvider$1", "SaxonProvider$HardenedConfiguration", "SaxonProvider$SaxonProviderConfigurer", "HardeningXPathFactory",
-            "HardeningXPathFactory$Wrapper", "HardeningXPath", "HardeningXPathExpression", "DocumentBuilderHardener", "HardeningDocumentBuilder",
-            "HardeningDocumentBuilderFactory", "HardeningDocumentBuilderFactory$Wrapper");
+    // @formatter:off
+    private static final Set<String> XPATH_HARDENER = saxParsersHardenerPlus(
+            "DocumentBuilderHardener",
+            "FallbackIgnoreEntityResolver2",
+            "FallbackIgnoreURIResolver",
+            "HardeningDocumentBuilder",
+            "HardeningDocumentBuilderFactory",
+            "HardeningDocumentBuilderFactory$1",
+            "HardeningDocumentBuilderFactory$Wrapper",
+            "HardeningException",
+            "HardeningSAXParser",
+            "HardeningSAXParserFactory",
+            "HardeningSAXParserFactory$1",
+            "HardeningSAXParserFactory$Wrapper",
+            "HardeningXMLReader",
+            "HardeningXPath",
+            "HardeningXPathExpression",
+            "HardeningXPathFactory",
+            "HardeningXPathFactory$1",
+            "HardeningXPathFactory$Wrapper",
+            "SAXParserHardener",
+            "SAXParserHardener$HardeningExpatXMLReader",
+            "SaxonProvider",
+            "SaxonProvider$1",
+            "SaxonProvider$HardenedConfiguration",
+            "SaxonProvider$SaxonProviderConfigurer",
+            "XPathHardener");
+    // @formatter:on
 
-    private static final Set<String> SCHEMA_HARDENER = saxParsersHardenerPlus("SchemaHardener", "HardeningSchemaFactory", "HardeningSchemaFactory$Wrapper",
-            "HardeningValidator", "HardeningValidatorHandler", "HardeningSchema", "FallbackIgnoreLSResourceResolver");
+    // @formatter:off
+    private static final Set<String> SCHEMA_HARDENER = saxParsersHardenerPlus(
+            "FallbackIgnoreEntityResolver2",
+            "FallbackIgnoreLSResourceResolver",
+            "HardeningException",
+            "HardeningSAXParser",
+            "HardeningSAXParserFactory",
+            "HardeningSAXParserFactory$1",
+            "HardeningSAXParserFactory$Wrapper",
+            "HardeningSchema",
+            "HardeningSchemaFactory",
+            "HardeningSchemaFactory$1",
+            "HardeningSchemaFactory$Wrapper",
+            "HardeningValidator",
+            "HardeningValidatorHandler",
+            "HardeningXMLReader",
+            "SAXParserHardener",
+            "SAXParserHardener$HardeningExpatXMLReader",
+            "SchemaHardener");
+    // @formatter:on
 
     /**
      * Class count of the {@link #rootClosure()} DOM entry point, the baseline the {@link #reportFootprint()} percentages are computed against.
      */
-    private static final int LIBRARY_CLASS_COUNT = 6;
+    private static final int LIBRARY_CLASS_COUNT = 7;
 
     /**
      * Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library.

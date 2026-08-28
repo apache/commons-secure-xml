@@ -114,7 +114,7 @@ public final class HardeningXMLInputFactory {
          * @param delegate the delegate to wrap; must not be {@code null}.
          * @throws NullPointerException if {@code delegate} is {@code null}.
          */
-        Wrapper(final XMLInputFactory delegate) {
+        private Wrapper(final XMLInputFactory delegate) {
             this.delegate = Objects.requireNonNull(delegate, "delegate");
             delegate.setXMLResolver(new FallbackIgnoreXMLResolver(null));
         }

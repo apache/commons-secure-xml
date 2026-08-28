@@ -93,7 +93,7 @@ public final class HardeningSAXParserFactory {
          * @param delegate the delegate to wrap; must not be {@code null}.
          * @throws NullPointerException if {@code delegate} is {@code null}.
          */
-        Wrapper(final SAXParserFactory delegate) {
+        private Wrapper(final SAXParserFactory delegate) {
             this.delegate = Objects.requireNonNull(delegate, "delegate");
         }
 

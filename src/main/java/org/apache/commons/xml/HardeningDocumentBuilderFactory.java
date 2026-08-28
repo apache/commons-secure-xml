@@ -94,7 +94,7 @@ public final class HardeningDocumentBuilderFactory {
          * @param delegate the delegate to wrap; must not be {@code null}.
          * @throws NullPointerException if {@code delegate} is {@code null}.
          */
-        Wrapper(final DocumentBuilderFactory delegate) {
+        private Wrapper(final DocumentBuilderFactory delegate) {
             this.delegate = Objects.requireNonNull(delegate, "delegate");
         }
 
