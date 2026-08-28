@@ -31,7 +31,7 @@ import org.xml.sax.ext.EntityResolver2;
 /**
  * Entity resolver that consults an optional caller-supplied resolver and ignores (resolves to empty) whatever the caller does not resolve.
  * <p>
- * The canonical hardening floor, and the entity-resolution counterpart of the JAXP 1.5 {@code ACCESS_EXTERNAL_*} properties. Every floor
+ * The canonical secure floor, and the entity-resolution counterpart of the JAXP 1.5 {@code ACCESS_EXTERNAL_*} properties. Every floor
  * ({@link FallbackIgnoreLSResourceResolver}, {@link FallbackIgnoreURIResolver} and {@link FallbackIgnoreXMLResolver}) shares two defining properties:
  * </p>
  * <ol>
