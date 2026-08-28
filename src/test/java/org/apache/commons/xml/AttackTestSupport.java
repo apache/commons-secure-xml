@@ -246,7 +246,7 @@ final class AttackTestSupport {
      * Skeleton for every {@code assert*BlocksOrDoesNotLeak} helper.
      *
      * <p>Treats a thrown exception of one of the {@code expected} types as "hardening blocked at parse" (acceptable); otherwise asserts the captured output
-     * omits {@link #LEAKED_MARKER}. A throw whose type does not match {@code expected} fails the test, so unrelated failures (for example, a {@link HardeningException}
+     * omits {@link #LEAKED_MARKER}. A throw whose type does not match {@code expected} fails the test, so unrelated failures (for example, a {@link SecureException}
      * because no recipe matched the JAXP implementation) cannot be silently accepted as a clean block.</p>
      *
      * @param action      The parse to execute, returning the captured output text checked for {@link #LEAKED_MARKER}.

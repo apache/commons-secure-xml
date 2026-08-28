@@ -64,8 +64,8 @@ final class SaxonProvider {
 
         /** Collection-level ignore: {@code fn:collection()} and {@code fn:uri-collection()} resolve to an empty collection instead of fetching. */
         private static final CollectionFinder EMPTY_COLLECTION_FINDER = (context, collectionURI) -> {
-            if (HardeningException.throwOnUnresolved()) {
-                throw new XPathException(HardeningException.forbidden("collection", null, null, collectionURI, null));
+            if (SecureException.throwOnUnresolved()) {
+                throw new XPathException(SecureException.forbidden("collection", null, null, collectionURI, null));
             }
             return CollectionFn.EMPTY_COLLECTION;
         };
@@ -88,7 +88,7 @@ final class SaxonProvider {
         public XMLReader makeParser(final String className) throws TransformerFactoryConfigurationError {
             try {
                 return HardeningSAXParserFactory.harden(super.makeParser(className));
-            } catch (final HardeningException e) {
+            } catch (final SecureException e) {
                 throw new TransformerFactoryConfigurationError(e);
             }
         }
@@ -126,7 +126,7 @@ final class SaxonProvider {
             return SaxonProviderConfigurer.configure(factory);
         } catch (final ClassCastException e) {
             // A Saxon-package factory the configurer cannot lock down; refuse it rather than returning it unhardened.
-            throw new HardeningException("Unsupported Saxon TransformerFactory " + factory.getClass().getName(), e);
+            throw new SecureException("Unsupported Saxon TransformerFactory " + factory.getClass().getName(), e);
         }
     }
 
@@ -135,7 +135,7 @@ final class SaxonProvider {
             return SaxonProviderConfigurer.configure(factory);
         } catch (final ClassCastException e) {
             // A Saxon-package factory the configurer cannot lock down; refuse it rather than returning it unhardened.
-            throw new HardeningException("Unsupported Saxon XPathFactory " + factory.getClass().getName(), e);
+            throw new SecureException("Unsupported Saxon XPathFactory " + factory.getClass().getName(), e);
         }
     }
 

@@ -75,7 +75,7 @@ public final class SecureDocumentBuilderFactory {
      *
      * @param factory The factory to harden.
      * @return A new hardened factory or the original factory, as-is, if it is a known Android factory.
-     * @throws HardeningException Thrown if a (non-Andoid) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
+     * @throws SecureException Thrown if a (non-Andoid) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
      */
     static DocumentBuilderFactory harden(final DocumentBuilderFactory factory) {
         // Android exposes no FSP, ACCESS_EXTERNAL_* or attribute API, and KXmlParser drops user-defined entities; nothing to apply.
@@ -220,19 +220,19 @@ public final class SecureDocumentBuilderFactory {
     }
 
     /**
-     * Sets a feature on the given factory, throwing a {@link HardeningException} if the implementation does not recognize it.
+     * Sets a feature on the given factory, throwing a {@link SecureException} if the implementation does not recognize it.
      *
      * @param factory The factory to harden.
      * @param feature The feature to set.
      * @param value   The value to set.
-     * @throws HardeningException   Thrown if this factory or the {@code XPath}s it creates cannot support this feature.
+     * @throws SecureException   Thrown if this factory or the {@code XPath}s it creates cannot support this feature.
      * @throws NullPointerException Thrown if the {@code feature} parameter is null.
      */
     private static void setFeature(final DocumentBuilderFactory factory, final String feature, final boolean value) {
         try {
             factory.setFeature(feature, value);
         } catch (final ParserConfigurationException e) {
-            throw HardeningException.settingFailed("feature", feature, factory, e);
+            throw SecureException.settingFailed("feature", feature, factory, e);
         }
     }
 

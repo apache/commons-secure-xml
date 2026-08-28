@@ -176,7 +176,7 @@ public final class HardeningTransformerFactory {
         try {
             factory.setFeature(feature, value);
         } catch (final Exception e) {
-            throw HardeningException.settingFailed("feature", feature, factory, e);
+            throw SecureException.settingFailed("feature", feature, factory, e);
         }
     }
 
@@ -227,7 +227,7 @@ public final class HardeningTransformerFactory {
          * @throws TransformerConfigurationException if the source cannot be parsed.
          * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
          *                                   configuration error} or if the implementation is not available or cannot be instantiated.
-         * @throws HardeningException Thrown if a (non-Andoid) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
+         * @throws SecureException Thrown if a (non-Andoid) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
          */
         private Source hardenSourceToDom(final Source source) throws TransformerConfigurationException {
             if (source instanceof StreamSource || source instanceof SAXSource && ((SAXSource) source).getXMLReader() == null) {

@@ -301,7 +301,7 @@ public final class HardeningSAXParserFactory {
         try {
             factory.setFeature(feature, value);
         } catch (final Exception e) {
-            throw HardeningException.settingFailed("feature", feature, factory, e);
+            throw SecureException.settingFailed("feature", feature, factory, e);
         }
     }
 
@@ -309,7 +309,7 @@ public final class HardeningSAXParserFactory {
         try {
             reader.setFeature(feature, value);
         } catch (final Exception e) {
-            throw HardeningException.settingFailed("feature", feature, reader, e);
+            throw SecureException.settingFailed("feature", feature, reader, e);
         }
     }
 

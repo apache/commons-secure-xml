@@ -67,7 +67,7 @@ final class FallbackIgnoreURIResolver implements URIResolver {
      * Creates a new empty document.
      *
      * @return a new empty document.
-     * @throws HardeningException        Thrown if a {@link DocumentBuilder} cannot be created which satisfies the configuration requested.
+     * @throws SecureException        Thrown if a {@link DocumentBuilder} cannot be created which satisfies the configuration requested.
      * @throws ExceptionInInitializerError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
      *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      */
@@ -127,8 +127,8 @@ final class FallbackIgnoreURIResolver implements URIResolver {
             // The implementation parses the opted-in handle with an internal reader at its own defaults; the rewrite hands it a hardened reader instead.
             return HardeningSAXParserFactory.harden(resolved, overrideDefaultParser.getAsBoolean());
         }
-        if (HardeningException.throwOnUnresolved()) {
-            throw new TransformerException(HardeningException.forbidden("uri", null, null, href, base));
+        if (SecureException.throwOnUnresolved()) {
+            throw new TransformerException(SecureException.forbidden("uri", null, null, href, base));
         }
         return emptySource.get();
     }

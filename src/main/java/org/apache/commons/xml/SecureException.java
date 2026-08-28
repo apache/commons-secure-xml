@@ -31,7 +31,7 @@ package org.apache.commons.xml;
  *
  * <p>Package-private by design: callers should catch {@link IllegalStateException}, which this extends.</p>
  */
-final class HardeningException extends IllegalStateException {
+final class SecureException extends IllegalStateException {
 
     private static final long serialVersionUID = 1L;
 
@@ -47,7 +47,7 @@ final class HardeningException extends IllegalStateException {
      */
     static String forbidden(final String type, final String namespace, final String publicId, final String systemId, final String baseURI) {
         return String.format("External resource fetch forbidden by %s: type=%s, namespace=%s, publicId=%s, systemId=%s, baseURI=%s",
-                HardeningException.THROW_ON_UNRESOLVED, type, namespace, publicId, systemId, baseURI);
+                SecureException.THROW_ON_UNRESOLVED, type, namespace, publicId, systemId, baseURI);
     }
 
     /**
@@ -59,19 +59,19 @@ final class HardeningException extends IllegalStateException {
      * @param cause  the original checked or unchecked exception from the JAXP implementation.
      * @return the exception to throw.
      */
-    static HardeningException settingFailed(final String kind, final String name, final Object target, final Throwable cause) {
-        return new HardeningException("Failed to set " + kind + " '" + name + "' on " + target.getClass().getName(), cause);
+    static SecureException settingFailed(final String kind, final String name, final Object target, final Throwable cause) {
+        return new SecureException("Failed to set " + kind + " '" + name + "' on " + target.getClass().getName(), cause);
     }
 
     /**
      * Whether unresolved external references must be rejected instead of resolved to empty content.
      *
-     * <p>Read per resolution, so the {@value HardeningException#THROW_ON_UNRESOLVED} system property also toggles factories that already exist.</p>
+     * <p>Read per resolution, so the {@value SecureException#THROW_ON_UNRESOLVED} system property also toggles factories that already exist.</p>
      *
-     * @return {@code true} when the {@value HardeningException#THROW_ON_UNRESOLVED} system property is set.
+     * @return {@code true} when the {@value SecureException#THROW_ON_UNRESOLVED} system property is set.
      */
     static boolean throwOnUnresolved() {
-        return Boolean.getBoolean(HardeningException.THROW_ON_UNRESOLVED);
+        return Boolean.getBoolean(SecureException.THROW_ON_UNRESOLVED);
     }
 
     /**
@@ -83,7 +83,7 @@ final class HardeningException extends IllegalStateException {
      */
     static final String THROW_ON_UNRESOLVED = "org.apache.commons.xml.throwOnUnresolved";
 
-    HardeningException(final String message, final Throwable cause) {
+    SecureException(final String message, final Throwable cause) {
         super(message, cause);
     }
 }

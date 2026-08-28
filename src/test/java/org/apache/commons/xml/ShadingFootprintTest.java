@@ -62,14 +62,14 @@ class ShadingFootprintTest {
             "SecureDocumentBuilderFactory",
             "SecureDocumentBuilderFactory$1",
             "SecureDocumentBuilderFactory$Wrapper",
-            "HardeningException",
+            "SecureException",
             "MethodHandleFactory");
     // @formatter:on
 
     // @formatter:off
     private static final Set<String> SAX_PARSER_FACTORY = set(
             "FallbackIgnoreEntityResolver2",
-            "HardeningException",
+            "SecureException",
             "HardeningSAXParser",
             "HardeningSAXParserFactory",
             "HardeningSAXParserFactory$1",
@@ -82,7 +82,7 @@ class ShadingFootprintTest {
     // @formatter:off
     private static final Set<String> XML_INPUT_FACTORY = set(
             "FallbackIgnoreXMLResolver",
-            "HardeningException",
+            "SecureException",
             "HardeningXMLInputFactory",
             "HardeningXMLInputFactory$1",
             "HardeningXMLInputFactory$Wrapper",
@@ -102,7 +102,7 @@ class ShadingFootprintTest {
             "SecureDocumentBuilderFactory",
             "SecureDocumentBuilderFactory$1",
             "SecureDocumentBuilderFactory$Wrapper",
-            "HardeningException",
+            "SecureException",
             "HardeningSAXParser",
             "HardeningSAXParserFactory",
             "HardeningSAXParserFactory$1",
@@ -132,7 +132,7 @@ class ShadingFootprintTest {
             "SecureDocumentBuilderFactory$1",
             "SecureDocumentBuilderFactory$Wrapper",
             "MethodHandleFactory",
-            "HardeningException",
+            "SecureException",
             "HardeningSAXParser",
             "HardeningSAXParserFactory",
             "HardeningSAXParserFactory$1",
@@ -154,7 +154,7 @@ class ShadingFootprintTest {
     private static final Set<String> SCHEMA_FACTORY = saxParserFactoryPlus(
             "FallbackIgnoreEntityResolver2",
             "FallbackIgnoreLSResourceResolver",
-            "HardeningException",
+            "SecureException",
             "HardeningSAXParser",
             "HardeningSAXParserFactory",
             "HardeningSAXParserFactory$1",
@@ -218,7 +218,7 @@ class ShadingFootprintTest {
 
     @BeforeAll
     static void indexCompiledClasses() throws Exception {
-        classesDir = Paths.get(HardeningException.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        classesDir = Paths.get(SecureException.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         clazzpath = new Clazzpath();
         clazzpath.addClazzpathUnit(classesDir);
     }

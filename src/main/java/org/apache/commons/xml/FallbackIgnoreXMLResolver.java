@@ -66,8 +66,8 @@ final class FallbackIgnoreXMLResolver implements XMLResolver {
         if (resolved != null) {
             return resolved;
         }
-        if (HardeningException.throwOnUnresolved()) {
-            throw new XMLStreamException(HardeningException.forbidden(null, namespace, publicID, systemID, baseURI));
+        if (SecureException.throwOnUnresolved()) {
+            throw new XMLStreamException(SecureException.forbidden(null, namespace, publicID, systemID, baseURI));
         }
         return EMPTY;
     }

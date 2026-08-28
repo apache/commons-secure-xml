@@ -74,7 +74,7 @@ public final class HardeningXPathFactory {
      *
      * @param factory The factory to harden.
      * @return A new hardened factory or the original factory, hardened, if it is a known Saxon factory.
-     * @throws HardeningException Thrown if this {@link XPathFactory} or the {@code XPath}s it creates cannot support this feature.
+     * @throws SecureException Thrown if this {@link XPathFactory} or the {@code XPath}s it creates cannot support this feature.
      */
     static XPathFactory harden(final XPathFactory factory) {
         if (SaxonProvider.isSaxon(factory.getClass())) {
@@ -166,19 +166,19 @@ public final class HardeningXPathFactory {
     }
 
     /**
-     * Sets a feature on the given factory, throwing a {@link HardeningException} if the implementation does not recognize it.
+     * Sets a feature on the given factory, throwing a {@link SecureException} if the implementation does not recognize it.
      *
      * @param factory The factory to harden.
      * @param feature The feature to set.
      * @param value   The value to set.
-     * @throws HardeningException Thrown if this {@link XPathFactory} or the {@code XPath}s it creates cannot support this feature or if {@code feature} is
+     * @throws SecureException Thrown if this {@link XPathFactory} or the {@code XPath}s it creates cannot support this feature or if {@code feature} is
      *                            {@code null}.
      */
     private static void setFeature(final XPathFactory factory, final String feature, final boolean value) {
         try {
             factory.setFeature(feature, value);
         } catch (final XPathFactoryConfigurationException e) {
-            throw HardeningException.settingFailed("feature", feature, factory, e);
+            throw SecureException.settingFailed("feature", feature, factory, e);
         }
     }
 
