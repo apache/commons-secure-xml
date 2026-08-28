@@ -36,7 +36,7 @@ import org.xml.sax.helpers.XMLReaderAdapter;
  * SAX 1 ({@link #getParser()}) path gets the same hardening. The SAX 1 view matters because some consumers, such as Xalan's identity transformer, still ask
  * for a {@link Parser}.</p>
  *
- * <p>The secure reader is computed lazily on first access and cached: hardening an {@link XMLReader} can install a new wrapper (Android's Expat path), so
+ * <p>The secure reader is computed lazily on first access and cached: secure an {@link XMLReader} can install a new wrapper (Android's Expat path), so
  * every parse must run through the same instance. The {@code parse(...)} overloads inherited from {@link SAXParser} dispatch virtually to {@link #getXMLReader()}
  * and {@link #getParser()}, so they too run through the secure views without further overrides.</p>
  */
@@ -105,7 +105,7 @@ final class SecureSAXParser extends SAXParser {
     public void reset() {
         delegate.reset();
         // The JAXP reset contract reverts the delegate to its just-created state, which strips the post-creation reader hardening.
-        // We reset the cached readers, so hardening can be applied again.
+        // We reset the cached readers, so securing can be applied again.
         secureXMLReader = null;
         secureParser = null;
     }
