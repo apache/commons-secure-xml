@@ -33,7 +33,7 @@ import org.xml.sax.helpers.XMLReaderAdapter;
  * {@link SAXParser} that exposes a secure {@link XMLReader} and a matching SAX 1 {@link Parser}.
  *
  * <p>Both views are produced from the same secure reader, so a caller reaching the parser through either the SAX 2 ({@link #getXMLReader()}) or the legacy
- * SAX 1 ({@link #getParser()}) path gets the same hardening. The SAX 1 view matters because some consumers, such as Xalan's identity transformer, still ask
+ * SAX 1 ({@link #getParser()}) path gets the same securing. The SAX 1 view matters because some consumers, such as Xalan's identity transformer, still ask
  * for a {@link Parser}.</p>
  *
  * <p>The secure reader is computed lazily on first access and cached: secure an {@link XMLReader} can install a new wrapper (Android's Expat path), so
@@ -104,7 +104,7 @@ final class SecureSAXParser extends SAXParser {
     @Override
     public void reset() {
         delegate.reset();
-        // The JAXP reset contract reverts the delegate to its just-created state, which strips the post-creation reader hardening.
+        // The JAXP reset contract reverts the delegate to its just-created state, which strips the post-creation reader securing.
         // We reset the cached readers, so securing can be applied again.
         secureXMLReader = null;
         secureParser = null;
