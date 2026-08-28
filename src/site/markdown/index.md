@@ -148,11 +148,11 @@ HardeningSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
 
 ### Wrappers, not the original factories
 
-A returned factory is not necessarily an instance of the underlying implementation:
-it might be (and usually is) a wrapper around it,
+A returned factory is not necessarily an instance of the underlying implementation.
+It might be (and usually is) a wrapper around it,
 so it cannot be cast to the implementation's own class.
-Everything else about the implementation's behavior is preserved —
-features, properties, and attributes delegate to it —
+Everything else about the implementation's behavior is preserved:
+features, properties, and attributes delegate to it,
 and only the security behavior is hardened.
 
 Preserved behavior includes the choice of internal parsers.
