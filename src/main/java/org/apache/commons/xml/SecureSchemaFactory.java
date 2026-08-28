@@ -163,7 +163,7 @@ public final class SecureSchemaFactory {
         /**
          * Secures every schema source through {@link SecureSAXParserFactory#secure(Source, boolean)}.
          *
-         * @param schemas the schema sources to harden; must not be {@code null}.
+         * @param schemas the schema sources to secure; must not be {@code null}.
          * @return a new array of secure sources.
          * @throws SAXException if any source cannot be secure.
          * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
@@ -268,7 +268,7 @@ public final class SecureSchemaFactory {
      * every implementation. The reader used to parse schema and instance documents is secure separately, through
      * {@link SecureSAXParserFactory#secure(javax.xml.transform.Source, boolean)}.</p>
      *
-     * @param factory the factory to harden; never {@code null}.
+     * @param factory the factory to secure; never {@code null}.
      * @return a secure factory.
      */
     static SchemaFactory secure(final SchemaFactory factory) {
