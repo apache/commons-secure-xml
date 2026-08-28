@@ -190,7 +190,7 @@ public final class SecureTransformerFactory {
         public Source getAssociatedStylesheet(final Source source, final String media, final String title, final String charset)
                 throws TransformerConfigurationException {
             // Xalan's getAssociatedStylesheet drops a SAXSource's reader and self-provisions its own to scan for xml-stylesheet PIs (XALANJ-2849).
-            final Source secure = isXalan(delegate) ? hardenSourceToDom(source) : SecureSAXParserFactory.secure(source, overrideDefaultParser());
+            final Source secure = isXalan(delegate) ? secureSourceToDom(source) : SecureSAXParserFactory.secure(source, overrideDefaultParser());
             return delegate.getAssociatedStylesheet(secure, media, title, charset);
         }
 
@@ -214,7 +214,7 @@ public final class SecureTransformerFactory {
             return floor.getDelegate();
         }
 
-        private TransformerHandler hardenHandler(final TransformerHandler handler) {
+        private TransformerHandler secure(final TransformerHandler handler) {
             return handler == null ? null : new SecureTransformerHandler(handler, getURIResolver(), emptySource, overrideDefaultParser());
         }
 
@@ -230,7 +230,7 @@ public final class SecureTransformerFactory {
          *                                   configuration error} or if the implementation is not available or cannot be instantiated.
          * @throws SecureException Thrown if a (non-Android) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
          */
-        private Source hardenSourceToDom(final Source source) throws TransformerConfigurationException {
+        private Source secureSourceToDom(final Source source) throws TransformerConfigurationException {
             if (source instanceof StreamSource || source instanceof SAXSource && ((SAXSource) source).getXMLReader() == null) {
                 final InputSource inputSource = SAXSource.sourceToInputSource(source);
                 if (inputSource != null) {
@@ -285,7 +285,7 @@ public final class SecureTransformerFactory {
 
         @Override
         public TransformerHandler newTransformerHandler() throws TransformerConfigurationException {
-            return hardenHandler(delegate.newTransformerHandler());
+            return secure(delegate.newTransformerHandler());
         }
 
         /**
@@ -296,13 +296,13 @@ public final class SecureTransformerFactory {
          */
         @Override
         public TransformerHandler newTransformerHandler(final Source source) throws TransformerConfigurationException {
-            return hardenHandler(delegate.newTransformerHandler(SecureSAXParserFactory.secure(source, overrideDefaultParser())));
+            return secure(delegate.newTransformerHandler(SecureSAXParserFactory.secure(source, overrideDefaultParser())));
         }
 
         @Override
         public TransformerHandler newTransformerHandler(final Templates templates) throws TransformerConfigurationException {
             // Implementations cast templates.newTransformer() to their own Transformer type, so hand them the wrapped implementation Templates, not the wrapper.
-            return hardenHandler(delegate.newTransformerHandler(unwrap(templates)));
+            return secure(delegate.newTransformerHandler(unwrap(templates)));
         }
 
         /**
