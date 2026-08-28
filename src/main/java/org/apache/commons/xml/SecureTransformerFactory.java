@@ -427,7 +427,7 @@ public final class SecureTransformerFactory {
      *         {@link org.apache.commons.xml}-hardened reader instead.</li>
      * </ul>
      *
-     * @param factory the factory to harden; never {@code null}.
+     * @param factory the factory to secure; never {@code null}.
      * @return a secure factory.
      */
     static TransformerFactory secure(final TransformerFactory factory) {
