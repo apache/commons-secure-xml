@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Test;
 /**
  * {@link TemplatesHandler} products of the secure factory: {@code xsl:include} resolution during the SAX-driven compile sits on the factory's resolver floor,
  * and the {@link Templates} returned by {@link TemplatesHandler#getTemplates()} produce Transformers that carry the floor. The unconfigured control proves the
- * vector leaks without the hardening.
+ * vector leaks without the securing.
  */
 @Tag("trax")
 class TemplatesHandlerTest {
