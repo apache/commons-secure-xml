@@ -28,7 +28,7 @@ import org.w3c.dom.ls.LSResourceResolver;
 /**
  * {@link LSResourceResolver} floor: consults an optional caller-supplied resolver and ignores (resolves to empty) whatever the caller does not resolve.
  * <p>
- * The schema-compile counterpart of {@link FallbackIgnoreEntityResolver2}. The hardened {@link javax.xml.validation.SchemaFactory},
+ * The schema-compile counterpart of {@link FallbackIgnoreEntityResolver2}. The secure {@link javax.xml.validation.SchemaFactory},
  * {@link javax.xml.validation.Validator} and {@link javax.xml.validation.ValidatorHandler} wrappers install one of these and route a caller-set resolver
  * through {@link #setDelegate} rather than letting it replace the floor. A caller opts a specific resource in by returning a non-{@code null} {@link LSInput};
  * anything left unresolved resolves to an empty {@link LSInput}, so the external resource is neither fetched nor leaked.
