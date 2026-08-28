@@ -202,7 +202,7 @@ public final class HardeningTransformerFactory {
      * </ol>
      *
      * <p>The {@link SAXTransformerFactory} extension products ride the same wrappers: {@code newTransformerHandler}/{@code newTemplatesHandler} products are
-     * wrapped ({@link HardeningTransformerHandler}, {@link HardeningTemplatesHandler}) so the {@link Transformer}/{@link Templates} they expose carry the resolver
+     * wrapped ({@link HardeningTransformerHandler}, {@link SecureTemplatesHandler}) so the {@link Transformer}/{@link Templates} they expose carry the resolver
      * floor, and {@code newXMLFilter} returns a {@link HardeningXMLFilter} composed from these wrappers instead of the implementation's filter, which would
      * self-provision an unhardened input reader.</p>
      *
@@ -369,7 +369,7 @@ public final class HardeningTransformerFactory {
         @Override
         public TemplatesHandler newTemplatesHandler() throws TransformerConfigurationException {
             final TemplatesHandler handler = delegate.newTemplatesHandler();
-            return handler == null ? null : new HardeningTemplatesHandler(handler, getURIResolver(), emptySource, overrideDefaultParser());
+            return handler == null ? null : new SecureTemplatesHandler(handler, getURIResolver(), emptySource, overrideDefaultParser());
         }
 
         @Override

@@ -37,7 +37,7 @@ import org.xml.sax.SAXException;
  * Transformers without a {@link URIResolver} floor. Wrapping {@code getTemplates()} closes that, exactly as
  * {@link javax.xml.transform.TransformerFactory#newTemplates newTemplates} does.</p>
  */
-final class HardeningTemplatesHandler implements TemplatesHandler {
+final class SecureTemplatesHandler implements TemplatesHandler {
 
     private final TemplatesHandler delegate;
 
@@ -65,7 +65,7 @@ final class HardeningTemplatesHandler implements TemplatesHandler {
      * @param overrideDefaultParser whether the produced Templates' source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningTemplatesHandler(final TemplatesHandler delegate, final URIResolver uriResolver, final Supplier<Source> emptySource,
+    SecureTemplatesHandler(final TemplatesHandler delegate, final URIResolver uriResolver, final Supplier<Source> emptySource,
             final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
         this.uriResolver = uriResolver;
