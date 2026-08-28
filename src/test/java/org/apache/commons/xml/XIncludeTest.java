@@ -341,7 +341,7 @@ class XIncludeTest {
         final SAXParserFactory unhardenedFactory = SAXParserFactory.newInstance();
         unhardenedFactory.setNamespaceAware(true);
         assumeXIncludeAware(unhardenedFactory);
-        final XMLReader reader = SAXParserHardener.hardenReader(unhardenedFactory.newSAXParser().getXMLReader());
+        final XMLReader reader = HardeningSAXParserFactory.harden(unhardenedFactory.newSAXParser().getXMLReader());
         reader.setEntityResolver(new AllowListResolver());
         final String captured = captureCharacters(reader, input);
         assertEquals(RESOLVED_MARKER, captured.trim(),
@@ -356,7 +356,7 @@ class XIncludeTest {
         final SAXParserFactory unhardenedFactory = SAXParserFactory.newInstance();
         unhardenedFactory.setNamespaceAware(true);
         assumeXIncludeAware(unhardenedFactory);
-        final XMLReader reader = SAXParserHardener.hardenReader(unhardenedFactory.newSAXParser().getXMLReader());
+        final XMLReader reader = HardeningSAXParserFactory.harden(unhardenedFactory.newSAXParser().getXMLReader());
         final String captured = captureCharacters(reader, input);
         assertFalse(captured.contains(LEAKED_MARKER),
                 "hardenReader parse=text must resolve the include to empty, not leak; got: " + captured);
@@ -371,7 +371,7 @@ class XIncludeTest {
         final SAXParserFactory unhardenedFactory = SAXParserFactory.newInstance();
         unhardenedFactory.setNamespaceAware(true);
         assumeXIncludeAware(unhardenedFactory);
-        final XMLReader reader = SAXParserHardener.hardenReader(unhardenedFactory.newSAXParser().getXMLReader());
+        final XMLReader reader = HardeningSAXParserFactory.harden(unhardenedFactory.newSAXParser().getXMLReader());
         assertThrows(SAXException.class, () -> reader.parse(input),
                 "hardenReader should block XInclude parse=xml on reader with XInclude already enabled");
     }

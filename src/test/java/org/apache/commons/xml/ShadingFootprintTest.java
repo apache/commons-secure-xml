@@ -39,12 +39,12 @@ import org.vafer.jdependency.Clazz;
 import org.vafer.jdependency.Clazzpath;
 
 /**
- * Guards the shade footprint: the set of classes a consumer pulls in when they shade a single hardener entry point.
+ * Guards the shade footprint: the set of classes a consumer pulls in when they shade a single factory entry point.
  *
  * <p>Using {@code jdependency}, the same library {@code maven-shade-plugin}'s {@code minimizeJar} uses, this test computes each entry point's transitive class
- * closure over the compiled {@code target/classes} and pins it to an expected set. It keeps each hardener from silently regaining a dependency on classes it
- * should not need (for example a sibling resolver floor or another hardener), so schema builds only on the shared SAX path, TrAX and XPath additionally on the
- * DOM path their Xalan getAssociatedStylesheet and InputSource rewrites parse through, while only the public {@link org.apache.commons.xml} entry pulls the whole
+ * closure over the compiled {@code target/classes} and pins it to an expected set. It keeps each entry point from silently regaining a dependency on classes it
+ * should not need (for example a sibling resolver floor or another factory class), so schema builds only on the shared SAX path, TrAX and XPath additionally on the
+ * DOM path their Xalan getAssociatedStylesheet and InputSource rewrites parse through, while the six public entry points together pull the whole
  * library. Update the expected sets deliberately: a change here is a change to what a downstream shade includes.</p>
  *
  * <p>The test reads the compiled {@code .class} files from the code-source location, which only exists on a regular JVM: a native image carries no bytecode (and
@@ -56,8 +56,7 @@ class ShadingFootprintTest {
     private static final String PKG = "org.apache.commons.xml.";
 
     // @formatter:off
-    private static final Set<String> DOCUMENT_BUILDER_HARDENER = set(
-            "DocumentBuilderHardener",
+    private static final Set<String> DOCUMENT_BUILDER_FACTORY = set(
             "FallbackIgnoreEntityResolver2",
             "HardeningDocumentBuilder",
             "HardeningDocumentBuilderFactory",
@@ -67,36 +66,33 @@ class ShadingFootprintTest {
     // @formatter:on
 
     // @formatter:off
-    private static final Set<String> SAX_PARSER_HARDENER = set(
+    private static final Set<String> SAX_PARSER_FACTORY = set(
             "FallbackIgnoreEntityResolver2",
             "HardeningException",
             "HardeningSAXParser",
             "HardeningSAXParserFactory",
             "HardeningSAXParserFactory$1",
+            "HardeningSAXParserFactory$HardeningExpatXMLReader",
             "HardeningSAXParserFactory$Wrapper",
-            "HardeningXMLReader",
-            "SAXParserHardener",
-            "SAXParserHardener$HardeningExpatXMLReader");
+            "HardeningXMLReader");
     // @formatter:on
 
     // @formatter:off
-    private static final Set<String> STAX_HARDENER = set(
+    private static final Set<String> XML_INPUT_FACTORY = set(
             "FallbackIgnoreXMLResolver",
             "HardeningException",
             "HardeningXMLInputFactory",
             "HardeningXMLInputFactory$1",
-            "HardeningXMLInputFactory$Wrapper",
-            "StaxHardener");
+            "HardeningXMLInputFactory$Wrapper");
     // @formatter:on
 
     /**
-     * TrAX, XPath and schema re-harden their sub-parsers through {@link SAXParserHardener#hardenSource(Source)}, so each builds on the full SAX closure below;
-     * TrAX additionally parses the Xalan {@code getAssociatedStylesheet} source and XPath its InputSource-taking evaluate calls through the DOM hardener, so
+     * TrAX, XPath and schema re-harden their sub-parsers through {@link HardeningSAXParserFactory#harden(Source)}, so each builds on the full SAX closure below;
+     * TrAX additionally parses the Xalan {@code getAssociatedStylesheet} source and XPath its InputSource-taking evaluate calls through the DOM entry point, so
      * their closures carry that set too.
      */
     // @formatter:off
-    private static final Set<String> TRANSFORMER_HARDENER = saxParsersHardenerPlus(
-            "DocumentBuilderHardener",
+    private static final Set<String> TRANSFORMER_FACTORY = saxParserFactoryPlus(
             "FallbackIgnoreEntityResolver2",
             "FallbackIgnoreURIResolver",
             "HardeningDocumentBuilder",
@@ -107,6 +103,7 @@ class ShadingFootprintTest {
             "HardeningSAXParser",
             "HardeningSAXParserFactory",
             "HardeningSAXParserFactory$1",
+            "HardeningSAXParserFactory$HardeningExpatXMLReader",
             "HardeningSAXParserFactory$Wrapper",
             "HardeningTemplates",
             "HardeningTemplatesHandler",
@@ -117,18 +114,14 @@ class ShadingFootprintTest {
             "HardeningTransformerHandler",
             "HardeningXMLFilter",
             "HardeningXMLReader",
-            "SAXParserHardener",
-            "SAXParserHardener$HardeningExpatXMLReader",
             "SaxonProvider",
             "SaxonProvider$1",
             "SaxonProvider$HardenedConfiguration",
-            "SaxonProvider$SaxonProviderConfigurer",
-            "TransformerHardener");
+            "SaxonProvider$SaxonProviderConfigurer");
     // @formatter:on
 
     // @formatter:off
-    private static final Set<String> XPATH_HARDENER = saxParsersHardenerPlus(
-            "DocumentBuilderHardener",
+    private static final Set<String> XPATH_FACTORY = saxParserFactoryPlus(
             "FallbackIgnoreEntityResolver2",
             "FallbackIgnoreURIResolver",
             "HardeningDocumentBuilder",
@@ -139,6 +132,7 @@ class ShadingFootprintTest {
             "HardeningSAXParser",
             "HardeningSAXParserFactory",
             "HardeningSAXParserFactory$1",
+            "HardeningSAXParserFactory$HardeningExpatXMLReader",
             "HardeningSAXParserFactory$Wrapper",
             "HardeningXMLReader",
             "HardeningXPath",
@@ -146,23 +140,21 @@ class ShadingFootprintTest {
             "HardeningXPathFactory",
             "HardeningXPathFactory$1",
             "HardeningXPathFactory$Wrapper",
-            "SAXParserHardener",
-            "SAXParserHardener$HardeningExpatXMLReader",
             "SaxonProvider",
             "SaxonProvider$1",
             "SaxonProvider$HardenedConfiguration",
-            "SaxonProvider$SaxonProviderConfigurer",
-            "XPathHardener");
+            "SaxonProvider$SaxonProviderConfigurer");
     // @formatter:on
 
     // @formatter:off
-    private static final Set<String> SCHEMA_HARDENER = saxParsersHardenerPlus(
+    private static final Set<String> SCHEMA_FACTORY = saxParserFactoryPlus(
             "FallbackIgnoreEntityResolver2",
             "FallbackIgnoreLSResourceResolver",
             "HardeningException",
             "HardeningSAXParser",
             "HardeningSAXParserFactory",
             "HardeningSAXParserFactory$1",
+            "HardeningSAXParserFactory$HardeningExpatXMLReader",
             "HardeningSAXParserFactory$Wrapper",
             "HardeningSchema",
             "HardeningSchemaFactory",
@@ -170,22 +162,19 @@ class ShadingFootprintTest {
             "HardeningSchemaFactory$Wrapper",
             "HardeningValidator",
             "HardeningValidatorHandler",
-            "HardeningXMLReader",
-            "SAXParserHardener",
-            "SAXParserHardener$HardeningExpatXMLReader",
-            "SchemaHardener");
+            "HardeningXMLReader");
     // @formatter:on
 
     /**
      * Class count of the {@link #rootClosure()} DOM entry point, the baseline the {@link #reportFootprint()} percentages are computed against.
      */
-    private static final int LIBRARY_CLASS_COUNT = 7;
+    private static final int LIBRARY_CLASS_COUNT = 6;
 
     /**
      * Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library.
      */
-    private static final String[] REPORTED = {"DocumentBuilderHardener", "SAXParserHardener", "StaxHardener", "TransformerHardener", "XPathHardener",
-            "SchemaHardener"};
+    private static final String[] REPORTED = {"HardeningDocumentBuilderFactory", "HardeningSAXParserFactory", "HardeningXMLInputFactory",
+            "HardeningTransformerFactory", "HardeningXPathFactory", "HardeningSchemaFactory"};
 
     private static Clazzpath clazzpath;
     private static Path classesDir;
@@ -253,10 +242,10 @@ class ShadingFootprintTest {
     }
 
     /**
-     * {@link #SAX_PARSER_HARDENER} plus the extra names; used where an entry point's closure is the SAX path plus its own classes.
+     * {@link #SAX_PARSER_FACTORY} plus the extra names; used where an entry point's closure is the SAX path plus its own classes.
      */
-    private static Set<String> saxParsersHardenerPlus(final String... more) {
-        final Set<String> union = new TreeSet<>(SAX_PARSER_HARDENER);
+    private static Set<String> saxParserFactoryPlus(final String... more) {
+        final Set<String> union = new TreeSet<>(SAX_PARSER_FACTORY);
         union.addAll(Arrays.asList(more));
         return union;
     }
@@ -270,8 +259,8 @@ class ShadingFootprintTest {
     }
 
     @Test
-    void documentBuilderHardenerFootprint() {
-        assertEquals(DOCUMENT_BUILDER_HARDENER, closureOf("DocumentBuilderHardener"));
+    void documentBuilderFactoryFootprint() {
+        assertEquals(DOCUMENT_BUILDER_FACTORY, closureOf("HardeningDocumentBuilderFactory"));
     }
 
     @Test
@@ -280,27 +269,27 @@ class ShadingFootprintTest {
     }
 
     @Test
-    void saxParserHardenerFootprint() {
-        assertEquals(SAX_PARSER_HARDENER, closureOf("SAXParserHardener"));
+    void saxParserFactoryFootprint() {
+        assertEquals(SAX_PARSER_FACTORY, closureOf("HardeningSAXParserFactory"));
     }
 
     @Test
-    void schemaHardenerFootprint() {
-        assertEquals(SCHEMA_HARDENER, closureOf("SchemaHardener"));
+    void schemaFactoryFootprint() {
+        assertEquals(SCHEMA_FACTORY, closureOf("HardeningSchemaFactory"));
     }
 
     @Test
-    void staxHardenerFootprint() {
-        assertEquals(STAX_HARDENER, closureOf("StaxHardener"));
+    void xmlInputFactoryFootprint() {
+        assertEquals(XML_INPUT_FACTORY, closureOf("HardeningXMLInputFactory"));
     }
 
     @Test
-    void transformerHardenerFootprint() {
-        assertEquals(TRANSFORMER_HARDENER, closureOf("TransformerHardener"));
+    void transformerFactoryFootprint() {
+        assertEquals(TRANSFORMER_FACTORY, closureOf("HardeningTransformerFactory"));
     }
 
     @Test
-    void xPathHardenerFootprint() {
-        assertEquals(XPATH_HARDENER, closureOf("XPathHardener"));
+    void xPathFactoryFootprint() {
+        assertEquals(XPATH_FACTORY, closureOf("HardeningXPathFactory"));
     }
 }

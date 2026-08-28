@@ -32,7 +32,7 @@ import javax.xml.transform.URIResolver;
 
 /**
  * {@link Transformer} wrapper that rewrites the Source on every {@link Transformer#transform(Source, Result)} call through
- * {@link SAXParserHardener#hardenSource(Source)} before delegating, and keeps an ignore-all {@link URIResolver} floor so runtime {@code document()} calls a
+ * {@link HardeningSAXParserFactory#harden(Source)} before delegating, and keeps an ignore-all {@link URIResolver} floor so runtime {@code document()} calls a
  * caller does not resolve return empty rather than being fetched.
  * <p>
  * The floor is installed on the delegate transformer at construction, seeded with the factory's compile-time resolver; {@link #setURIResolver(URIResolver)}
@@ -137,7 +137,7 @@ final class HardeningTransformer extends Transformer {
     @Override
     public void transform(final Source xmlSource, final Result outputTarget) throws TransformerException {
         try {
-            delegate.transform(SAXParserHardener.hardenSource(xmlSource), outputTarget);
+            delegate.transform(HardeningSAXParserFactory.harden(xmlSource), outputTarget);
         } catch (final TransformerConfigurationException e) {
             throw new TransformerException(e);
         }

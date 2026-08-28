@@ -52,7 +52,7 @@ final class SaxonProvider {
      *
      * <ol>
      *   <li><b>SAX layer.</b> {@link #makeParser} hands every {@link XMLReader} Saxon would otherwise use through
-     *   {@link SAXParserHardener#hardenReader(XMLReader)}, which routes it to the matching bundled hardening recipe. External DTDs, entities and XInclude
+     *   {@link HardeningSAXParserFactory#harden(XMLReader)}, which routes it to the matching bundled hardening recipe. External DTDs, entities and XInclude
      *   resolve to empty content at parse time.</li>
      *   <li><b>Collection layer.</b> {@code fn:collection} bypasses the resource resolver and fetches directly, so an empty {@link CollectionFinder} supplies its
      *   ignore outcome instead.</li>
@@ -87,7 +87,7 @@ final class SaxonProvider {
         @Override
         public XMLReader makeParser(final String className) throws TransformerFactoryConfigurationError {
             try {
-                return SAXParserHardener.hardenReader(super.makeParser(className));
+                return HardeningSAXParserFactory.harden(super.makeParser(className));
             } catch (final HardeningException e) {
                 throw new TransformerFactoryConfigurationError(e);
             }
@@ -103,7 +103,7 @@ final class SaxonProvider {
     private static final class SaxonProviderConfigurer {
 
         private static TransformerFactory configure(final TransformerFactory factory) {
-            // The URIResolver floor is installed by the HardeningTransformerFactory wrapper that TransformerHardener puts around this factory.
+            // The URIResolver floor is installed by the HardeningTransformerFactory wrapper that HardeningTransformerFactory.harden puts around this factory.
             ((SaxonTransformerFactory) factory).setConfiguration(new HardenedConfiguration());
             return factory;
         }

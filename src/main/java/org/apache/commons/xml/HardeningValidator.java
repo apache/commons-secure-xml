@@ -34,7 +34,7 @@ import org.xml.sax.SAXNotSupportedException;
 
 /**
  * {@link Validator} wrapper that rewrites the Source on every {@link Validator#validate(Source)} and {@link Validator#validate(Source, Result)} call through
- * {@link SAXParserHardener#hardenSource(Source)} before delegating, and keeps an ignore-all {@link LSResourceResolver} floor so {@code xsi:schemaLocation} is not resolved at
+ * {@link HardeningSAXParserFactory#harden(Source)} before delegating, and keeps an ignore-all {@link LSResourceResolver} floor so {@code xsi:schemaLocation} is not resolved at
  * validation time. {@link #reset()} re-establishes the bare ignore-all floor, matching the just-constructed state.
  */
 final class HardeningValidator extends Validator {
@@ -113,7 +113,7 @@ final class HardeningValidator extends Validator {
     @Override
     public void validate(final Source source, final Result result) throws SAXException, IOException {
         try {
-            delegate.validate(SAXParserHardener.hardenSource(source), result);
+            delegate.validate(HardeningSAXParserFactory.harden(source), result);
         } catch (final TransformerConfigurationException e) {
             throw new SAXException("Failed to harden source for validation", e);
         }

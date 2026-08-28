@@ -116,7 +116,7 @@ final class FallbackIgnoreURIResolver implements URIResolver {
         final Source resolved = delegate != null ? delegate.resolve(href, base) : null;
         if (resolved != null) {
             // The implementation parses the opted-in handle with an internal reader at its own defaults; the rewrite hands it a hardened reader instead.
-            return SAXParserHardener.hardenSource(resolved);
+            return HardeningSAXParserFactory.harden(resolved);
         }
         if (HardeningException.throwOnUnresolved()) {
             throw new TransformerException(HardeningException.forbidden("uri", null, null, href, base));
