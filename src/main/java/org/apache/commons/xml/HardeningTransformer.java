@@ -56,7 +56,7 @@ final class HardeningTransformer extends Transformer {
      *
      * @param delegate    the delegate to wrap; must not be {@code null}.
      * @param uriResolver the compile-time URIResolver snapshot to seed the floor with; may be {@code null}.
-     * @param emptySource the empty-{@link Source} supplier for the produced Transformers
+     * @param emptySource the empty-{@link Source} supplier for the produced Transformers; {@code null} for the default empty DOM document.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
     HardeningTransformer(final Transformer delegate, final URIResolver uriResolver, final Supplier<Source> emptySource) {
