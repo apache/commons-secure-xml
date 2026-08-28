@@ -37,7 +37,7 @@ import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 
 /**
- * Creates new, hardened {@link SchemaFactory} instances.
+ * Creates new, secure {@link SchemaFactory} instances.
  * <p>
  * Beyond the three universal guarantees on {@link org.apache.commons.xml}:
  * </p>
@@ -51,7 +51,7 @@ import org.xml.sax.SAXNotSupportedException;
  * </p>
  * <p>
  * Not a {@link SchemaFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-hardened factory through this class
- * by calling an inherited method such as {@code newDefaultInstance()}. The hardened factories are instances of a nested, non-public wrapper class.
+ * by calling an inherited method such as {@code newDefaultInstance()}. The secure factories are instances of a nested, non-public wrapper class.
  * </p>
  *
  * @see org.apache.commons.xml
@@ -69,24 +69,24 @@ public final class SecureSchemaFactory {
      *
      * <p>Unlike the other factory types there is no per-implementation branching and no feature or limit configuration on the factory itself: schema compilation
      * and validation reach external resources only through the resolver hook, so wrapping the factory with a non-removable ignore-all resolver floor is enough on
-     * every implementation. The reader used to parse schema and instance documents is hardened separately, through
+     * every implementation. The reader used to parse schema and instance documents is secure separately, through
      * {@link SecureSAXParserFactory#secure(javax.xml.transform.Source, boolean)}.</p>
      *
      * @param factory the factory to harden; never {@code null}.
-     * @return a hardened factory.
+     * @return a secure factory.
      */
     static SchemaFactory secure(final SchemaFactory factory) {
         return new Wrapper(factory);
     }
 
     /**
-     * Returns a new, hardened {@link SchemaFactory} of the system-default implementation, supporting W3C XML Schema 1.0.
+     * Returns a new, secure {@link SchemaFactory} of the system-default implementation, supporting W3C XML Schema 1.0.
      * <p>
      * Obtained as by {@code SchemaFactory.newDefaultInstance()} where the platform provides it (Java 9 or later), and by instantiating the JDK's built-in
      * implementation directly on Java 8.
      * </p>
      *
-     * @return A hardened factory.
+     * @return A secure factory.
      * @throws IllegalStateException    Thrown if a required hardening setting cannot be applied to the underlying implementation.
      * @throws IllegalArgumentException Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation
      *                                 (for example Android).
@@ -110,10 +110,10 @@ public final class SecureSchemaFactory {
     }
 
     /**
-     * Returns a new, hardened {@link SchemaFactory} for the given schema language.
+     * Returns a new, secure {@link SchemaFactory} for the given schema language.
      *
      * @param schemaLanguage The schema language, as accepted by {@link SchemaFactory#newInstance(String)}.
-     * @return A hardened factory.
+     * @return A secure factory.
      * @throws IllegalArgumentException        Thrown if no implementation of the schema language is available.
      * @throws NullPointerException            Thrown if {@code schemaLanguage} is {@code null}.
      * @throws SchemaFactoryConfigurationError Thrown if a configuration error is encountered.
@@ -123,12 +123,12 @@ public final class SecureSchemaFactory {
     }
 
     /**
-     * Returns a new, hardened {@link SchemaFactory} of the given implementation class.
+     * Returns a new, secure {@link SchemaFactory} of the given implementation class.
      *
      * @param schemaLanguage   The schema language, as accepted by {@link SchemaFactory#newInstance(String)}.
      * @param factoryClassName The fully qualified class name of the {@link SchemaFactory} implementation.
      * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
-     * @return A hardened factory.
+     * @return A secure factory.
      * @throws IllegalArgumentException Thrown if {@code factoryClassName} is {@code null}, or if the factory class cannot be loaded or instantiated, or does
      *                                  not support {@code schemaLanguage}.
      * @throws NullPointerException     Thrown if {@code schemaLanguage} is {@code null}.
@@ -157,7 +157,7 @@ public final class SecureSchemaFactory {
      * </ol>
      *
      * <p>
-     * The hardened reader supplied by {@link SecureSAXParserFactory#secure(Source, boolean)} already carries {@code FEATURE_SECURE_PROCESSING} and the processing limits, so a
+     * The secure reader supplied by {@link SecureSAXParserFactory#secure(Source, boolean)} already carries {@code FEATURE_SECURE_PROCESSING} and the processing limits, so a
      * DOCTYPE, external entity or Billion Laughs payload in the schema or instance document is bounded there rather than on this factory. The JAXP 1.5
      * {@code ACCESS_EXTERNAL_*} properties are deliberately not set: the resolver floor already blocks the same fetches on every implementation, and the JDK 8
      * {@code SchemaFactory} has a bug whereby those properties keep blocking even when a caller's own resolver would grant the access. The floor is a non-removable
@@ -173,22 +173,22 @@ public final class SecureSchemaFactory {
          * Secures every schema source through {@link SecureSAXParserFactory#secure(Source, boolean)}.
          *
          * @param schemas the schema sources to harden; must not be {@code null}.
-         * @return a new array of hardened sources.
+         * @return a new array of secure sources.
          * @throws SAXException if any source cannot be hardened.
          * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
          *                                   configuration error} or if the implementation is not available or cannot be instantiated.
          */
         private Source[] secure(final Source[] schemas) throws SAXException {
-            final Source[] hardened = new Source[schemas.length];
+            final Source[] secure = new Source[schemas.length];
             final boolean overrideDefaultParser = overrideDefaultParser();
             try {
                 for (int i = 0; i < schemas.length; i++) {
-                    hardened[i] = SecureSAXParserFactory.secure(schemas[i], overrideDefaultParser);
+                    secure[i] = SecureSAXParserFactory.secure(schemas[i], overrideDefaultParser);
                 }
             } catch (final TransformerConfigurationException e) {
                 throw new SAXException("Failed to harden schema source", e);
             }
-            return hardened;
+            return secure;
         }
 
 
