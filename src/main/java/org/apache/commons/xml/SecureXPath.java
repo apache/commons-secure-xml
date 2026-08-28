@@ -62,7 +62,7 @@ final class SecureXPath implements XPath {
      * @throws XPathExpressionException if the source cannot be parsed.
      * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
      *                                   configuration error} or if the implementation is not available or cannot be instantiated.
-     * @throws SecureException Thrown if a (non-Andoid) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
+     * @throws SecureException Thrown if a (non-Android) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
      */
     static Document parse(final InputSource source, final boolean overrideDefaultParser) throws XPathExpressionException {
         Objects.requireNonNull(source, "source");

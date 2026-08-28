@@ -238,7 +238,7 @@ public final class SecureDocumentBuilderFactory {
      *
      * @return A secure factory.
      * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws IllegalStateException     Thrown if a (non-Andoid) factory cannot support the secure processing feature
+     * @throws IllegalStateException     Thrown if a (non-Android) factory cannot support the secure processing feature
      *                                   {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
      * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
      *                                   implementation is not available or cannot be instantiated.
@@ -254,7 +254,7 @@ public final class SecureDocumentBuilderFactory {
      * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
      * @return A secure factory.
      * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws IllegalStateException     Thrown if a (non-Andoid) factory cannot support the secure processing feature
+     * @throws IllegalStateException     Thrown if a (non-Android) factory cannot support the secure processing feature
      *                                   {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
      * @throws FactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
      */
@@ -325,7 +325,7 @@ public final class SecureDocumentBuilderFactory {
      *
      * @param factory The factory to harden.
      * @return A new secure factory or the original factory, as-is, if it is a known Android factory.
-     * @throws SecureException Thrown if a (non-Andoid) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
+     * @throws SecureException Thrown if a (non-Android) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
      */
     static DocumentBuilderFactory secure(final DocumentBuilderFactory factory) {
         // Android exposes no FSP, ACCESS_EXTERNAL_* or attribute API, and KXmlParser drops user-defined entities; nothing to apply.
