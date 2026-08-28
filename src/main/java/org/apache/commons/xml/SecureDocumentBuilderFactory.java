@@ -53,7 +53,7 @@ public final class SecureDocumentBuilderFactory {
      * <p>
      * Wraps each produced builder in a {@link SecureDocumentBuilder}; required when the underlying factory carries no resolver of its own and does not honor
      * JAXP 1.5 {@code ACCESS_EXTERNAL_*} (e.g. the external Xerces distribution). A caller-set resolver is routed through the floor rather than replacing it. Kept
-     * as a standalone wrapper so any hardener can reuse the floor.
+     * as a standalone wrapper so any secure class can reuse the floor.
      * </p>
      *
      * @see org.apache.commons.xml
@@ -323,7 +323,7 @@ public final class SecureDocumentBuilderFactory {
      *         needed here. A caller can chain its own resolver onto the floor to allow-list resources, but cannot remove it.</li>
      * </ul>
      *
-     * @param factory The factory to harden.
+     * @param factory The factory to secure.
      * @return A new secure factory or the original factory, as-is, if it is a known Android factory.
      * @throws SecureException Thrown if a (non-Android) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
      */
@@ -343,7 +343,7 @@ public final class SecureDocumentBuilderFactory {
     /**
      * Sets a feature on the given factory, throwing a {@link SecureException} if the implementation does not recognize it.
      *
-     * @param factory The factory to harden.
+     * @param factory The factory to secure.
      * @param feature The feature to set.
      * @param value   The value to set.
      * @throws SecureException   Thrown if this factory or the {@code XPath}s it creates cannot support this feature.
