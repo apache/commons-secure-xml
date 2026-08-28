@@ -123,7 +123,7 @@ final class SecureValidator extends Validator {
         try {
             delegate.validate(SecureSAXParserFactory.secure(source, overrideDefaultParser), result);
         } catch (final TransformerConfigurationException e) {
-            throw new SAXException("Failed to harden source for validation", e);
+            throw new SAXException("Failed to secure source for validation", e);
         }
     }
 }

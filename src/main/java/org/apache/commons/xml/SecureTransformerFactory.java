@@ -266,7 +266,7 @@ public final class SecureTransformerFactory {
 
         @Override
         public Transformer newTransformer() throws TransformerConfigurationException {
-            // Identity transformer: still parses runtime sources, so wrap it to harden Transformer.transform(Source, Result).
+            // Identity transformer: still parses runtime sources, so wrap it to secure Transformer.transform(Source, Result).
             final Transformer transformer = delegate.newTransformer();
             return transformer == null ? null : new SecureTransformer(transformer, getURIResolver(), emptySource, overrideDefaultParser());
         }

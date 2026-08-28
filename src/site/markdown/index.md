@@ -27,8 +27,8 @@ stock JDK and external JAXP implementations.
 
 ## Why
 
-Any Java library that parses XML has to harden JAXP before handing a factory to user code, and every library ends up
-copy-pasting the same hardening snippet. The snippet is fragile: the attributes and features needed to harden a factory
+Any Java library that parses XML has to secure JAXP before handing a factory to user code, and every library ends up
+copy-pasting the same hardening snippet. The snippet is fragile: the attributes and features needed to secure a factory
 are not standardized, each JAXP implementation exposes a slightly different set, and setting an unknown one throws an
 exception that callers routinely swallow. Writing this block correctly for every implementation is real work, and
 duplicating it across projects means every project owns the maintenance burden on its own.

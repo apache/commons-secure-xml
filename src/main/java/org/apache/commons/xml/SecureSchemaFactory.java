@@ -177,7 +177,7 @@ public final class SecureSchemaFactory {
                     secure[i] = SecureSAXParserFactory.secure(schemas[i], overrideDefaultParser);
                 }
             } catch (final TransformerConfigurationException e) {
-                throw new SAXException("Failed to harden schema source", e);
+                throw new SAXException("Failed to secure schema source", e);
             }
             return secure;
         }

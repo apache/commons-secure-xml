@@ -46,7 +46,7 @@ final class SaxonProvider {
     /**
      * Sole holder of Saxon symbolic references, so that the outer class verifies without Saxon on the classpath.
      *
-     * <p>{@link SaxonProvider#isSaxon} runs on every harden call, Saxon present or not, and the JVM verifier may load classes eagerly to prove class-typed
+     * <p>{@link SaxonProvider#isSaxon} runs on every secure call, Saxon present or not, and the JVM verifier may load classes eagerly to prove class-typed
      * assignability; keeping every Saxon reference in this nested class defers that loading until a Saxon factory has actually been recognized.</p>
      */
     private static final class SaxonProviderConfigurer {
