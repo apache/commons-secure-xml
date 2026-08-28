@@ -29,7 +29,7 @@ import javax.xml.validation.ValidatorHandler;
  * floor), and each {@link ValidatorHandler} is wrapped in a {@link HardeningValidatorHandler} that keeps the same ignore-all resolver floor so
  * {@code xsi:schemaLocation} is not resolved during SAX-driven validation.
  */
-final class HardeningSchema extends Schema {
+final class SecureSchema extends Schema {
 
     private final Schema delegate;
 
@@ -45,7 +45,7 @@ final class HardeningSchema extends Schema {
      * @param overrideDefaultParser whether the produced Validators' source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningSchema(final Schema delegate, final boolean overrideDefaultParser) {
+    SecureSchema(final Schema delegate, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
         this.overrideDefaultParser = overrideDefaultParser;
     }

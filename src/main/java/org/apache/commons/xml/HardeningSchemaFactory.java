@@ -151,7 +151,7 @@ public final class HardeningSchemaFactory {
      *   <li>{@link HardeningSchemaFactory} installs an ignore-all {@link FallbackIgnoreLSResourceResolver} floor on the factory (blocking
      *       {@code xs:import}/{@code xs:include}/{@code xs:redefine} at compile time) and rewrites the Source on every {@code newSchema(Source[])} entry point
      *       through {@link SecureSAXParserFactory#harden(Source, boolean)}.</li>
-     *   <li>{@link HardeningSchema} wraps every Validator/ValidatorHandler the inner Schema produces and re-installs the floor on each (blocking
+     *   <li>{@link SecureSchema} wraps every Validator/ValidatorHandler the inner Schema produces and re-installs the floor on each (blocking
      *       {@code xsi:schemaLocation} at validation time), since neither the JDK nor Xerces reliably propagates it through {@code Schema}.</li>
      *   <li>{@link HardeningValidator} rewrites the Source on every {@link Validator#validate(Source)} call.</li>
      * </ol>
@@ -235,7 +235,7 @@ public final class HardeningSchemaFactory {
 
         @Override
         public Schema newSchema() throws SAXException {
-            return new HardeningSchema(delegate.newSchema(), overrideDefaultParser());
+            return new SecureSchema(delegate.newSchema(), overrideDefaultParser());
         }
 
         /**
@@ -246,7 +246,7 @@ public final class HardeningSchemaFactory {
          */
         @Override
         public Schema newSchema(final Source[] schemas) throws SAXException {
-            return new HardeningSchema(delegate.newSchema(harden(schemas)), overrideDefaultParser());
+            return new SecureSchema(delegate.newSchema(harden(schemas)), overrideDefaultParser());
         }
 
         /**

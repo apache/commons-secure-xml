@@ -80,9 +80,9 @@ class OverrideDefaultParserTest {
         assumeFalse(AttackTestSupport.IS_ANDROID);
         final SchemaFactory factory = HardeningSchemaFactory.newDefaultInstance();
         assertFalse(factory.getFeature(FEATURE));
-        assertFalse(((HardeningSchema) factory.newSchema(AttackTestSupport.streamSource(AttackTestSupport.BENIGN_SCHEMA))).overrideDefaultParser);
+        assertFalse(((SecureSchema) factory.newSchema(AttackTestSupport.streamSource(AttackTestSupport.BENIGN_SCHEMA))).overrideDefaultParser);
         factory.setFeature(FEATURE, true);
-        assertTrue(((HardeningSchema) factory.newSchema(AttackTestSupport.streamSource(AttackTestSupport.BENIGN_SCHEMA))).overrideDefaultParser);
+        assertTrue(((SecureSchema) factory.newSchema(AttackTestSupport.streamSource(AttackTestSupport.BENIGN_SCHEMA))).overrideDefaultParser);
     }
 
     @Test
