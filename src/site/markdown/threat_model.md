@@ -218,13 +218,12 @@ enforced by the reserved settings above, which a caller cannot lift.
 
   As in the previous case, you need to provide a secure resolver.
 
-- **Parser pinning.** You may set `jdk.xml.overrideDefaultParser` on a TrAX, XPath or schema factory that recognizes it.
-  The implementation's internal parsers are never used
-  (the hardening wrappers parse every source themselves),
-  so the feature carries no security weight here:
-  it selects which hardened parser family performs those parses —
-  the platform's built-in parser when `false` (the JDK's default),
-  the pluggable lookup when `true` or where the feature is not recognized.
+- **Internal parser selection.**
+  On the stock JDK TrAX, XPath, and schema implementations
+  you may set [`jdk.xml.overrideDefaultParser`](https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/module-summary.html#jdk.xml.overrideDefaultParser)
+  to switch their internal parses from the JDK parsers to a `ServiceLoader`-resolved parser.
+  Whichever parser is selected, it is hardened,
+  so the setting carries no security weight.
 
 ### What is out of scope
 
