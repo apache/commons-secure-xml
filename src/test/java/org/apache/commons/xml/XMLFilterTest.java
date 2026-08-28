@@ -35,7 +35,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.XMLFilter;
 
 /**
- * {@link XMLFilter} products of the hardened factory: the input document is parsed by a hardened reader (never a self-provisioned permissive one), and the
+ * {@link XMLFilter} products of the secure factory: the input document is parsed by a secure reader (never a self-provisioned permissive one), and the
  * transformation runs on the resolver floor, so neither an external entity in the input nor a stylesheet's runtime {@code document()} fetches. The
  * unconfigured controls prove both vectors leak without the hardening. The {@code Templates} overload doubles as a regression test for handing the factory a
  * wrapped {@code Templates}.
@@ -82,7 +82,7 @@ class XMLFilterTest {
 
     @Test
     void hardenedFilterDoesNotLeakExternalEntity() throws Exception {
-        // The f003 vector: with no caller-set parent, the input must be parsed by a hardened reader, not a self-provisioned permissive one.
+        // The f003 vector: with no caller-set parent, the input must be parsed by a secure reader, not a self-provisioned permissive one.
         final XMLFilter filter = SaxSurfaceTestSupport.hardenedFactory().newXMLFilter(AttackTestSupport.streamSource(IDENTITY_XSLT));
         assertFalse(filterAndCapture(filter, entityPayload()).contains(AttackTestSupport.LEAKED_MARKER), "external entity through XMLFilter leaked");
     }
