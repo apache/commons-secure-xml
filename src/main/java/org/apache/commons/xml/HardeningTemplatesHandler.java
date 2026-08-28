@@ -56,7 +56,7 @@ final class HardeningTemplatesHandler implements TemplatesHandler {
      *
      * @param delegate the delegate to wrap; must not be {@code null}.
      * @param uriResolver the compile-time URIResolver snapshot to restore onto Transformers produced from the compiled Templates; may be {@code null}.
-     * @param emptySource the empty-{@link Source} supplier for the produced Templates.
+     * @param emptySource the empty-{@link Source} supplier for the produced Templates; may be {@code null} for the default empty DOM document.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
     HardeningTemplatesHandler(final TemplatesHandler delegate, final URIResolver uriResolver, final Supplier<Source> emptySource) {
