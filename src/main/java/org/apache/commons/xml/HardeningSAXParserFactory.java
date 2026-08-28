@@ -31,16 +31,15 @@ import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.XMLReader;
 
 /**
- * Universal SAX factory wrapper that funnels every produced parser through {@link SAXParserHardener#hardenReader(XMLReader)}.
+ * Creates new, hardened {@link SAXParserFactory} instances.
  * <p>
- * {@link SAXParserFactory} exposes only a feature API and no property API, so the per-parse hardening (limits, entity blocking, implementation-specific fixups)
- * has to run on each {@link XMLReader} the factory produces. This wrapper returns a {@link HardeningSAXParser}, which applies that hardening lazily to both the
- * SAX 2 {@link XMLReader} and the SAX 1 {@link org.xml.sax.Parser} it exposes.
+ * Not a {@link SAXParserFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-hardened factory through this class
+ * by calling an inherited method such as {@code newDefaultInstance()}. The hardened factories are instances of a nested, non-public wrapper class.
  * </p>
  *
  * @see org.apache.commons.xml
  */
-public final class HardeningSAXParserFactory extends SAXParserFactory {
+public final class HardeningSAXParserFactory {
 
     /**
      * Returns a new, hardened {@link SAXParserFactory}.
@@ -60,70 +59,97 @@ public final class HardeningSAXParserFactory extends SAXParserFactory {
         return SAXParserHardener.harden(SAXParserFactory.newInstance());
     }
 
-    private final SAXParserFactory delegate;
-
     /**
-     * Constructs a new instance.
+     * Wraps a prepared delegate in the hardening wrapper; called by the hardener once the required settings are applied.
      *
      * @param delegate the delegate to wrap; must not be {@code null}.
-     * @throws NullPointerException if {@code delegate} is {@code null}.
+     * @return The hardened factory.
      */
-    HardeningSAXParserFactory(final SAXParserFactory delegate) {
-        this.delegate = Objects.requireNonNull(delegate, "delegate");
+    static SAXParserFactory wrap(final SAXParserFactory delegate) {
+        return new Wrapper(delegate);
     }
 
-    @Override
-    public boolean getFeature(final String name) throws ParserConfigurationException, SAXNotRecognizedException, SAXNotSupportedException {
-        return delegate.getFeature(name);
+    private HardeningSAXParserFactory() {
+        // static only
     }
 
-    @Override
-    public Schema getSchema() {
-        return delegate.getSchema();
-    }
+    /**
+     * Universal SAX factory wrapper that funnels every produced parser through {@link SAXParserHardener#hardenReader(XMLReader)}.
+     * <p>
+     * {@link SAXParserFactory} exposes only a feature API and no property API, so the per-parse hardening (limits, entity blocking, implementation-specific fixups)
+     * has to run on each {@link XMLReader} the factory produces. This wrapper returns a {@link HardeningSAXParser}, which applies that hardening lazily to both the
+     * SAX 2 {@link XMLReader} and the SAX 1 {@link org.xml.sax.Parser} it exposes.
+     * </p>
+     *
+     * @see org.apache.commons.xml
+     */
+    private static final class Wrapper extends SAXParserFactory {
 
-    @Override
-    public boolean isNamespaceAware() {
-        return delegate.isNamespaceAware();
-    }
+        private final SAXParserFactory delegate;
 
-    @Override
-    public boolean isValidating() {
-        return delegate.isValidating();
-    }
+        /**
+         * Constructs a new instance.
+         *
+         * @param delegate the delegate to wrap; must not be {@code null}.
+         * @throws NullPointerException if {@code delegate} is {@code null}.
+         */
+        Wrapper(final SAXParserFactory delegate) {
+            this.delegate = Objects.requireNonNull(delegate, "delegate");
+        }
 
-    @Override
-    public boolean isXIncludeAware() {
-        return delegate.isXIncludeAware();
-    }
+        @Override
+        public boolean getFeature(final String name) throws ParserConfigurationException, SAXNotRecognizedException, SAXNotSupportedException {
+            return delegate.getFeature(name);
+        }
 
-    @Override
-    public SAXParser newSAXParser() throws ParserConfigurationException, SAXException {
-        return new HardeningSAXParser(delegate.newSAXParser());
-    }
+        @Override
+        public Schema getSchema() {
+            return delegate.getSchema();
+        }
 
-    @Override
-    public void setFeature(final String name, final boolean value) throws ParserConfigurationException, SAXNotRecognizedException, SAXNotSupportedException {
-        delegate.setFeature(name, value);
-    }
+        @Override
+        public boolean isNamespaceAware() {
+            return delegate.isNamespaceAware();
+        }
 
-    @Override
-    public void setNamespaceAware(final boolean awareness) {
-        delegate.setNamespaceAware(awareness);
-    }
+        @Override
+        public boolean isValidating() {
+            return delegate.isValidating();
+        }
 
-    @Override
-    public void setSchema(final Schema schema) {
-        delegate.setSchema(schema);
-    }
+        @Override
+        public boolean isXIncludeAware() {
+            return delegate.isXIncludeAware();
+        }
 
-    @Override
-    public void setValidating(final boolean validating) {
-        delegate.setValidating(validating);
-    }
+        @Override
+        public SAXParser newSAXParser() throws ParserConfigurationException, SAXException {
+            return new HardeningSAXParser(delegate.newSAXParser());
+        }
 
-    @Override
-    public void setXIncludeAware(final boolean state) {
-        delegate.setXIncludeAware(state);
+        @Override
+        public void setFeature(final String name, final boolean value) throws ParserConfigurationException, SAXNotRecognizedException, SAXNotSupportedException {
+            delegate.setFeature(name, value);
+        }
+
+        @Override
+        public void setNamespaceAware(final boolean awareness) {
+            delegate.setNamespaceAware(awareness);
+        }
+
+        @Override
+        public void setSchema(final Schema schema) {
+            delegate.setSchema(schema);
+        }
+
+        @Override
+        public void setValidating(final boolean validating) {
+            delegate.setValidating(validating);
+        }
+
+        @Override
+        public void setXIncludeAware(final boolean state) {
+            delegate.setXIncludeAware(state);
+        }
     }
 }

@@ -90,7 +90,7 @@ requires a code change to this library.
 import org.w3c.dom.Document;
 import org.apache.commons.xml.HardeningDocumentBuilderFactory;
 
-Document doc = HardeningDocumentBuilderFactory().newInstance().parse(inputStream);
+Document doc = HardeningDocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputStream);
 ```
 
 **SAX parsing** via `SAXParserFactory`:
@@ -98,7 +98,7 @@ Document doc = HardeningDocumentBuilderFactory().newInstance().parse(inputStream
 ```java
 import org.apache.commons.xml.HardeningSAXParserFactory;
 
-HardeningSAXParserFactory().newInstance().parse(inputStream, myDefaultHandler);
+HardeningSAXParserFactory.newInstance().newSAXParser().parse(inputStream, myDefaultHandler);
 ```
 
 **Streaming (StAX) parsing** via `XMLInputFactory`:

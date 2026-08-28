@@ -45,7 +45,7 @@ final class SchemaHardener {
      * @return a hardened factory.
      */
     static SchemaFactory harden(final SchemaFactory factory) {
-        return new HardeningSchemaFactory(factory);
+        return HardeningSchemaFactory.wrap(factory);
     }
 
     private SchemaHardener() {

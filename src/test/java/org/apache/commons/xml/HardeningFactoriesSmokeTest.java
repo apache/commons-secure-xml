@@ -48,6 +48,20 @@ class HardeningFactoriesSmokeTest {
 
     private static final String BENIGN_XML = "<?xml version=\"1.0\"?>\n<root><child>hello</child></root>\n";
 
+    /**
+     * The public classes must not extend their JAXP factory type: extending it would inherit the JAXP static factory methods, letting a caller obtain a
+     * non-hardened factory through an inherited method such as {@code newInstance(String, ClassLoader)} or {@code newDefaultInstance()}.
+     */
+    @Test
+    void publicClassesDoNotExtendTheirJaxpFactoryType() {
+        assertFalse(DocumentBuilderFactory.class.isAssignableFrom(HardeningDocumentBuilderFactory.class));
+        assertFalse(SAXParserFactory.class.isAssignableFrom(HardeningSAXParserFactory.class));
+        assertFalse(SchemaFactory.class.isAssignableFrom(HardeningSchemaFactory.class));
+        assertFalse(TransformerFactory.class.isAssignableFrom(HardeningTransformerFactory.class));
+        assertFalse(XMLInputFactory.class.isAssignableFrom(HardeningXMLInputFactory.class));
+        assertFalse(XPathFactory.class.isAssignableFrom(HardeningXPathFactory.class));
+    }
+
     @Test
     void benignDocumentParses() throws Exception {
         final Document doc = HardeningDocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(BENIGN_XML)));
@@ -112,8 +126,8 @@ class HardeningFactoriesSmokeTest {
 
     @Test
     void newXPathFactoryReturnsFreshInstance() throws Exception {
-        final XPathFactory a = HardeningXPathFactory.newXPathFactory();
-        final XPathFactory b = HardeningXPathFactory.newXPathFactory();
+        final XPathFactory a = HardeningXPathFactory.newInstance();
+        final XPathFactory b = HardeningXPathFactory.newInstance();
         assertNotSame(a, b);
         assertTrue(a.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }

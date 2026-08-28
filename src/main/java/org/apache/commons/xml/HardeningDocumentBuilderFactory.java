@@ -29,16 +29,15 @@ import javax.xml.validation.Schema;
 import org.xml.sax.EntityResolver;
 
 /**
- * {@link DocumentBuilderFactory} wrapper that keeps an ignore-all {@link EntityResolver} floor on every {@link DocumentBuilder} produced.
+ * Creates new, hardened {@link DocumentBuilderFactory} instances.
  * <p>
- * Wraps each produced builder in a {@link HardeningDocumentBuilder}; required when the underlying factory carries no resolver of its own and does not honor
- * JAXP 1.5 {@code ACCESS_EXTERNAL_*} (e.g. the external Xerces distribution). A caller-set resolver is routed through the floor rather than replacing it. Kept
- * as a standalone wrapper so any hardener can reuse the floor.
+ * Not a {@link DocumentBuilderFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-hardened factory through this class
+ * by calling an inherited method such as {@code newDefaultInstance()}. The hardened factories are instances of a nested, non-public wrapper class.
  * </p>
  *
  * @see org.apache.commons.xml
  */
-public final class HardeningDocumentBuilderFactory extends DocumentBuilderFactory {
+public final class HardeningDocumentBuilderFactory {
 
     /**
      * Returns a new, hardened {@link DocumentBuilderFactory}.
@@ -61,121 +60,147 @@ public final class HardeningDocumentBuilderFactory extends DocumentBuilderFactor
         return DocumentBuilderHardener.harden(DocumentBuilderFactory.newInstance());
     }
 
-    private final DocumentBuilderFactory delegate;
-
     /**
-     * Constructs a new instance.
+     * Wraps a prepared delegate in the hardening wrapper; called by the hardener once the required settings are applied.
      *
      * @param delegate the delegate to wrap; must not be {@code null}.
-     * @throws NullPointerException if {@code delegate} is {@code null}.
+     * @return The hardened factory.
      */
-    HardeningDocumentBuilderFactory(final DocumentBuilderFactory delegate) {
-        this.delegate = Objects.requireNonNull(delegate, "delegate");
+    static DocumentBuilderFactory wrap(final DocumentBuilderFactory delegate) {
+        return new Wrapper(delegate);
     }
 
-    @Override
-    public Object getAttribute(final String name) {
-        return delegate.getAttribute(name);
+    private HardeningDocumentBuilderFactory() {
+        // static only
     }
 
-    @Override
-    public boolean getFeature(final String name) throws ParserConfigurationException {
-        return delegate.getFeature(name);
-    }
+    /**
+     * {@link DocumentBuilderFactory} wrapper that keeps an ignore-all {@link EntityResolver} floor on every {@link DocumentBuilder} produced.
+     * <p>
+     * Wraps each produced builder in a {@link HardeningDocumentBuilder}; required when the underlying factory carries no resolver of its own and does not honor
+     * JAXP 1.5 {@code ACCESS_EXTERNAL_*} (e.g. the external Xerces distribution). A caller-set resolver is routed through the floor rather than replacing it. Kept
+     * as a standalone wrapper so any hardener can reuse the floor.
+     * </p>
+     *
+     * @see org.apache.commons.xml
+     */
+    private static final class Wrapper extends DocumentBuilderFactory {
 
-    @Override
-    public Schema getSchema() {
-        return delegate.getSchema();
-    }
+        private final DocumentBuilderFactory delegate;
 
-    @Override
-    public boolean isCoalescing() {
-        return delegate.isCoalescing();
-    }
+        /**
+         * Constructs a new instance.
+         *
+         * @param delegate the delegate to wrap; must not be {@code null}.
+         * @throws NullPointerException if {@code delegate} is {@code null}.
+         */
+        Wrapper(final DocumentBuilderFactory delegate) {
+            this.delegate = Objects.requireNonNull(delegate, "delegate");
+        }
 
-    @Override
-    public boolean isExpandEntityReferences() {
-        return delegate.isExpandEntityReferences();
-    }
+        @Override
+        public Object getAttribute(final String name) {
+            return delegate.getAttribute(name);
+        }
 
-    @Override
-    public boolean isIgnoringComments() {
-        return delegate.isIgnoringComments();
-    }
+        @Override
+        public boolean getFeature(final String name) throws ParserConfigurationException {
+            return delegate.getFeature(name);
+        }
 
-    @Override
-    public boolean isIgnoringElementContentWhitespace() {
-        return delegate.isIgnoringElementContentWhitespace();
-    }
+        @Override
+        public Schema getSchema() {
+            return delegate.getSchema();
+        }
 
-    @Override
-    public boolean isNamespaceAware() {
-        return delegate.isNamespaceAware();
-    }
+        @Override
+        public boolean isCoalescing() {
+            return delegate.isCoalescing();
+        }
 
-    @Override
-    public boolean isValidating() {
-        return delegate.isValidating();
-    }
+        @Override
+        public boolean isExpandEntityReferences() {
+            return delegate.isExpandEntityReferences();
+        }
 
-    @Override
-    public boolean isXIncludeAware() {
-        return delegate.isXIncludeAware();
-    }
+        @Override
+        public boolean isIgnoringComments() {
+            return delegate.isIgnoringComments();
+        }
 
-    @Override
-    public DocumentBuilder newDocumentBuilder() throws ParserConfigurationException {
-        return new HardeningDocumentBuilder(delegate.newDocumentBuilder());
-    }
+        @Override
+        public boolean isIgnoringElementContentWhitespace() {
+            return delegate.isIgnoringElementContentWhitespace();
+        }
 
-    @Override
-    public void setAttribute(final String name, final Object value) {
-        delegate.setAttribute(name, value);
-    }
+        @Override
+        public boolean isNamespaceAware() {
+            return delegate.isNamespaceAware();
+        }
 
-    @Override
-    public void setCoalescing(final boolean coalescing) {
-        delegate.setCoalescing(coalescing);
-    }
+        @Override
+        public boolean isValidating() {
+            return delegate.isValidating();
+        }
 
-    @Override
-    public void setExpandEntityReferences(final boolean expandEntityRef) {
-        delegate.setExpandEntityReferences(expandEntityRef);
-    }
+        @Override
+        public boolean isXIncludeAware() {
+            return delegate.isXIncludeAware();
+        }
 
-    @Override
-    public void setFeature(final String name, final boolean value) throws ParserConfigurationException {
-        delegate.setFeature(name, value);
-    }
+        @Override
+        public DocumentBuilder newDocumentBuilder() throws ParserConfigurationException {
+            return new HardeningDocumentBuilder(delegate.newDocumentBuilder());
+        }
 
-    @Override
-    public void setIgnoringComments(final boolean ignoreComments) {
-        delegate.setIgnoringComments(ignoreComments);
-    }
+        @Override
+        public void setAttribute(final String name, final Object value) {
+            delegate.setAttribute(name, value);
+        }
 
-    @Override
-    public void setIgnoringElementContentWhitespace(final boolean whitespace) {
-        delegate.setIgnoringElementContentWhitespace(whitespace);
-    }
+        @Override
+        public void setCoalescing(final boolean coalescing) {
+            delegate.setCoalescing(coalescing);
+        }
 
-    @Override
-    public void setNamespaceAware(final boolean awareness) {
-        delegate.setNamespaceAware(awareness);
-    }
+        @Override
+        public void setExpandEntityReferences(final boolean expandEntityRef) {
+            delegate.setExpandEntityReferences(expandEntityRef);
+        }
 
-    @Override
-    public void setSchema(final Schema schema) {
-        delegate.setSchema(schema);
-    }
+        @Override
+        public void setFeature(final String name, final boolean value) throws ParserConfigurationException {
+            delegate.setFeature(name, value);
+        }
 
-    @Override
-    public void setValidating(final boolean validating) {
-        delegate.setValidating(validating);
-    }
+        @Override
+        public void setIgnoringComments(final boolean ignoreComments) {
+            delegate.setIgnoringComments(ignoreComments);
+        }
 
-    @Override
-    public void setXIncludeAware(final boolean state) {
-        delegate.setXIncludeAware(state);
-    }
+        @Override
+        public void setIgnoringElementContentWhitespace(final boolean whitespace) {
+            delegate.setIgnoringElementContentWhitespace(whitespace);
+        }
 
+        @Override
+        public void setNamespaceAware(final boolean awareness) {
+            delegate.setNamespaceAware(awareness);
+        }
+
+        @Override
+        public void setSchema(final Schema schema) {
+            delegate.setSchema(schema);
+        }
+
+        @Override
+        public void setValidating(final boolean validating) {
+            delegate.setValidating(validating);
+        }
+
+        @Override
+        public void setXIncludeAware(final boolean state) {
+            delegate.setXIncludeAware(state);
+        }
+    }
 }

@@ -66,7 +66,7 @@ final class XPathHardener {
         // Required: enables the engine's secure-processing limits; XPathFactory has no attribute API for finer control.
         setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
         // Required: FSP does not reach the parser the engine provisions for InputSource-taking evaluate calls; the wrapper parses those itself.
-        return new HardeningXPathFactory(factory);
+        return HardeningXPathFactory.wrap(factory);
     }
 
     /**

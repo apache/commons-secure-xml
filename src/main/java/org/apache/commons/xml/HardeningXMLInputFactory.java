@@ -34,33 +34,15 @@ import javax.xml.stream.util.XMLEventAllocator;
 import javax.xml.transform.Source;
 
 /**
- * {@link XMLInputFactory} wrapper that installs a non-removable {@link FallbackIgnoreXMLResolver} floor on the delegate's entity-resolution hook and keeps it
- * non-removable by the caller.
- *
- * <p>The constructor installs the floor through {@code setXMLResolver}, which every implementation routes external resolution through (Woodstox fans it out to
- * both its DTD-subset and entity resolvers). Woodstox keeps one hook outside that fan-out, {@value StaxHardener#WSTX_UNDECLARED_ENTITY_RESOLVER}, which is
- * deliberately left empty: emptying the external subset leaves any entity it declared undeclared, and Woodstox then rejects the reference. The rejection is
- * implementation-prescribed and keeps the resource just as unfetched as the empty resolution the other implementations produce; a caller who wants those
- * references resolved can still set the property, and their resolver lands behind a floor like on every other resolver hook.</p>
- *
- * <p>Every resolver-valued entry point ({@link #setXMLResolver(XMLResolver)}, {@code setProperty(XMLInputFactory.RESOLVER, ...)} and the Woodstox
- * {@code com.ctc.wstx.*Resolver} keys) is routed uniformly: a caller who supplies their own {@link FallbackIgnoreXMLResolver} takes control and it is
- * passed straight to the delegate; otherwise the current resolver on that hook is read, and if it is one of our floors the caller's resolver is set as its
- * {@link FallbackIgnoreXMLResolver#setDelegate delegate} (an opt-in the floor cannot be removed by), or, if the hook is empty, the caller's resolver is
- * wrapped in a new floor. This matters because Woodstox does not chain resolvers: when a resolver returns {@code null}, {@code DefaultInputResolver} falls
- * through to fetching the systemId URL itself, so a caller-set resolver that returns {@code null} must still land behind the floor. {@link #getXMLResolver()} and
- * {@code getProperty} report the caller's resolver unwrapped.</p>
+ * Creates new, hardened {@link XMLInputFactory} instances.
+ * <p>
+ * Not a {@link XMLInputFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-hardened factory through this class
+ * by calling an inherited method such as {@code newDefaultFactory()}. The hardened factories are instances of a nested, non-public wrapper class.
+ * </p>
  *
  * @see org.apache.commons.xml
  */
-public final class HardeningXMLInputFactory extends XMLInputFactory {
-
-    private static boolean isResolverProperty(final String name) {
-        return XMLInputFactory.RESOLVER.equals(name)
-                || StaxHardener.WSTX_DTD_RESOLVER.equals(name)
-                || StaxHardener.WSTX_ENTITY_RESOLVER.equals(name)
-                || StaxHardener.WSTX_UNDECLARED_ENTITY_RESOLVER.equals(name);
-    }
+public final class HardeningXMLInputFactory {
 
     /**
      * Returns a new, hardened {@link XMLInputFactory}.
@@ -76,169 +58,214 @@ public final class HardeningXMLInputFactory extends XMLInputFactory {
         return StaxHardener.harden(XMLInputFactory.newInstance());
     }
 
-    private static XMLResolver unwrap(final XMLResolver resolver) {
-        return resolver instanceof FallbackIgnoreXMLResolver ? ((FallbackIgnoreXMLResolver) resolver).getDelegate() : resolver;
-    }
-
-    private final XMLInputFactory delegate;
-
     /**
-     * Constructs a new instance.
+     * Wraps a prepared delegate in the hardening wrapper; called by the hardener once the required settings are applied.
      *
      * @param delegate the delegate to wrap; must not be {@code null}.
-     * @throws NullPointerException if {@code delegate} is {@code null}.
+     * @return The hardened factory.
      */
-    HardeningXMLInputFactory(final XMLInputFactory delegate) {
-        this.delegate = Objects.requireNonNull(delegate, "delegate");
-        delegate.setXMLResolver(new FallbackIgnoreXMLResolver(null));
+    static XMLInputFactory wrap(final XMLInputFactory delegate) {
+        return new Wrapper(delegate);
     }
 
-    @Override
-    public XMLEventReader createFilteredReader(final XMLEventReader reader, final EventFilter filter) throws XMLStreamException {
-        return delegate.createFilteredReader(reader, filter);
-    }
-
-    @Override
-    public XMLStreamReader createFilteredReader(final XMLStreamReader reader, final StreamFilter filter) throws XMLStreamException {
-        return delegate.createFilteredReader(reader, filter);
-    }
-
-    @Override
-    public XMLEventReader createXMLEventReader(final InputStream stream) throws XMLStreamException {
-        return delegate.createXMLEventReader(stream);
-    }
-
-    @Override
-    public XMLEventReader createXMLEventReader(final InputStream stream, final String encoding) throws XMLStreamException {
-        return delegate.createXMLEventReader(stream, encoding);
-    }
-
-    @Override
-    public XMLEventReader createXMLEventReader(final Reader reader) throws XMLStreamException {
-        return delegate.createXMLEventReader(reader);
-    }
-
-    @Override
-    public XMLEventReader createXMLEventReader(final Source source) throws XMLStreamException {
-        return delegate.createXMLEventReader(source);
-    }
-
-    @Override
-    public XMLEventReader createXMLEventReader(final String systemId, final InputStream stream) throws XMLStreamException {
-        return delegate.createXMLEventReader(systemId, stream);
-    }
-
-    @Override
-    public XMLEventReader createXMLEventReader(final String systemId, final Reader reader) throws XMLStreamException {
-        return delegate.createXMLEventReader(systemId, reader);
-    }
-
-    @Override
-    public XMLEventReader createXMLEventReader(final XMLStreamReader reader) throws XMLStreamException {
-        return delegate.createXMLEventReader(reader);
-    }
-
-    @Override
-    public XMLStreamReader createXMLStreamReader(final InputStream stream) throws XMLStreamException {
-        return delegate.createXMLStreamReader(stream);
-    }
-
-    @Override
-    public XMLStreamReader createXMLStreamReader(final InputStream stream, final String encoding) throws XMLStreamException {
-        return delegate.createXMLStreamReader(stream, encoding);
-    }
-
-    @Override
-    public XMLStreamReader createXMLStreamReader(final Reader reader) throws XMLStreamException {
-        return delegate.createXMLStreamReader(reader);
-    }
-
-    @Override
-    public XMLStreamReader createXMLStreamReader(final Source source) throws XMLStreamException {
-        return delegate.createXMLStreamReader(source);
-    }
-
-    @Override
-    public XMLStreamReader createXMLStreamReader(final String systemId, final InputStream stream) throws XMLStreamException {
-        return delegate.createXMLStreamReader(systemId, stream);
-    }
-
-    @Override
-    public XMLStreamReader createXMLStreamReader(final String systemId, final Reader reader) throws XMLStreamException {
-        return delegate.createXMLStreamReader(systemId, reader);
-    }
-
-
-    @Override
-    public XMLEventAllocator getEventAllocator() {
-        return delegate.getEventAllocator();
-    }
-
-    @Override
-    public Object getProperty(final String name) {
-        if (isResolverProperty(name)) {
-            return unwrap((XMLResolver) delegate.getProperty(name));
-        }
-        return delegate.getProperty(name);
-    }
-
-    @Override
-    public XMLReporter getXMLReporter() {
-        return delegate.getXMLReporter();
-    }
-
-    @Override
-    public XMLResolver getXMLResolver() {
-        return unwrap(delegate.getXMLResolver());
-    }
-
-    @Override
-    public boolean isPropertySupported(final String name) {
-        return delegate.isPropertySupported(name);
-    }
-
-    @Override
-    public void setEventAllocator(final XMLEventAllocator allocator) {
-        delegate.setEventAllocator(allocator);
-    }
-
-    @Override
-    public void setProperty(final String name, final Object value) {
-        // If a resolver property has a value of the wrong type, pass it to the delegate to generate an appropriate exception.
-        if (isResolverProperty(name) && (value == null || value instanceof XMLResolver)) {
-            setResolverProperty(name, (XMLResolver) value);
-        } else {
-            delegate.setProperty(name, value);
-        }
+    private HardeningXMLInputFactory() {
+        // static only
     }
 
     /**
-     * Routes a caller-set resolver for the property {@code name} behind the floor currently installed on that hook.
+     * {@link XMLInputFactory} wrapper that installs a non-removable {@link FallbackIgnoreXMLResolver} floor on the delegate's entity-resolution hook and keeps it
+     * non-removable by the caller.
      *
-     * @param name     The resolver-valued property being set.
-     * @param resolver The caller's resolver, or their own {@link FallbackIgnoreXMLResolver} to take control.
+     * <p>The constructor installs the floor through {@code setXMLResolver}, which every implementation routes external resolution through (Woodstox fans it out to
+     * both its DTD-subset and entity resolvers). Woodstox keeps one hook outside that fan-out, {@value StaxHardener#WSTX_UNDECLARED_ENTITY_RESOLVER}, which is
+     * deliberately left empty: emptying the external subset leaves any entity it declared undeclared, and Woodstox then rejects the reference. The rejection is
+     * implementation-prescribed and keeps the resource just as unfetched as the empty resolution the other implementations produce; a caller who wants those
+     * references resolved can still set the property, and their resolver lands behind a floor like on every other resolver hook.</p>
+     *
+     * <p>Every resolver-valued entry point ({@link #setXMLResolver(XMLResolver)}, {@code setProperty(XMLInputFactory.RESOLVER, ...)} and the Woodstox
+     * {@code com.ctc.wstx.*Resolver} keys) is routed uniformly: a caller who supplies their own {@link FallbackIgnoreXMLResolver} takes control and it is
+     * passed straight to the delegate; otherwise the current resolver on that hook is read, and if it is one of our floors the caller's resolver is set as its
+     * {@link FallbackIgnoreXMLResolver#setDelegate delegate} (an opt-in the floor cannot be removed by), or, if the hook is empty, the caller's resolver is
+     * wrapped in a new floor. This matters because Woodstox does not chain resolvers: when a resolver returns {@code null}, {@code DefaultInputResolver} falls
+     * through to fetching the systemId URL itself, so a caller-set resolver that returns {@code null} must still land behind the floor. {@link #getXMLResolver()} and
+     * {@code getProperty} report the caller's resolver unwrapped.</p>
+     *
+     * @see org.apache.commons.xml
      */
-    private void setResolverProperty(final String name, final XMLResolver resolver) {
-        if (resolver instanceof FallbackIgnoreXMLResolver) {
-            // The caller supplies their own floor: hand it to the delegate as-is.
-            delegate.setProperty(name, resolver);
-        } else {
-            final Object current = delegate.getProperty(name);
-            if (current instanceof FallbackIgnoreXMLResolver) {
-                ((FallbackIgnoreXMLResolver) current).setDelegate(resolver);
+    private static final class Wrapper extends XMLInputFactory {
+
+        private static boolean isResolverProperty(final String name) {
+            return XMLInputFactory.RESOLVER.equals(name)
+                    || StaxHardener.WSTX_DTD_RESOLVER.equals(name)
+                    || StaxHardener.WSTX_ENTITY_RESOLVER.equals(name)
+                    || StaxHardener.WSTX_UNDECLARED_ENTITY_RESOLVER.equals(name);
+        }
+
+
+        private static XMLResolver unwrap(final XMLResolver resolver) {
+            return resolver instanceof FallbackIgnoreXMLResolver ? ((FallbackIgnoreXMLResolver) resolver).getDelegate() : resolver;
+        }
+
+        private final XMLInputFactory delegate;
+
+        /**
+         * Constructs a new instance.
+         *
+         * @param delegate the delegate to wrap; must not be {@code null}.
+         * @throws NullPointerException if {@code delegate} is {@code null}.
+         */
+        Wrapper(final XMLInputFactory delegate) {
+            this.delegate = Objects.requireNonNull(delegate, "delegate");
+            delegate.setXMLResolver(new FallbackIgnoreXMLResolver(null));
+        }
+
+        @Override
+        public XMLEventReader createFilteredReader(final XMLEventReader reader, final EventFilter filter) throws XMLStreamException {
+            return delegate.createFilteredReader(reader, filter);
+        }
+
+        @Override
+        public XMLStreamReader createFilteredReader(final XMLStreamReader reader, final StreamFilter filter) throws XMLStreamException {
+            return delegate.createFilteredReader(reader, filter);
+        }
+
+        @Override
+        public XMLEventReader createXMLEventReader(final InputStream stream) throws XMLStreamException {
+            return delegate.createXMLEventReader(stream);
+        }
+
+        @Override
+        public XMLEventReader createXMLEventReader(final InputStream stream, final String encoding) throws XMLStreamException {
+            return delegate.createXMLEventReader(stream, encoding);
+        }
+
+        @Override
+        public XMLEventReader createXMLEventReader(final Reader reader) throws XMLStreamException {
+            return delegate.createXMLEventReader(reader);
+        }
+
+        @Override
+        public XMLEventReader createXMLEventReader(final Source source) throws XMLStreamException {
+            return delegate.createXMLEventReader(source);
+        }
+
+        @Override
+        public XMLEventReader createXMLEventReader(final String systemId, final InputStream stream) throws XMLStreamException {
+            return delegate.createXMLEventReader(systemId, stream);
+        }
+
+        @Override
+        public XMLEventReader createXMLEventReader(final String systemId, final Reader reader) throws XMLStreamException {
+            return delegate.createXMLEventReader(systemId, reader);
+        }
+
+        @Override
+        public XMLEventReader createXMLEventReader(final XMLStreamReader reader) throws XMLStreamException {
+            return delegate.createXMLEventReader(reader);
+        }
+
+        @Override
+        public XMLStreamReader createXMLStreamReader(final InputStream stream) throws XMLStreamException {
+            return delegate.createXMLStreamReader(stream);
+        }
+
+        @Override
+        public XMLStreamReader createXMLStreamReader(final InputStream stream, final String encoding) throws XMLStreamException {
+            return delegate.createXMLStreamReader(stream, encoding);
+        }
+
+        @Override
+        public XMLStreamReader createXMLStreamReader(final Reader reader) throws XMLStreamException {
+            return delegate.createXMLStreamReader(reader);
+        }
+
+        @Override
+        public XMLStreamReader createXMLStreamReader(final Source source) throws XMLStreamException {
+            return delegate.createXMLStreamReader(source);
+        }
+
+        @Override
+        public XMLStreamReader createXMLStreamReader(final String systemId, final InputStream stream) throws XMLStreamException {
+            return delegate.createXMLStreamReader(systemId, stream);
+        }
+
+        @Override
+        public XMLStreamReader createXMLStreamReader(final String systemId, final Reader reader) throws XMLStreamException {
+            return delegate.createXMLStreamReader(systemId, reader);
+        }
+
+
+        @Override
+        public XMLEventAllocator getEventAllocator() {
+            return delegate.getEventAllocator();
+        }
+
+        @Override
+        public Object getProperty(final String name) {
+            if (isResolverProperty(name)) {
+                return unwrap((XMLResolver) delegate.getProperty(name));
+            }
+            return delegate.getProperty(name);
+        }
+
+        @Override
+        public XMLReporter getXMLReporter() {
+            return delegate.getXMLReporter();
+        }
+
+        @Override
+        public XMLResolver getXMLResolver() {
+            return unwrap(delegate.getXMLResolver());
+        }
+
+        @Override
+        public boolean isPropertySupported(final String name) {
+            return delegate.isPropertySupported(name);
+        }
+
+        @Override
+        public void setEventAllocator(final XMLEventAllocator allocator) {
+            delegate.setEventAllocator(allocator);
+        }
+
+        @Override
+        public void setProperty(final String name, final Object value) {
+            // If a resolver property has a value of the wrong type, pass it to the delegate to generate an appropriate exception.
+            if (isResolverProperty(name) && (value == null || value instanceof XMLResolver)) {
+                setResolverProperty(name, (XMLResolver) value);
             } else {
-                delegate.setProperty(name, new FallbackIgnoreXMLResolver(resolver));
+                delegate.setProperty(name, value);
             }
         }
-    }
 
-    @Override
-    public void setXMLReporter(final XMLReporter reporter) {
-        delegate.setXMLReporter(reporter);
-    }
+        /**
+         * Routes a caller-set resolver for the property {@code name} behind the floor currently installed on that hook.
+         *
+         * @param name     The resolver-valued property being set.
+         * @param resolver The caller's resolver, or their own {@link FallbackIgnoreXMLResolver} to take control.
+         */
+        private void setResolverProperty(final String name, final XMLResolver resolver) {
+            if (resolver instanceof FallbackIgnoreXMLResolver) {
+                // The caller supplies their own floor: hand it to the delegate as-is.
+                delegate.setProperty(name, resolver);
+            } else {
+                final Object current = delegate.getProperty(name);
+                if (current instanceof FallbackIgnoreXMLResolver) {
+                    ((FallbackIgnoreXMLResolver) current).setDelegate(resolver);
+                } else {
+                    delegate.setProperty(name, new FallbackIgnoreXMLResolver(resolver));
+                }
+            }
+        }
 
-    @Override
-    public void setXMLResolver(final XMLResolver resolver) {
-        setResolverProperty(XMLInputFactory.RESOLVER, resolver);
+        @Override
+        public void setXMLReporter(final XMLReporter reporter) {
+            delegate.setXMLReporter(reporter);
+        }
+
+        @Override
+        public void setXMLResolver(final XMLResolver resolver) {
+            setResolverProperty(XMLInputFactory.RESOLVER, resolver);
+        }
     }
 }
