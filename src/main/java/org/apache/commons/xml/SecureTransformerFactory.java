@@ -68,7 +68,7 @@ import org.xml.sax.XMLReader;
  * {@code newXMLFilter(..)}), if reachable by casting the returned factory, produce objects carrying the same guarantees.
  * </p>
  * <p>
- * Not a {@link TransformerFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-hardened factory through this class
+ * Not a {@link TransformerFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-secured factory through this class
  * by calling an inherited method such as {@code newDefaultInstance()}. The secure factories are instances of a nested, non-public wrapper class.
  * </p>
  *
@@ -82,7 +82,7 @@ public final class SecureTransformerFactory {
      *
      * <p>Used by providers whose underlying TrAX implementation pulls a new {@code SAXParserFactory.newInstance()} for any Source that is not already a
      * {@link SAXSource} carrying its own {@link XMLReader}, and only sets {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING FSP} on the resulting reader.
-     * Wrapping the factory and rewriting the Source upstream guarantees the parse runs through an {@link org.apache.commons.xml}-hardened reader instead.</p>
+     * Wrapping the factory and rewriting the Source upstream guarantees the parse runs through an {@link org.apache.commons.xml}-secured reader instead.</p>
      *
      * <p>Three layers cooperate:</p>
      * <ol>
@@ -96,7 +96,7 @@ public final class SecureTransformerFactory {
      * <p>The {@link SAXTransformerFactory} extension products ride the same wrappers: {@code newTransformerHandler}/{@code newTemplatesHandler} products are
      * wrapped ({@link SecureTransformerHandler}, {@link SecureTemplatesHandler}) so the {@link Transformer}/{@link Templates} they expose carry the resolver
      * floor, and {@code newXMLFilter} returns a {@link SecureXMLFilter} composed from these wrappers instead of the implementation's filter, which would
-     * self-provision an unhardened input reader.</p>
+     * self-provision an unsecured input reader.</p>
      *
      * <h2>Caveats</h2>
      * <ul>
@@ -424,7 +424,7 @@ public final class SecureTransformerFactory {
      *         routed through the floor rather than replacing it, so a caller can opt a specific URI in but cannot reopen the fetch.</li>
      *     <li><strong>The nested wrapper</strong>: required. Both implementations fall back to {@code SAXParserFactory.newInstance()} to parse a
      *         stylesheet or source document that does not carry its own reader, and only set FSP on it; wrapping the factory rewrites every {@link Source} through an
-     *         {@link org.apache.commons.xml}-hardened reader instead.</li>
+     *         {@link org.apache.commons.xml}-secured reader instead.</li>
      * </ul>
      *
      * @param factory the factory to secure; never {@code null}.
