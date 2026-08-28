@@ -56,7 +56,7 @@ class XIncludeTest {
     /**
      * Allow-lists the two fixture URLs, returning the appropriate in-memory content for each: {@link #RESOLVED_MARKER}
      * wrapped as XML for {@link #REFERENCED_XML}, and as plain text for {@link #REFERENCED_TEXT}. Anything else returns
-     * {@code null} so the hardening's ignore-all floor empties it. Mirrors a caller allow-listing trusted resources.
+     * {@code null} so the securing's ignore-all floor empties it. Mirrors a caller allow-listing trusted resources.
      */
     private static final class AllowListResolver implements EntityResolver {
 
@@ -85,7 +85,7 @@ class XIncludeTest {
     /** Content the allow-list resolver returns for an allowed include; its presence proves the caller's resolver was consulted. */
     private static final String RESOLVED_MARKER = "XINCLUDE-RESOLVED-905bbbce-16ee-4a0c-b165-d1f8c663934c";
 
-    /** Resolver that resolves nothing, so the hardening's ignore-all floor must empty every lookup and never leak. */
+    /** Resolver that resolves nothing, so the securing's ignore-all floor must empty every lookup and never leak. */
     private static final EntityResolver NO_OP_RESOLVER = (publicId, systemId) -> null;
 
     /**
