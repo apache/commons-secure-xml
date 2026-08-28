@@ -18,13 +18,13 @@
  * Apache Commons Secure XML provides secure-by-default JAXP factory creation for Java. A single method call returns a secure JAXP factory that can be used to
  * <em>safely</em> parse XML files.
  * <p>
- * Every method returns <em>new, hardened</em> factory instances. No caching or pooling is performed; callers on a hot path are responsible for their own
+ * Every method returns <em>new, secure</em> factory instances. No caching or pooling is performed; callers on a hot path are responsible for their own
  * caching.
  * </p>
  * <p>
  * A returned factory is not necessarily an instance of the underlying implementation. It might be (and usually is) a wrapper around it, so it cannot be cast
  * to the implementation's own class. Everything else about the implementation's behavior is preserved: features, properties, and attributes delegate to it,
- * and only the security behavior is hardened.
+ * and only the security behavior is secure.
  * </p>
  * <p>
  * Preserved behavior includes the choice of internal parsers. Each TrAX, XPath, or schema implementation has its own way of instantiating them, and the
@@ -36,7 +36,7 @@
  * <li>Saxon selects its parsers through its own configuration.</li>
  * </ul>
  * <p>
- * Whichever parser is selected, it is hardened.
+ * Whichever parser is selected, it is secure.
  * </p>
  * <h2>Security Guarantees</h2>
  * <p>
