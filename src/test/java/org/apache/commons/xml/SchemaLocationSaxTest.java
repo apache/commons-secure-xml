@@ -35,12 +35,12 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * Checks that a hardened {@link SAXParserFactory} performing JAXP 1.2 XSD validation does not fetch an external schema named by an
+ * Checks that a secure {@link SAXParserFactory} performing JAXP 1.2 XSD validation does not fetch an external schema named by an
  * {@code xsi:noNamespaceSchemaLocation} hint in the instance document.
  *
  * <p>This is the SAX counterpart of {@link SchemaLocationDomTest}. The instance is empty {@code <root/>}; the referenced schema declares a default {@code leak}
  * attribute carrying {@link AttackTestSupport#LEAKED_MARKER}. A parser that fetches the schema augments the element's attributes with that default (the
- * permissive control observes it in {@link DefaultHandler#startElement}), while a hardened parser resolves the schema reference to empty content instead. Either
+ * permissive control observes it in {@link DefaultHandler#startElement}), while a secure parser resolves the schema reference to empty content instead. Either
  * the empty schema makes the validating parse fail, or the parse completes but the default is never augmented onto the element; either way the marker is never
  * observed.</p>
  *
@@ -77,7 +77,7 @@ class SchemaLocationSaxTest {
 
     private static void parse(final SAXParser parser, final DefaultHandler handler) throws Exception {
         // Drive the XMLReader directly rather than SAXParser.parse(InputSource, DefaultHandler): the latter calls reader.setEntityResolver(handler), which would
-        // clobber the hardened ignore-all resolver that external Xerces relies on to block the schemaLocation fetch. Reuse AttackTestSupport's shared strict
+        // clobber the secure ignore-all resolver that external Xerces relies on to block the schemaLocation fetch. Reuse AttackTestSupport's shared strict
         // reporter as the error handler so a blocked fetch surfaces as a thrown exception rather than a silent recovery.
         final XMLReader reader = parser.getXMLReader();
         reader.setContentHandler(handler);
