@@ -235,11 +235,12 @@ public final class HardeningXPathFactory {
         }
 
         /**
-         * Whether {@code jdk.xml.overrideDefaultParser} on the delegate currently asks for the platform's built-in parser; the engine's internal parser is
-         * never used, so the feature instead selects which hardened parser family performs the {@link org.xml.sax.InputSource} document build. An
-         * implementation that does not recognize the feature reports it by exception and keeps the pluggable lookup.
+         * Checks whether parsers should be instantiated via {@code newDefaultInstance()} instead of {@code newInstance()}.
          *
-         * @return Whether the document builds should pin the platform's built-in parser.
+         * <p>The JDK implementation of {@link XPathFactory} uses the JDK parsers while {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} is unset or
+         * {@code false}.</p>
+         *
+         * @return {@code true} if parsers should be created via {@code newDefaultInstance()}.
          */
         private boolean useDefaultParser() {
             try {

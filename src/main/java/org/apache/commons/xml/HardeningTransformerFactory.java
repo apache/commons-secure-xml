@@ -456,10 +456,12 @@ public final class HardeningTransformerFactory {
         }
 
         /**
-         * Whether {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} on the delegate currently asks for the platform's built-in parser; the
-         * implementation's internal parsers are never used, so the feature instead selects which hardened parser family performs the source rewrites.
+         * Checks whether parsers should be instantiated via {@code newDefaultInstance()} instead of {@code newInstance()}.
          *
-         * @return Whether the rewrites should pin the platform's built-in parser.
+         * <p>The JDK implementation of {@link TransformerFactory} uses the JDK parsers while {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} is unset
+         * or {@code false}.</p>
+         *
+         * @return {@code true} if parsers should be created via {@code newDefaultInstance()}.
          */
         private boolean useDefaultParser() {
             return supportsOverrideDefaultParser && !delegate.getFeature(HardeningSAXParserFactory.OVERRIDE_DEFAULT_PARSER);
