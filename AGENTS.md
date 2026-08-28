@@ -36,7 +36,7 @@ Guidance for AI coding agents working in this repository.
      align intermediate lines with a single leading ` * `.
    - The first sentence is a short summary fragment.
      It is the only part that appears in class/method index listings, so keep it self-contained.
-     Details (what is hardened, thread-safety, edge cases) belong in subsequent paragraphs, not bolted onto the summary.
+     Details (what is secured, thread-safety, edge cases) belong in subsequent paragraphs, not bolted onto the summary.
    - Separate paragraphs with a blank `*` line.
      Prefix every paragraph *except the first* with a `<p>` tag at the start of the first word.
      **Do** close with `</p>`.
