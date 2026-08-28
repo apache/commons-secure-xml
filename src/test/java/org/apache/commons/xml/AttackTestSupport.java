@@ -58,7 +58,7 @@ import org.xml.sax.helpers.XMLFilterImpl;
 /**
  * Shared fixtures for attack tests.
  *
- * <p>The hardened-side helpers come in three flavors, distinguished by their suffix:</p>
+ * <p>The secure-side helpers come in three flavors, distinguished by their suffix:</p>
  *
  * <ul>
  *   <li>{@code assert*Blocks(...)} runs the payload through a secure factory from {@link org.apache.commons.xml} and asserts the parse throws. Used when the hardening
@@ -75,7 +75,7 @@ import org.xml.sax.helpers.XMLFilterImpl;
  * {@link #DOM_RESOLVES_INTERNAL_ENTITIES} so they skip on platforms (such as Android with KXmlParser) whose DOM parser does not surface the entity events that
  * the strict {@link #assertDomBlocks} assertion expects.</p>
  *
- * <p>The permissive-side positive controls mirror the hardened-side verbs with an {@code assertPermissive*} prefix: {@code assertPermissive*Parses} for direct
+ * <p>The permissive-side positive controls mirror the secure-side verbs with an {@code assertPermissive*} prefix: {@code assertPermissive*Parses} for direct
  * parsing, {@code assertPermissive*Compiles} for {@link SchemaFactory} / {@link TransformerFactory} compilation, {@code assertPermissiveTransformerTransforms}
  * for {@code Transformer.transform}, {@code assertPermissiveValidatorValidates} for {@code Validator.validate}. Both sides perform the same operation; the
  * prefix marks which factory secure level the assertion is set against.</p>
@@ -689,7 +689,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened-in-place XMLReader parse of the payload throws.
+     * Asserts a secure-in-place XMLReader parse of the payload throws.
      *
      * <p>{@link XMLReader#parse(InputSource)} on a raw reader secure via {@link SecureSAXParserFactory#secure(XMLReader)}; only a thrown exception passes.</p>
      */
@@ -698,14 +698,14 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened-in-place XMLReader parse either blocks at parse or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     * Asserts a secure-in-place XMLReader parse either blocks at parse or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
      */
     static void assertXmlReaderBlocksOrDoesNotLeak(final String payload) {
         assertNoLeakOrThrows(() -> captureCharacters(rawSecureXMLReader(), payload), "XMLReader", SAXException.class);
     }
 
     /**
-     * Asserts a hardened-in-place XMLReader parse completes without throwing and without leaked content.
+     * Asserts a secure-in-place XMLReader parse completes without throwing and without leaked content.
      *
      * <p>{@link XMLReader#parse(InputSource)} on a raw reader secure via {@link SecureSAXParserFactory#secure(XMLReader)}; use this when the secure contract
      * guarantees the parse succeeds but never resolves the external resource.</p>
@@ -715,7 +715,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a hardened-in-place XMLReader parse succeeds.
+     * Asserts a secure-in-place XMLReader parse succeeds.
      *
      * <p>{@link XMLReader#parse(InputSource)} on a raw reader secure via {@link SecureSAXParserFactory#secure(XMLReader)}; positive control for DOCTYPE-only
      * payloads.</p>
