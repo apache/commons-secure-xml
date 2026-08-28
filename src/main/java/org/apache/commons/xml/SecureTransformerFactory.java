@@ -83,7 +83,7 @@ public final class SecureTransformerFactory {
             MethodType.methodType(TransformerFactory.class));
 
     /**
-     * Capability-driven hardening for any {@link TransformerFactory} on the classpath.
+     * Capability-driven secure for any {@link TransformerFactory} on the classpath.
      *
      * <p>Rather than branching on the implementation class, this method probes what the factory supports and adapts:</p>
      * <ul>
@@ -127,7 +127,7 @@ public final class SecureTransformerFactory {
      * </p>
      *
      * @return A secure factory.
-     * @throws IllegalStateException                Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException                Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws TransformerFactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in
      *                                                implementation (for example Android).
      */
@@ -153,7 +153,7 @@ public final class SecureTransformerFactory {
      * Returns a new, secure {@link TransformerFactory}.
      *
      * @return A secure factory.
-     * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException if a required secure setting cannot be applied to the underlying implementation.
      */
     public static TransformerFactory newInstance() {
         return secure(TransformerFactory.newInstance());
@@ -165,7 +165,7 @@ public final class SecureTransformerFactory {
      * @param factoryClassName The fully qualified class name of the {@link TransformerFactory} implementation.
      * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
      * @return A secure factory.
-     * @throws IllegalStateException                Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException                Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws TransformerFactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
      */
     public static TransformerFactory newInstance(final String factoryClassName, final ClassLoader classLoader) {
