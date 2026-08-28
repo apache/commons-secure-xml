@@ -33,8 +33,8 @@ import org.junit.jupiter.api.Test;
  * Checks that {@code getAssociatedStylesheet} scans for {@code xml-stylesheet} PIs without fetching an external DTD declared in the document prolog.
  *
  * <p>The PI scan parses the prolog, where a {@code DOCTYPE} with an external subset is processed before the root element. On Apache Xalan the scan runs on a
- * reader the engine provisions itself, ignoring a hardened reader passed in a {@link javax.xml.transform.sax.SAXSource} (XALANJ-2849); the wrapper works around
- * that by handing Xalan a {@code DOMSource} it pre-parsed through a hardened {@code DocumentBuilder}. The JDK's XSLTC honors the hardened reader directly. Either
+ * reader the engine provisions itself, ignoring a secure reader passed in a {@link javax.xml.transform.sax.SAXSource} (XALANJ-2849); the wrapper works around
+ * that by handing Xalan a {@code DOMSource} it pre-parsed through a secure {@code DocumentBuilder}. The JDK's XSLTC honors the secure reader directly. Either
  * way the external DTD resolves to empty instead of being fetched. Tagged {@code trax}, so it runs on the stock JDK, Apache Xalan, Saxon, and the Android
  * runtime.</p>
  */
@@ -57,7 +57,7 @@ class AssociatedStylesheetTest {
 
     @Test
     void hardenedGetAssociatedStylesheetIgnoresExternalDtd() throws TransformerConfigurationException {
-        // The prolog declares an unreachable external DTD; the hardened parse resolves it to empty rather than fetching it, so the PI scan completes and finds
+        // The prolog declares an unreachable external DTD; the secure parse resolves it to empty rather than fetching it, so the PI scan completes and finds
         // the stylesheet instead of throwing on a fetch. (The returned Source's shape is engine-specific: XSLTC and Xalan point it at included.xsl, while Saxon
         // resolves the href through its own floor and returns an empty source; both mean the scan ran without fetching the DTD.)
         final Source associated = hardenedFactory()
