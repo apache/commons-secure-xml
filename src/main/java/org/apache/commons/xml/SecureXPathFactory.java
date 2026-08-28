@@ -54,7 +54,7 @@ public final class SecureXPathFactory {
             MethodType.methodType(XPathFactory.class));
 
     /**
-     * Capability-driven hardening for any {@link XPathFactory} on the classpath.
+     * Capability-driven securing for any {@link XPathFactory} on the classpath.
      *
      * <p>The XPath object model mirrors TrAX: the stock JDK and Apache Xalan ship an XPath 1.0 engine with no URI-fetching functions, while Saxon adds the XPath 3.1
      * {@code fn:doc}, {@code fn:collection} and {@code fn:unparsed-text} functions that can reach external resources. Rather than branching on the implementation
@@ -64,7 +64,7 @@ public final class SecureXPathFactory {
      *         subclass routes to the same recipe as the registered factory. Its URI-fetching
      *         functions and reflection-based extension calls are reachable only through a locked-down Saxon {@code Configuration}, not the standard JAXP knobs; this
      *         is the XPath counterpart of the Saxon exception in {@link SecureTransformerFactory#secure(javax.xml.transform.TransformerFactory)}, kept as a
-     *         documented package-prefix exception because the required hardening surface is reachable only through a vendor API.</li>
+     *         documented package-prefix exception because the required securing surface is reachable only through a vendor API.</li>
      *     <li><strong>FSP</strong> ({@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING}): required. It is the only knob both the stock JDK and Xalan XPath
      *         engines expose, and switches on their secure-processing limits. {@link XPathFactory} has no attribute API for finer control.</li>
      *     <li><strong>The nested wrapper</strong>: required. FSP governs only the engine, not the parser it provisions internally for the
@@ -95,7 +95,7 @@ public final class SecureXPathFactory {
      * </p>
      *
      * @return A secure factory.
-     * @throws IllegalStateException Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws RuntimeException      Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation (for
      *                               example Android).
      */
@@ -126,7 +126,7 @@ public final class SecureXPathFactory {
      * Returns a new, secure {@link XPathFactory} for the default XPath object model.
      *
      * @return A secure factory.
-     * @throws IllegalStateException Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws RuntimeException      Thrown if there is a failure in creating an {@link XPathFactory} for the default object model.
      */
     public static XPathFactory newInstance() {
@@ -138,7 +138,7 @@ public final class SecureXPathFactory {
      *
      * @param uri The underlying object model identifier, as accepted by {@link XPathFactory#newInstance(String)}.
      * @return A secure factory.
-     * @throws IllegalStateException              Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException              Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws XPathFactoryConfigurationException Thrown if no implementation of the object model is available.
      * @throws NullPointerException               Thrown if {@code uri} is {@code null}.
      * @throws IllegalArgumentException           Thrown if {@code uri} is empty.
@@ -154,7 +154,7 @@ public final class SecureXPathFactory {
      * @param factoryClassName The fully qualified class name of the {@link XPathFactory} implementation.
      * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
      * @return A secure factory.
-     * @throws IllegalStateException              Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException              Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws XPathFactoryConfigurationException Thrown if {@code factoryClassName} is {@code null}, or if the factory class cannot be loaded or
      *                                            instantiated, or does not support {@code uri}.
      * @throws NullPointerException               Thrown if {@code uri} is {@code null}.
