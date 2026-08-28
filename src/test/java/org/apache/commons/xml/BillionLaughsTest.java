@@ -39,7 +39,7 @@ import org.junit.jupiter.api.Test;
  *   <li>{@link #CONTENT_120K} ({@code 120,000}) on the JVM: above every JVM parser default.</li>
  *   <li>{@link #CONTENT_9M} ({@code 9,000,000}) on Android: above libexpat's 8 MiB billion-laughs activation threshold, the only defense there since the limit is
  *       not configurable. For that same reason the positive controls do not run on Android (see {@link #assumeEntityLimitConfigurable()}): a payload the secure test
- *       blocks cannot be parsed even without hardening.</li>
+ *       blocks cannot be parsed even without securing.</li>
  * </ul>
  *
  * <p>The XSLT payload spreads those same {@code 120,000} expansions over two literal result elements with content {@link #CONTENT_60K} rather than one text node,
@@ -75,7 +75,7 @@ class BillionLaughsTest {
      *
      * <p>The controls prove the secure test blocked a payload that would otherwise parse, so they must use the very payload the secure test blocks.
      * On Android the entity-expansion limit is not configurable (libexpat's billion-laughs check cannot be lifted), so that payload
-     * cannot be parsed even without hardening, leaving nothing to prove.</p>
+     * cannot be parsed even without securing, leaving nothing to prove.</p>
      */
     private static void assumeEntityLimitConfigurable() {
         Assumptions.assumeFalse(AttackTestSupport.IS_ANDROID, "Skipped on Android: the entity-expansion limit is not configurable");
