@@ -48,7 +48,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * benign document still parses successfully.
  * </p>
  */
-class HardeningFactoriesSmokeTest {
+class SecureFactoriesSmokeTest {
 
     private static final String BENIGN_XML = "<?xml version=\"1.0\"?>\n<root><child>hello</child></root>\n";
 
