@@ -479,10 +479,10 @@ final class AttackTestSupport {
     /**
      * Asserts a hardened Schema compilation throws.
      *
-     * <p>{@link SchemaFactory#newSchema(Source)} via {@link HardeningSchemaFactory#newInstance(String)}; only a thrown exception passes.</p>
+     * <p>{@link SchemaFactory#newSchema(Source)} via {@link SecureSchemaFactory#newInstance(String)}; only a thrown exception passes.</p>
      */
     static void assertSchemaBlocks(final Source xsd) {
-        assertParseFails(() -> strictSchema(HardeningSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), xsd), "Schema compile", SAXException.class, SecurityException.class);
+        assertParseFails(() -> strictSchema(SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), xsd), "Schema compile", SAXException.class, SecurityException.class);
     }
 
     /**
@@ -491,7 +491,7 @@ final class AttackTestSupport {
      */
     static void assertSchemaBlocksOrDoesNotLeak(final Source xsd) {
         assertNoLeakOrThrows(() -> {
-            strictSchema(HardeningSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), xsd);
+            strictSchema(SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), xsd);
             return "";
         }, "Schema compile", SAXException.class, SecurityException.class);
     }
@@ -499,21 +499,21 @@ final class AttackTestSupport {
     /**
      * Asserts a hardened Schema compilation succeeds.
      *
-     * <p>{@link SchemaFactory#newSchema(Source)} via {@link HardeningSchemaFactory#newInstance(String)}; positive control for DOCTYPE-only payloads.</p>
+     * <p>{@link SchemaFactory#newSchema(Source)} via {@link SecureSchemaFactory#newInstance(String)}; positive control for DOCTYPE-only payloads.</p>
      */
     static void assertSchemaCompiles(final Source xsd) {
-        assertParseSucceeds(() -> strictSchema(HardeningSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), xsd), "Schema compile");
+        assertParseSucceeds(() -> strictSchema(SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), xsd), "Schema compile");
     }
 
     /**
      * Asserts a hardened Schema compilation completes without throwing.
      *
-     * <p>{@link SchemaFactory#newSchema(Source)} via {@link HardeningSchemaFactory#newInstance(String)}; use this when the hardening contract guarantees the compile
+     * <p>{@link SchemaFactory#newSchema(Source)} via {@link SecureSchemaFactory#newInstance(String)}; use this when the hardening contract guarantees the compile
      * succeeds but never resolves the external resource (for example, {@code XERCES_LOAD_EXTERNAL_DTD=false} silently skipping the external subset, with the body's
      * undeclared entity reference dropped per XML 1.0 §4.1).</p>
      */
     static void assertSchemaDoesNotLeak(final Source xsd) {
-        assertParseSucceeds(() -> strictSchema(HardeningSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), xsd), "Schema compile");
+        assertParseSucceeds(() -> strictSchema(SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), xsd), "Schema compile");
     }
 
     /**
@@ -643,12 +643,12 @@ final class AttackTestSupport {
     /**
      * Asserts a hardened Validator validation throws.
      *
-     * <p>{@link Validator#validate(Source)} on a validator from {@link #BENIGN_SCHEMA} compiled via {@link HardeningSchemaFactory#newInstance(String)}; only a thrown
+     * <p>{@link Validator#validate(Source)} on a validator from {@link #BENIGN_SCHEMA} compiled via {@link SecureSchemaFactory#newInstance(String)}; only a thrown
      * exception passes (the schema is benign; the attack lives in the instance document).</p>
      */
     static void assertValidatorBlocks(final String xml) {
         assertParseFails(
-                () -> strictValidator(strictSchema(HardeningSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), streamSource(BENIGN_SCHEMA))).validate(streamSource(xml)),
+                () -> strictValidator(strictSchema(SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), streamSource(BENIGN_SCHEMA))).validate(streamSource(xml)),
                 "Validator", SAXException.class, SecurityException.class);
     }
 
@@ -659,7 +659,7 @@ final class AttackTestSupport {
      */
     static void assertValidatorBlocksOrDoesNotLeak(final String xml) {
         assertNoLeakOrThrows(() -> {
-            strictValidator(strictSchema(HardeningSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), streamSource(BENIGN_SCHEMA))).validate(streamSource(xml));
+            strictValidator(strictSchema(SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), streamSource(BENIGN_SCHEMA))).validate(streamSource(xml));
             return "";
         }, "Validator", SAXException.class, SecurityException.class, IOException.class);
     }
@@ -667,24 +667,24 @@ final class AttackTestSupport {
     /**
      * Asserts a hardened Validator validation completes without throwing.
      *
-     * <p>{@link Validator#validate(Source)} on a validator from {@link #BENIGN_SCHEMA} compiled via {@link HardeningSchemaFactory#newInstance(String)}; use this when the
+     * <p>{@link Validator#validate(Source)} on a validator from {@link #BENIGN_SCHEMA} compiled via {@link SecureSchemaFactory#newInstance(String)}; use this when the
      * hardening contract guarantees the validate succeeds but never resolves the external resource.</p>
      */
     static void assertValidatorDoesNotLeak(final String xml) {
         assertParseSucceeds(
-                () -> strictValidator(strictSchema(HardeningSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), streamSource(BENIGN_SCHEMA))).validate(streamSource(xml)),
+                () -> strictValidator(strictSchema(SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), streamSource(BENIGN_SCHEMA))).validate(streamSource(xml)),
                 "Validator");
     }
 
     /**
      * Asserts a hardened Validator validation succeeds.
      *
-     * <p>{@link Validator#validate(Source)} on a validator from {@link #BENIGN_SCHEMA} compiled via {@link HardeningSchemaFactory#newInstance(String)}; positive control
+     * <p>{@link Validator#validate(Source)} on a validator from {@link #BENIGN_SCHEMA} compiled via {@link SecureSchemaFactory#newInstance(String)}; positive control
      * for DOCTYPE-only payloads.</p>
      */
     static void assertValidatorValidates(final String xml) {
         assertParseSucceeds(
-                () -> strictValidator(strictSchema(HardeningSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), streamSource(BENIGN_SCHEMA))).validate(streamSource(xml)),
+                () -> strictValidator(strictSchema(SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), streamSource(BENIGN_SCHEMA))).validate(streamSource(xml)),
                 "Validator");
     }
 

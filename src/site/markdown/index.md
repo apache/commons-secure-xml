@@ -138,7 +138,7 @@ NodeList hits = (NodeList) HardeningXPathFactory.newInstance()
 ```java
 import javax.xml.XMLConstants;
 import javax.xml.transform.stream.StreamSource;
-import org.apache.commons.xml.HardeningSchemaFactory;
+import org.apache.commons.xml.SecureSchemaFactory;
 
 HardeningSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         .newSchema(new StreamSource(xsdStream))

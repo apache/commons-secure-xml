@@ -107,7 +107,7 @@ class ResetHardeningTest {
     void validatorResetKeepsResourceResolverFloor() throws Exception {
         // A Schema built without sources validates against the instance's xsi:schemaLocation hints, so the resolver floor is the only barrier between the
         // validator and the external schema fetch.
-        final Validator validator = HardeningSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema().newValidator();
+        final Validator validator = SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema().newValidator();
         AttackTestSupport.assumeDoesNotThrow(validator::reset);
         validator.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
         // schema-location-instance.xml hints at schema-location.xsd, which declares its root: a validator whose floor was stripped fetches it and validates

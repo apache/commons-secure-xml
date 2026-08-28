@@ -56,7 +56,7 @@ import org.xml.sax.SAXNotSupportedException;
  *
  * @see org.apache.commons.xml
  */
-public final class HardeningSchemaFactory {
+public final class SecureSchemaFactory {
 
     /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
     private static final String JDK_SCHEMA_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory";
@@ -137,18 +137,18 @@ public final class HardeningSchemaFactory {
         return harden(SchemaFactory.newInstance(schemaLanguage, factoryClassName, classLoader));
     }
 
-    private HardeningSchemaFactory() {
+    private SecureSchemaFactory() {
         // static only
     }
 
     /**
      * Capability-driven hardening wrapper for any {@link SchemaFactory} on the classpath, the same recipe for every implementation. It is the entry point reached
-     * by {@link HardeningSchemaFactory#newInstance(String)}; there is no per-implementation branching, no {@code FEATURE_SECURE_PROCESSING} and no limit configuration on the
+     * by {@link SecureSchemaFactory#newInstance(String)}; there is no per-implementation branching, no {@code FEATURE_SECURE_PROCESSING} and no limit configuration on the
      * factory itself.
      *
      * <p>Three layers cooperate:</p>
      * <ol>
-     *   <li>{@link HardeningSchemaFactory} installs an ignore-all {@link FallbackIgnoreLSResourceResolver} floor on the factory (blocking
+     *   <li>{@link SecureSchemaFactory} installs an ignore-all {@link FallbackIgnoreLSResourceResolver} floor on the factory (blocking
      *       {@code xs:import}/{@code xs:include}/{@code xs:redefine} at compile time) and rewrites the Source on every {@code newSchema(Source[])} entry point
      *       through {@link SecureSAXParserFactory#harden(Source, boolean)}.</li>
      *   <li>{@link SecureSchema} wraps every Validator/ValidatorHandler the inner Schema produces and re-installs the floor on each (blocking

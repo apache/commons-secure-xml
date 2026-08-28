@@ -161,9 +161,9 @@ class ShadingFootprintTest {
             "SecureSAXParserFactory$HardeningExpatXMLReader",
             "SecureSAXParserFactory$Wrapper",
             "SecureSchema",
-            "HardeningSchemaFactory",
-            "HardeningSchemaFactory$1",
-            "HardeningSchemaFactory$Wrapper",
+            "SecureSchemaFactory",
+            "SecureSchemaFactory$1",
+            "SecureSchemaFactory$Wrapper",
             "HardeningValidator",
             "HardeningValidatorHandler",
             "HardeningXMLReader");
@@ -178,7 +178,7 @@ class ShadingFootprintTest {
      * Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library.
      */
     private static final String[] REPORTED = {"SecureDocumentBuilderFactory", "SecureSAXParserFactory", "HardeningXMLInputFactory",
-            "HardeningTransformerFactory", "HardeningXPathFactory", "HardeningSchemaFactory"};
+            "HardeningTransformerFactory", "HardeningXPathFactory", "SecureSchemaFactory"};
 
     private static Clazzpath clazzpath;
     private static Path classesDir;
@@ -279,7 +279,7 @@ class ShadingFootprintTest {
 
     @Test
     void schemaFactoryFootprint() {
-        assertEquals(SCHEMA_FACTORY, closureOf("HardeningSchemaFactory"));
+        assertEquals(SCHEMA_FACTORY, closureOf("SecureSchemaFactory"));
     }
 
     @Test

@@ -60,7 +60,7 @@ class HardeningFactoriesSmokeTest {
     void publicClassesDoNotExtendTheirJaxpFactoryType() {
         assertFalse(DocumentBuilderFactory.class.isAssignableFrom(SecureDocumentBuilderFactory.class));
         assertFalse(SAXParserFactory.class.isAssignableFrom(SecureSAXParserFactory.class));
-        assertFalse(SchemaFactory.class.isAssignableFrom(HardeningSchemaFactory.class));
+        assertFalse(SchemaFactory.class.isAssignableFrom(SecureSchemaFactory.class));
         assertFalse(TransformerFactory.class.isAssignableFrom(HardeningTransformerFactory.class));
         assertFalse(XMLInputFactory.class.isAssignableFrom(HardeningXMLInputFactory.class));
         assertFalse(XPathFactory.class.isAssignableFrom(HardeningXPathFactory.class));
@@ -106,8 +106,8 @@ class HardeningFactoriesSmokeTest {
 
     @Test
     void newSchemaFactoryReturnsFreshInstance() throws Exception {
-        final SchemaFactory a = HardeningSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        final SchemaFactory b = HardeningSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        final SchemaFactory a = SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        final SchemaFactory b = SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         assertNotSame(a, b);
         assertTrue(a.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
@@ -155,7 +155,7 @@ class HardeningFactoriesSmokeTest {
     @Test
     void explicitClassNameSchemaFactoryIsHardened() throws Exception {
         final Class<?> impl = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).getClass();
-        final SchemaFactory factory = HardeningSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI, impl.getName(), impl.getClassLoader());
+        final SchemaFactory factory = SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI, impl.getName(), impl.getClassLoader());
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 
@@ -292,7 +292,7 @@ class HardeningFactoriesSmokeTest {
 
     @Test
     void newDefaultInstanceSchemaFactoryIsHardened() throws Exception {
-        final SchemaFactory factory = HardeningSchemaFactory.newDefaultInstance();
+        final SchemaFactory factory = SecureSchemaFactory.newDefaultInstance();
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 

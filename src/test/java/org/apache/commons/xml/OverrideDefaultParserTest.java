@@ -78,7 +78,7 @@ class OverrideDefaultParserTest {
     @Test
     void schemaFactoryReadsFeatureAtCreation() throws Exception {
         assumeFalse(AttackTestSupport.IS_ANDROID);
-        final SchemaFactory factory = HardeningSchemaFactory.newDefaultInstance();
+        final SchemaFactory factory = SecureSchemaFactory.newDefaultInstance();
         assertFalse(factory.getFeature(FEATURE));
         assertFalse(((SecureSchema) factory.newSchema(AttackTestSupport.streamSource(AttackTestSupport.BENIGN_SCHEMA))).overrideDefaultParser);
         factory.setFeature(FEATURE, true);
