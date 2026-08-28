@@ -35,14 +35,14 @@ import org.xml.sax.ext.EntityResolver2;
  * ({@link FallbackIgnoreLSResourceResolver}, {@link FallbackIgnoreURIResolver} and {@link FallbackIgnoreXMLResolver}) shares two defining properties:
  * </p>
  * <ol>
- * <li><strong>Non-removable, and it wraps the resolver the caller sets.</strong> The hardened wrappers install one and route a caller-set resolver through
+ * <li><strong>Non-removable, and it wraps the resolver the caller sets.</strong> The secure wrappers install one and route a caller-set resolver through
  * {@code setDelegate} rather than letting it replace the floor, so the caller's resolver is consulted first but cannot remove the floor underneath it.</li>
  * <li><strong>It supplies the default action for a lookup the caller's resolver does not resolve</strong> (a {@code null} return, or no caller resolver at
  * all). This is where a floor departs from stock JAXP: normally an unresolved lookup falls back to the processor's built-in resolution and the resource is
  * <em>fetched</em>; a floor instead resolves it to <em>empty</em> content, so the parse continues without the external fetch and without a leak.</li>
  * </ol>
  * <p>
- * The hardened DOM and SAX wrappers install one of these and, when the caller sets their own {@link EntityResolver}, route it through {@link #setDelegate}
+ * The secure DOM and SAX wrappers install one of these and, when the caller sets their own {@link EntityResolver}, route it through {@link #setDelegate}
  * rather than letting it replace the floor. A caller therefore opts a specific resource in by returning a non-{@code null} {@link InputSource} from their
  * resolver; anything they leave unresolved (a {@code null} return, or no caller resolver at all) goes to {@link #onUnresolved}, which returns empty content by
  * default.
