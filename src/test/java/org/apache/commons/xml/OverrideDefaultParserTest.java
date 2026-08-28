@@ -33,6 +33,7 @@ import javax.xml.xpath.XPathFactory;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.xml.sax.XMLReader;
 
 /**
@@ -95,6 +96,9 @@ class OverrideDefaultParserTest {
     }
 
     @Test
+    // The JDK default TrAX pinned by newDefaultInstance() is XSLTC, which defines the compiled translet class at run time — impossible in a closed-world
+    // native image (the reason the native profile substitutes Xalan). The capture tests above stay enabled: newTemplates never loads the translet.
+    @DisabledInNativeImage
     void transformSucceedsUnderBothParserFamilies() throws Exception {
         assumeFalse(AttackTestSupport.IS_ANDROID);
         final TransformerFactory factory = HardeningTransformerFactory.newDefaultInstance();
