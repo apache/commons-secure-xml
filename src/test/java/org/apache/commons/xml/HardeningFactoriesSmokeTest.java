@@ -59,7 +59,7 @@ class HardeningFactoriesSmokeTest {
     @Test
     void publicClassesDoNotExtendTheirJaxpFactoryType() {
         assertFalse(DocumentBuilderFactory.class.isAssignableFrom(SecureDocumentBuilderFactory.class));
-        assertFalse(SAXParserFactory.class.isAssignableFrom(HardeningSAXParserFactory.class));
+        assertFalse(SAXParserFactory.class.isAssignableFrom(SecureSAXParserFactory.class));
         assertFalse(SchemaFactory.class.isAssignableFrom(HardeningSchemaFactory.class));
         assertFalse(TransformerFactory.class.isAssignableFrom(HardeningTransformerFactory.class));
         assertFalse(XMLInputFactory.class.isAssignableFrom(HardeningXMLInputFactory.class));
@@ -97,8 +97,8 @@ class HardeningFactoriesSmokeTest {
 
     @Test
     void newSAXParserFactoryReturnsFreshInstance() {
-        final SAXParserFactory a = HardeningSAXParserFactory.newInstance();
-        final SAXParserFactory b = HardeningSAXParserFactory.newInstance();
+        final SAXParserFactory a = SecureSAXParserFactory.newInstance();
+        final SAXParserFactory b = SecureSAXParserFactory.newInstance();
         assertNotSame(a, b);
         assertFalse(a.isValidating());
         assertFalse(a.isXIncludeAware());
@@ -148,7 +148,7 @@ class HardeningFactoriesSmokeTest {
     @Test
     void explicitClassNameSAXParserFactoryIsHardened() throws Exception {
         final Class<?> impl = SAXParserFactory.newInstance().getClass();
-        final SAXParserFactory factory = HardeningSAXParserFactory.newInstance(impl.getName(), impl.getClassLoader());
+        final SAXParserFactory factory = SecureSAXParserFactory.newInstance(impl.getName(), impl.getClassLoader());
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 
@@ -218,10 +218,10 @@ class HardeningFactoriesSmokeTest {
     @Tag("sax")
     void newDefaultInstanceSAXParserFactoryIsUsable() throws Exception {
         if (AttackTestSupport.IS_ANDROID) {
-            assertThrows(FactoryConfigurationError.class, HardeningSAXParserFactory::newDefaultInstance);
+            assertThrows(FactoryConfigurationError.class, SecureSAXParserFactory::newDefaultInstance);
             return;
         }
-        final SAXParserFactory factory = HardeningSAXParserFactory.newDefaultInstance();
+        final SAXParserFactory factory = SecureSAXParserFactory.newDefaultInstance();
         factory.newSAXParser().parse(new InputSource(new StringReader(BENIGN_XML)), new DefaultHandler());
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
@@ -254,7 +254,7 @@ class HardeningFactoriesSmokeTest {
     @Test
     @Tag("sax")
     void newNSInstanceSAXParserFactoryIsNamespaceAware() throws Exception {
-        final SAXParserFactory factory = HardeningSAXParserFactory.newNSInstance();
+        final SAXParserFactory factory = SecureSAXParserFactory.newNSInstance();
         assertTrue(factory.isNamespaceAware());
         factory.newSAXParser().parse(new InputSource(new StringReader(BENIGN_XML)), new DefaultHandler());
         if (!AttackTestSupport.IS_ANDROID) {
@@ -266,10 +266,10 @@ class HardeningFactoriesSmokeTest {
     @Tag("sax")
     void newDefaultNSInstanceSAXParserFactoryIsNamespaceAware() throws Exception {
         if (AttackTestSupport.IS_ANDROID) {
-            assertThrows(FactoryConfigurationError.class, HardeningSAXParserFactory::newDefaultNSInstance);
+            assertThrows(FactoryConfigurationError.class, SecureSAXParserFactory::newDefaultNSInstance);
             return;
         }
-        final SAXParserFactory factory = HardeningSAXParserFactory.newDefaultNSInstance();
+        final SAXParserFactory factory = SecureSAXParserFactory.newDefaultNSInstance();
         assertTrue(factory.isNamespaceAware());
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
@@ -285,7 +285,7 @@ class HardeningFactoriesSmokeTest {
     @Test
     void explicitClassNameNSSAXParserFactoryIsNamespaceAware() throws Exception {
         final Class<?> impl = SAXParserFactory.newInstance().getClass();
-        final SAXParserFactory factory = HardeningSAXParserFactory.newNSInstance(impl.getName(), impl.getClassLoader());
+        final SAXParserFactory factory = SecureSAXParserFactory.newNSInstance(impl.getName(), impl.getClassLoader());
         assertTrue(factory.isNamespaceAware());
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }

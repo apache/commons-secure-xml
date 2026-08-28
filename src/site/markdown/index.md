@@ -95,7 +95,7 @@ Document doc = HardeningDocumentBuilderFactory.newInstance().newDocumentBuilder(
 **SAX parsing** via `SAXParserFactory`:
 
 ```java
-import org.apache.commons.xml.HardeningSAXParserFactory;
+import org.apache.commons.xml.SecureSAXParserFactory;
 
 HardeningSAXParserFactory.newInstance().newSAXParser().parse(inputStream, myDefaultHandler);
 ```

@@ -93,7 +93,7 @@ class SchemaLocationPropertyTest {
 
     private static XMLReader hardenedValidatingSax(final String property, final String value) {
         return configureOrSkip(() -> {
-            final SAXParserFactory factory = HardeningSAXParserFactory.newInstance();
+            final SAXParserFactory factory = SecureSAXParserFactory.newInstance();
             factory.setNamespaceAware(true);
             factory.setValidating(true);
             final SAXParser parser = factory.newSAXParser();

@@ -185,7 +185,7 @@ public final class HardeningTransformerFactory {
     }
 
     /**
-     * {@link TransformerFactory} wrapper that rewrites every Source-taking entry point through {@link HardeningSAXParserFactory#harden(Source, boolean)} before
+     * {@link TransformerFactory} wrapper that rewrites every Source-taking entry point through {@link SecureSAXParserFactory#harden(Source, boolean)} before
      * delegating.
      *
      * <p>Used by providers whose underlying TrAX implementation pulls a new {@code SAXParserFactory.newInstance()} for any Source that is not already a
@@ -209,7 +209,7 @@ public final class HardeningTransformerFactory {
      * <h2>Caveats</h2>
      * <ul>
      *   <li>A {@link SAXSource} that carries its own {@link XMLReader} is trusted as-is: the caller is expected to supply a hardened reader (via
-     *       {@link HardeningSAXParserFactory#newInstance()}) in that case. The same applies to the SAX events a caller feeds into a handler, and to a parent reader a
+     *       {@link SecureSAXParserFactory#newInstance()}) in that case. The same applies to the SAX events a caller feeds into a handler, and to a parent reader a
      *       caller sets on a returned {@link XMLFilter}.</li>
      * </ul>
      *
@@ -220,10 +220,10 @@ public final class HardeningTransformerFactory {
         /**
          * Parses a reader-less source into a DOM through a hardened, namespace-aware {@link javax.xml.parsers.DocumentBuilder} and returns a {@link DOMSource}
          * carrying its system id, so the consumer walks the tree instead of provisioning its own reader. Any other source is left to
-         * {@link HardeningSAXParserFactory#harden(Source, boolean)}.
+         * {@link SecureSAXParserFactory#harden(Source, boolean)}.
          *
          * @param source The source to scan for an associated stylesheet.
-         * @return A {@link DOMSource} for a reader-less source, otherwise the result of {@link HardeningSAXParserFactory#harden(Source, boolean)}.
+         * @return A {@link DOMSource} for a reader-less source, otherwise the result of {@link SecureSAXParserFactory#harden(Source, boolean)}.
          * @throws TransformerConfigurationException if the source cannot be parsed.
          * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
          *                                   configuration error} or if the implementation is not available or cannot be instantiated.
@@ -242,7 +242,7 @@ public final class HardeningTransformerFactory {
                     }
                 }
             }
-            return HardeningSAXParserFactory.harden(source, overrideDefaultParser());
+            return SecureSAXParserFactory.harden(source, overrideDefaultParser());
         }
 
         /**
@@ -256,7 +256,7 @@ public final class HardeningTransformerFactory {
         }
 
         /**
-         * Whether the delegate recognizes {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER}, probed with a same-value {@code setFeature}:
+         * Whether the delegate recognizes {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER}, probed with a same-value {@code setFeature}:
          * {@code TransformerFactory.getFeature} cannot signal an unrecognized name (it returns {@code false}), while every implementation rejects a
          * {@code setFeature} for a name it does not support (Xalan with {@link TransformerConfigurationException}, Saxon with its own unchecked exception).
          *
@@ -265,8 +265,8 @@ public final class HardeningTransformerFactory {
          */
         private static boolean probeOverrideDefaultParser(final SAXTransformerFactory factory) {
             try {
-                factory.setFeature(HardeningSAXParserFactory.OVERRIDE_DEFAULT_PARSER,
-                        factory.getFeature(HardeningSAXParserFactory.OVERRIDE_DEFAULT_PARSER));
+                factory.setFeature(SecureSAXParserFactory.OVERRIDE_DEFAULT_PARSER,
+                        factory.getFeature(SecureSAXParserFactory.OVERRIDE_DEFAULT_PARSER));
                 return true;
             } catch (final Exception e) {
                 return false;
@@ -286,7 +286,7 @@ public final class HardeningTransformerFactory {
 
         private final FallbackIgnoreURIResolver floor;
 
-        /** Whether the delegate recognizes {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER}; its value is read per created product, like the JDK. */
+        /** Whether the delegate recognizes {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER}; its value is read per created product, like the JDK. */
         private final boolean supportsOverrideDefaultParser;
 
         /**
@@ -326,7 +326,7 @@ public final class HardeningTransformerFactory {
         public Source getAssociatedStylesheet(final Source source, final String media, final String title, final String charset)
                 throws TransformerConfigurationException {
             // Xalan's getAssociatedStylesheet drops a SAXSource's reader and self-provisions its own to scan for xml-stylesheet PIs (XALANJ-2849).
-            final Source hardened = isXalan(delegate) ? hardenSourceToDom(source) : HardeningSAXParserFactory.harden(source, overrideDefaultParser());
+            final Source hardened = isXalan(delegate) ? hardenSourceToDom(source) : SecureSAXParserFactory.harden(source, overrideDefaultParser());
             return delegate.getAssociatedStylesheet(hardened, media, title, charset);
         }
 
@@ -362,7 +362,7 @@ public final class HardeningTransformerFactory {
          */
         @Override
         public Templates newTemplates(final Source source) throws TransformerConfigurationException {
-            final Templates templates = delegate.newTemplates(HardeningSAXParserFactory.harden(source, overrideDefaultParser()));
+            final Templates templates = delegate.newTemplates(SecureSAXParserFactory.harden(source, overrideDefaultParser()));
             return templates == null ? null : new HardeningTemplates(templates, getURIResolver(), emptySource, overrideDefaultParser());
         }
 
@@ -387,7 +387,7 @@ public final class HardeningTransformerFactory {
          */
         @Override
         public Transformer newTransformer(final Source source) throws TransformerConfigurationException {
-            final Transformer transformer = delegate.newTransformer(HardeningSAXParserFactory.harden(source, overrideDefaultParser()));
+            final Transformer transformer = delegate.newTransformer(SecureSAXParserFactory.harden(source, overrideDefaultParser()));
             return transformer == null ? null : new HardeningTransformer(transformer, getURIResolver(), emptySource, overrideDefaultParser());
         }
 
@@ -404,7 +404,7 @@ public final class HardeningTransformerFactory {
          */
         @Override
         public TransformerHandler newTransformerHandler(final Source source) throws TransformerConfigurationException {
-            return hardenHandler(delegate.newTransformerHandler(HardeningSAXParserFactory.harden(source, overrideDefaultParser())));
+            return hardenHandler(delegate.newTransformerHandler(SecureSAXParserFactory.harden(source, overrideDefaultParser())));
         }
 
         @Override
@@ -455,13 +455,13 @@ public final class HardeningTransformerFactory {
         /**
          * Checks whether parsers should be instantiated via {@code newInstance()} instead of {@code newDefaultInstance()}.
          *
-         * <p>The JDK implementation of {@link TransformerFactory} uses the JDK parsers while {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} is unset
+         * <p>The JDK implementation of {@link TransformerFactory} uses the JDK parsers while {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} is unset
          * or {@code false}.</p>
          *
          * @return {@code true} if parsers should be created via {@code newInstance()}.
          */
         private boolean overrideDefaultParser() {
-            return !supportsOverrideDefaultParser || delegate.getFeature(HardeningSAXParserFactory.OVERRIDE_DEFAULT_PARSER);
+            return !supportsOverrideDefaultParser || delegate.getFeature(SecureSAXParserFactory.OVERRIDE_DEFAULT_PARSER);
         }
     }
 }

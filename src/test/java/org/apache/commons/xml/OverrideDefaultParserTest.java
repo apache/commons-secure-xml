@@ -49,7 +49,7 @@ import org.xml.sax.XMLReader;
 @Tag("schema")
 class OverrideDefaultParserTest {
 
-    private static final String FEATURE = HardeningSAXParserFactory.OVERRIDE_DEFAULT_PARSER;
+    private static final String FEATURE = SecureSAXParserFactory.OVERRIDE_DEFAULT_PARSER;
 
     /** Package prefix of the JDK's built-in parsers, the family a {@code false} feature value pins. */
     private static final String JDK_INTERNAL_PREFIX = "com.sun.org.apache.xerces.internal.";
@@ -64,10 +64,10 @@ class OverrideDefaultParserTest {
     @Test
     void hardenedReaderFollowsFlag() throws Exception {
         assumeFalse(AttackTestSupport.IS_ANDROID);
-        final XMLReader pinned = ((HardeningXMLReader) HardeningSAXParserFactory.newHardenedReader(false)).getDelegate();
+        final XMLReader pinned = ((HardeningXMLReader) SecureSAXParserFactory.newHardenedReader(false)).getDelegate();
         assertTrue(pinned.getClass().getName().startsWith(JDK_INTERNAL_PREFIX), pinned.getClass().getName());
-        final XMLReader pluggable = ((HardeningXMLReader) HardeningSAXParserFactory.newHardenedReader(true)).getDelegate();
-        final XMLReader lookedUp = ((HardeningXMLReader) HardeningSAXParserFactory.newNSInstance().newSAXParser().getXMLReader()).getDelegate();
+        final XMLReader pluggable = ((HardeningXMLReader) SecureSAXParserFactory.newHardenedReader(true)).getDelegate();
+        final XMLReader lookedUp = ((HardeningXMLReader) SecureSAXParserFactory.newNSInstance().newSAXParser().getXMLReader()).getDelegate();
         assertEquals(lookedUp.getClass(), pluggable.getClass());
         if (xercesOnClasspath()) {
             // The two families genuinely differ only where a third-party parser wins the lookup (the test-jdk-xerces execution).

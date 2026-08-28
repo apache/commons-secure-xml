@@ -71,10 +71,10 @@ class ShadingFootprintTest {
             "FallbackIgnoreEntityResolver2",
             "SecureException",
             "SecureSAXParser",
-            "HardeningSAXParserFactory",
-            "HardeningSAXParserFactory$1",
-            "HardeningSAXParserFactory$HardeningExpatXMLReader",
-            "HardeningSAXParserFactory$Wrapper",
+            "SecureSAXParserFactory",
+            "SecureSAXParserFactory$1",
+            "SecureSAXParserFactory$HardeningExpatXMLReader",
+            "SecureSAXParserFactory$Wrapper",
             "HardeningXMLReader",
             "MethodHandleFactory");
     // @formatter:on
@@ -90,7 +90,7 @@ class ShadingFootprintTest {
     // @formatter:on
 
     /**
-     * TrAX, XPath and schema re-harden their sub-parsers through {@link HardeningSAXParserFactory#harden(Source, boolean)}, so each builds on the full SAX closure below;
+     * TrAX, XPath and schema re-harden their sub-parsers through {@link SecureSAXParserFactory#harden(Source, boolean)}, so each builds on the full SAX closure below;
      * TrAX additionally parses the Xalan {@code getAssociatedStylesheet} source and XPath its InputSource-taking evaluate calls through the DOM entry point, so
      * their closures carry that set too.
      */
@@ -104,10 +104,10 @@ class ShadingFootprintTest {
             "SecureDocumentBuilderFactory$Wrapper",
             "SecureException",
             "SecureSAXParser",
-            "HardeningSAXParserFactory",
-            "HardeningSAXParserFactory$1",
-            "HardeningSAXParserFactory$HardeningExpatXMLReader",
-            "HardeningSAXParserFactory$Wrapper",
+            "SecureSAXParserFactory",
+            "SecureSAXParserFactory$1",
+            "SecureSAXParserFactory$HardeningExpatXMLReader",
+            "SecureSAXParserFactory$Wrapper",
             "HardeningTemplates",
             "HardeningTemplatesHandler",
             "HardeningTransformer",
@@ -134,10 +134,10 @@ class ShadingFootprintTest {
             "MethodHandleFactory",
             "SecureException",
             "SecureSAXParser",
-            "HardeningSAXParserFactory",
-            "HardeningSAXParserFactory$1",
-            "HardeningSAXParserFactory$HardeningExpatXMLReader",
-            "HardeningSAXParserFactory$Wrapper",
+            "SecureSAXParserFactory",
+            "SecureSAXParserFactory$1",
+            "SecureSAXParserFactory$HardeningExpatXMLReader",
+            "SecureSAXParserFactory$Wrapper",
             "HardeningXMLReader",
             "HardeningXPath",
             "HardeningXPathExpression",
@@ -156,10 +156,10 @@ class ShadingFootprintTest {
             "FallbackIgnoreLSResourceResolver",
             "SecureException",
             "SecureSAXParser",
-            "HardeningSAXParserFactory",
-            "HardeningSAXParserFactory$1",
-            "HardeningSAXParserFactory$HardeningExpatXMLReader",
-            "HardeningSAXParserFactory$Wrapper",
+            "SecureSAXParserFactory",
+            "SecureSAXParserFactory$1",
+            "SecureSAXParserFactory$HardeningExpatXMLReader",
+            "SecureSAXParserFactory$Wrapper",
             "HardeningSchema",
             "HardeningSchemaFactory",
             "HardeningSchemaFactory$1",
@@ -177,7 +177,7 @@ class ShadingFootprintTest {
     /**
      * Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library.
      */
-    private static final String[] REPORTED = {"SecureDocumentBuilderFactory", "HardeningSAXParserFactory", "HardeningXMLInputFactory",
+    private static final String[] REPORTED = {"SecureDocumentBuilderFactory", "SecureSAXParserFactory", "HardeningXMLInputFactory",
             "HardeningTransformerFactory", "HardeningXPathFactory", "HardeningSchemaFactory"};
 
     private static Clazzpath clazzpath;
@@ -274,7 +274,7 @@ class ShadingFootprintTest {
 
     @Test
     void saxParserFactoryFootprint() {
-        assertEquals(SAX_PARSER_FACTORY, closureOf("HardeningSAXParserFactory"));
+        assertEquals(SAX_PARSER_FACTORY, closureOf("SecureSAXParserFactory"));
     }
 
     @Test

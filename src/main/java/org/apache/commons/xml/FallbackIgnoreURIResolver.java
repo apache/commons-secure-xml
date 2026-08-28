@@ -88,7 +88,7 @@ final class FallbackIgnoreURIResolver implements URIResolver {
 
     /**
      * Whether the opted-in rewrite should use the pluggable parser lookup instead of the platform's built-in parser; read per resolution so the factory-level floor tracks a later
-     * {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} toggle.
+     * {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} toggle.
      */
     private final BooleanSupplier overrideDefaultParser;
 
@@ -125,7 +125,7 @@ final class FallbackIgnoreURIResolver implements URIResolver {
         final Source resolved = delegate != null ? delegate.resolve(href, base) : null;
         if (resolved != null) {
             // The implementation parses the opted-in handle with an internal reader at its own defaults; the rewrite hands it a hardened reader instead.
-            return HardeningSAXParserFactory.harden(resolved, overrideDefaultParser.getAsBoolean());
+            return SecureSAXParserFactory.harden(resolved, overrideDefaultParser.getAsBoolean());
         }
         if (SecureException.throwOnUnresolved()) {
             throw new TransformerException(SecureException.forbidden("uri", null, null, href, base));

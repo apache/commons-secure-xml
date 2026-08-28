@@ -263,7 +263,7 @@ class XIncludeTest {
     void hardenedSaxBlocksParseText() throws Exception {
         final String input = xiIncludeXml(REFERENCED_TEXT, "text");
 
-        final SAXParserFactory factory = HardeningSAXParserFactory.newInstance();
+        final SAXParserFactory factory = SecureSAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         final String captured = captureCharacters(factory.newSAXParser().getXMLReader(), input);
@@ -276,7 +276,7 @@ class XIncludeTest {
     void hardenedSaxBlocksParseXml() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_XML, "xml"));
 
-        final SAXParserFactory factory = HardeningSAXParserFactory.newInstance();
+        final SAXParserFactory factory = SecureSAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         assertThrows(SAXException.class, () -> {
@@ -290,7 +290,7 @@ class XIncludeTest {
     void hardenedSaxNullResolverDoesNotLeak() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_XML, "xml"));
 
-        final SAXParserFactory factory = HardeningSAXParserFactory.newInstance();
+        final SAXParserFactory factory = SecureSAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         final XMLReader reader = factory.newSAXParser().getXMLReader();
@@ -304,7 +304,7 @@ class XIncludeTest {
     void hardenedSaxWithAllowListResolvesParseText() throws Exception {
         final String input = xiIncludeXml(REFERENCED_TEXT, "text");
 
-        final SAXParserFactory factory = HardeningSAXParserFactory.newInstance();
+        final SAXParserFactory factory = SecureSAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         final XMLReader reader = factory.newSAXParser().getXMLReader();
@@ -319,7 +319,7 @@ class XIncludeTest {
     void hardenedSaxWithAllowListResolvesParseXml() throws Exception {
         final String input = xiIncludeXml(REFERENCED_XML, "xml");
 
-        final SAXParserFactory factory = HardeningSAXParserFactory.newInstance();
+        final SAXParserFactory factory = SecureSAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         final XMLReader reader = factory.newSAXParser().getXMLReader();
@@ -341,7 +341,7 @@ class XIncludeTest {
         final SAXParserFactory unhardenedFactory = SAXParserFactory.newInstance();
         unhardenedFactory.setNamespaceAware(true);
         assumeXIncludeAware(unhardenedFactory);
-        final XMLReader reader = HardeningSAXParserFactory.harden(unhardenedFactory.newSAXParser().getXMLReader());
+        final XMLReader reader = SecureSAXParserFactory.harden(unhardenedFactory.newSAXParser().getXMLReader());
         reader.setEntityResolver(new AllowListResolver());
         final String captured = captureCharacters(reader, input);
         assertEquals(RESOLVED_MARKER, captured.trim(),
@@ -356,7 +356,7 @@ class XIncludeTest {
         final SAXParserFactory unhardenedFactory = SAXParserFactory.newInstance();
         unhardenedFactory.setNamespaceAware(true);
         assumeXIncludeAware(unhardenedFactory);
-        final XMLReader reader = HardeningSAXParserFactory.harden(unhardenedFactory.newSAXParser().getXMLReader());
+        final XMLReader reader = SecureSAXParserFactory.harden(unhardenedFactory.newSAXParser().getXMLReader());
         final String captured = captureCharacters(reader, input);
         assertFalse(captured.contains(LEAKED_MARKER),
                 "hardenReader parse=text must resolve the include to empty, not leak; got: " + captured);
@@ -371,7 +371,7 @@ class XIncludeTest {
         final SAXParserFactory unhardenedFactory = SAXParserFactory.newInstance();
         unhardenedFactory.setNamespaceAware(true);
         assumeXIncludeAware(unhardenedFactory);
-        final XMLReader reader = HardeningSAXParserFactory.harden(unhardenedFactory.newSAXParser().getXMLReader());
+        final XMLReader reader = SecureSAXParserFactory.harden(unhardenedFactory.newSAXParser().getXMLReader());
         assertThrows(SAXException.class, () -> reader.parse(input),
                 "hardenReader should block XInclude parse=xml on reader with XInclude already enabled");
     }

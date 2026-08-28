@@ -39,7 +39,7 @@ final class SaxSurfaceTestSupport {
 
     /** Feeds the input's SAX events into the handler through a hardened, namespace-aware reader. */
     static void feed(final ContentHandler handler, final InputSource input) throws Exception {
-        final SAXParserFactory factory = HardeningSAXParserFactory.newInstance();
+        final SAXParserFactory factory = SecureSAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
         final XMLReader reader = factory.newSAXParser().getXMLReader();
         reader.setContentHandler(handler);

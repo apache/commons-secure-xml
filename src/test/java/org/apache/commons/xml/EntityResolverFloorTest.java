@@ -132,7 +132,7 @@ class EntityResolverFloorTest {
     }
 
     private static XMLReader hardenedReader() throws Exception {
-        final XMLReader reader = HardeningSAXParserFactory.newInstance().newSAXParser().getXMLReader();
+        final XMLReader reader = SecureSAXParserFactory.newInstance().newSAXParser().getXMLReader();
         reader.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
         return reader;
     }
@@ -177,7 +177,7 @@ class EntityResolverFloorTest {
     }
 
     private static XMLReader xIncludeAwareReader() throws Exception {
-        final SAXParserFactory factory = HardeningSAXParserFactory.newInstance();
+        final SAXParserFactory factory = SecureSAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
         AttackTestSupport.assumeDoesNotThrow(() -> factory.setXIncludeAware(true));
         final XMLReader reader = factory.newSAXParser().getXMLReader();
@@ -227,7 +227,7 @@ class EntityResolverFloorTest {
     void saxParseWithHandlerDoesNotBypass() throws Exception {
         // SAXParser.parse(source, handler) installs the handler as the reader's entity resolver; the handler does not resolve it (returns null), so the
         // ignore-all floor must still resolve the external entity to empty rather than letting the parser fetch it.
-        final SAXParser parser = HardeningSAXParserFactory.newInstance().newSAXParser();
+        final SAXParser parser = SecureSAXParserFactory.newInstance().newSAXParser();
         final StringBuilder text = new StringBuilder();
         try {
             parser.parse(AttackTestSupport.inputSource(entityPayload(ALLOWED)), AttackTestSupport.capturingHandler(text));

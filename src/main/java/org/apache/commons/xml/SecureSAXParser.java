@@ -81,7 +81,7 @@ final class SecureSAXParser extends SAXParser {
     @Override
     public XMLReader getXMLReader() throws SAXException {
         if (hardenedReader == null) {
-            hardenedReader = HardeningSAXParserFactory.harden(delegate.getXMLReader());
+            hardenedReader = SecureSAXParserFactory.harden(delegate.getXMLReader());
         }
         return hardenedReader;
     }

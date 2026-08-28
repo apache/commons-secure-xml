@@ -233,14 +233,14 @@ public final class HardeningXPathFactory {
         /**
          * Checks whether parsers should be instantiated via {@code newInstance()} instead of {@code newDefaultInstance()}.
          *
-         * <p>The JDK implementation of {@link XPathFactory} uses the JDK parsers while {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} is unset or
+         * <p>The JDK implementation of {@link XPathFactory} uses the JDK parsers while {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} is unset or
          * {@code false}.</p>
          *
          * @return {@code true} if parsers should be created via {@code newInstance()}.
          */
         private boolean overrideDefaultParser() {
             try {
-                return delegate.getFeature(HardeningSAXParserFactory.OVERRIDE_DEFAULT_PARSER);
+                return delegate.getFeature(SecureSAXParserFactory.OVERRIDE_DEFAULT_PARSER);
             } catch (final XPathFactoryConfigurationException e) {
                 return true;
             }

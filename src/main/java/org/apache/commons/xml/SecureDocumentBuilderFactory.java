@@ -194,7 +194,7 @@ public final class SecureDocumentBuilderFactory {
      * reconfiguring the default parser, so it is honored through the standard lookup rather than bypassed.
      * </p>
      *
-     * @param overrideDefaultParser whether {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
+     * @param overrideDefaultParser whether {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
      * @return A hardened, namespace-aware factory.
      * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the

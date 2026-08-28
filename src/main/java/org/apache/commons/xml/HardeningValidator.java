@@ -34,7 +34,7 @@ import org.xml.sax.SAXNotSupportedException;
 
 /**
  * {@link Validator} wrapper that rewrites the Source on every {@link Validator#validate(Source)} and {@link Validator#validate(Source, Result)} call through
- * {@link HardeningSAXParserFactory#harden(Source, boolean)} before delegating, and keeps an ignore-all {@link LSResourceResolver} floor so {@code xsi:schemaLocation} is not resolved at
+ * {@link SecureSAXParserFactory#harden(Source, boolean)} before delegating, and keeps an ignore-all {@link LSResourceResolver} floor so {@code xsi:schemaLocation} is not resolved at
  * validation time. {@link #reset()} re-establishes the bare ignore-all floor, matching the just-constructed state.
  */
 final class HardeningValidator extends Validator {
@@ -44,7 +44,7 @@ final class HardeningValidator extends Validator {
     private final FallbackIgnoreLSResourceResolver floor = new FallbackIgnoreLSResourceResolver(null);
 
     /**
-     * Snapshot of the factory's {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} outcome at creation, like the JDK copies the feature onto its
+     * Snapshot of the factory's {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} outcome at creation, like the JDK copies the feature onto its
      * validators.
      */
     private final boolean overrideDefaultParser;
@@ -121,7 +121,7 @@ final class HardeningValidator extends Validator {
     @Override
     public void validate(final Source source, final Result result) throws SAXException, IOException {
         try {
-            delegate.validate(HardeningSAXParserFactory.harden(source, overrideDefaultParser), result);
+            delegate.validate(SecureSAXParserFactory.harden(source, overrideDefaultParser), result);
         } catch (final TransformerConfigurationException e) {
             throw new SAXException("Failed to harden source for validation", e);
         }

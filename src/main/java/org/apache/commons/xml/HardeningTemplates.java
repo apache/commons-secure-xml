@@ -52,7 +52,7 @@ final class HardeningTemplates implements Templates {
     private final Supplier<Source> emptySource;
 
     /**
-     * Snapshot of the factory's {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} outcome, carried onto every produced Transformer and self-provisioned
+     * Snapshot of the factory's {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} outcome, carried onto every produced Transformer and self-provisioned
      * filter reader.
      */
     final boolean overrideDefaultParser;

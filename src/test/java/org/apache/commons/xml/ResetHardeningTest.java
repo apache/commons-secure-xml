@@ -72,7 +72,7 @@ class ResetHardeningTest {
     @Test
     @Tag("sax")
     void saxParserResetKeepsEntityResolverFloor() throws Exception {
-        final SAXParser parser = HardeningSAXParserFactory.newInstance().newSAXParser();
+        final SAXParser parser = SecureSAXParserFactory.newInstance().newSAXParser();
         // Materialize the hardened reader before the reset, so a stale cached wrapper would be observable.
         parser.getXMLReader();
         AttackTestSupport.assumeDoesNotThrow(parser::reset);

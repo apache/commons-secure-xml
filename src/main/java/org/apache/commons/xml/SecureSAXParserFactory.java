@@ -54,7 +54,7 @@ import org.xml.sax.XMLReader;
  *
  * @see org.apache.commons.xml
  */
-public final class HardeningSAXParserFactory {
+public final class SecureSAXParserFactory {
 
     /** Class name of Android's Expat-backed {@link XMLReader}. */
     private static final String ANDROID_EXPAT_READER = "org.apache.harmony.xml.ExpatReader";
@@ -313,7 +313,7 @@ public final class HardeningSAXParserFactory {
         }
     }
 
-    private HardeningSAXParserFactory() {
+    private SecureSAXParserFactory() {
         // static only
     }
 
@@ -343,7 +343,7 @@ public final class HardeningSAXParserFactory {
     }
 
     /**
-     * Universal SAX factory wrapper that funnels every produced parser through {@link HardeningSAXParserFactory#harden(XMLReader)}.
+     * Universal SAX factory wrapper that funnels every produced parser through {@link SecureSAXParserFactory#harden(XMLReader)}.
      * <p>
      * {@link SAXParserFactory} exposes only a feature API and no property API, so the per-parse hardening (limits, entity blocking, implementation-specific fixups)
      * has to run on each {@link XMLReader} the factory produces. This wrapper returns a {@link SecureSAXParser}, which applies that hardening lazily to both the
