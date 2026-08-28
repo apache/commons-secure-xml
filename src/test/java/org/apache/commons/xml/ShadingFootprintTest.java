@@ -58,7 +58,7 @@ class ShadingFootprintTest {
     // @formatter:off
     private static final Set<String> DOCUMENT_BUILDER_FACTORY = set(
             "FallbackIgnoreEntityResolver2",
-            "HardeningDocumentBuilder",
+            "SecureDocumentBuilder",
             "HardeningDocumentBuilderFactory",
             "HardeningDocumentBuilderFactory$1",
             "HardeningDocumentBuilderFactory$Wrapper",
@@ -98,7 +98,7 @@ class ShadingFootprintTest {
     private static final Set<String> TRANSFORMER_FACTORY = saxParserFactoryPlus(
             "FallbackIgnoreEntityResolver2",
             "FallbackIgnoreURIResolver",
-            "HardeningDocumentBuilder",
+            "SecureDocumentBuilder",
             "HardeningDocumentBuilderFactory",
             "HardeningDocumentBuilderFactory$1",
             "HardeningDocumentBuilderFactory$Wrapper",
@@ -127,7 +127,7 @@ class ShadingFootprintTest {
     private static final Set<String> XPATH_FACTORY = saxParserFactoryPlus(
             "FallbackIgnoreEntityResolver2",
             "FallbackIgnoreURIResolver",
-            "HardeningDocumentBuilder",
+            "SecureDocumentBuilder",
             "HardeningDocumentBuilderFactory",
             "HardeningDocumentBuilderFactory$1",
             "HardeningDocumentBuilderFactory$Wrapper",

@@ -37,7 +37,7 @@ import org.xml.sax.SAXException;
  * caller's resolver does not satisfy resolves to empty rather than being fetched. {@link #reset()} re-establishes the bare ignore-all floor, matching the just-constructed
  * state.</p>
  */
-final class HardeningDocumentBuilder extends DocumentBuilder {
+final class SecureDocumentBuilder extends DocumentBuilder {
 
     private final DocumentBuilder delegate;
 
@@ -49,7 +49,7 @@ final class HardeningDocumentBuilder extends DocumentBuilder {
      * @param delegate the delegate to wrap; must not be {@code null}.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningDocumentBuilder(final DocumentBuilder delegate) {
+    SecureDocumentBuilder(final DocumentBuilder delegate) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
         delegate.setEntityResolver(floor);
     }

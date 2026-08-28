@@ -243,7 +243,7 @@ public final class HardeningDocumentBuilderFactory {
     /**
      * {@link DocumentBuilderFactory} wrapper that keeps an ignore-all {@link EntityResolver} floor on every {@link DocumentBuilder} produced.
      * <p>
-     * Wraps each produced builder in a {@link HardeningDocumentBuilder}; required when the underlying factory carries no resolver of its own and does not honor
+     * Wraps each produced builder in a {@link SecureDocumentBuilder}; required when the underlying factory carries no resolver of its own and does not honor
      * JAXP 1.5 {@code ACCESS_EXTERNAL_*} (e.g. the external Xerces distribution). A caller-set resolver is routed through the floor rather than replacing it. Kept
      * as a standalone wrapper so any hardener can reuse the floor.
      * </p>
@@ -316,7 +316,7 @@ public final class HardeningDocumentBuilderFactory {
 
         @Override
         public DocumentBuilder newDocumentBuilder() throws ParserConfigurationException {
-            return new HardeningDocumentBuilder(delegate.newDocumentBuilder());
+            return new SecureDocumentBuilder(delegate.newDocumentBuilder());
         }
 
         @Override
