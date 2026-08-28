@@ -79,7 +79,7 @@ public final class SecureTransformerFactory {
     /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
     private static final String JDK_TRANSFORMER_FACTORY = "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl";
 
-    private static final MethodHandle NEW_DEFAULT_INSTANCE = MethodHandleFactory.findStatic(TransformerFactory.class, "newDefaultInstance",
+    private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(TransformerFactory.class, "newDefaultInstance",
             MethodType.methodType(TransformerFactory.class));
 
     /**
@@ -132,10 +132,10 @@ public final class SecureTransformerFactory {
      *                                                implementation (for example Android).
      */
     public static TransformerFactory newDefaultInstance() {
-        if (NEW_DEFAULT_INSTANCE != null) {
+        if (MH_newDefaultInstance != null) {
             final TransformerFactory factory;
             try {
-                factory = (TransformerFactory) NEW_DEFAULT_INSTANCE.invokeExact();
+                factory = (TransformerFactory) MH_newDefaultInstance.invokeExact();
             } catch (final TransformerFactoryConfigurationError e) {
                 throw e;
             } catch (final Throwable e) {
