@@ -69,6 +69,9 @@ public final class HardeningSAXParserFactory {
      */
     static final String OVERRIDE_DEFAULT_PARSER = "jdk.xml.overrideDefaultParser";
 
+    /** System property naming the {@link SAXParserFactory} implementation, the JDK's own mechanism for reconfiguring the default parser. */
+    private static final String SAX_FACTORY_ID = "javax.xml.parsers.SAXParserFactory";
+
     private static final MethodHandle NEW_DEFAULT_INSTANCE = MethodHandleFactory.findStatic(SAXParserFactory.class, "newDefaultInstance",
             MethodType.methodType(SAXParserFactory.class));
 
@@ -266,7 +269,7 @@ public final class HardeningSAXParserFactory {
      * Returns the hardened, namespace-aware factory the Source-rewriting wrappers parse with.
      * <p>
      * While {@code overrideDefaultParser} is {@code false} the factory is the JDK's "default parser" factory, determined the way the JDK itself determines it: the built-in parser,
-     * unless the {@code javax.xml.parsers.SAXParserFactory} system property is set — that property is the JDK's own mechanism for reconfiguring the default
+     * unless the {@value #SAX_FACTORY_ID} system property is set — that property is the JDK's own mechanism for reconfiguring the default
      * parser, so it is honored through the standard lookup rather than bypassed.
      * </p>
      *
@@ -277,7 +280,7 @@ public final class HardeningSAXParserFactory {
      *                                   implementation is not available or cannot be instantiated.
      */
     static SAXParserFactory newNSInstance(final boolean overrideDefaultParser) {
-        return overrideDefaultParser || System.getProperty("javax.xml.parsers.SAXParserFactory") != null ? newNSInstance() : newDefaultNSInstance();
+        return overrideDefaultParser || System.getProperty(SAX_FACTORY_ID) != null ? newNSInstance() : newDefaultNSInstance();
     }
 
     /**
