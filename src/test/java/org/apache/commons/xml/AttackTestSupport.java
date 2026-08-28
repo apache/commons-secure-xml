@@ -114,14 +114,15 @@ final class AttackTestSupport {
 
     /**
      * Strict reporter installed on every secure factory, parser, validator and transformer in the helpers below.
-     *
-     * <p>The secure layer signals every blocked external fetch and every SAX-fatal it could not silently skip via the standard JAXP error channels:
+     * <p>
+     * The secure layer signals every blocked external fetch and every SAX-fatal it could not silently skip via the standard JAXP error channels:
      * {@link ErrorListener#error(TransformerException)} / {@link ErrorListener#fatalError(TransformerException) fatalError} on the TrAX side and
      * {@link ErrorHandler#error(SAXParseException) error} / {@link ErrorHandler#fatalError(SAXParseException) fatalError} on the SAX side. Both Apache Xalan's
      * {@code DefaultErrorHandler(false)} and Saxon's {@code StandardErrorListener} are pathologically lenient defaults that swallow these events; SAX's
      * {@link DefaultHandler} treats {@code error} as a no-op. The test fixture replaces those defaults with a strict reporter that re-throws on every reported
-     * error or fatalError so the helpers can observe the block via the same mechanism the spec uses to surface it. Warnings stay silent: they are not security
-     * signals.</p>
+     * error or fatalError so the helpers can observe the block via the same mechanism the specification uses to surface it. Warnings stay silent: they are not
+     * security signals.
+     * </p>
      */
     static final class StrictReporter implements ErrorListener, ErrorHandler {
 
