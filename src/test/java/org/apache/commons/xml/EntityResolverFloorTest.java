@@ -54,9 +54,9 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 /**
- * Checks that a caller-supplied resolver cannot remove the hardened ignore-all floor on any factory.
+ * Checks that a caller-supplied resolver cannot remove the secure ignore-all floor on any factory.
  *
- * <p>The observable contract on every hardened factory is the same: a resource the caller resolves (returns a non-null value) is allowed, but anything the
+ * <p>The observable contract on every secure factory is the same: a resource the caller resolves (returns a non-null value) is allowed, but anything the
  * caller does not resolve is resolved to empty content instead of fetched, so a resolver that resolves nothing leaves the block in place. Most
  * factories enforce this with a {@link FallbackIgnoreEntityResolver2}-style floor that consults the caller and returns empty on a {@code null} return; Saxon
  * enforces the equivalent through an ignore-all {@code ResourceResolver} floor on its {@code Configuration}. Every resolver channel is exercised: the SAX/DOM
@@ -138,7 +138,7 @@ class EntityResolverFloorTest {
     }
 
     /**
-     * A hardened {@link TransformerFactory} with a re-throwing error listener. XSLTC and Xalan enforce the block through the
+     * A secure {@link TransformerFactory} with a re-throwing error listener. XSLTC and Xalan enforce the block through the
      * {@link FallbackIgnoreURIResolver} floor; Saxon enforces it through the ignore-all resolver floor on its {@code Configuration}. Either way a caller-set
      * resolver that returns {@code null} cannot re-open the fetch. The strict listener turns any reported-and-recovered error into a test failure, so an
      * implementation cannot quietly recover from a floor resolution while the test asserts clean completion.
