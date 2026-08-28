@@ -279,7 +279,7 @@ final class AttackTestSupport {
      * @param description short label naming the JAXP surface under test.
      */
     private static void assertNoLeakStrict(final ThrowingSupplier<String> action, final String description) {
-        final String output = assertDoesNotThrow(action, "Hardened " + description + " parse must not throw");
+        final String output = assertDoesNotThrow(action, "Secured " + description + " parse must not throw");
         assertFalse(output.contains(LEAKED_MARKER),
                 "Securing did not block " + description + "; output contained marker '" + LEAKED_MARKER + "'.\nFull output:\n" + output);
     }

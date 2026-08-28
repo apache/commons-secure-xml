@@ -193,7 +193,7 @@ class XIncludeTest {
         final Document doc = factory.newDocumentBuilder().parse(input);
         final String text = doc.getDocumentElement().getTextContent();
         assertFalse(text.contains(LEAKED_MARKER),
-                "Hardened DOM parse=text must resolve the include to empty, not leak; got: " + text);
+                "Secured DOM parse=text must resolve the include to empty, not leak; got: " + text);
     }
 
     @Test
@@ -207,7 +207,7 @@ class XIncludeTest {
         assertThrows(SAXException.class, () -> {
             final DocumentBuilder builder = factory.newDocumentBuilder();
             builder.parse(input);
-        }, "Hardened DOM parse=xml should throw");
+        }, "Secured DOM parse=xml should throw");
     }
 
     @Test
@@ -268,7 +268,7 @@ class XIncludeTest {
         assumeXIncludeAware(factory);
         final String captured = captureCharacters(factory.newSAXParser().getXMLReader(), input);
         assertFalse(captured.contains(LEAKED_MARKER),
-                "Hardened SAX parse=text must resolve the include to empty, not leak; got: " + captured);
+                "Secured SAX parse=text must resolve the include to empty, not leak; got: " + captured);
     }
 
     @Test
@@ -282,7 +282,7 @@ class XIncludeTest {
         assertThrows(SAXException.class, () -> {
             final XMLReader reader = factory.newSAXParser().getXMLReader();
             reader.parse(input);
-        }, "Hardened SAX parse=xml should throw");
+        }, "Secured SAX parse=xml should throw");
     }
 
     @Test

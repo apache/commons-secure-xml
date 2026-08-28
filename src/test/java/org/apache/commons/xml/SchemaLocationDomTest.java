@@ -93,7 +93,7 @@ class SchemaLocationDomTest {
         try {
             final Document document = parse(factory);
             assertNotEquals(LEAKED_MARKER, document.getDocumentElement().getAttribute("leak"),
-                    "Hardened parse must not inline the external schema's default attribute.");
+                    "Secured parse must not inline the external schema's default attribute.");
         } catch (final Exception blocked) {
             // Acceptable: the empty schema was rejected at parse time, so nothing was fetched or inlined.
         }

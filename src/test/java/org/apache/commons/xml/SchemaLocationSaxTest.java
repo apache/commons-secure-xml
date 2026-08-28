@@ -109,7 +109,7 @@ class SchemaLocationSaxTest {
         } catch (final Exception blocked) {
             // Acceptable: the empty schema was rejected at parse time, so nothing was fetched or augmented.
         }
-        assertNull(handler.leak, "Hardened parse must not augment the external schema's default attribute onto the element.");
+        assertNull(handler.leak, "Secured parse must not augment the external schema's default attribute onto the element.");
     }
 
     @Test
