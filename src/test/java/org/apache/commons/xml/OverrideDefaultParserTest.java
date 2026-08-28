@@ -64,9 +64,9 @@ class OverrideDefaultParserTest {
     @Test
     void hardenedReaderFollowsFlag() throws Exception {
         assumeFalse(AttackTestSupport.IS_ANDROID);
-        final XMLReader pinned = ((HardeningXMLReader) HardeningSAXParserFactory.newHardenedReader(true)).getDelegate();
+        final XMLReader pinned = ((HardeningXMLReader) HardeningSAXParserFactory.newHardenedReader(false)).getDelegate();
         assertTrue(pinned.getClass().getName().startsWith(JDK_INTERNAL_PREFIX), pinned.getClass().getName());
-        final XMLReader pluggable = ((HardeningXMLReader) HardeningSAXParserFactory.newHardenedReader(false)).getDelegate();
+        final XMLReader pluggable = ((HardeningXMLReader) HardeningSAXParserFactory.newHardenedReader(true)).getDelegate();
         final XMLReader lookedUp = ((HardeningXMLReader) HardeningSAXParserFactory.newNSInstance().newSAXParser().getXMLReader()).getDelegate();
         assertEquals(lookedUp.getClass(), pluggable.getClass());
         if (xercesOnClasspath()) {
@@ -80,9 +80,9 @@ class OverrideDefaultParserTest {
         assumeFalse(AttackTestSupport.IS_ANDROID);
         final SchemaFactory factory = HardeningSchemaFactory.newDefaultInstance();
         assertFalse(factory.getFeature(FEATURE));
-        assertTrue(((HardeningSchema) factory.newSchema(AttackTestSupport.streamSource(AttackTestSupport.BENIGN_SCHEMA))).useDefaultParser);
+        assertFalse(((HardeningSchema) factory.newSchema(AttackTestSupport.streamSource(AttackTestSupport.BENIGN_SCHEMA))).overrideDefaultParser);
         factory.setFeature(FEATURE, true);
-        assertFalse(((HardeningSchema) factory.newSchema(AttackTestSupport.streamSource(AttackTestSupport.BENIGN_SCHEMA))).useDefaultParser);
+        assertTrue(((HardeningSchema) factory.newSchema(AttackTestSupport.streamSource(AttackTestSupport.BENIGN_SCHEMA))).overrideDefaultParser);
     }
 
     @Test
@@ -90,9 +90,9 @@ class OverrideDefaultParserTest {
         assumeFalse(AttackTestSupport.IS_ANDROID);
         final TransformerFactory factory = HardeningTransformerFactory.newDefaultInstance();
         assertFalse(factory.getFeature(FEATURE));
-        assertTrue(((HardeningTemplates) factory.newTemplates(AttackTestSupport.streamSource(AttackTestSupport.xsltBody("probe")))).useDefaultParser);
+        assertFalse(((HardeningTemplates) factory.newTemplates(AttackTestSupport.streamSource(AttackTestSupport.xsltBody("probe")))).overrideDefaultParser);
         factory.setFeature(FEATURE, true);
-        assertFalse(((HardeningTemplates) factory.newTemplates(AttackTestSupport.streamSource(AttackTestSupport.xsltBody("probe")))).useDefaultParser);
+        assertTrue(((HardeningTemplates) factory.newTemplates(AttackTestSupport.streamSource(AttackTestSupport.xsltBody("probe")))).overrideDefaultParser);
     }
 
     @Test
@@ -123,8 +123,8 @@ class OverrideDefaultParserTest {
         assumeFalse(AttackTestSupport.IS_ANDROID);
         final XPathFactory factory = HardeningXPathFactory.newDefaultInstance();
         assertFalse(factory.getFeature(FEATURE));
-        assertTrue(((HardeningXPath) factory.newXPath()).useDefaultParser);
+        assertFalse(((HardeningXPath) factory.newXPath()).overrideDefaultParser);
         factory.setFeature(FEATURE, true);
-        assertFalse(((HardeningXPath) factory.newXPath()).useDefaultParser);
+        assertTrue(((HardeningXPath) factory.newXPath()).overrideDefaultParser);
     }
 }

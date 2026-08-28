@@ -180,10 +180,10 @@ public final class HardeningSchemaFactory {
          */
         private Source[] harden(final Source[] schemas) throws SAXException {
             final Source[] hardened = new Source[schemas.length];
-            final boolean useDefaultParser = useDefaultParser();
+            final boolean overrideDefaultParser = overrideDefaultParser();
             try {
                 for (int i = 0; i < schemas.length; i++) {
-                    hardened[i] = HardeningSAXParserFactory.harden(schemas[i], useDefaultParser);
+                    hardened[i] = HardeningSAXParserFactory.harden(schemas[i], overrideDefaultParser);
                 }
             } catch (final TransformerConfigurationException e) {
                 throw new SAXException("Failed to harden schema source", e);
@@ -235,7 +235,7 @@ public final class HardeningSchemaFactory {
 
         @Override
         public Schema newSchema() throws SAXException {
-            return new HardeningSchema(delegate.newSchema(), useDefaultParser());
+            return new HardeningSchema(delegate.newSchema(), overrideDefaultParser());
         }
 
         /**
@@ -246,22 +246,22 @@ public final class HardeningSchemaFactory {
          */
         @Override
         public Schema newSchema(final Source[] schemas) throws SAXException {
-            return new HardeningSchema(delegate.newSchema(harden(schemas)), useDefaultParser());
+            return new HardeningSchema(delegate.newSchema(harden(schemas)), overrideDefaultParser());
         }
 
         /**
-         * Checks whether parsers should be instantiated via {@code newDefaultInstance()} instead of {@code newInstance()}.
+         * Checks whether parsers should be instantiated via {@code newInstance()} instead of {@code newDefaultInstance()}.
          *
          * <p>The JDK implementation of {@link SchemaFactory} uses the JDK parsers while {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} is unset or
          * {@code false}.</p>
          *
-         * @return {@code true} if parsers should be created via {@code newDefaultInstance()}.
+         * @return {@code true} if parsers should be created via {@code newInstance()}.
          */
-        private boolean useDefaultParser() {
+        private boolean overrideDefaultParser() {
             try {
-                return !delegate.getFeature(HardeningSAXParserFactory.OVERRIDE_DEFAULT_PARSER);
+                return delegate.getFeature(HardeningSAXParserFactory.OVERRIDE_DEFAULT_PARSER);
             } catch (final SAXNotRecognizedException | SAXNotSupportedException e) {
-                return false;
+                return true;
             }
         }
 

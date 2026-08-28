@@ -56,7 +56,7 @@ final class HardeningXPath implements XPath {
      * engine would have provisioned.
      *
      * @param source           The document to evaluate against.
-     * @param useDefaultParser Whether the document build should pin the platform's built-in parser.
+     * @param overrideDefaultParser Whether the document build should use the pluggable parser lookup instead of the platform's built-in parser.
      * @return The parsed document.
      * @throws NullPointerException     if {@code source} is {@code null}, per the {@link XPath} contract.
      * @throws XPathExpressionException if the source cannot be parsed.
@@ -64,10 +64,10 @@ final class HardeningXPath implements XPath {
      *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      * @throws HardeningException Thrown if a (non-Andoid) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
      */
-    static Document parse(final InputSource source, final boolean useDefaultParser) throws XPathExpressionException {
+    static Document parse(final InputSource source, final boolean overrideDefaultParser) throws XPathExpressionException {
         Objects.requireNonNull(source, "source");
         try {
-            final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newNSInstance(useDefaultParser);
+            final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newNSInstance(overrideDefaultParser);
             return factory.newDocumentBuilder().parse(source);
         } catch (final ParserConfigurationException | SAXException | IOException e) {
             throw new XPathExpressionException(e);
@@ -79,24 +79,24 @@ final class HardeningXPath implements XPath {
     /**
      * Snapshot of the factory's {@code jdk.xml.overrideDefaultParser} outcome at creation, like the JDK copies the feature onto the XPath objects it creates.
      */
-    final boolean useDefaultParser;
+    final boolean overrideDefaultParser;
 
     /**
      * Constructs a new instance.
      *
      * @param delegate         the delegate to wrap; must not be {@code null}.
-     * @param useDefaultParser whether the {@link InputSource} document builds should pin the platform's built-in parser.
+     * @param overrideDefaultParser whether the {@link InputSource} document builds should use the pluggable parser lookup instead of the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningXPath(final XPath delegate, final boolean useDefaultParser) {
+    HardeningXPath(final XPath delegate, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
-        this.useDefaultParser = useDefaultParser;
+        this.overrideDefaultParser = overrideDefaultParser;
     }
 
     @Override
     public XPathExpression compile(final String expression) throws XPathExpressionException {
         final XPathExpression compiled = delegate.compile(expression);
-        return compiled == null ? null : new HardeningXPathExpression(compiled, useDefaultParser);
+        return compiled == null ? null : new HardeningXPathExpression(compiled, overrideDefaultParser);
     }
 
     /**
@@ -107,7 +107,7 @@ final class HardeningXPath implements XPath {
      */
     @Override
     public String evaluate(final String expression, final InputSource source) throws XPathExpressionException {
-        return delegate.evaluate(expression, parse(source, useDefaultParser));
+        return delegate.evaluate(expression, parse(source, overrideDefaultParser));
     }
 
     /**
@@ -118,7 +118,7 @@ final class HardeningXPath implements XPath {
      */
     @Override
     public Object evaluate(final String expression, final InputSource source, final QName returnType) throws XPathExpressionException {
-        return delegate.evaluate(expression, parse(source, useDefaultParser), returnType);
+        return delegate.evaluate(expression, parse(source, overrideDefaultParser), returnType);
     }
 
     @Override

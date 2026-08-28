@@ -55,7 +55,7 @@ final class HardeningTemplates implements Templates {
      * Snapshot of the factory's {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} outcome, carried onto every produced Transformer and self-provisioned
      * filter reader.
      */
-    final boolean useDefaultParser;
+    final boolean overrideDefaultParser;
 
     /**
      * Constructs a new instance.
@@ -63,14 +63,14 @@ final class HardeningTemplates implements Templates {
      * @param delegate         the delegate to wrap; must not be {@code null}.
      * @param uriResolver      the compile-time URIResolver snapshot to restore onto Transformers produced from the compiled Templates; may be {@code null}.
      * @param emptySource      the empty-{@link Source} supplier for the produced Transformers
-     * @param useDefaultParser whether the produced Transformers' source rewrites should pin the platform's built-in parser.
+     * @param overrideDefaultParser whether the produced Transformers' source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningTemplates(final Templates delegate, final URIResolver uriResolver, final Supplier<Source> emptySource, final boolean useDefaultParser) {
+    HardeningTemplates(final Templates delegate, final URIResolver uriResolver, final Supplier<Source> emptySource, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
         this.uriResolver = uriResolver;
         this.emptySource = emptySource;
-        this.useDefaultParser = useDefaultParser;
+        this.overrideDefaultParser = overrideDefaultParser;
     }
 
     /**
@@ -93,6 +93,6 @@ final class HardeningTemplates implements Templates {
         if (transformer == null) {
             return null;
         }
-        return new HardeningTransformer(transformer, uriResolver, emptySource, useDefaultParser);
+        return new HardeningTransformer(transformer, uriResolver, emptySource, overrideDefaultParser);
     }
 }

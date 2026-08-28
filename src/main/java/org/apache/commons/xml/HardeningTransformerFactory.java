@@ -237,7 +237,7 @@ public final class HardeningTransformerFactory {
                 final InputSource inputSource = SAXSource.sourceToInputSource(source);
                 if (inputSource != null) {
                     try {
-                        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newNSInstance(useDefaultParser());
+                        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newNSInstance(overrideDefaultParser());
                         final Document document = factory.newDocumentBuilder().parse(inputSource);
                         return new DOMSource(document, inputSource.getSystemId());
                     } catch (final ParserConfigurationException | SAXException | IOException e) {
@@ -245,7 +245,7 @@ public final class HardeningTransformerFactory {
                     }
                 }
             }
-            return HardeningSAXParserFactory.harden(source, useDefaultParser());
+            return HardeningSAXParserFactory.harden(source, overrideDefaultParser());
         }
 
         /**
@@ -314,7 +314,7 @@ public final class HardeningTransformerFactory {
             this.delegate = Objects.requireNonNull(delegate, "delegate");
             this.emptySource = emptySource;
             this.supportsOverrideDefaultParser = probeOverrideDefaultParser(delegate);
-            this.floor = new FallbackIgnoreURIResolver(null, emptySource, this::useDefaultParser);
+            this.floor = new FallbackIgnoreURIResolver(null, emptySource, this::overrideDefaultParser);
             // Compile-time block for xsl:import/xsl:include and document(); a caller-set resolver is routed through the floor rather than replacing it.
             delegate.setURIResolver(floor);
         }
@@ -329,7 +329,7 @@ public final class HardeningTransformerFactory {
         public Source getAssociatedStylesheet(final Source source, final String media, final String title, final String charset)
                 throws TransformerConfigurationException {
             // Xalan's getAssociatedStylesheet drops a SAXSource's reader and self-provisions its own to scan for xml-stylesheet PIs (XALANJ-2849).
-            final Source hardened = isXalan(delegate) ? hardenSourceToDom(source) : HardeningSAXParserFactory.harden(source, useDefaultParser());
+            final Source hardened = isXalan(delegate) ? hardenSourceToDom(source) : HardeningSAXParserFactory.harden(source, overrideDefaultParser());
             return delegate.getAssociatedStylesheet(hardened, media, title, charset);
         }
 
@@ -354,7 +354,7 @@ public final class HardeningTransformerFactory {
         }
 
         private TransformerHandler hardenHandler(final TransformerHandler handler) {
-            return handler == null ? null : new HardeningTransformerHandler(handler, getURIResolver(), emptySource, useDefaultParser());
+            return handler == null ? null : new HardeningTransformerHandler(handler, getURIResolver(), emptySource, overrideDefaultParser());
         }
 
         /**
@@ -365,21 +365,21 @@ public final class HardeningTransformerFactory {
          */
         @Override
         public Templates newTemplates(final Source source) throws TransformerConfigurationException {
-            final Templates templates = delegate.newTemplates(HardeningSAXParserFactory.harden(source, useDefaultParser()));
-            return templates == null ? null : new HardeningTemplates(templates, getURIResolver(), emptySource, useDefaultParser());
+            final Templates templates = delegate.newTemplates(HardeningSAXParserFactory.harden(source, overrideDefaultParser()));
+            return templates == null ? null : new HardeningTemplates(templates, getURIResolver(), emptySource, overrideDefaultParser());
         }
 
         @Override
         public TemplatesHandler newTemplatesHandler() throws TransformerConfigurationException {
             final TemplatesHandler handler = delegate.newTemplatesHandler();
-            return handler == null ? null : new HardeningTemplatesHandler(handler, getURIResolver(), emptySource, useDefaultParser());
+            return handler == null ? null : new HardeningTemplatesHandler(handler, getURIResolver(), emptySource, overrideDefaultParser());
         }
 
         @Override
         public Transformer newTransformer() throws TransformerConfigurationException {
             // Identity transformer: still parses runtime sources, so wrap it to harden Transformer.transform(Source, Result).
             final Transformer transformer = delegate.newTransformer();
-            return transformer == null ? null : new HardeningTransformer(transformer, getURIResolver(), emptySource, useDefaultParser());
+            return transformer == null ? null : new HardeningTransformer(transformer, getURIResolver(), emptySource, overrideDefaultParser());
         }
 
         /**
@@ -390,8 +390,8 @@ public final class HardeningTransformerFactory {
          */
         @Override
         public Transformer newTransformer(final Source source) throws TransformerConfigurationException {
-            final Transformer transformer = delegate.newTransformer(HardeningSAXParserFactory.harden(source, useDefaultParser()));
-            return transformer == null ? null : new HardeningTransformer(transformer, getURIResolver(), emptySource, useDefaultParser());
+            final Transformer transformer = delegate.newTransformer(HardeningSAXParserFactory.harden(source, overrideDefaultParser()));
+            return transformer == null ? null : new HardeningTransformer(transformer, getURIResolver(), emptySource, overrideDefaultParser());
         }
 
         @Override
@@ -407,7 +407,7 @@ public final class HardeningTransformerFactory {
          */
         @Override
         public TransformerHandler newTransformerHandler(final Source source) throws TransformerConfigurationException {
-            return hardenHandler(delegate.newTransformerHandler(HardeningSAXParserFactory.harden(source, useDefaultParser())));
+            return hardenHandler(delegate.newTransformerHandler(HardeningSAXParserFactory.harden(source, overrideDefaultParser())));
         }
 
         @Override
@@ -431,7 +431,7 @@ public final class HardeningTransformerFactory {
         @Override
         public XMLFilter newXMLFilter(final Templates templates) throws TransformerConfigurationException {
             return new HardeningXMLFilter(templates instanceof HardeningTemplates ? (HardeningTemplates) templates
-                    : new HardeningTemplates(templates, getURIResolver(), emptySource, useDefaultParser()));
+                    : new HardeningTemplates(templates, getURIResolver(), emptySource, overrideDefaultParser()));
         }
 
         @Override
@@ -456,15 +456,15 @@ public final class HardeningTransformerFactory {
         }
 
         /**
-         * Checks whether parsers should be instantiated via {@code newDefaultInstance()} instead of {@code newInstance()}.
+         * Checks whether parsers should be instantiated via {@code newInstance()} instead of {@code newDefaultInstance()}.
          *
          * <p>The JDK implementation of {@link TransformerFactory} uses the JDK parsers while {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} is unset
          * or {@code false}.</p>
          *
-         * @return {@code true} if parsers should be created via {@code newDefaultInstance()}.
+         * @return {@code true} if parsers should be created via {@code newInstance()}.
          */
-        private boolean useDefaultParser() {
-            return supportsOverrideDefaultParser && !delegate.getFeature(HardeningSAXParserFactory.OVERRIDE_DEFAULT_PARSER);
+        private boolean overrideDefaultParser() {
+            return !supportsOverrideDefaultParser || delegate.getFeature(HardeningSAXParserFactory.OVERRIDE_DEFAULT_PARSER);
         }
     }
 }

@@ -41,18 +41,18 @@ final class HardeningXPathExpression implements XPathExpression {
     /**
      * Snapshot of the factory's {@code jdk.xml.overrideDefaultParser} outcome, inherited from the {@link HardeningXPath} that compiled this expression.
      */
-    private final boolean useDefaultParser;
+    private final boolean overrideDefaultParser;
 
     /**
      * Constructs a new instance.
      *
      * @param delegate         the delegate to wrap; must not be {@code null}.
-     * @param useDefaultParser whether the {@link InputSource} document builds should pin the platform's built-in parser.
+     * @param overrideDefaultParser whether the {@link InputSource} document builds should use the pluggable parser lookup instead of the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningXPathExpression(final XPathExpression delegate, final boolean useDefaultParser) {
+    HardeningXPathExpression(final XPathExpression delegate, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
-        this.useDefaultParser = useDefaultParser;
+        this.overrideDefaultParser = overrideDefaultParser;
     }
 
     /**
@@ -63,7 +63,7 @@ final class HardeningXPathExpression implements XPathExpression {
      */
     @Override
     public String evaluate(final InputSource source) throws XPathExpressionException {
-        return delegate.evaluate(HardeningXPath.parse(source, useDefaultParser));
+        return delegate.evaluate(HardeningXPath.parse(source, overrideDefaultParser));
     }
 
     /**
@@ -74,7 +74,7 @@ final class HardeningXPathExpression implements XPathExpression {
      */
     @Override
     public Object evaluate(final InputSource source, final QName returnType) throws XPathExpressionException {
-        return delegate.evaluate(HardeningXPath.parse(source, useDefaultParser), returnType);
+        return delegate.evaluate(HardeningXPath.parse(source, overrideDefaultParser), returnType);
     }
 
     @Override

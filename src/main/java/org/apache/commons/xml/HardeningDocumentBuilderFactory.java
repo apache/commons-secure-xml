@@ -187,19 +187,19 @@ public final class HardeningDocumentBuilderFactory {
     /**
      * Returns the hardened, namespace-aware factory the Source-rewriting wrappers parse with.
      * <p>
-     * With {@code useDefaultParser} the factory is the JDK's "default parser" factory, determined the way the JDK itself determines it: the built-in
+     * While {@code overrideDefaultParser} is {@code false} the factory is the JDK's "default parser" factory, determined the way the JDK itself determines it: the built-in
      * implementation, unless the {@code javax.xml.parsers.DocumentBuilderFactory} system property is set — that property is the JDK's own mechanism for
      * reconfiguring the default parser, so it is honored through the standard lookup rather than bypassed.
      * </p>
      *
-     * @param useDefaultParser whether {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} on the originating factory asks for the JDK's default parser.
+     * @param overrideDefaultParser whether {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
      * @return A hardened, namespace-aware factory.
      * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
      *                                   implementation is not available or cannot be instantiated.
      */
-    static DocumentBuilderFactory newNSInstance(final boolean useDefaultParser) {
-        return useDefaultParser && System.getProperty("javax.xml.parsers.DocumentBuilderFactory") == null ? newDefaultNSInstance() : newNSInstance();
+    static DocumentBuilderFactory newNSInstance(final boolean overrideDefaultParser) {
+        return overrideDefaultParser || System.getProperty("javax.xml.parsers.DocumentBuilderFactory") != null ? newNSInstance() : newDefaultNSInstance();
     }
 
     /**

@@ -226,7 +226,7 @@ public final class HardeningXPathFactory {
         @Override
         public XPath newXPath() {
             final XPath xpath = delegate.newXPath();
-            return xpath == null ? null : new HardeningXPath(xpath, useDefaultParser());
+            return xpath == null ? null : new HardeningXPath(xpath, overrideDefaultParser());
         }
 
         @Override
@@ -235,18 +235,18 @@ public final class HardeningXPathFactory {
         }
 
         /**
-         * Checks whether parsers should be instantiated via {@code newDefaultInstance()} instead of {@code newInstance()}.
+         * Checks whether parsers should be instantiated via {@code newInstance()} instead of {@code newDefaultInstance()}.
          *
          * <p>The JDK implementation of {@link XPathFactory} uses the JDK parsers while {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} is unset or
          * {@code false}.</p>
          *
-         * @return {@code true} if parsers should be created via {@code newDefaultInstance()}.
+         * @return {@code true} if parsers should be created via {@code newInstance()}.
          */
-        private boolean useDefaultParser() {
+        private boolean overrideDefaultParser() {
             try {
-                return !delegate.getFeature(HardeningSAXParserFactory.OVERRIDE_DEFAULT_PARSER);
+                return delegate.getFeature(HardeningSAXParserFactory.OVERRIDE_DEFAULT_PARSER);
             } catch (final XPathFactoryConfigurationException e) {
-                return false;
+                return true;
             }
         }
 

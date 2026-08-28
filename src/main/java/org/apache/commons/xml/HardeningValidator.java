@@ -47,18 +47,18 @@ final class HardeningValidator extends Validator {
      * Snapshot of the factory's {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} outcome at creation, like the JDK copies the feature onto its
      * validators.
      */
-    private final boolean useDefaultParser;
+    private final boolean overrideDefaultParser;
 
     /**
      * Constructs a new instance.
      *
      * @param delegate         the delegate to wrap; must not be {@code null}.
-     * @param useDefaultParser whether the source rewrites should pin the platform's built-in parser.
+     * @param overrideDefaultParser whether the source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningValidator(final Validator delegate, final boolean useDefaultParser) {
+    HardeningValidator(final Validator delegate, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
-        this.useDefaultParser = useDefaultParser;
+        this.overrideDefaultParser = overrideDefaultParser;
         // Block xsi:schemaLocation resolution; neither the JDK nor Xerces reliably propagates the factory's resolver to its Validators. The floor is a
         // non-removable lower bound: a caller opts specific lookups in by setting their own resolver, but cannot drop the ignore-all block.
         delegate.setResourceResolver(floor);
@@ -121,7 +121,7 @@ final class HardeningValidator extends Validator {
     @Override
     public void validate(final Source source, final Result result) throws SAXException, IOException {
         try {
-            delegate.validate(HardeningSAXParserFactory.harden(source, useDefaultParser), result);
+            delegate.validate(HardeningSAXParserFactory.harden(source, overrideDefaultParser), result);
         } catch (final TransformerConfigurationException e) {
             throw new SAXException("Failed to harden source for validation", e);
         }

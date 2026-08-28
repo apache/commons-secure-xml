@@ -36,23 +36,23 @@ final class HardeningSchema extends Schema {
     /**
      * Snapshot of the factory's {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} outcome, carried onto every produced Validator.
      */
-    final boolean useDefaultParser;
+    final boolean overrideDefaultParser;
 
     /**
      * Constructs a new instance.
      *
      * @param delegate         the delegate to wrap; must not be {@code null}.
-     * @param useDefaultParser whether the produced Validators' source rewrites should pin the platform's built-in parser.
+     * @param overrideDefaultParser whether the produced Validators' source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningSchema(final Schema delegate, final boolean useDefaultParser) {
+    HardeningSchema(final Schema delegate, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
-        this.useDefaultParser = useDefaultParser;
+        this.overrideDefaultParser = overrideDefaultParser;
     }
 
     @Override
     public Validator newValidator() {
-        return new HardeningValidator(delegate.newValidator(), useDefaultParser);
+        return new HardeningValidator(delegate.newValidator(), overrideDefaultParser);
     }
 
     @Override

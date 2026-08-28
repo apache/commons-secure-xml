@@ -55,7 +55,7 @@ final class HardeningTransformer extends Transformer {
      * Snapshot of the factory's {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} outcome at creation, like the JDK copies the feature onto the
      * transformers it creates.
      */
-    private final boolean useDefaultParser;
+    private final boolean overrideDefaultParser;
 
     /**
      * Constructs a new instance.
@@ -63,14 +63,14 @@ final class HardeningTransformer extends Transformer {
      * @param delegate         the delegate to wrap; must not be {@code null}.
      * @param uriResolver      the compile-time URIResolver snapshot to seed the floor with; may be {@code null}.
      * @param emptySource      the empty-{@link Source} supplier for the produced Transformers; {@code null} for the default empty DOM document.
-     * @param useDefaultParser whether the source rewrites should pin the platform's built-in parser.
+     * @param overrideDefaultParser whether the source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningTransformer(final Transformer delegate, final URIResolver uriResolver, final Supplier<Source> emptySource, final boolean useDefaultParser) {
+    HardeningTransformer(final Transformer delegate, final URIResolver uriResolver, final Supplier<Source> emptySource, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
         this.uriResolver = uriResolver;
-        this.useDefaultParser = useDefaultParser;
-        this.floor = new FallbackIgnoreURIResolver(uriResolver, emptySource, () -> useDefaultParser);
+        this.overrideDefaultParser = overrideDefaultParser;
+        this.floor = new FallbackIgnoreURIResolver(uriResolver, emptySource, () -> overrideDefaultParser);
         delegate.setURIResolver(floor);
     }
 
@@ -145,7 +145,7 @@ final class HardeningTransformer extends Transformer {
     @Override
     public void transform(final Source xmlSource, final Result outputTarget) throws TransformerException {
         try {
-            delegate.transform(HardeningSAXParserFactory.harden(xmlSource, useDefaultParser), outputTarget);
+            delegate.transform(HardeningSAXParserFactory.harden(xmlSource, overrideDefaultParser), outputTarget);
         } catch (final TransformerConfigurationException e) {
             throw new TransformerException(e);
         }
