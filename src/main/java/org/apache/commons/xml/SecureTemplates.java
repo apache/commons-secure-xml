@@ -28,7 +28,7 @@ import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.URIResolver;
 
 /**
- * {@link Templates} wrapper whose only purpose is to return a {@link HardeningTransformer} from {@link Templates#newTransformer()}, with the factory's
+ * {@link Templates} wrapper whose only purpose is to return a {@link SecureTransformer} from {@link Templates#newTransformer()}, with the factory's
  * compile-time {@link URIResolver} pre-installed.
  * <p>
  * Both Apache Xalan 2.7 and stock-JDK XSLTC fail to propagate the factory's URIResolver through {@code Templates.newTransformer()}: the produced runtime
@@ -93,6 +93,6 @@ final class SecureTemplates implements Templates {
         if (transformer == null) {
             return null;
         }
-        return new HardeningTransformer(transformer, uriResolver, emptySource, overrideDefaultParser);
+        return new SecureTransformer(transformer, uriResolver, emptySource, overrideDefaultParser);
     }
 }

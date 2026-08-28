@@ -35,7 +35,7 @@ import org.xml.sax.SAXException;
  *
  * <p>The handler's input is SAX events the caller drives, so it has no inner source-parsing path of its own. What needs the floor is its transformer: the
  * handler runs the transformation on the object {@link TransformerHandler#getTransformer()} exposes, and not every implementation seeds that transformer with
- * the factory's resolver (the stock JDK's {@code newTransformerHandler(Templates)} does not). Wrapping that transformer in a {@link HardeningTransformer} at
+ * the factory's resolver (the stock JDK's {@code newTransformerHandler(Templates)} does not). Wrapping that transformer in a {@link SecureTransformer} at
  * construction installs the floor on the live instance, so runtime {@code document()} during the handler's transform is covered, and so is a caller who pulls
  * the transformer out through {@code getTransformer()}.</p>
  */
@@ -46,7 +46,7 @@ final class HardeningTransformerHandler implements TransformerHandler {
     /**
      * Wraps the handler's LIVE transformer; constructing it installs the resolver floor that the handler's own transform then runs under.
      */
-    private final HardeningTransformer transformer;
+    private final SecureTransformer transformer;
 
     /**
      * Constructs a new instance.
@@ -60,7 +60,7 @@ final class HardeningTransformerHandler implements TransformerHandler {
     HardeningTransformerHandler(final TransformerHandler delegate, final URIResolver uriResolver, final Supplier<Source> emptySource,
             final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
-        this.transformer = new HardeningTransformer(delegate.getTransformer(), uriResolver, emptySource, overrideDefaultParser);
+        this.transformer = new SecureTransformer(delegate.getTransformer(), uriResolver, emptySource, overrideDefaultParser);
     }
 
     @Override

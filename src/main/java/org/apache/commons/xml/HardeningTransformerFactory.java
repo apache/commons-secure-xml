@@ -195,10 +195,10 @@ public final class HardeningTransformerFactory {
      * <p>Three layers cooperate:</p>
      * <ol>
      *   <li>{@link HardeningTransformerFactory} rewrites the Source on every entry point that compiles a stylesheet or transforms a one-shot input.</li>
-     *   <li>{@link SecureTemplates} returns a {@link HardeningTransformer} from {@link Templates#newTransformer()} so runtime source parsing is also covered, and
+     *   <li>{@link SecureTemplates} returns a {@link SecureTransformer} from {@link Templates#newTransformer()} so runtime source parsing is also covered, and
      *       restores the factory's URIResolver onto the produced Transformer (which the underlying implementation typically does not propagate through
      *       {@code Templates}).</li>
-     *   <li>{@link HardeningTransformer} rewrites the Source on every {@link Transformer#transform(Source, javax.xml.transform.Result)} call.</li>
+     *   <li>{@link SecureTransformer} rewrites the Source on every {@link Transformer#transform(Source, javax.xml.transform.Result)} call.</li>
      * </ol>
      *
      * <p>The {@link SAXTransformerFactory} extension products ride the same wrappers: {@code newTransformerHandler}/{@code newTemplatesHandler} products are
@@ -376,7 +376,7 @@ public final class HardeningTransformerFactory {
         public Transformer newTransformer() throws TransformerConfigurationException {
             // Identity transformer: still parses runtime sources, so wrap it to harden Transformer.transform(Source, Result).
             final Transformer transformer = delegate.newTransformer();
-            return transformer == null ? null : new HardeningTransformer(transformer, getURIResolver(), emptySource, overrideDefaultParser());
+            return transformer == null ? null : new SecureTransformer(transformer, getURIResolver(), emptySource, overrideDefaultParser());
         }
 
         /**
@@ -388,7 +388,7 @@ public final class HardeningTransformerFactory {
         @Override
         public Transformer newTransformer(final Source source) throws TransformerConfigurationException {
             final Transformer transformer = delegate.newTransformer(SecureSAXParserFactory.harden(source, overrideDefaultParser()));
-            return transformer == null ? null : new HardeningTransformer(transformer, getURIResolver(), emptySource, overrideDefaultParser());
+            return transformer == null ? null : new SecureTransformer(transformer, getURIResolver(), emptySource, overrideDefaultParser());
         }
 
         @Override

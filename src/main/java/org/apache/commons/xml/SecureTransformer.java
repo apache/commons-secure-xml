@@ -40,7 +40,7 @@ import javax.xml.transform.URIResolver;
  * the factory's compile-time resolver, matching the just-constructed state.
  * </p>
  */
-final class HardeningTransformer extends Transformer {
+final class SecureTransformer extends Transformer {
 
     private final Transformer delegate;
 
@@ -66,7 +66,7 @@ final class HardeningTransformer extends Transformer {
      * @param overrideDefaultParser whether the source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningTransformer(final Transformer delegate, final URIResolver uriResolver, final Supplier<Source> emptySource, final boolean overrideDefaultParser) {
+    SecureTransformer(final Transformer delegate, final URIResolver uriResolver, final Supplier<Source> emptySource, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
         this.uriResolver = uriResolver;
         this.overrideDefaultParser = overrideDefaultParser;

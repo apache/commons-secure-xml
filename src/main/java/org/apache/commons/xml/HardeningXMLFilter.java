@@ -39,7 +39,7 @@ import org.xml.sax.helpers.XMLFilterImpl;
  * <p>Composed from the library's own wrappers instead of delegating to the implementation's filter, because the implementation filters self-provision an
  * unhardened reader for the input (the stock JDK's does so as early as {@code setContentHandler}) and cast a supplied {@link javax.xml.transform.Templates} to
  * their own type, which a wrapped Templates is not. Here the input is parsed by the parent reader, a hardened one installed on first {@code parse} when the
- * caller has not set a parent (a caller-set parent is trusted configuration, used as-is), and the transformation runs on a {@link HardeningTransformer}, so
+ * caller has not set a parent (a caller-set parent is trusted configuration, used as-is), and the transformation runs on a {@link SecureTransformer}, so
  * runtime {@code document()} sits on the resolver floor.</p>
  */
 final class HardeningXMLFilter extends XMLFilterImpl {
@@ -80,7 +80,7 @@ final class HardeningXMLFilter extends XMLFilterImpl {
             result.setLexicalHandler((LexicalHandler) handler);
         }
         try {
-            // A new HardeningTransformer per parse: the floor is installed on it, and transformers are not reusable across concurrent parses.
+            // A new SecureTransformer per parse: the floor is installed on it, and transformers are not reusable across concurrent parses.
             final Transformer transformer = templates.newTransformer();
             transformer.transform(new SAXSource(getParent(), input), result);
         } catch (final TransformerException e) {

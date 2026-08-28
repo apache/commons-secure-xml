@@ -110,7 +110,7 @@ class ShadingFootprintTest {
             "SecureSAXParserFactory$Wrapper",
             "SecureTemplates",
             "SecureTemplatesHandler",
-            "HardeningTransformer",
+            "SecureTransformer",
             "HardeningTransformerFactory",
             "HardeningTransformerFactory$1",
             "HardeningTransformerFactory$Wrapper",
