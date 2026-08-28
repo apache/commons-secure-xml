@@ -34,7 +34,7 @@ import org.xml.sax.InputSource;
  * overloads as well.
  * </p>
  */
-final class HardeningXPathExpression implements XPathExpression {
+final class SecureXPathExpression implements XPathExpression {
 
     private final XPathExpression delegate;
 
@@ -50,7 +50,7 @@ final class HardeningXPathExpression implements XPathExpression {
      * @param overrideDefaultParser whether the {@link InputSource} document builds should use the pluggable parser lookup instead of the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningXPathExpression(final XPathExpression delegate, final boolean overrideDefaultParser) {
+    SecureXPathExpression(final XPathExpression delegate, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
         this.overrideDefaultParser = overrideDefaultParser;
     }

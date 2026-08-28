@@ -44,7 +44,7 @@ import org.xml.sax.SAXException;
  * stock JDK and Apache Xalan provision an internal parser for that build which {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING} on the
  * {@link javax.xml.xpath.XPathFactory} does not reach. Parsing here puts the build on the library's resolver floor: an external reference inside the document
  * resolves to empty content, so it is neither fetched nor leaked, and the evaluation proceeds on whatever the parse produced. {@link #compile(String)} wraps
- * the compiled expression in a {@link HardeningXPathExpression} on the same terms.</p>
+ * the compiled expression in a {@link SecureXPathExpression} on the same terms.</p>
  *
  * <p>The {@code evaluateExpression} default methods added to the interface by Java 9 route through the {@code evaluate} overloads overridden here, so they
  * carry the same rewrite on newer runtimes even though this class targets Java 8.</p>
@@ -96,7 +96,7 @@ final class SecureXPath implements XPath {
     @Override
     public XPathExpression compile(final String expression) throws XPathExpressionException {
         final XPathExpression compiled = delegate.compile(expression);
-        return compiled == null ? null : new HardeningXPathExpression(compiled, overrideDefaultParser);
+        return compiled == null ? null : new SecureXPathExpression(compiled, overrideDefaultParser);
     }
 
     /**

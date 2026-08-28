@@ -140,7 +140,7 @@ class ShadingFootprintTest {
             "SecureSAXParserFactory$Wrapper",
             "SecureXMLReader",
             "SecureXPath",
-            "HardeningXPathExpression",
+            "SecureXPathExpression",
             "HardeningXPathFactory",
             "HardeningXPathFactory$1",
             "HardeningXPathFactory$Wrapper",
