@@ -24,7 +24,7 @@ import java.lang.invoke.MethodType;
 /**
  * MethodHandle utility.
  */
-class MethodHandleFactory {
+final class MethodHandleFactory {
 
     @FunctionalInterface
     interface ThrowableCallable<V> {
