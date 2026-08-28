@@ -44,7 +44,7 @@ import org.xml.sax.XMLReader;
  * that an external reference is still either blocked at parse or resolved to empty content afterwards; the tests are skipped on platforms whose
  * implementation does not support {@code reset()} at all (there the hardening cannot be stripped in the first place).</p>
  */
-class ResetHardeningTest {
+class ResetSecureTest {
 
     /** systemId of the external general entity the floor must keep covering after a reset (its content carries {@link AttackTestSupport#LEAKED_MARKER}). */
     private static final String UNLISTED = AttackTestSupport.resourceUrl("referenced.xml").toString();
