@@ -353,43 +353,43 @@ class EntityResolverFloorTest {
 
     @Test
     @Tag("trax")
-    void transformerDoesNotLeakUnlisted() {
+    void transformerDoesNotLeakUnlisted() throws Exception {
         final TransformerFactory factory = secureTransformerFactory();
         factory.setURIResolver((href, base) -> null);
         // Deterministic on every implementation: XSLTC and Xalan compile the empty document the URIResolver floor
         // returns, Saxon the EmptySource its Configuration floor returns, so the import contributes nothing.
         final StringWriter sink = new StringWriter();
-        assertDoesNotThrow(() -> factory.newTemplates(AttackTestSupport.resourceSource("with-import.xsl")).newTransformer()
-                .transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink)));
+        factory.newTemplates(AttackTestSupport.resourceSource("with-import.xsl")).newTransformer().transform(AttackTestSupport.streamSource("<root/>"),
+                new StreamResult(sink));
         assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "unlisted stylesheet import leaked");
     }
 
     @Test
     @Tag("trax")
-    void transformerParsesOptedInDocumentSecured() {
+    void transformerParsesOptedInDocumentSecured() throws Exception {
         // Same contract on the runtime document() channel, which reaches a different internal reader than the compile-time import.
         final TransformerFactory factory = secureTransformerFactory();
-        factory.setURIResolver((href, base) ->
-                href != null && href.endsWith("referenced.xml") ? AttackTestSupport.resourceSource("referenced-with-entity.xml") : null);
+        factory.setURIResolver(
+                (href, base) -> href != null && href.endsWith("referenced.xml") ? AttackTestSupport.resourceSource("referenced-with-entity.xml") : null);
         // Same undeclared-entity outcome as the import above: skipped, never expanded.
         final StringWriter sink = new StringWriter();
-        assertDoesNotThrow(() -> factory.newTemplates(AttackTestSupport.resourceSource("with-document.xsl")).newTransformer()
-                .transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink)));
+        factory.newTemplates(AttackTestSupport.resourceSource("with-document.xsl")).newTransformer().transform(AttackTestSupport.streamSource("<root/>"),
+                new StreamResult(sink));
         assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "opted-in document() resource leaked its external entity");
     }
 
     @Test
     @Tag("trax")
-    void transformerParsesOptedInImportSecured() {
+    void transformerParsesOptedInImportSecured() throws Exception {
         // The opted-in module carries an external DTD reference; parsed on the floor the DTD is empty, so its entity cannot expand into the output.
         final TransformerFactory factory = secureTransformerFactory();
-        factory.setURIResolver((href, base) ->
-                href != null && href.endsWith("included.xsl") ? AttackTestSupport.resourceSource("included-with-entity.xsl") : null);
+        factory.setURIResolver(
+                (href, base) -> href != null && href.endsWith("included.xsl") ? AttackTestSupport.resourceSource("included-with-entity.xsl") : null);
         // The emptied DTD leaves the entity undeclared — only a validity violation when an external subset is
         // declared — so every non-validating parser skips it and the transform deterministically completes.
         final StringWriter sink = new StringWriter();
-        assertDoesNotThrow(() -> factory.newTemplates(AttackTestSupport.resourceSource("with-import.xsl")).newTransformer()
-                .transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink)));
+        factory.newTemplates(AttackTestSupport.resourceSource("with-import.xsl")).newTransformer().transform(AttackTestSupport.streamSource("<root/>"),
+                new StreamResult(sink));
         assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "opted-in stylesheet import leaked its external entity");
     }
 
