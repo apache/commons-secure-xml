@@ -32,7 +32,7 @@ import javax.xml.transform.URIResolver;
 
 /**
  * {@link Transformer} wrapper that rewrites the Source on every {@link Transformer#transform(Source, Result)} call through
- * {@link HardeningSAXParserFactory#harden(Source)} before delegating, and keeps an ignore-all {@link URIResolver} floor so runtime {@code document()} calls a
+ * {@link HardeningSAXParserFactory#harden(Source, boolean)} before delegating, and keeps an ignore-all {@link URIResolver} floor so runtime {@code document()} calls a
  * caller does not resolve return empty rather than being fetched.
  * <p>
  * The floor is installed on the delegate transformer at construction, seeded with the factory's compile-time resolver; {@link #setURIResolver(URIResolver)}
@@ -52,17 +52,25 @@ final class HardeningTransformer extends Transformer {
     private final FallbackIgnoreURIResolver floor;
 
     /**
+     * Snapshot of the factory's {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} outcome at creation, like the JDK copies the feature onto the
+     * transformers it creates.
+     */
+    private final boolean overrideDefaultParser;
+
+    /**
      * Constructs a new instance.
      *
-     * @param delegate    the delegate to wrap; must not be {@code null}.
-     * @param uriResolver the compile-time URIResolver snapshot to seed the floor with; may be {@code null}.
-     * @param emptySource the empty-{@link Source} supplier for the produced Transformers; {@code null} for the default empty DOM document.
+     * @param delegate         the delegate to wrap; must not be {@code null}.
+     * @param uriResolver      the compile-time URIResolver snapshot to seed the floor with; may be {@code null}.
+     * @param emptySource      the empty-{@link Source} supplier for the produced Transformers; {@code null} for the default empty DOM document.
+     * @param overrideDefaultParser whether the source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningTransformer(final Transformer delegate, final URIResolver uriResolver, final Supplier<Source> emptySource) {
+    HardeningTransformer(final Transformer delegate, final URIResolver uriResolver, final Supplier<Source> emptySource, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
         this.uriResolver = uriResolver;
-        this.floor = new FallbackIgnoreURIResolver(uriResolver, emptySource);
+        this.overrideDefaultParser = overrideDefaultParser;
+        this.floor = new FallbackIgnoreURIResolver(uriResolver, emptySource, () -> overrideDefaultParser);
         delegate.setURIResolver(floor);
     }
 
@@ -137,7 +145,7 @@ final class HardeningTransformer extends Transformer {
     @Override
     public void transform(final Source xmlSource, final Result outputTarget) throws TransformerException {
         try {
-            delegate.transform(HardeningSAXParserFactory.harden(xmlSource), outputTarget);
+            delegate.transform(HardeningSAXParserFactory.harden(xmlSource, overrideDefaultParser), outputTarget);
         } catch (final TransformerConfigurationException e) {
             throw new TransformerException(e);
         }

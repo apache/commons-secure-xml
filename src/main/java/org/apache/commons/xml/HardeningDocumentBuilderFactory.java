@@ -50,6 +50,8 @@ public final class HardeningDocumentBuilderFactory {
 
     /** Class name of Android's Harmony-based {@link DocumentBuilderFactory}, which exposes no hardening surface. */
     private static final String ANDROID_DOCUMENT_BUILDER_FACTORY = "org.apache.harmony.xml.parsers.DocumentBuilderFactoryImpl";
+    /** System property naming the {@link DocumentBuilderFactory} implementation, the JDK's own mechanism for reconfiguring the default parser. */
+    private static final String DOM_FACTORY_ID = "javax.xml.parsers.DocumentBuilderFactory";
     /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
     private static final String JDK_DOCUMENT_BUILDER_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl";
 
@@ -182,6 +184,24 @@ public final class HardeningDocumentBuilderFactory {
      */
     public static DocumentBuilderFactory newNSInstance() {
         return makeNSAware(newInstance());
+    }
+
+    /**
+     * Returns the hardened, namespace-aware factory the Source-rewriting wrappers parse with.
+     * <p>
+     * While {@code overrideDefaultParser} is {@code false} the factory is the JDK's "default parser" factory, determined the way the JDK itself determines it: the built-in
+     * implementation, unless the {@value #DOM_FACTORY_ID} system property is set — that property is the JDK's own mechanism for
+     * reconfiguring the default parser, so it is honored through the standard lookup rather than bypassed.
+     * </p>
+     *
+     * @param overrideDefaultParser whether {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
+     * @return A hardened, namespace-aware factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
+     *                                   implementation is not available or cannot be instantiated.
+     */
+    static DocumentBuilderFactory newNSInstance(final boolean overrideDefaultParser) {
+        return overrideDefaultParser || System.getProperty(DOM_FACTORY_ID) != null ? newNSInstance() : newDefaultNSInstance();
     }
 
     /**

@@ -146,8 +146,10 @@ limitations under the License.
     </pluginManagement>
     <plugins>
       <!--
-        Run the test suite seven times, each with a distinct JAXP combination:
+        Run the test suite eight times, each with a distinct JAXP combination:
 
+          - test-jdk-xerces:    stock JDK TrAX and XPath over Apache Xerces SAX/DOM
+                                (the only cell where jdk.xml.overrideDefaultParser decides which parser rewrites sources)
           - test-saxon:         Saxon-HE (TrAX, XPath) over stock JDK SAX
           - test-saxon-xerces:  Saxon-HE (TrAX, XPath) over stock JDK SAX or Apache Xerces SAX
                                 (Saxon prefers the JDK SAX provider but may resolve to Xerces)
@@ -310,6 +312,30 @@ limitations under the License.
               <reportsDirectory>${project.build.directory}/surefire-reports/xerces</reportsDirectory>
               <!-- Xerces only contributes DOM/SAX/Schema; the rest is JDK-bundled and already covered by test-stockjdk. -->
               <groups>dom,sax,schema</groups>
+              <additionalClasspathDependencies>
+                <dependency>
+                  <groupId>xerces</groupId>
+                  <artifactId>xercesImpl</artifactId>
+                  <version>${commons.xerces.version}</version>
+                </dependency>
+              </additionalClasspathDependencies>
+              <classpathDependencyExcludes>
+                <exclude>net.sf.saxon:Saxon-HE</exclude>
+              </classpathDependencyExcludes>
+            </configuration>
+          </execution>
+          <execution>
+            <id>test-jdk-xerces</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <reportsDirectory>${project.build.directory}/surefire-reports/jdk-xerces</reportsDirectory>
+              <!-- The only cell pairing the JDK TrAX and XPath implementations with a third-party ServiceLoader parser: Xerces resolves the
+                   SAXParserFactory/DocumentBuilderFactory lookups (and the SchemaFactory one, which is why the schema-group FODP tests pin the JDK
+                   implementation via newDefaultInstance), so jdk.xml.overrideDefaultParser genuinely decides which parser performs the hardened
+                   source rewrites. -->
+              <groups>trax,xpath,schema</groups>
               <additionalClasspathDependencies>
                 <dependency>
                   <groupId>xerces</groupId>
@@ -546,6 +572,10 @@ limitations under the License.
               </execution>
               <execution>
                 <id>test-xerces</id>
+                <phase>none</phase>
+              </execution>
+              <execution>
+                <id>test-jdk-xerces</id>
                 <phase>none</phase>
               </execution>
             </executions>

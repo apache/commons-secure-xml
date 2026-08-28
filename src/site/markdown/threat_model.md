@@ -161,7 +161,6 @@ produces, breaks the hardening for that instance.
 - `http://xml.org/sax/features/external-parameter-entities`
 - `javax.xml.stream.isSupportingExternalEntities`
 - `javax.xml.stream.supportDTD`
-- `jdk.xml.overrideDefaultParser`
 - the implementation's secure-processing limits (entity expansion, element depth, attribute count, and similar)
 
 This list is not exhaustive:
@@ -218,6 +217,13 @@ enforced by the reserved settings above, which a caller cannot lift.
   - `http://apache.org/xml/features/xinclude`.
 
   As in the previous case, you need to provide a secure resolver.
+
+- **Internal parser selection.**
+  On the stock JDK TrAX, XPath, and schema implementations
+  you may set [`jdk.xml.overrideDefaultParser`](https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/module-summary.html#jdk.xml.overrideDefaultParser)
+  to switch their internal parses from the JDK parsers to a `ServiceLoader`-resolved parser.
+  Whichever parser is selected, it is hardened,
+  so the setting carries no security weight.
 
 ### What is out of scope
 

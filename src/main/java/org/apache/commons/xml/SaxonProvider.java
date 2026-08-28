@@ -111,7 +111,7 @@ final class SaxonProvider {
         private static XPathFactory configure(final XPathFactory factory) {
             final HardenedConfiguration config = new HardenedConfiguration();
             // XPath has no factory wrapper, so the ignore-all floor lives on the Configuration; reuse FallbackIgnoreURIResolver, adapted to a ResourceResolver.
-            config.setResourceResolver(new ResourceResolverWrappingURIResolver(new FallbackIgnoreURIResolver(null, emptySourceSupplier())));
+            config.setResourceResolver(new ResourceResolverWrappingURIResolver(new FallbackIgnoreURIResolver(null, emptySourceSupplier(), () -> false)));
             ((XPathFactoryImpl) factory).setConfiguration(config);
             return factory;
         }

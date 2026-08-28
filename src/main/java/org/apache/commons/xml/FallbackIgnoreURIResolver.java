@@ -17,6 +17,7 @@
 
 package org.apache.commons.xml;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -86,14 +87,22 @@ final class FallbackIgnoreURIResolver implements URIResolver {
     private final Supplier<Source> emptySource;
 
     /**
+     * Whether the opted-in rewrite should use the pluggable parser lookup instead of the platform's built-in parser; read per resolution so the factory-level floor tracks a later
+     * {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} toggle.
+     */
+    private final BooleanSupplier overrideDefaultParser;
+
+    /**
      * Constructs a new resolver.
      *
-     * @param delegate    the resolver to delegate resolution to; may be {@code null}.
-     * @param emptySource the empty-{@link Source} supplier for the ignore outcome, or {@code null} for the default empty DOM document.
+     * @param delegate         the resolver to delegate resolution to; may be {@code null}.
+     * @param emptySource      the empty-{@link Source} supplier for the ignore outcome, or {@code null} for the default empty DOM document.
+     * @param overrideDefaultParser whether the opted-in rewrite should use the pluggable parser lookup instead of the platform's built-in parser, read at each resolution.
      */
-    FallbackIgnoreURIResolver(final URIResolver delegate, final Supplier<Source> emptySource) {
+    FallbackIgnoreURIResolver(final URIResolver delegate, final Supplier<Source> emptySource, final BooleanSupplier overrideDefaultParser) {
         this.delegate = delegate;
         this.emptySource = emptySource != null ? emptySource : () -> new DOMSource(EMPTY_DOCUMENT);
+        this.overrideDefaultParser = overrideDefaultParser;
     }
 
     /**
@@ -116,7 +125,7 @@ final class FallbackIgnoreURIResolver implements URIResolver {
         final Source resolved = delegate != null ? delegate.resolve(href, base) : null;
         if (resolved != null) {
             // The implementation parses the opted-in handle with an internal reader at its own defaults; the rewrite hands it a hardened reader instead.
-            return HardeningSAXParserFactory.harden(resolved);
+            return HardeningSAXParserFactory.harden(resolved, overrideDefaultParser.getAsBoolean());
         }
         if (HardeningException.throwOnUnresolved()) {
             throw new TransformerException(HardeningException.forbidden("uri", null, null, href, base));

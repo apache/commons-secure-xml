@@ -52,17 +52,25 @@ final class HardeningTemplatesHandler implements TemplatesHandler {
     private final Supplier<Source> emptySource;
 
     /**
+     * Snapshot of the factory's {@value HardeningSAXParserFactory#OVERRIDE_DEFAULT_PARSER} outcome, carried onto the produced Templates.
+     */
+    private final boolean overrideDefaultParser;
+
+    /**
      * Constructs a new instance.
      *
      * @param delegate the delegate to wrap; must not be {@code null}.
      * @param uriResolver the compile-time URIResolver snapshot to restore onto Transformers produced from the compiled Templates; may be {@code null}.
      * @param emptySource the empty-{@link Source} supplier for the produced Templates; may be {@code null} for the default empty DOM document.
+     * @param overrideDefaultParser whether the produced Templates' source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningTemplatesHandler(final TemplatesHandler delegate, final URIResolver uriResolver, final Supplier<Source> emptySource) {
+    HardeningTemplatesHandler(final TemplatesHandler delegate, final URIResolver uriResolver, final Supplier<Source> emptySource,
+            final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
         this.uriResolver = uriResolver;
         this.emptySource = emptySource;
+        this.overrideDefaultParser = overrideDefaultParser;
     }
 
     @Override
@@ -94,7 +102,7 @@ final class HardeningTemplatesHandler implements TemplatesHandler {
     public Templates getTemplates() {
         // Null before the stylesheet's endDocument (and on a failed compile in some implementations).
         final Templates templates = delegate.getTemplates();
-        return templates == null ? null : new HardeningTemplates(templates, uriResolver, emptySource);
+        return templates == null ? null : new HardeningTemplates(templates, uriResolver, emptySource, overrideDefaultParser);
     }
 
     @Override

@@ -63,6 +63,15 @@ public final class HardeningSAXParserFactory {
     /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
     private static final String JDK_SAX_PARSER_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl";
 
+    /**
+     * The JDK feature governing whether an implementation's internal parser lookup may resolve a third-party parser. The hardening wrappers parse every source
+     * themselves, so instead of configuring the implementation the TrAX, XPath and schema wrappers read this feature and pick the rewrite parser accordingly.
+     */
+    static final String OVERRIDE_DEFAULT_PARSER = "jdk.xml.overrideDefaultParser";
+
+    /** System property naming the {@link SAXParserFactory} implementation, the JDK's own mechanism for reconfiguring the default parser. */
+    private static final String SAX_FACTORY_ID = "javax.xml.parsers.SAXParserFactory";
+
     private static final MethodHandle NEW_DEFAULT_INSTANCE = MethodHandleFactory.findStatic(SAXParserFactory.class, "newDefaultInstance",
             MethodType.methodType(SAXParserFactory.class));
 
@@ -105,16 +114,17 @@ public final class HardeningSAXParserFactory {
      * as-is. Used by the TrAX and schema wrappers to route every source they parse through the SAX hardening path.
      * </p>
      *
-     * @param source the source to harden; never {@code null}.
+     * @param source           the source to harden; never {@code null}.
+     * @param overrideDefaultParser whether {@value #OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
      * @return a hardened source.
      * @throws TransformerConfigurationException if a hardened reader cannot be obtained.
      * @throws FactoryConfigurationError         Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
      *                                           configuration error} or if the implementation is not available or cannot be instantiated.
      */
-    static Source harden(final Source source) throws TransformerConfigurationException {
+    static Source harden(final Source source, final boolean overrideDefaultParser) throws TransformerConfigurationException {
         if (source instanceof StreamSource || source instanceof SAXSource && ((SAXSource) source).getXMLReader() == null) {
             final InputSource inputSource = SAXSource.sourceToInputSource(source);
-            return inputSource == null ? source : new SAXSource(newHardenedReader(), inputSource);
+            return inputSource == null ? source : new SAXSource(newHardenedReader(overrideDefaultParser), inputSource);
         }
         return source;
     }
@@ -200,16 +210,18 @@ public final class HardeningSAXParserFactory {
     }
 
     /**
-     * Creates a new hardened, namespace-aware {@link XMLReader} for the TrAX wrappers to parse sources with.
+     * Creates a new hardened, namespace-aware {@link XMLReader} for the TrAX, XPath and schema wrappers to parse sources with, from the factory
+     * {@link #newNSInstance(boolean)} selects.
      *
+     * @param overrideDefaultParser whether {@value #OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
      * @return a hardened reader.
      * @throws TransformerConfigurationException if a hardened reader cannot be obtained.
      * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
      *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      */
-    static XMLReader newHardenedReader() throws TransformerConfigurationException {
+    static XMLReader newHardenedReader(final boolean overrideDefaultParser) throws TransformerConfigurationException {
         try {
-            return newNSInstance().newSAXParser().getXMLReader();
+            return newNSInstance(overrideDefaultParser).newSAXParser().getXMLReader();
         } catch (final ParserConfigurationException | SAXException e) {
             throw new TransformerConfigurationException("Failed to obtain a hardened XMLReader for source parsing", e);
         }
@@ -251,6 +263,24 @@ public final class HardeningSAXParserFactory {
      */
     public static SAXParserFactory newNSInstance() {
         return makeNSAware(newInstance());
+    }
+
+    /**
+     * Returns the hardened, namespace-aware factory the Source-rewriting wrappers parse with.
+     * <p>
+     * While {@code overrideDefaultParser} is {@code false} the factory is the JDK's "default parser" factory, determined the way the JDK itself determines it: the built-in parser,
+     * unless the {@value #SAX_FACTORY_ID} system property is set — that property is the JDK's own mechanism for reconfiguring the default
+     * parser, so it is honored through the standard lookup rather than bypassed.
+     * </p>
+     *
+     * @param overrideDefaultParser whether {@value #OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
+     * @return A hardened, namespace-aware factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
+     *                                   implementation is not available or cannot be instantiated.
+     */
+    static SAXParserFactory newNSInstance(final boolean overrideDefaultParser) {
+        return overrideDefaultParser || System.getProperty(SAX_FACTORY_ID) != null ? newNSInstance() : newDefaultNSInstance();
     }
 
     /**

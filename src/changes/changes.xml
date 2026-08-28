@@ -43,6 +43,7 @@ The <action> type attribute can be add, update, fix, or remove.
       <action type="add" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Mirror on each factory class every JAXP static factory method, including the Java 9 newDefaultInstance and Java 13 newNSInstance families, all usable on Java 8.</action>
       <!-- FIX -->
       <action type="fix" dev="ppkarwasz" due-to="Ta Duc Thien, Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-10">Block XInclude (xi:include) href resolution by default, since the JAXP external-access properties do not govern it.</action>
+      <action type="fix" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Honor jdk.xml.overrideDefaultParser on TrAX, XPath and schema factories that recognize it.</action>
       <action type="fix" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Restore the hardened configuration when a factory or parser is reset() instead of reverting to the implementation defaults.</action>
       <action type="fix" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Parse a Source opted in by a caller-supplied URIResolver using a hardened parser.</action>
       <action type="fix" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Harden the document parse behind the InputSource-taking XPath evaluation entry points.</action>
