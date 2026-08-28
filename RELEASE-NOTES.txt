@@ -20,7 +20,7 @@ Apache Commons Secure XML 1.0.0 Release Notes
 The Apache Commons Secure XML team is pleased to announce the release of Apache Commons Secure XML 1.0.0.
 
 Apache Commons Secure XML provides secure-by-default JAXP factory creation, abstracting over
-implementation-specific XXE hardening differences between the stock JDK and external JAXP implementations
+implementation-specific XXE securing differences between the stock JDK and external JAXP implementations
 (Android, Apache Xalan, Apache Xerces, Woodstox, Saxon-HE).
 
 First release, requires Java 8 or above.
@@ -40,8 +40,8 @@ Fixed Bugs
 ----------
 
 * COMMONSXML-10:   Block XInclude (xi:include) href resolution by default, since the JAXP external-access properties do not govern it. Thanks to Ta Duc Thien, Piotr P. Karwasz, Gary Gregory.
-*                  Restore the hardened configuration when a factory or parser is reset() instead of reverting to the implementation defaults. Thanks to Piotr P. Karwasz, Gary Gregory.
-*                  Parse a Source opted in by a caller-supplied URIResolver using a hardened parser. Thanks to Piotr P. Karwasz, Gary Gregory.
+*                  Restore the secured configuration when a factory or parser is reset() instead of reverting to the implementation defaults. Thanks to Piotr P. Karwasz, Gary Gregory.
+*                  Parse a Source opted in by a caller-supplied URIResolver using a secured parser. Thanks to Piotr P. Karwasz, Gary Gregory.
 *                  Secure the document parse behind the InputSource-taking XPath evaluation entry points. Thanks to Piotr P. Karwasz, Gary Gregory.
 
 Changes
