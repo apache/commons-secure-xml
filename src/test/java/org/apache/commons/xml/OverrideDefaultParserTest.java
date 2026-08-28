@@ -90,9 +90,9 @@ class OverrideDefaultParserTest {
         assumeFalse(AttackTestSupport.IS_ANDROID);
         final TransformerFactory factory = HardeningTransformerFactory.newDefaultInstance();
         assertFalse(factory.getFeature(FEATURE));
-        assertFalse(((HardeningTemplates) factory.newTemplates(AttackTestSupport.streamSource(AttackTestSupport.xsltBody("probe")))).overrideDefaultParser);
+        assertFalse(((SecureTemplates) factory.newTemplates(AttackTestSupport.streamSource(AttackTestSupport.xsltBody("probe")))).overrideDefaultParser);
         factory.setFeature(FEATURE, true);
-        assertTrue(((HardeningTemplates) factory.newTemplates(AttackTestSupport.streamSource(AttackTestSupport.xsltBody("probe")))).overrideDefaultParser);
+        assertTrue(((SecureTemplates) factory.newTemplates(AttackTestSupport.streamSource(AttackTestSupport.xsltBody("probe")))).overrideDefaultParser);
     }
 
     @Test

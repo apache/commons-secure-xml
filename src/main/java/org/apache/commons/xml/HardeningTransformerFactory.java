@@ -195,7 +195,7 @@ public final class HardeningTransformerFactory {
      * <p>Three layers cooperate:</p>
      * <ol>
      *   <li>{@link HardeningTransformerFactory} rewrites the Source on every entry point that compiles a stylesheet or transforms a one-shot input.</li>
-     *   <li>{@link HardeningTemplates} returns a {@link HardeningTransformer} from {@link Templates#newTransformer()} so runtime source parsing is also covered, and
+     *   <li>{@link SecureTemplates} returns a {@link HardeningTransformer} from {@link Templates#newTransformer()} so runtime source parsing is also covered, and
      *       restores the factory's URIResolver onto the produced Transformer (which the underlying implementation typically does not propagate through
      *       {@code Templates}).</li>
      *   <li>{@link HardeningTransformer} rewrites the Source on every {@link Transformer#transform(Source, javax.xml.transform.Result)} call.</li>
@@ -274,7 +274,7 @@ public final class HardeningTransformerFactory {
         }
 
         private static Templates unwrap(final Templates templates) {
-            return templates instanceof HardeningTemplates ? ((HardeningTemplates) templates).getDelegate() : templates;
+            return templates instanceof SecureTemplates ? ((SecureTemplates) templates).getDelegate() : templates;
         }
 
         private final SAXTransformerFactory delegate;
@@ -363,7 +363,7 @@ public final class HardeningTransformerFactory {
         @Override
         public Templates newTemplates(final Source source) throws TransformerConfigurationException {
             final Templates templates = delegate.newTemplates(SecureSAXParserFactory.harden(source, overrideDefaultParser()));
-            return templates == null ? null : new HardeningTemplates(templates, getURIResolver(), emptySource, overrideDefaultParser());
+            return templates == null ? null : new SecureTemplates(templates, getURIResolver(), emptySource, overrideDefaultParser());
         }
 
         @Override
@@ -422,13 +422,13 @@ public final class HardeningTransformerFactory {
         @Override
         public XMLFilter newXMLFilter(final Source source) throws TransformerConfigurationException {
             final Templates templates = newTemplates(source);
-            return templates == null ? null : new HardeningXMLFilter((HardeningTemplates) templates);
+            return templates == null ? null : new HardeningXMLFilter((SecureTemplates) templates);
         }
 
         @Override
         public XMLFilter newXMLFilter(final Templates templates) throws TransformerConfigurationException {
-            return new HardeningXMLFilter(templates instanceof HardeningTemplates ? (HardeningTemplates) templates
-                    : new HardeningTemplates(templates, getURIResolver(), emptySource, overrideDefaultParser()));
+            return new HardeningXMLFilter(templates instanceof SecureTemplates ? (SecureTemplates) templates
+                    : new SecureTemplates(templates, getURIResolver(), emptySource, overrideDefaultParser()));
         }
 
         @Override

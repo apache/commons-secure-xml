@@ -37,7 +37,7 @@ import javax.xml.transform.URIResolver;
  * factory ultimately produces.
  * </p>
  */
-final class HardeningTemplates implements Templates {
+final class SecureTemplates implements Templates {
 
     private final Templates delegate;
 
@@ -66,7 +66,7 @@ final class HardeningTemplates implements Templates {
      * @param overrideDefaultParser whether the produced Transformers' source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningTemplates(final Templates delegate, final URIResolver uriResolver, final Supplier<Source> emptySource, final boolean overrideDefaultParser) {
+    SecureTemplates(final Templates delegate, final URIResolver uriResolver, final Supplier<Source> emptySource, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
         this.uriResolver = uriResolver;
         this.emptySource = emptySource;

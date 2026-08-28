@@ -30,7 +30,7 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 
 /**
- * {@link TemplatesHandler} wrapper whose only purpose is to return a {@link HardeningTemplates} from {@link TemplatesHandler#getTemplates()}.
+ * {@link TemplatesHandler} wrapper whose only purpose is to return a {@link SecureTemplates} from {@link TemplatesHandler#getTemplates()}.
  *
  * <p>The handler itself only compiles: the caller drives the stylesheet's SAX events, and {@code xsl:include}/{@code xsl:import} hrefs already resolve through
  * the delegate factory's resolver, which is the hardening floor. What the raw handler lacks is the runtime side: the {@link Templates} it compiles produce
@@ -102,7 +102,7 @@ final class HardeningTemplatesHandler implements TemplatesHandler {
     public Templates getTemplates() {
         // Null before the stylesheet's endDocument (and on a failed compile in some implementations).
         final Templates templates = delegate.getTemplates();
-        return templates == null ? null : new HardeningTemplates(templates, uriResolver, emptySource, overrideDefaultParser);
+        return templates == null ? null : new SecureTemplates(templates, uriResolver, emptySource, overrideDefaultParser);
     }
 
     @Override

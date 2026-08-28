@@ -34,7 +34,7 @@ import org.xml.sax.ext.LexicalHandler;
 import org.xml.sax.helpers.XMLFilterImpl;
 
 /**
- * {@link XMLFilter} that transforms the parsed input through a {@link HardeningTemplates} and emits the result as SAX events.
+ * {@link XMLFilter} that transforms the parsed input through a {@link SecureTemplates} and emits the result as SAX events.
  *
  * <p>Composed from the library's own wrappers instead of delegating to the implementation's filter, because the implementation filters self-provision an
  * unhardened reader for the input (the stock JDK's does so as early as {@code setContentHandler}) and cast a supplied {@link javax.xml.transform.Templates} to
@@ -44,7 +44,7 @@ import org.xml.sax.helpers.XMLFilterImpl;
  */
 final class HardeningXMLFilter extends XMLFilterImpl {
 
-    private final HardeningTemplates templates;
+    private final SecureTemplates templates;
 
     /**
      * Constructs a new instance.
@@ -52,7 +52,7 @@ final class HardeningXMLFilter extends XMLFilterImpl {
      * @param templates the delegate to wrap; must not be {@code null}.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningXMLFilter(final HardeningTemplates templates) {
+    HardeningXMLFilter(final SecureTemplates templates) {
         this.templates = Objects.requireNonNull(templates, "templates");
     }
 
