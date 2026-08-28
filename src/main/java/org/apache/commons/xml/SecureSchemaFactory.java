@@ -61,7 +61,7 @@ public final class SecureSchemaFactory {
     /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
     private static final String JDK_SCHEMA_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory";
 
-    private static final MethodHandle NEW_DEFAULT_INSTANCE = MethodHandleFactory.findStatic(SchemaFactory.class, "newDefaultInstance",
+    private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(SchemaFactory.class, "newDefaultInstance",
             MethodType.methodType(SchemaFactory.class));
 
     /**
@@ -92,10 +92,10 @@ public final class SecureSchemaFactory {
      *                                 (for example Android).
      */
     public static SchemaFactory newDefaultInstance() {
-        if (NEW_DEFAULT_INSTANCE != null) {
+        if (MH_newDefaultInstance != null) {
             final SchemaFactory factory;
             try {
-                factory = (SchemaFactory) NEW_DEFAULT_INSTANCE.invokeExact();
+                factory = (SchemaFactory) MH_newDefaultInstance.invokeExact();
             } catch (final SchemaFactoryConfigurationError e) {
                 throw e;
             } catch (final Throwable e) {
