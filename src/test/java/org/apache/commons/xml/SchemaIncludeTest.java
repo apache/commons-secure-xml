@@ -30,7 +30,7 @@ class SchemaIncludeTest {
     private static final String RESOURCE = "with-include.xsd";
 
     @Test
-    void hardenedSchemaBlocks() {
+    void secureSchemaBlocks() {
         AttackTestSupport.assertSchemaBlocks(AttackTestSupport.resourceSource(RESOURCE));
     }
 

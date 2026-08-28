@@ -180,7 +180,7 @@ class XIncludeTest {
 
     @Test
     @Tag("dom")
-    void hardenedDomBlocksParseText() throws Exception {
+    void secureDomBlocksParseText() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_TEXT, "text"));
 
         final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
@@ -194,7 +194,7 @@ class XIncludeTest {
 
     @Test
     @Tag("dom")
-    void hardenedDomBlocksParseXml() throws Exception {
+    void secureDomBlocksParseXml() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_XML, "xml"));
 
         final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
@@ -208,7 +208,7 @@ class XIncludeTest {
 
     @Test
     @Tag("dom")
-    void hardenedDomNullResolverDoesNotLeak() throws Exception {
+    void secureDomNullResolverDoesNotLeak() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_XML, "xml"));
 
         final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
@@ -222,7 +222,7 @@ class XIncludeTest {
 
     @Test
     @Tag("dom")
-    void hardenedDomWithAllowListResolvesParseText() throws Exception {
+    void secureDomWithAllowListResolvesParseText() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_TEXT, "text"));
 
         final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
@@ -237,7 +237,7 @@ class XIncludeTest {
 
     @Test
     @Tag("dom")
-    void hardenedDomWithAllowListResolvesParseXml() throws Exception {
+    void secureDomWithAllowListResolvesParseXml() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_XML, "xml"));
 
         final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
@@ -252,7 +252,7 @@ class XIncludeTest {
 
     @Test
     @Tag("sax")
-    void hardenedSaxBlocksParseText() throws Exception {
+    void secureSaxBlocksParseText() throws Exception {
         final String input = xiIncludeXml(REFERENCED_TEXT, "text");
 
         final SAXParserFactory factory = SecureSAXParserFactory.newInstance();
@@ -265,7 +265,7 @@ class XIncludeTest {
 
     @Test
     @Tag("sax")
-    void hardenedSaxBlocksParseXml() throws Exception {
+    void secureSaxBlocksParseXml() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_XML, "xml"));
 
         final SAXParserFactory factory = SecureSAXParserFactory.newInstance();
@@ -279,7 +279,7 @@ class XIncludeTest {
 
     @Test
     @Tag("sax")
-    void hardenedSaxNullResolverDoesNotLeak() throws Exception {
+    void secureSaxNullResolverDoesNotLeak() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_XML, "xml"));
 
         final SAXParserFactory factory = SecureSAXParserFactory.newInstance();
@@ -293,7 +293,7 @@ class XIncludeTest {
 
     @Test
     @Tag("sax")
-    void hardenedSaxWithAllowListResolvesParseText() throws Exception {
+    void secureSaxWithAllowListResolvesParseText() throws Exception {
         final String input = xiIncludeXml(REFERENCED_TEXT, "text");
 
         final SAXParserFactory factory = SecureSAXParserFactory.newInstance();
@@ -308,7 +308,7 @@ class XIncludeTest {
 
     @Test
     @Tag("sax")
-    void hardenedSaxWithAllowListResolvesParseXml() throws Exception {
+    void secureSaxWithAllowListResolvesParseXml() throws Exception {
         final String input = xiIncludeXml(REFERENCED_XML, "xml");
 
         final SAXParserFactory factory = SecureSAXParserFactory.newInstance();

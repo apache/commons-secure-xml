@@ -116,17 +116,17 @@ class SaxonXPathExternalCallsTest {
     }
 
     @Test
-    void hardenedXPathBlocksDoc() {
+    void secureXPathBlocksDoc() {
         assertCallExcludesMarker(hardenedSaxonXPathFactory(), docExpression());
     }
 
     @Test
-    void hardenedXPathBlocksJsonDoc() {
+    void secureXPathBlocksJsonDoc() {
         assertCallExcludesMarker(hardenedSaxonXPathFactory(), jsonDocExpression());
     }
 
     @Test
-    void hardenedXPathBlocksUnparsedText() {
+    void secureXPathBlocksUnparsedText() {
         assertCallExcludesMarker(hardenedSaxonXPathFactory(), unparsedTextExpression());
     }
 

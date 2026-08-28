@@ -98,7 +98,7 @@ class SchemaLocationSaxTest {
     }
 
     @Test
-    void hardenedDoesNotFetchExternalSchema() throws Exception {
+    void secureDoesNotFetchExternalSchema() throws Exception {
         assumeTrue(supportsSchemaLanguage(), "parser does not support JAXP 1.2 schema-language XSD validation");
         final SAXParser parser = newValidatingParser(SecureSAXParserFactory.newInstance());
         // The schemaLocation reference resolves to empty rather than being fetched. Either the empty schema fails the validating parse (acceptable), or the

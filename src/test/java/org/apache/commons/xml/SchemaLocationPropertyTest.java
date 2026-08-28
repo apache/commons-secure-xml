@@ -138,25 +138,25 @@ class SchemaLocationPropertyTest {
     }
 
     @Test
-    void hardenedDomRefusesNoNamespaceSchemaLocation() {
+    void secureDomRefusesNoNamespaceSchemaLocation() {
         final DocumentBuilder builder = hardenedValidatingDom(EXTERNAL_NO_NS, noNamespaceLocation());
         assertParseFails(() -> builder.parse(inputSource(NO_NS_INSTANCE)), "DOM external-noNamespaceSchemaLocation", SAXException.class);
     }
 
     @Test
-    void hardenedDomRefusesSchemaLocation() {
+    void secureDomRefusesSchemaLocation() {
         final DocumentBuilder builder = hardenedValidatingDom(EXTERNAL_SCHEMA_LOCATION, namespacedLocation());
         assertParseFails(() -> builder.parse(inputSource(NAMESPACED_INSTANCE)), "DOM external-schemaLocation", SAXException.class);
     }
 
     @Test
-    void hardenedSaxRefusesNoNamespaceSchemaLocation() {
+    void secureSaxRefusesNoNamespaceSchemaLocation() {
         final XMLReader reader = hardenedValidatingSax(EXTERNAL_NO_NS, noNamespaceLocation());
         assertParseFails(() -> reader.parse(inputSource(NO_NS_INSTANCE)), "SAX external-noNamespaceSchemaLocation", SAXException.class);
     }
 
     @Test
-    void hardenedSaxRefusesSchemaLocation() {
+    void secureSaxRefusesSchemaLocation() {
         final XMLReader reader = hardenedValidatingSax(EXTERNAL_SCHEMA_LOCATION, namespacedLocation());
         assertParseFails(() -> reader.parse(inputSource(NAMESPACED_INSTANCE)), "SAX external-schemaLocation", SAXException.class);
     }

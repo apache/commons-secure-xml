@@ -56,7 +56,7 @@ class AssociatedStylesheetTest {
     }
 
     @Test
-    void hardenedGetAssociatedStylesheetIgnoresExternalDtd() throws TransformerConfigurationException {
+    void secureGetAssociatedStylesheetIgnoresExternalDtd() throws TransformerConfigurationException {
         // The prolog declares an unreachable external DTD; the secure parse resolves it to empty rather than fetching it, so the PI scan completes and finds
         // the stylesheet instead of throwing on a fetch. (The returned Source's shape is engine-specific: XSLTC and Xalan point it at included.xsl, while Saxon
         // resolves the href through its own floor and returns an empty source; both mean the scan ran without fetching the DTD.)
@@ -66,7 +66,7 @@ class AssociatedStylesheetTest {
     }
 
     @Test
-    void hardenedGetAssociatedStylesheetReturnsStylesheet() throws TransformerConfigurationException {
+    void secureGetAssociatedStylesheetReturnsStylesheet() throws TransformerConfigurationException {
         // Positive control: a plain document with no DOCTYPE resolves its xml-stylesheet PI end to end.
         final Source associated = hardenedFactory()
                 .getAssociatedStylesheet(AttackTestSupport.resourceSource("associated-stylesheet-plain.xml"), null, null, null);

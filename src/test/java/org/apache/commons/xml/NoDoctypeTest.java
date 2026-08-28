@@ -45,49 +45,49 @@ class NoDoctypeTest {
 
     @Test
     @Tag("dom")
-    void hardenedDomParses() {
+    void secureDomParses() {
         AttackTestSupport.assertDomParses(payload());
     }
 
     @Test
     @Tag("sax")
-    void hardenedSaxParses() {
+    void secureSaxParses() {
         AttackTestSupport.assertSaxParses(payload());
     }
 
     @Test
     @Tag("schema")
-    void hardenedSchemaCompiles() {
+    void secureSchemaCompiles() {
         AttackTestSupport.assertSchemaCompiles(AttackTestSupport.streamSource(xsdPayload()));
     }
 
     @Test
     @Tag("stax")
-    void hardenedStaxParses() {
+    void secureStaxParses() {
         AttackTestSupport.assertStaxParses(payload());
     }
 
     @Test
     @Tag("trax")
-    void hardenedTemplatesCompiles() {
+    void secureTemplatesCompiles() {
         AttackTestSupport.assertTemplatesCompiles(AttackTestSupport.streamSource(xsltPayload()));
     }
 
     @Test
     @Tag("trax")
-    void hardenedTransformerTransforms() {
+    void secureTransformerTransforms() {
         AttackTestSupport.assertTransformerTransforms(payload());
     }
 
     @Test
     @Tag("schema")
-    void hardenedValidatorValidates() {
+    void secureValidatorValidates() {
         AttackTestSupport.assertValidatorValidates(payload());
     }
 
     @Test
     @Tag("sax")
-    void hardenedXmlReaderParses() {
+    void secureXmlReaderParses() {
         AttackTestSupport.assertXmlReaderParses(payload());
     }
 }

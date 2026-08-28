@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 class TemplatesIncludeTest {
 
     @Test
-    void hardenedTemplatesBlocks() {
+    void secureTemplatesBlocks() {
         AttackTestSupport.assertTemplatesDoesNotLeak(AttackTestSupport.resourceSource("with-include.xsl"));
     }
 }

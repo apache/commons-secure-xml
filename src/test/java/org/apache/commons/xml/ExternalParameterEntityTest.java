@@ -144,7 +144,7 @@ class ExternalParameterEntityTest {
 
     @Test
     @Tag("dom")
-    void hardenedDomBlocksOrDoesNotLeak() {
+    void secureDomBlocksOrDoesNotLeak() {
         Assumptions.assumeTrue(DOM_ACCEPTS_PARAMETER_ENTITIES,
                 "Skipped: platform DOM does not accept parameter entities");
         AttackTestSupport.assertDomBlocksOrDoesNotLeak(xmlPayload());
@@ -152,7 +152,7 @@ class ExternalParameterEntityTest {
 
     @Test
     @Tag("sax")
-    void hardenedSaxBlocksOrDoesNotLeak() {
+    void secureSaxBlocksOrDoesNotLeak() {
         Assumptions.assumeTrue(SAX_RESOLVES_PARAMETER_ENTITIES,
                 "Skipped: platform SAX parser does not invoke the entity resolver for parameter entities");
         AttackTestSupport.assertSaxBlocksOrDoesNotLeak(xmlPayload());
@@ -160,7 +160,7 @@ class ExternalParameterEntityTest {
 
     @Test
     @Tag("schema")
-    void hardenedSchemaBlocksOrDoesNotLeak() {
+    void secureSchemaBlocksOrDoesNotLeak() {
         Assumptions.assumeTrue(SAX_RESOLVES_PARAMETER_ENTITIES,
                 "Skipped: platform SAX parser does not invoke the entity resolver for parameter entities");
         AttackTestSupport.assertSchemaBlocksOrDoesNotLeak(AttackTestSupport.streamSource(xsdPayload()));
@@ -168,13 +168,13 @@ class ExternalParameterEntityTest {
 
     @Test
     @Tag("stax")
-    void hardenedStaxBlocksOrDoesNotLeak() {
+    void secureStaxBlocksOrDoesNotLeak() {
         AttackTestSupport.assertStaxBlocksOrDoesNotLeak(xmlPayload());
     }
 
     @Test
     @Tag("trax")
-    void hardenedTemplatesBlocksOrDoesNotLeak() {
+    void secureTemplatesBlocksOrDoesNotLeak() {
         Assumptions.assumeTrue(SAX_RESOLVES_PARAMETER_ENTITIES,
                 "Skipped: platform SAX parser does not invoke the entity resolver for parameter entities");
         AttackTestSupport.assertTemplatesBlocksOrDoesNotLeak(AttackTestSupport.streamSource(xsltPayload()));
@@ -182,7 +182,7 @@ class ExternalParameterEntityTest {
 
     @Test
     @Tag("trax")
-    void hardenedTransformerBlocksOrDoesNotLeak() {
+    void secureTransformerBlocksOrDoesNotLeak() {
         Assumptions.assumeTrue(SAX_RESOLVES_PARAMETER_ENTITIES,
                 "Skipped: platform SAX parser does not invoke the entity resolver for parameter entities");
         AttackTestSupport.assertTransformerBlocksOrDoesNotLeak(xmlPayload());
@@ -190,7 +190,7 @@ class ExternalParameterEntityTest {
 
     @Test
     @Tag("schema")
-    void hardenedValidatorBlocksOrDoesNotLeak() {
+    void secureValidatorBlocksOrDoesNotLeak() {
         Assumptions.assumeTrue(SAX_RESOLVES_PARAMETER_ENTITIES,
                 "Skipped: platform SAX parser does not invoke the entity resolver for parameter entities");
         AttackTestSupport.assertValidatorBlocksOrDoesNotLeak(xmlPayload());
@@ -198,7 +198,7 @@ class ExternalParameterEntityTest {
 
     @Test
     @Tag("sax")
-    void hardenedXmlReaderBlocksOrDoesNotLeak() {
+    void secureXmlReaderBlocksOrDoesNotLeak() {
         Assumptions.assumeTrue(SAX_RESOLVES_PARAMETER_ENTITIES,
                 "Skipped: platform SAX parser does not invoke the entity resolver for parameter entities");
         AttackTestSupport.assertXmlReaderBlocksOrDoesNotLeak(xmlPayload());

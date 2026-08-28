@@ -49,7 +49,7 @@ class XPathInputSourceTest {
     }
 
     @Test
-    void hardenedXPathEvaluateDoesNotLeak() throws Exception {
+    void secureXPathEvaluateDoesNotLeak() throws Exception {
         // Deterministic on every engine: the entity is declared in the internal subset and the floor resolves only its
         // external content — to empty replacement text — so the pre-parse completes and the reference expands to nothing.
         final String result = SecureXPathFactory.newInstance().newXPath().evaluate(EXPRESSION, AttackTestSupport.inputSource(entityPayload()));
@@ -57,7 +57,7 @@ class XPathInputSourceTest {
     }
 
     @Test
-    void hardenedXPathEvaluatesPlainDocument() throws Exception {
+    void secureXPathEvaluatesPlainDocument() throws Exception {
         // Positive control: the secure pre-parse still evaluates an entity-free document end to end.
         final String result = SecureXPathFactory.newInstance().newXPath().evaluate(EXPRESSION,
                 AttackTestSupport.inputSource(AttackTestSupport.xmlBody("plain text")));
@@ -65,7 +65,7 @@ class XPathInputSourceTest {
     }
 
     @Test
-    void hardenedXPathExpressionEvaluateDoesNotLeak() throws Exception {
+    void secureXPathExpressionEvaluateDoesNotLeak() throws Exception {
         // Same declared-entity outcome as above on the compiled-expression entry point.
         final String result = SecureXPathFactory.newInstance().newXPath().compile(EXPRESSION).evaluate(AttackTestSupport.inputSource(entityPayload()));
         assertFalse(result.contains(AttackTestSupport.LEAKED_MARKER), "external entity leaked into the compiled XPath result: " + result);

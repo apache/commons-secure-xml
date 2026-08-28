@@ -62,7 +62,7 @@ class OverrideDefaultParserTest {
     }
 
     @Test
-    void hardenedReaderFollowsFlag() throws Exception {
+    void secureReaderFollowsFlag() throws Exception {
         assumeFalse(AttackTestSupport.IS_ANDROID);
         final XMLReader pinned = ((SecureXMLReader) SecureSAXParserFactory.newSecureXMLReader(false)).getDelegate();
         assertTrue(pinned.getClass().getName().startsWith(JDK_INTERNAL_PREFIX), pinned.getClass().getName());

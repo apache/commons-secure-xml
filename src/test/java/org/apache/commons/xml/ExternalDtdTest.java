@@ -65,7 +65,7 @@ class ExternalDtdTest {
 
     @Test
     @Tag("dom")
-    void hardenedDomDoesNotLeak() {
+    void secureDomDoesNotLeak() {
         Assumptions.assumeTrue(AttackTestSupport.DOM_RESOLVES_INTERNAL_ENTITIES,
                 "Skipped: platform DOM does not resolve user-defined entities");
         AttackTestSupport.assertDomDoesNotLeak(xmlPayload());
@@ -73,19 +73,19 @@ class ExternalDtdTest {
 
     @Test
     @Tag("sax")
-    void hardenedSaxDoesNotLeak() {
+    void secureSaxDoesNotLeak() {
         AttackTestSupport.assertSaxDoesNotLeak(xmlPayload());
     }
 
     @Test
     @Tag("schema")
-    void hardenedSchemaDoesNotLeak() {
+    void secureSchemaDoesNotLeak() {
         AttackTestSupport.assertSchemaDoesNotLeak(AttackTestSupport.streamSource(xsdPayload()));
     }
 
     @Test
     @Tag("stax")
-    void hardenedStaxBlocksOrDoesNotLeak() {
+    void secureStaxBlocksOrDoesNotLeak() {
         // Woodstox rejects a reference to an entity declared only in the emptied external subset; the Xerces lineage skips it as an unreported validity
         // constraint because the DOCTYPE has a system identifier.
         AttackTestSupport.assertStaxBlocksOrDoesNotLeak(xmlPayload());
@@ -93,25 +93,25 @@ class ExternalDtdTest {
 
     @Test
     @Tag("trax")
-    void hardenedTemplatesDoesNotLeak() {
+    void secureTemplatesDoesNotLeak() {
         AttackTestSupport.assertTemplatesDoesNotLeak(AttackTestSupport.streamSource(xsltPayload()));
     }
 
     @Test
     @Tag("trax")
-    void hardenedTransformerDoesNotLeak() {
+    void secureTransformerDoesNotLeak() {
         AttackTestSupport.assertTransformerDoesNotLeak(xmlPayload());
     }
 
     @Test
     @Tag("schema")
-    void hardenedValidatorDoesNotLeak() {
+    void secureValidatorDoesNotLeak() {
         AttackTestSupport.assertValidatorDoesNotLeak(xmlPayload());
     }
 
     @Test
     @Tag("sax")
-    void hardenedXmlReaderDoesNotLeak() {
+    void secureXmlReaderDoesNotLeak() {
         AttackTestSupport.assertXmlReaderDoesNotLeak(xmlPayload());
     }
 

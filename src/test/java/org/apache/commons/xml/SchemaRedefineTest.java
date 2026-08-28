@@ -30,7 +30,7 @@ class SchemaRedefineTest {
     private static final String RESOURCE = "with-redefine.xsd";
 
     @Test
-    void hardenedSchemaBlocks() {
+    void secureSchemaBlocks() {
         AttackTestSupport.assertSchemaBlocks(AttackTestSupport.resourceSource(RESOURCE));
     }
 

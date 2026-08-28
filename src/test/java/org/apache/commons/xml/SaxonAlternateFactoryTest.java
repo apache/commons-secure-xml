@@ -84,7 +84,7 @@ class SaxonAlternateFactoryTest {
     }
 
     @Test
-    void hardenedBasicFactoryDoesNotLeakCollection() {
+    void secureBasicFactoryDoesNotLeakCollection() {
         assumeSaxonPresent();
         try {
             final String result = transform(SecureTransformerFactory.secure(basicSaxonFactory()));

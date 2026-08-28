@@ -30,7 +30,7 @@ class SchemaImportTest {
     private static final String RESOURCE = "with-import.xsd";
 
     @Test
-    void hardenedSchemaBlocks() {
+    void secureSchemaBlocks() {
         AttackTestSupport.assertSchemaBlocks(AttackTestSupport.resourceSource(RESOURCE));
     }
 

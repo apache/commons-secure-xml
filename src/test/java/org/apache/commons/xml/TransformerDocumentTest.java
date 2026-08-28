@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 class TransformerDocumentTest {
 
     @Test
-    void hardenedTransformerBlocks() {
+    void secureTransformerBlocks() {
         AttackTestSupport.assertTemplatesDoesNotLeak(AttackTestSupport.resourceSource("with-document.xsl"));
     }
 }
