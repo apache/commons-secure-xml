@@ -91,7 +91,7 @@ import org.xml.sax.helpers.XMLFilterImpl;
 final class AttackTestSupport {
 
     /**
-     * Test-only permissive counterpart of {@code SecureSAXParserFactory.HardeningExpatXMLReader}: a pass-through Expat wrapper that rejects the
+     * Test-only permissive counterpart of {@code SecureSAXParserFactory.SecureExpatXMLReader}: a pass-through Expat wrapper that rejects the
      * {@code namespace-prefixes} feature eagerly (so a probing TrAX identity transformer falls back instead of failing the whole parse) but installs no ignore-all
      * resolver floor, so the unconfigured/positive controls stay permissive.
      */
@@ -888,7 +888,7 @@ final class AttackTestSupport {
      *
      * <p>On Android the reader is Expat, which accepts {@code namespace-prefixes} at {@code setFeature} time but fails mid-parse; a probing TrAX path (an
      * identity transform, or Xalan's {@code TrAXFilter} self-provisioning) enables that feature, so wrap it to reject the feature eagerly (matching the
-     * production {@code HardeningExpatXMLReader}) while keeping the control permissive (no floor).</p>
+     * production {@code SecureExpatXMLReader}) while keeping the control permissive (no floor).</p>
      *
      * @return A permissive reader, wrapped on Android to reject {@code namespace-prefixes} eagerly.
      */

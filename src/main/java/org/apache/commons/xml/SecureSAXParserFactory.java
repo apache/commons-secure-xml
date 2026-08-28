@@ -85,7 +85,7 @@ public final class SecureSAXParserFactory {
      *     <li><strong>Android</strong> (Harmony / Expat): {@link XMLConstants#FEATURE_SECURE_PROCESSING FSP} and the JAXP 1.5 {@code ACCESS_EXTERNAL_*} properties
      *         are not recognized, and libexpat enforces its own Billion Laughs check, so neither is applied. Two fixups are still needed: an ignore-all resolver
      *         (Expat ignores external fetches silently when no resolver is set; the floor keeps that behavior non-bypassable, resolving anything unresolved to
-     *         empty), and a {@link HardeningExpatXMLReader} so the unsupported {@code namespace-prefixes} feature is rejected at
+     *         empty), and a {@link SecureExpatXMLReader} so the unsupported {@code namespace-prefixes} feature is rejected at
      *         configuration time rather than mid-parse.</li>
      *     <li><strong>FSP</strong>: required on every other reader. It switches on the implementation's built-in security manager, which is what carries the
      *         processing limits.</li>
@@ -143,9 +143,9 @@ public final class SecureSAXParserFactory {
         }
         if (ANDROID_EXPAT_READER.equals(reader.getClass().getName())) {
             // Expat ignores external fetches when no resolver is set; the ignore-all floor keeps that behavior non-bypassable (routing a caller-set resolver,
-            // including SAXParser.parse's handler, through it and resolving anything unresolved to empty) and, via HardeningExpatXMLReader, rejects the
+            // including SAXParser.parse's handler, through it and resolving anything unresolved to empty) and, via SecureExpatXMLReader, rejects the
             // unsupported namespace-prefixes feature eagerly rather than mid-parse.
-            return new HardeningExpatXMLReader(reader);
+            return new SecureExpatXMLReader(reader);
         }
         // Required: enables the JDK XMLSecurityManager / Xerces SecurityManager limits.
         setFeature(reader, XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -325,11 +325,11 @@ public final class SecureSAXParserFactory {
      * {@code parse}, with a {@link SAXNotSupportedException}. Reporting the rejection eagerly from {@link #setFeature(String, boolean)} lets consumers that probe
      * the feature, such as Xalan's identity transformer, catch the exception and fall back instead of failing the whole parse.</p>
      */
-    static final class HardeningExpatXMLReader extends SecureXMLReader {
+    static final class SecureExpatXMLReader extends SecureXMLReader {
 
         private static final String NAMESPACE_PREFIXES_FEATURE = "http://xml.org/sax/features/namespace-prefixes";
 
-        HardeningExpatXMLReader(final XMLReader delegate) {
+        SecureExpatXMLReader(final XMLReader delegate) {
             super(delegate);
         }
 
