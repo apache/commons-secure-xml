@@ -37,7 +37,7 @@ import net.sf.saxon.trans.XPathException;
 import net.sf.saxon.xpath.XPathFactoryImpl;
 
 /**
- * Hardening recipes for Saxon-HE ({@code net.sf.saxon:Saxon-HE}).
+ * Securing recipes for Saxon-HE ({@code net.sf.saxon:Saxon-HE}).
  *
  * <p>Saxon supplies {@link TransformerFactory} and {@link XPathFactory} implementations; it does not ship a DOM, SAX, StAX or Schema factory of its own.</p>
  */
@@ -52,7 +52,7 @@ final class SaxonProvider {
      *
      * <ol>
      *   <li><b>SAX layer.</b> {@link #makeParser} hands every {@link XMLReader} Saxon would otherwise use through
-     *   {@link SecureSAXParserFactory#harden(XMLReader)}, which routes it to the matching bundled hardening recipe. External DTDs, entities and XInclude
+     *   {@link SecureSAXParserFactory#secure(XMLReader)}, which routes it to the matching bundled hardening recipe. External DTDs, entities and XInclude
      *   resolve to empty content at parse time.</li>
      *   <li><b>Collection layer.</b> {@code fn:collection} bypasses the resource resolver and fetches directly, so an empty {@link CollectionFinder} supplies its
      *   ignore outcome instead.</li>
@@ -87,7 +87,7 @@ final class SaxonProvider {
         @Override
         public XMLReader makeParser(final String className) throws TransformerFactoryConfigurationError {
             try {
-                return SecureSAXParserFactory.harden(super.makeParser(className));
+                return SecureSAXParserFactory.secure(super.makeParser(className));
             } catch (final SecureException e) {
                 throw new TransformerFactoryConfigurationError(e);
             }

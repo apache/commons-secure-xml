@@ -63,7 +63,7 @@ public final class SecureXPathFactory {
      *     <li><strong>Saxon</strong> ({@code net.sf.saxon}): recognized by package prefix and handed to {@link SaxonProvider#configure(XPathFactory)}, so any public
      *         subclass routes to the same recipe as the registered factory. Its URI-fetching
      *         functions and reflection-based extension calls are reachable only through a locked-down Saxon {@code Configuration}, not the standard JAXP knobs; this
-     *         is the XPath counterpart of the Saxon exception in {@link SecureTransformerFactory#harden(javax.xml.transform.TransformerFactory)}, kept as a
+     *         is the XPath counterpart of the Saxon exception in {@link SecureTransformerFactory#secure(javax.xml.transform.TransformerFactory)}, kept as a
      *         documented package-prefix exception because the required hardening surface is reachable only through a vendor API.</li>
      *     <li><strong>FSP</strong> ({@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING}): required. It is the only knob both the stock JDK and Xalan XPath
      *         engines expose, and switches on their secure-processing limits. {@link XPathFactory} has no attribute API for finer control.</li>
@@ -76,7 +76,7 @@ public final class SecureXPathFactory {
      * @return A new hardened factory or the original factory, hardened, if it is a known Saxon factory.
      * @throws SecureException Thrown if this {@link XPathFactory} or the {@code XPath}s it creates cannot support this feature.
      */
-    static XPathFactory harden(final XPathFactory factory) {
+    static XPathFactory secure(final XPathFactory factory) {
         if (SaxonProvider.isSaxon(factory.getClass())) {
             // Saxon: only a locked-down Configuration can close its URI-fetching functions and extension-function surface.
             return SaxonProvider.configure(factory);
@@ -110,7 +110,7 @@ public final class SecureXPathFactory {
                 // Unreachable: the looked-up method declares no other exceptions.
                 throw new IllegalStateException(e);
             }
-            return harden(factory);
+            return secure(factory);
         }
         try {
             // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead.
@@ -130,7 +130,7 @@ public final class SecureXPathFactory {
      * @throws RuntimeException      Thrown if there is a failure in creating an {@link XPathFactory} for the default object model.
      */
     public static XPathFactory newInstance() {
-        return harden(XPathFactory.newInstance());
+        return secure(XPathFactory.newInstance());
     }
 
     /**
@@ -144,7 +144,7 @@ public final class SecureXPathFactory {
      * @throws IllegalArgumentException           Thrown if {@code uri} is empty.
      */
     public static XPathFactory newInstance(final String uri) throws XPathFactoryConfigurationException {
-        return harden(XPathFactory.newInstance(uri));
+        return secure(XPathFactory.newInstance(uri));
     }
 
     /**
@@ -162,7 +162,7 @@ public final class SecureXPathFactory {
      */
     public static XPathFactory newInstance(final String uri, final String factoryClassName, final ClassLoader classLoader)
             throws XPathFactoryConfigurationException {
-        return harden(XPathFactory.newInstance(uri, factoryClassName, classLoader));
+        return secure(XPathFactory.newInstance(uri, factoryClassName, classLoader));
     }
 
     /**

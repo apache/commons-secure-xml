@@ -80,7 +80,7 @@ public final class SecureSAXParserFactory {
      *
      * <p>Rather than branching on the implementation class, this method probes what the parser supports and adapts. Because
      * {@link SAXParserFactory} exposes only a feature API and no property API, the per-parse configuration runs on each {@link XMLReader} the factory produces,
-     * funnelled through the nested wrapper into {@link #harden(XMLReader)}:</p>
+     * funnelled through the nested wrapper into {@link #secure(XMLReader)}:</p>
      * <ul>
      *     <li><strong>Android</strong> (Harmony / Expat): {@link XMLConstants#FEATURE_SECURE_PROCESSING FSP} and the JAXP 1.5 {@code ACCESS_EXTERNAL_*} properties
      *         are not recognized, and libexpat enforces its own Billion Laughs check, so neither is applied. Two fixups are still needed: an ignore-all resolver
@@ -98,12 +98,12 @@ public final class SecureSAXParserFactory {
      * @param factory the factory to harden; never {@code null}.
      * @return a hardened factory.
      */
-    static SAXParserFactory harden(final SAXParserFactory factory) {
+    static SAXParserFactory secure(final SAXParserFactory factory) {
         // Required: enables the implementation's security manager, which carries the limits. Android's Expat rejects FSP, so it is skipped there.
         if (!ANDROID_SAX_PARSER_FACTORY.equals(factory.getClass().getName())) {
             setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
         }
-        // The per-parse hardening (limits, entity blocking, Android fixups) lives in harden(XMLReader) because SAXParserFactory has no property API.
+        // The per-parse hardening (limits, entity blocking, Android fixups) lives in secure(XMLReader) because SAXParserFactory has no property API.
         return new Wrapper(factory);
     }
 
@@ -121,7 +121,7 @@ public final class SecureSAXParserFactory {
      * @throws FactoryConfigurationError         Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
      *                                           configuration error} or if the implementation is not available or cannot be instantiated.
      */
-    static Source harden(final Source source, final boolean overrideDefaultParser) throws TransformerConfigurationException {
+    static Source secure(final Source source, final boolean overrideDefaultParser) throws TransformerConfigurationException {
         if (source instanceof StreamSource || source instanceof SAXSource && ((SAXSource) source).getXMLReader() == null) {
             final InputSource inputSource = SAXSource.sourceToInputSource(source);
             return inputSource == null ? source : new SAXSource(newHardenedReader(overrideDefaultParser), inputSource);
@@ -130,15 +130,15 @@ public final class SecureSAXParserFactory {
     }
 
     /**
-     * Hardens an existing {@link XMLReader}.
+     * Secures an existing {@link XMLReader}.
      *
      * @param reader The reader to harden; never {@code null}.
      * @return A hardened reader.
      * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
      */
-    static XMLReader harden(final XMLReader reader) {
+    static XMLReader secure(final XMLReader reader) {
         if (reader instanceof SecureXMLReader) {
-            // Already hardened (for example, a reader from a hardened factory passed back through harden(XMLReader)); the floor is already in place.
+            // Already hardened (for example, a reader from a hardened factory passed back through secure(XMLReader)); the floor is already in place.
             return reader;
         }
         if (ANDROID_EXPAT_READER.equals(reader.getClass().getName())) {
@@ -189,7 +189,7 @@ public final class SecureSAXParserFactory {
                 // Unreachable: the looked-up method declares no other exceptions.
                 throw new IllegalStateException(e);
             }
-            return harden(factory);
+            return secure(factory);
         }
         // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead. Where that class does not exist either (for
         // example Android), the lookup miss surfaces as the factory's own FactoryConfigurationError, like any newInstance miss.
@@ -236,7 +236,7 @@ public final class SecureSAXParserFactory {
      *                                   error} or if the implementation is not available or cannot be instantiated.
      */
     public static SAXParserFactory newInstance() {
-        return harden(SAXParserFactory.newInstance());
+        return secure(SAXParserFactory.newInstance());
     }
 
     /**
@@ -249,7 +249,7 @@ public final class SecureSAXParserFactory {
      * @throws FactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
      */
     public static SAXParserFactory newInstance(final String factoryClassName, final ClassLoader classLoader) {
-        return harden(SAXParserFactory.newInstance(factoryClassName, classLoader));
+        return secure(SAXParserFactory.newInstance(factoryClassName, classLoader));
     }
 
     /**
@@ -343,7 +343,7 @@ public final class SecureSAXParserFactory {
     }
 
     /**
-     * Universal SAX factory wrapper that funnels every produced parser through {@link SecureSAXParserFactory#harden(XMLReader)}.
+     * Universal SAX factory wrapper that funnels every produced parser through {@link SecureSAXParserFactory#secure(XMLReader)}.
      * <p>
      * {@link SAXParserFactory} exposes only a feature API and no property API, so the per-parse hardening (limits, entity blocking, implementation-specific fixups)
      * has to run on each {@link XMLReader} the factory produces. This wrapper returns a {@link SecureSAXParser}, which applies that hardening lazily to both the

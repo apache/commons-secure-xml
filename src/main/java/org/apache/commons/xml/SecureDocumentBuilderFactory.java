@@ -77,7 +77,7 @@ public final class SecureDocumentBuilderFactory {
      * @return A new hardened factory or the original factory, as-is, if it is a known Android factory.
      * @throws SecureException Thrown if a (non-Andoid) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
      */
-    static DocumentBuilderFactory harden(final DocumentBuilderFactory factory) {
+    static DocumentBuilderFactory secure(final DocumentBuilderFactory factory) {
         // Android exposes no FSP, ACCESS_EXTERNAL_* or attribute API, and KXmlParser drops user-defined entities; nothing to apply.
         if (ANDROID_DOCUMENT_BUILDER_FACTORY.equals(factory.getClass().getName())) {
             return factory;
@@ -124,7 +124,7 @@ public final class SecureDocumentBuilderFactory {
                 // Unreachable: the looked-up method declares no other exceptions.
                 throw new IllegalStateException(e);
             }
-            return harden(factory);
+            return secure(factory);
         }
         // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead. Where that class does not exist either (for
         // example Android), the lookup miss surfaces as the factory's own FactoryConfigurationError, like any newInstance miss.
@@ -155,7 +155,7 @@ public final class SecureDocumentBuilderFactory {
      *                                   implementation is not available or cannot be instantiated.
      */
     public static DocumentBuilderFactory newInstance() {
-        return harden(DocumentBuilderFactory.newInstance());
+        return secure(DocumentBuilderFactory.newInstance());
     }
 
     /**
@@ -170,7 +170,7 @@ public final class SecureDocumentBuilderFactory {
      * @throws FactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
      */
     public static DocumentBuilderFactory newInstance(final String factoryClassName, final ClassLoader classLoader) {
-        return harden(DocumentBuilderFactory.newInstance(factoryClassName, classLoader));
+        return secure(DocumentBuilderFactory.newInstance(factoryClassName, classLoader));
     }
 
     /**

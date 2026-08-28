@@ -38,7 +38,7 @@
  * <p>
  * Whichever parser is selected, it is hardened.
  * </p>
- * <h2>Hardening guarantees</h2>
+ * <h2>Security Guarantees</h2>
  * <p>
  * Every factory returned by makes the same three guarantees, regardless of which JAXP implementation is on the classpath:
  * </p>

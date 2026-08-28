@@ -65,17 +65,17 @@ public final class SecureSchemaFactory {
             MethodType.methodType(SchemaFactory.class));
 
     /**
-     * Hardening for any {@link SchemaFactory} on the classpath.
+     * Secures a {@link SchemaFactory}.
      *
      * <p>Unlike the other factory types there is no per-implementation branching and no feature or limit configuration on the factory itself: schema compilation
      * and validation reach external resources only through the resolver hook, so wrapping the factory with a non-removable ignore-all resolver floor is enough on
      * every implementation. The reader used to parse schema and instance documents is hardened separately, through
-     * {@link SecureSAXParserFactory#harden(javax.xml.transform.Source, boolean)}.</p>
+     * {@link SecureSAXParserFactory#secure(javax.xml.transform.Source, boolean)}.</p>
      *
      * @param factory the factory to harden; never {@code null}.
      * @return a hardened factory.
      */
-    static SchemaFactory harden(final SchemaFactory factory) {
+    static SchemaFactory secure(final SchemaFactory factory) {
         return new Wrapper(factory);
     }
 
@@ -102,7 +102,7 @@ public final class SecureSchemaFactory {
                 // Unreachable: the looked-up method declares no other exceptions.
                 throw new IllegalStateException(e);
             }
-            return harden(factory);
+            return secure(factory);
         }
         // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead. Where that class does not exist either (for
         // example Android), the lookup miss surfaces as IllegalArgumentException, the error SchemaFactory.newInstance(String, String, ClassLoader) defines.
@@ -119,7 +119,7 @@ public final class SecureSchemaFactory {
      * @throws SchemaFactoryConfigurationError Thrown if a configuration error is encountered.
      */
     public static SchemaFactory newInstance(final String schemaLanguage) {
-        return harden(SchemaFactory.newInstance(schemaLanguage));
+        return secure(SchemaFactory.newInstance(schemaLanguage));
     }
 
     /**
@@ -134,7 +134,7 @@ public final class SecureSchemaFactory {
      * @throws NullPointerException     Thrown if {@code schemaLanguage} is {@code null}.
      */
     public static SchemaFactory newInstance(final String schemaLanguage, final String factoryClassName, final ClassLoader classLoader) {
-        return harden(SchemaFactory.newInstance(schemaLanguage, factoryClassName, classLoader));
+        return secure(SchemaFactory.newInstance(schemaLanguage, factoryClassName, classLoader));
     }
 
     private SecureSchemaFactory() {
@@ -150,14 +150,14 @@ public final class SecureSchemaFactory {
      * <ol>
      *   <li>{@link SecureSchemaFactory} installs an ignore-all {@link FallbackIgnoreLSResourceResolver} floor on the factory (blocking
      *       {@code xs:import}/{@code xs:include}/{@code xs:redefine} at compile time) and rewrites the Source on every {@code newSchema(Source[])} entry point
-     *       through {@link SecureSAXParserFactory#harden(Source, boolean)}.</li>
+     *       through {@link SecureSAXParserFactory#secure(Source, boolean)}.</li>
      *   <li>{@link SecureSchema} wraps every Validator/ValidatorHandler the inner Schema produces and re-installs the floor on each (blocking
      *       {@code xsi:schemaLocation} at validation time), since neither the JDK nor Xerces reliably propagates it through {@code Schema}.</li>
      *   <li>{@link SecureValidator} rewrites the Source on every {@link Validator#validate(Source)} call.</li>
      * </ol>
      *
      * <p>
-     * The hardened reader supplied by {@link SecureSAXParserFactory#harden(Source, boolean)} already carries {@code FEATURE_SECURE_PROCESSING} and the processing limits, so a
+     * The hardened reader supplied by {@link SecureSAXParserFactory#secure(Source, boolean)} already carries {@code FEATURE_SECURE_PROCESSING} and the processing limits, so a
      * DOCTYPE, external entity or Billion Laughs payload in the schema or instance document is bounded there rather than on this factory. The JAXP 1.5
      * {@code ACCESS_EXTERNAL_*} properties are deliberately not set: the resolver floor already blocks the same fetches on every implementation, and the JDK 8
      * {@code SchemaFactory} has a bug whereby those properties keep blocking even when a caller's own resolver would grant the access. The floor is a non-removable
@@ -170,7 +170,7 @@ public final class SecureSchemaFactory {
     private static final class Wrapper extends SchemaFactory {
 
         /**
-         * Hardens every schema source through {@link SecureSAXParserFactory#harden(Source, boolean)}.
+         * Secures every schema source through {@link SecureSAXParserFactory#secure(Source, boolean)}.
          *
          * @param schemas the schema sources to harden; must not be {@code null}.
          * @return a new array of hardened sources.
@@ -178,12 +178,12 @@ public final class SecureSchemaFactory {
          * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
          *                                   configuration error} or if the implementation is not available or cannot be instantiated.
          */
-        private Source[] harden(final Source[] schemas) throws SAXException {
+        private Source[] secure(final Source[] schemas) throws SAXException {
             final Source[] hardened = new Source[schemas.length];
             final boolean overrideDefaultParser = overrideDefaultParser();
             try {
                 for (int i = 0; i < schemas.length; i++) {
-                    hardened[i] = SecureSAXParserFactory.harden(schemas[i], overrideDefaultParser);
+                    hardened[i] = SecureSAXParserFactory.secure(schemas[i], overrideDefaultParser);
                 }
             } catch (final TransformerConfigurationException e) {
                 throw new SAXException("Failed to harden schema source", e);
@@ -246,7 +246,7 @@ public final class SecureSchemaFactory {
          */
         @Override
         public Schema newSchema(final Source[] schemas) throws SAXException {
-            return new SecureSchema(delegate.newSchema(harden(schemas)), overrideDefaultParser());
+            return new SecureSchema(delegate.newSchema(secure(schemas)), overrideDefaultParser());
         }
 
         /**

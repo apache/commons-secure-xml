@@ -87,7 +87,7 @@ class SaxonAlternateFactoryTest {
     void hardenedBasicFactoryDoesNotLeakCollection() {
         assumeSaxonPresent();
         try {
-            final String result = transform(SecureTransformerFactory.harden(basicSaxonFactory()));
+            final String result = transform(SecureTransformerFactory.secure(basicSaxonFactory()));
             assertFalse(result.contains(AttackTestSupport.LEAKED_MARKER), "collection() leaked through the alternate Saxon factory:\n" + result);
         } catch (final TransformerException blocked) {
             // Throwing is an acceptable outcome since it also prevents leaking the marker.

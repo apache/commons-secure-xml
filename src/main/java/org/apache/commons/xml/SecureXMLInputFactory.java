@@ -71,7 +71,7 @@ public final class SecureXMLInputFactory {
      * @param factory the factory to harden; never {@code null}.
      * @return a hardened factory.
      */
-    static XMLInputFactory harden(final XMLInputFactory factory) {
+    static XMLInputFactory secure(final XMLInputFactory factory) {
         // The wrapper installs the non-removable ignore-all resolver floor that resolves every external DTD and entity to empty content.
         return new Wrapper(factory);
     }
@@ -99,11 +99,11 @@ public final class SecureXMLInputFactory {
                 // Unreachable: the looked-up method declares no other exceptions.
                 throw new IllegalStateException(e);
             }
-            return harden(factory);
+            return secure(factory);
         }
         try {
             // Java 8: the method does not exist, and XMLInputFactory has no class-name-taking lookup; instantiate the JDK's built-in default directly.
-            return harden((XMLInputFactory) Class.forName(JDK_XML_INPUT_FACTORY).getConstructor().newInstance());
+            return secure((XMLInputFactory) Class.forName(JDK_XML_INPUT_FACTORY).getConstructor().newInstance());
         } catch (final ReflectiveOperationException e) {
             // Where the class does not exist either (for example Android), report the miss like any StAX factory lookup: with FactoryConfigurationError.
             throw new FactoryConfigurationError(e, "Neither XMLInputFactory.newDefaultFactory() nor " + JDK_XML_INPUT_FACTORY + " is available");
@@ -119,7 +119,7 @@ public final class SecureXMLInputFactory {
      */
     public static XMLInputFactory newFactory() {
         // XMLInputFactory.newInstance, not newFactory: the same specified lookup, but Android's StAX API predates newFactory.
-        return harden(XMLInputFactory.newInstance());
+        return secure(XMLInputFactory.newInstance());
     }
 
     /**
@@ -133,7 +133,7 @@ public final class SecureXMLInputFactory {
      * @throws NullPointerException      Thrown if {@code factoryId} is {@code null}.
      */
     public static XMLInputFactory newFactory(final String factoryId, final ClassLoader classLoader) {
-        return harden(XMLInputFactory.newFactory(factoryId, classLoader));
+        return secure(XMLInputFactory.newFactory(factoryId, classLoader));
     }
 
     /**
@@ -144,7 +144,7 @@ public final class SecureXMLInputFactory {
      * @throws FactoryConfigurationError Thrown if an instance of this factory cannot be loaded.
      */
     public static XMLInputFactory newInstance() {
-        return harden(XMLInputFactory.newInstance());
+        return secure(XMLInputFactory.newInstance());
     }
 
     private SecureXMLInputFactory() {

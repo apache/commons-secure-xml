@@ -105,7 +105,7 @@ public final class SecureTransformerFactory {
      * @param factory the factory to harden; never {@code null}.
      * @return a hardened factory.
      */
-    static TransformerFactory harden(final TransformerFactory factory) {
+    static TransformerFactory secure(final TransformerFactory factory) {
         // Required: enables secure processing (XSLTC runtime limits; Xalan's extension-function block).
         setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
         if (SaxonProvider.isSaxon(factory.getClass())) {
@@ -142,7 +142,7 @@ public final class SecureTransformerFactory {
                 // Unreachable: the looked-up method declares no other exceptions.
                 throw new IllegalStateException(e);
             }
-            return harden(factory);
+            return secure(factory);
         }
         // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead. Where that class does not exist either (for
         // example Android), the lookup miss surfaces as TransformerFactoryConfigurationError, like any newInstance miss.
@@ -156,7 +156,7 @@ public final class SecureTransformerFactory {
      * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
      */
     public static TransformerFactory newInstance() {
-        return harden(TransformerFactory.newInstance());
+        return secure(TransformerFactory.newInstance());
     }
 
     /**
@@ -169,7 +169,7 @@ public final class SecureTransformerFactory {
      * @throws TransformerFactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
      */
     public static TransformerFactory newInstance(final String factoryClassName, final ClassLoader classLoader) {
-        return harden(TransformerFactory.newInstance(factoryClassName, classLoader));
+        return secure(TransformerFactory.newInstance(factoryClassName, classLoader));
     }
 
     private static void setFeature(final TransformerFactory factory, final String feature, final boolean value) {
@@ -185,7 +185,7 @@ public final class SecureTransformerFactory {
     }
 
     /**
-     * {@link TransformerFactory} wrapper that rewrites every Source-taking entry point through {@link SecureSAXParserFactory#harden(Source, boolean)} before
+     * {@link TransformerFactory} wrapper that rewrites every Source-taking entry point through {@link SecureSAXParserFactory#secure(Source, boolean)} before
      * delegating.
      *
      * <p>Used by providers whose underlying TrAX implementation pulls a new {@code SAXParserFactory.newInstance()} for any Source that is not already a
@@ -220,10 +220,10 @@ public final class SecureTransformerFactory {
         /**
          * Parses a reader-less source into a DOM through a hardened, namespace-aware {@link javax.xml.parsers.DocumentBuilder} and returns a {@link DOMSource}
          * carrying its system id, so the consumer walks the tree instead of provisioning its own reader. Any other source is left to
-         * {@link SecureSAXParserFactory#harden(Source, boolean)}.
+         * {@link SecureSAXParserFactory#secure(Source, boolean)}.
          *
          * @param source The source to scan for an associated stylesheet.
-         * @return A {@link DOMSource} for a reader-less source, otherwise the result of {@link SecureSAXParserFactory#harden(Source, boolean)}.
+         * @return A {@link DOMSource} for a reader-less source, otherwise the result of {@link SecureSAXParserFactory#secure(Source, boolean)}.
          * @throws TransformerConfigurationException if the source cannot be parsed.
          * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
          *                                   configuration error} or if the implementation is not available or cannot be instantiated.
@@ -242,7 +242,7 @@ public final class SecureTransformerFactory {
                     }
                 }
             }
-            return SecureSAXParserFactory.harden(source, overrideDefaultParser());
+            return SecureSAXParserFactory.secure(source, overrideDefaultParser());
         }
 
         /**
@@ -326,7 +326,7 @@ public final class SecureTransformerFactory {
         public Source getAssociatedStylesheet(final Source source, final String media, final String title, final String charset)
                 throws TransformerConfigurationException {
             // Xalan's getAssociatedStylesheet drops a SAXSource's reader and self-provisions its own to scan for xml-stylesheet PIs (XALANJ-2849).
-            final Source hardened = isXalan(delegate) ? hardenSourceToDom(source) : SecureSAXParserFactory.harden(source, overrideDefaultParser());
+            final Source hardened = isXalan(delegate) ? hardenSourceToDom(source) : SecureSAXParserFactory.secure(source, overrideDefaultParser());
             return delegate.getAssociatedStylesheet(hardened, media, title, charset);
         }
 
@@ -362,7 +362,7 @@ public final class SecureTransformerFactory {
          */
         @Override
         public Templates newTemplates(final Source source) throws TransformerConfigurationException {
-            final Templates templates = delegate.newTemplates(SecureSAXParserFactory.harden(source, overrideDefaultParser()));
+            final Templates templates = delegate.newTemplates(SecureSAXParserFactory.secure(source, overrideDefaultParser()));
             return templates == null ? null : new SecureTemplates(templates, getURIResolver(), emptySource, overrideDefaultParser());
         }
 
@@ -387,7 +387,7 @@ public final class SecureTransformerFactory {
          */
         @Override
         public Transformer newTransformer(final Source source) throws TransformerConfigurationException {
-            final Transformer transformer = delegate.newTransformer(SecureSAXParserFactory.harden(source, overrideDefaultParser()));
+            final Transformer transformer = delegate.newTransformer(SecureSAXParserFactory.secure(source, overrideDefaultParser()));
             return transformer == null ? null : new SecureTransformer(transformer, getURIResolver(), emptySource, overrideDefaultParser());
         }
 
@@ -404,7 +404,7 @@ public final class SecureTransformerFactory {
          */
         @Override
         public TransformerHandler newTransformerHandler(final Source source) throws TransformerConfigurationException {
-            return hardenHandler(delegate.newTransformerHandler(SecureSAXParserFactory.harden(source, overrideDefaultParser())));
+            return hardenHandler(delegate.newTransformerHandler(SecureSAXParserFactory.secure(source, overrideDefaultParser())));
         }
 
         @Override
