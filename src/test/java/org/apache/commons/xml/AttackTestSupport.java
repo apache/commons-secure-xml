@@ -694,14 +694,14 @@ final class AttackTestSupport {
      * <p>{@link XMLReader#parse(InputSource)} on a raw reader hardened via {@link SecureSAXParserFactory#secure(XMLReader)}; only a thrown exception passes.</p>
      */
     static void assertXmlReaderBlocks(final String payload) {
-        assertParseFails(() -> consumeXmlReader(rawHardenedReader(), payload), "XMLReader", SAXException.class);
+        assertParseFails(() -> consumeXmlReader(rawSecureXMLReader(), payload), "XMLReader", SAXException.class);
     }
 
     /**
      * Asserts a hardened-in-place XMLReader parse either blocks at parse or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
      */
     static void assertXmlReaderBlocksOrDoesNotLeak(final String payload) {
-        assertNoLeakOrThrows(() -> captureCharacters(rawHardenedReader(), payload), "XMLReader", SAXException.class);
+        assertNoLeakOrThrows(() -> captureCharacters(rawSecureXMLReader(), payload), "XMLReader", SAXException.class);
     }
 
     /**
@@ -711,7 +711,7 @@ final class AttackTestSupport {
      * guarantees the parse succeeds but never resolves the external resource.</p>
      */
     static void assertXmlReaderDoesNotLeak(final String payload) {
-        assertNoLeakStrict(() -> captureCharacters(rawHardenedReader(), payload), "XMLReader");
+        assertNoLeakStrict(() -> captureCharacters(rawSecureXMLReader(), payload), "XMLReader");
     }
 
     /**
@@ -721,7 +721,7 @@ final class AttackTestSupport {
      * payloads.</p>
      */
     static void assertXmlReaderParses(final String payload) {
-        assertParseSucceeds(() -> consumeXmlReader(rawHardenedReader(), payload), "XMLReader");
+        assertParseSucceeds(() -> consumeXmlReader(rawSecureXMLReader(), payload), "XMLReader");
     }
 
     /**
@@ -927,7 +927,7 @@ final class AttackTestSupport {
     }
 
     /** Builds a raw {@link XMLReader} from a deliberately permissive {@link SAXParserFactory} and hardens it via {@link SecureSAXParserFactory#secure(XMLReader)}. */
-    private static XMLReader rawHardenedReader() throws Exception {
+    private static XMLReader rawSecureXMLReader() throws Exception {
         final SAXParserFactory factory = SAXParserFactory.newInstance();
         if (!IS_ANDROID) {
             factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
