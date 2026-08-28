@@ -218,7 +218,7 @@ public final class SecureTransformerFactory {
     private static final class Wrapper extends SAXTransformerFactory {
 
         /**
-         * Parses a reader-less source into a DOM through a hardened, namespace-aware {@link javax.xml.parsers.DocumentBuilder} and returns a {@link DOMSource}
+         * Parses a reader-less source into a DOM through a secure, namespace-aware {@link javax.xml.parsers.DocumentBuilder} and returns a {@link DOMSource}
          * carrying its system id, so the consumer walks the tree instead of provisioning its own reader. Any other source is left to
          * {@link SecureSAXParserFactory#secure(Source, boolean)}.
          *
