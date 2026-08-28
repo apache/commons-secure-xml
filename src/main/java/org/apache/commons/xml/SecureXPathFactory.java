@@ -45,7 +45,7 @@ import javax.xml.xpath.XPathVariableResolver;
  *
  * @see org.apache.commons.xml
  */
-public final class HardeningXPathFactory {
+public final class SecureXPathFactory {
 
     /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
     private static final String JDK_XPATH_FACTORY = "com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl";
@@ -182,7 +182,7 @@ public final class HardeningXPathFactory {
         }
     }
 
-    private HardeningXPathFactory() {
+    private SecureXPathFactory() {
         // static only
     }
 

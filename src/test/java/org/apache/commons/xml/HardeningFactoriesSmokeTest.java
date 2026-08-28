@@ -63,7 +63,7 @@ class HardeningFactoriesSmokeTest {
         assertFalse(SchemaFactory.class.isAssignableFrom(SecureSchemaFactory.class));
         assertFalse(TransformerFactory.class.isAssignableFrom(SecureTransformerFactory.class));
         assertFalse(XMLInputFactory.class.isAssignableFrom(SecureXMLInputFactory.class));
-        assertFalse(XPathFactory.class.isAssignableFrom(HardeningXPathFactory.class));
+        assertFalse(XPathFactory.class.isAssignableFrom(SecureXPathFactory.class));
     }
 
     @Test
@@ -130,8 +130,8 @@ class HardeningFactoriesSmokeTest {
 
     @Test
     void newXPathFactoryReturnsFreshInstance() throws Exception {
-        final XPathFactory a = HardeningXPathFactory.newInstance();
-        final XPathFactory b = HardeningXPathFactory.newInstance();
+        final XPathFactory a = SecureXPathFactory.newInstance();
+        final XPathFactory b = SecureXPathFactory.newInstance();
         assertNotSame(a, b);
         assertTrue(a.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
@@ -169,7 +169,7 @@ class HardeningFactoriesSmokeTest {
     @Test
     void explicitClassNameXPathFactoryIsHardened() throws Exception {
         final Class<?> impl = XPathFactory.newInstance().getClass();
-        final XPathFactory factory = HardeningXPathFactory.newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI, impl.getName(), impl.getClassLoader());
+        final XPathFactory factory = SecureXPathFactory.newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI, impl.getName(), impl.getClassLoader());
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 
@@ -310,7 +310,7 @@ class HardeningFactoriesSmokeTest {
 
     @Test
     void newDefaultInstanceXPathFactoryIsHardened() throws Exception {
-        final XPathFactory factory = HardeningXPathFactory.newDefaultInstance();
+        final XPathFactory factory = SecureXPathFactory.newDefaultInstance();
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 }

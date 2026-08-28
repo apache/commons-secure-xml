@@ -126,7 +126,7 @@ HardeningTransformerFactory.newInstance()
 ```java
 import javax.xml.xpath.XPathConstants;
 import org.w3c.dom.NodeList;
-import org.apache.commons.xml.HardeningXPathFactory;
+import org.apache.commons.xml.SecureXPathFactory;
 
 NodeList hits = (NodeList) HardeningXPathFactory.newInstance()
         .newXPath()

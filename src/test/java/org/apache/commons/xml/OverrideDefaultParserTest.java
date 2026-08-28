@@ -121,7 +121,7 @@ class OverrideDefaultParserTest {
     @Test
     void xPathFactoryReadsFeatureAtCreation() throws Exception {
         assumeFalse(AttackTestSupport.IS_ANDROID);
-        final XPathFactory factory = HardeningXPathFactory.newDefaultInstance();
+        final XPathFactory factory = SecureXPathFactory.newDefaultInstance();
         assertFalse(factory.getFeature(FEATURE));
         assertFalse(((SecureXPath) factory.newXPath()).overrideDefaultParser);
         factory.setFeature(FEATURE, true);

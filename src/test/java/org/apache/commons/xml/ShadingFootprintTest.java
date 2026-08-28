@@ -141,9 +141,9 @@ class ShadingFootprintTest {
             "SecureXMLReader",
             "SecureXPath",
             "SecureXPathExpression",
-            "HardeningXPathFactory",
-            "HardeningXPathFactory$1",
-            "HardeningXPathFactory$Wrapper",
+            "SecureXPathFactory",
+            "SecureXPathFactory$1",
+            "SecureXPathFactory$Wrapper",
             "SaxonProvider",
             "SaxonProvider$1",
             "SaxonProvider$HardenedConfiguration",
@@ -178,7 +178,7 @@ class ShadingFootprintTest {
      * Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library.
      */
     private static final String[] REPORTED = {"SecureDocumentBuilderFactory", "SecureSAXParserFactory", "SecureXMLInputFactory",
-            "SecureTransformerFactory", "HardeningXPathFactory", "SecureSchemaFactory"};
+            "SecureTransformerFactory", "SecureXPathFactory", "SecureSchemaFactory"};
 
     private static Clazzpath clazzpath;
     private static Path classesDir;
@@ -294,6 +294,6 @@ class ShadingFootprintTest {
 
     @Test
     void xPathFactoryFootprint() {
-        assertEquals(XPATH_FACTORY, closureOf("HardeningXPathFactory"));
+        assertEquals(XPATH_FACTORY, closureOf("SecureXPathFactory"));
     }
 }
