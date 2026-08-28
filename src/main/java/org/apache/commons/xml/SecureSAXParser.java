@@ -44,8 +44,8 @@ final class SecureSAXParser extends SAXParser {
 
     private final SAXParser delegate;
 
-    private XMLReader hardenedReader;
-    private Parser hardenedParser;
+    private XMLReader secureXMLReader;
+    private Parser secureParser;
 
     /**
      * Constructs a new instance.
@@ -60,12 +60,12 @@ final class SecureSAXParser extends SAXParser {
     @Override
     @SuppressWarnings("deprecation")
     public Parser getParser() throws SAXException {
-        if (hardenedParser == null) {
+        if (secureParser == null) {
             final XMLReader reader = getXMLReader();
             // Reuse the reader directly if it already is a SAX 1 parser; otherwise adapt it, so the SAX 1 path runs through the same secure reader.
-            hardenedParser = reader instanceof Parser ? (Parser) reader : new XMLReaderAdapter(reader);
+            secureParser = reader instanceof Parser ? (Parser) reader : new XMLReaderAdapter(reader);
         }
-        return hardenedParser;
+        return secureParser;
     }
 
     @Override
@@ -80,10 +80,10 @@ final class SecureSAXParser extends SAXParser {
 
     @Override
     public XMLReader getXMLReader() throws SAXException {
-        if (hardenedReader == null) {
-            hardenedReader = SecureSAXParserFactory.secure(delegate.getXMLReader());
+        if (secureXMLReader == null) {
+            secureXMLReader = SecureSAXParserFactory.secure(delegate.getXMLReader());
         }
-        return hardenedReader;
+        return secureXMLReader;
     }
 
     @Override
@@ -106,8 +106,8 @@ final class SecureSAXParser extends SAXParser {
         delegate.reset();
         // The JAXP reset contract reverts the delegate to its just-created state, which strips the post-creation reader hardening.
         // We reset the cached readers, so hardening can be applied again.
-        hardenedReader = null;
-        hardenedParser = null;
+        secureXMLReader = null;
+        secureParser = null;
     }
 
     @Override
