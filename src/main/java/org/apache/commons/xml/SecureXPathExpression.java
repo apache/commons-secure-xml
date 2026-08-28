@@ -30,7 +30,7 @@ import org.xml.sax.InputSource;
  * {@link XPathExpression} wrapper that applies the same {@link InputSource} rewrite as {@link SecureXPath} to the compiled evaluation entry points.
  * <p>
  * {@link SecureXPath#compile(String)} returns one of these, so {@link #evaluate(InputSource)} and {@link #evaluate(InputSource, QName)} build the document
- * through a hardened, namespace-aware parser instead of the engine's own; the {@code evaluateExpression} default methods added by Java 9 route through these
+ * through a secure, namespace-aware parser instead of the engine's own; the {@code evaluateExpression} default methods added by Java 9 route through these
  * overloads as well.
  * </p>
  */
