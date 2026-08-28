@@ -207,10 +207,10 @@ final class AttackTestSupport {
     /**
      * Asserts a hardened DOM parse of the payload throws.
      *
-     * <p>{@link DocumentBuilder#parse(InputSource)} via {@link HardeningDocumentBuilderFactory#newInstance()}; only a thrown exception passes.</p>
+     * <p>{@link DocumentBuilder#parse(InputSource)} via {@link SecureDocumentBuilderFactory#newInstance()}; only a thrown exception passes.</p>
      */
     static void assertDomBlocks(final String payload) {
-        assertParseFails(() -> strictDocumentBuilder(HardeningDocumentBuilderFactory.newInstance()).parse(inputSource(payload)), "DOM", SAXException.class);
+        assertParseFails(() -> strictDocumentBuilder(SecureDocumentBuilderFactory.newInstance()).parse(inputSource(payload)), "DOM", SAXException.class);
     }
 
     /**
@@ -226,7 +226,7 @@ final class AttackTestSupport {
     /**
      * Asserts a hardened DOM parse completes without throwing and without leaked content.
      *
-     * <p>{@link DocumentBuilder#parse(InputSource)} via {@link HardeningDocumentBuilderFactory#newInstance()}; use this when the hardening guarantee is "the parse
+     * <p>{@link DocumentBuilder#parse(InputSource)} via {@link SecureDocumentBuilderFactory#newInstance()}; use this when the hardening guarantee is "the parse
      * succeeds but never resolves the external resource", for example, when the ignore-all resolver floor resolves the external subset to empty content.</p>
      */
     static void assertDomDoesNotLeak(final String payload) {
@@ -236,10 +236,10 @@ final class AttackTestSupport {
     /**
      * Asserts a hardened DOM parse succeeds.
      *
-     * <p>{@link DocumentBuilder#parse(InputSource)} via {@link HardeningDocumentBuilderFactory#newInstance()}; positive control for DOCTYPE-only payloads.</p>
+     * <p>{@link DocumentBuilder#parse(InputSource)} via {@link SecureDocumentBuilderFactory#newInstance()}; positive control for DOCTYPE-only payloads.</p>
      */
     static void assertDomParses(final String payload) {
-        assertParseSucceeds(() -> strictDocumentBuilder(HardeningDocumentBuilderFactory.newInstance()).parse(inputSource(payload)), "DOM");
+        assertParseSucceeds(() -> strictDocumentBuilder(SecureDocumentBuilderFactory.newInstance()).parse(inputSource(payload)), "DOM");
     }
 
     /**
@@ -834,7 +834,7 @@ final class AttackTestSupport {
     }
 
     private static String domParseAndCaptureText(final String payload) throws Exception {
-        final Document doc = strictDocumentBuilder(HardeningDocumentBuilderFactory.newInstance()).parse(inputSource(payload));
+        final Document doc = strictDocumentBuilder(SecureDocumentBuilderFactory.newInstance()).parse(inputSource(payload));
         if (doc.getDocumentElement() == null) {
             return "";
         }

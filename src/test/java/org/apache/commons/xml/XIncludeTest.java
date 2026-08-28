@@ -187,7 +187,7 @@ class XIncludeTest {
     void hardenedDomBlocksParseText() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_TEXT, "text"));
 
-        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newInstance();
+        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         final Document doc = factory.newDocumentBuilder().parse(input);
@@ -201,7 +201,7 @@ class XIncludeTest {
     void hardenedDomBlocksParseXml() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_XML, "xml"));
 
-        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newInstance();
+        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         assertThrows(SAXException.class, () -> {
@@ -215,7 +215,7 @@ class XIncludeTest {
     void hardenedDomNullResolverDoesNotLeak() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_XML, "xml"));
 
-        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newInstance();
+        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         final DocumentBuilder builder = factory.newDocumentBuilder();
@@ -229,7 +229,7 @@ class XIncludeTest {
     void hardenedDomWithAllowListResolvesParseText() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_TEXT, "text"));
 
-        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newInstance();
+        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         final DocumentBuilder builder = factory.newDocumentBuilder();
@@ -248,7 +248,7 @@ class XIncludeTest {
     void hardenedDomWithAllowListResolvesParseXml() throws Exception {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_XML, "xml"));
 
-        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newInstance();
+        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         assumeXIncludeAware(factory);
         final DocumentBuilder builder = factory.newDocumentBuilder();

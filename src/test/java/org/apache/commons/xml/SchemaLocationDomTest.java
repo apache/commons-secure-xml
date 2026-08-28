@@ -87,7 +87,7 @@ class SchemaLocationDomTest {
     @Test
     void hardenedDoesNotFetchExternalSchema() {
         assumeTrue(supportsSchemaLanguage(), "parser does not support JAXP 1.2 schema-language XSD validation");
-        final DocumentBuilderFactory factory = enableXsdValidation(HardeningDocumentBuilderFactory.newInstance());
+        final DocumentBuilderFactory factory = enableXsdValidation(SecureDocumentBuilderFactory.newInstance());
         // The schemaLocation reference resolves to empty rather than being fetched. Either the empty schema fails the validating parse (acceptable), or the
         // parse completes but the schema's default leak attribute is never inlined. Either way the marker must not reach the DOM.
         try {

@@ -58,7 +58,7 @@ class HardeningFactoriesSmokeTest {
      */
     @Test
     void publicClassesDoNotExtendTheirJaxpFactoryType() {
-        assertFalse(DocumentBuilderFactory.class.isAssignableFrom(HardeningDocumentBuilderFactory.class));
+        assertFalse(DocumentBuilderFactory.class.isAssignableFrom(SecureDocumentBuilderFactory.class));
         assertFalse(SAXParserFactory.class.isAssignableFrom(HardeningSAXParserFactory.class));
         assertFalse(SchemaFactory.class.isAssignableFrom(HardeningSchemaFactory.class));
         assertFalse(TransformerFactory.class.isAssignableFrom(HardeningTransformerFactory.class));
@@ -68,28 +68,28 @@ class HardeningFactoriesSmokeTest {
 
     @Test
     void benignDocumentParses() throws Exception {
-        final Document doc = HardeningDocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(BENIGN_XML)));
+        final Document doc = SecureDocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(BENIGN_XML)));
         assertNotNull(doc);
         assertNotNull(doc.getDocumentElement());
     }
 
     @Test
     void newDocumentBuilderFactoryDisablesXIncludeAndValidation() {
-        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newInstance();
+        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
         assertFalse(factory.isXIncludeAware(), "XInclude must be off by default");
         assertFalse(factory.isValidating(), "Validation must be off by default");
     }
 
     @Test
     void newDocumentBuilderFactoryEnablesSecureProcessing() throws Exception {
-        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newInstance();
+        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING), "FEATURE_SECURE_PROCESSING must be on");
     }
 
     @Test
     void newDocumentBuilderFactoryReturnsFreshInstance() {
-        final DocumentBuilderFactory a = HardeningDocumentBuilderFactory.newInstance();
-        final DocumentBuilderFactory b = HardeningDocumentBuilderFactory.newInstance();
+        final DocumentBuilderFactory a = SecureDocumentBuilderFactory.newInstance();
+        final DocumentBuilderFactory b = SecureDocumentBuilderFactory.newInstance();
         assertNotNull(a);
         assertNotNull(b);
         assertNotSame(a, b);
@@ -141,7 +141,7 @@ class HardeningFactoriesSmokeTest {
     @Test
     void explicitClassNameDocumentBuilderFactoryIsHardened() throws Exception {
         final Class<?> impl = DocumentBuilderFactory.newInstance().getClass();
-        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newInstance(impl.getName(), impl.getClassLoader());
+        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance(impl.getName(), impl.getClassLoader());
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 
@@ -196,7 +196,7 @@ class HardeningFactoriesSmokeTest {
 
     @Test
     void unknownFactoryClassNameThrows() {
-        assertThrows(FactoryConfigurationError.class, () -> HardeningDocumentBuilderFactory.newInstance("no.such.FactoryClass", null));
+        assertThrows(FactoryConfigurationError.class, () -> SecureDocumentBuilderFactory.newInstance("no.such.FactoryClass", null));
     }
 
     // The newDefault* methods resolve the Java 9 JAXP method at runtime and fall back to the JDK's built-in implementation on Java 8. The dom and sax
@@ -206,10 +206,10 @@ class HardeningFactoriesSmokeTest {
     @Tag("dom")
     void newDefaultInstanceDocumentBuilderFactoryIsUsable() throws Exception {
         if (AttackTestSupport.IS_ANDROID) {
-            assertThrows(FactoryConfigurationError.class, HardeningDocumentBuilderFactory::newDefaultInstance);
+            assertThrows(FactoryConfigurationError.class, SecureDocumentBuilderFactory::newDefaultInstance);
             return;
         }
-        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newDefaultInstance();
+        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newDefaultInstance();
         assertNotNull(factory.newDocumentBuilder().parse(new InputSource(new StringReader(BENIGN_XML))).getDocumentElement());
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
@@ -231,7 +231,7 @@ class HardeningFactoriesSmokeTest {
     @Test
     @Tag("dom")
     void newNSInstanceDocumentBuilderFactoryIsNamespaceAware() throws Exception {
-        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newNSInstance();
+        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newNSInstance();
         assertTrue(factory.isNamespaceAware());
         assertNotNull(factory.newDocumentBuilder().parse(new InputSource(new StringReader(BENIGN_XML))).getDocumentElement());
         if (!AttackTestSupport.IS_ANDROID) {
@@ -243,10 +243,10 @@ class HardeningFactoriesSmokeTest {
     @Tag("dom")
     void newDefaultNSInstanceDocumentBuilderFactoryIsNamespaceAware() throws Exception {
         if (AttackTestSupport.IS_ANDROID) {
-            assertThrows(FactoryConfigurationError.class, HardeningDocumentBuilderFactory::newDefaultNSInstance);
+            assertThrows(FactoryConfigurationError.class, SecureDocumentBuilderFactory::newDefaultNSInstance);
             return;
         }
-        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newDefaultNSInstance();
+        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newDefaultNSInstance();
         assertTrue(factory.isNamespaceAware());
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
@@ -277,7 +277,7 @@ class HardeningFactoriesSmokeTest {
     @Test
     void explicitClassNameNSDocumentBuilderFactoryIsNamespaceAware() throws Exception {
         final Class<?> impl = DocumentBuilderFactory.newInstance().getClass();
-        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newNSInstance(impl.getName(), impl.getClassLoader());
+        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newNSInstance(impl.getName(), impl.getClassLoader());
         assertTrue(factory.isNamespaceAware());
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }

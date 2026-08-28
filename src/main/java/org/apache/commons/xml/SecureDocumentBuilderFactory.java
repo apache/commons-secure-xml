@@ -46,7 +46,7 @@ import org.xml.sax.EntityResolver;
  *
  * @see org.apache.commons.xml
  */
-public final class HardeningDocumentBuilderFactory {
+public final class SecureDocumentBuilderFactory {
 
     /** Class name of Android's Harmony-based {@link DocumentBuilderFactory}, which exposes no hardening surface. */
     private static final String ANDROID_DOCUMENT_BUILDER_FACTORY = "org.apache.harmony.xml.parsers.DocumentBuilderFactoryImpl";
@@ -236,7 +236,7 @@ public final class HardeningDocumentBuilderFactory {
         }
     }
 
-    private HardeningDocumentBuilderFactory() {
+    private SecureDocumentBuilderFactory() {
         // static only
     }
 

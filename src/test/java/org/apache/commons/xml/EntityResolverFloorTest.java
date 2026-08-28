@@ -126,7 +126,7 @@ class EntityResolverFloorTest {
     }
 
     private static DocumentBuilder hardenedBuilder() throws Exception {
-        final DocumentBuilder builder = HardeningDocumentBuilderFactory.newInstance().newDocumentBuilder();
+        final DocumentBuilder builder = SecureDocumentBuilderFactory.newInstance().newDocumentBuilder();
         builder.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
         return builder;
     }
@@ -168,7 +168,7 @@ class EntityResolverFloorTest {
     }
 
     private static DocumentBuilder xIncludeAwareBuilder() throws Exception {
-        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newInstance();
+        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         AttackTestSupport.assumeDoesNotThrow(() -> factory.setXIncludeAware(true));
         final DocumentBuilder builder = factory.newDocumentBuilder();

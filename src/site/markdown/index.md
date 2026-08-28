@@ -87,7 +87,7 @@ requires a code change to this library.
 
 ```java
 import org.w3c.dom.Document;
-import org.apache.commons.xml.HardeningDocumentBuilderFactory;
+import org.apache.commons.xml.SecureDocumentBuilderFactory;
 
 Document doc = HardeningDocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputStream);
 ```

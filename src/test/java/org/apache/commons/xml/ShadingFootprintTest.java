@@ -59,9 +59,9 @@ class ShadingFootprintTest {
     private static final Set<String> DOCUMENT_BUILDER_FACTORY = set(
             "FallbackIgnoreEntityResolver2",
             "SecureDocumentBuilder",
-            "HardeningDocumentBuilderFactory",
-            "HardeningDocumentBuilderFactory$1",
-            "HardeningDocumentBuilderFactory$Wrapper",
+            "SecureDocumentBuilderFactory",
+            "SecureDocumentBuilderFactory$1",
+            "SecureDocumentBuilderFactory$Wrapper",
             "HardeningException",
             "MethodHandleFactory");
     // @formatter:on
@@ -99,9 +99,9 @@ class ShadingFootprintTest {
             "FallbackIgnoreEntityResolver2",
             "FallbackIgnoreURIResolver",
             "SecureDocumentBuilder",
-            "HardeningDocumentBuilderFactory",
-            "HardeningDocumentBuilderFactory$1",
-            "HardeningDocumentBuilderFactory$Wrapper",
+            "SecureDocumentBuilderFactory",
+            "SecureDocumentBuilderFactory$1",
+            "SecureDocumentBuilderFactory$Wrapper",
             "HardeningException",
             "HardeningSAXParser",
             "HardeningSAXParserFactory",
@@ -128,9 +128,9 @@ class ShadingFootprintTest {
             "FallbackIgnoreEntityResolver2",
             "FallbackIgnoreURIResolver",
             "SecureDocumentBuilder",
-            "HardeningDocumentBuilderFactory",
-            "HardeningDocumentBuilderFactory$1",
-            "HardeningDocumentBuilderFactory$Wrapper",
+            "SecureDocumentBuilderFactory",
+            "SecureDocumentBuilderFactory$1",
+            "SecureDocumentBuilderFactory$Wrapper",
             "MethodHandleFactory",
             "HardeningException",
             "HardeningSAXParser",
@@ -177,7 +177,7 @@ class ShadingFootprintTest {
     /**
      * Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library.
      */
-    private static final String[] REPORTED = {"HardeningDocumentBuilderFactory", "HardeningSAXParserFactory", "HardeningXMLInputFactory",
+    private static final String[] REPORTED = {"SecureDocumentBuilderFactory", "HardeningSAXParserFactory", "HardeningXMLInputFactory",
             "HardeningTransformerFactory", "HardeningXPathFactory", "HardeningSchemaFactory"};
 
     private static Clazzpath clazzpath;
@@ -242,7 +242,7 @@ class ShadingFootprintTest {
     }
 
     private static Set<String> rootClosure() {
-        return closureOf("HardeningDocumentBuilderFactory");
+        return closureOf("SecureDocumentBuilderFactory");
     }
 
     /**
@@ -264,12 +264,12 @@ class ShadingFootprintTest {
 
     @Test
     void documentBuilderFactoryFootprint() {
-        assertEquals(DOCUMENT_BUILDER_FACTORY, closureOf("HardeningDocumentBuilderFactory"));
+        assertEquals(DOCUMENT_BUILDER_FACTORY, closureOf("SecureDocumentBuilderFactory"));
     }
 
     @Test
     void rootClosureMatchesDocumentBuilderFootprint() {
-        assertEquals(LIBRARY_CLASS_COUNT, rootClosure().size(), "HardeningDocumentBuilderFactory closure size drifted");
+        assertEquals(LIBRARY_CLASS_COUNT, rootClosure().size(), "SecureDocumentBuilderFactory closure size drifted");
     }
 
     @Test

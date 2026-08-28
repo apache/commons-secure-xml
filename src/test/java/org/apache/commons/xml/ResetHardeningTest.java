@@ -59,7 +59,7 @@ class ResetHardeningTest {
     @Tag("dom")
     void documentBuilderResetKeepsEntityResolverFloor() throws Exception {
         Assumptions.assumeTrue(AttackTestSupport.DOM_RESOLVES_INTERNAL_ENTITIES, "platform DOM does not resolve user-defined entities");
-        final DocumentBuilder builder = HardeningDocumentBuilderFactory.newInstance().newDocumentBuilder();
+        final DocumentBuilder builder = SecureDocumentBuilderFactory.newInstance().newDocumentBuilder();
         AttackTestSupport.assumeDoesNotThrow(builder::reset);
         try {
             final Document doc = builder.parse(AttackTestSupport.inputSource(entityPayload(UNLISTED)));

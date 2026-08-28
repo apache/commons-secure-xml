@@ -93,7 +93,7 @@ class UnsupportedXmlImplementationTest {
     void hardenRejectsUnsecurableFactory() {
         final IllegalStateException thrown = assertThrows(
                 IllegalStateException.class,
-                () -> HardeningDocumentBuilderFactory.harden(new FakeDocumentBuilderFactory()));
+                () -> SecureDocumentBuilderFactory.harden(new FakeDocumentBuilderFactory()));
         assertNotNull(thrown.getMessage());
         assertTrue(thrown.getMessage().contains(FakeDocumentBuilderFactory.class.getName()),
                 "Exception message must name the unsupported class: " + thrown.getMessage());

@@ -82,7 +82,7 @@ class SchemaLocationPropertyTest {
 
     private static DocumentBuilder hardenedValidatingDom(final String property, final String value) {
         return configureOrSkip(() -> {
-            final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newInstance();
+            final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(true);
             factory.setValidating(true);
             factory.setAttribute(SCHEMA_LANGUAGE, XMLConstants.W3C_XML_SCHEMA_NS_URI);
