@@ -64,7 +64,6 @@ final class SecureDocumentBuilder extends DocumentBuilder {
         return delegate.getSchema();
     }
 
-
     @Override
     public boolean isNamespaceAware() {
         return delegate.isNamespaceAware();
