@@ -72,7 +72,7 @@ public final class SecureSAXParserFactory {
     /** System property naming the {@link SAXParserFactory} implementation, the JDK's own mechanism for reconfiguring the default parser. */
     private static final String SAX_FACTORY_ID = "javax.xml.parsers.SAXParserFactory";
 
-    private static final MethodHandle NEW_DEFAULT_INSTANCE = MethodHandleFactory.findStatic(SAXParserFactory.class, "newDefaultInstance",
+    private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(SAXParserFactory.class, "newDefaultInstance",
             MethodType.methodType(SAXParserFactory.class));
 
     /**
@@ -179,10 +179,10 @@ public final class SecureSAXParserFactory {
      *                                   (for example Android).
      */
     public static SAXParserFactory newDefaultInstance() {
-        if (NEW_DEFAULT_INSTANCE != null) {
+        if (MH_newDefaultInstance != null) {
             final SAXParserFactory factory;
             try {
-                factory = (SAXParserFactory) NEW_DEFAULT_INSTANCE.invokeExact();
+                factory = (SAXParserFactory) MH_newDefaultInstance.invokeExact();
             } catch (final FactoryConfigurationError e) {
                 throw e;
             } catch (final Throwable e) {
