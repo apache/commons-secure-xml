@@ -39,7 +39,7 @@ import javax.xml.xpath.XPathVariableResolver;
  * input document is built through a secure, namespace-aware {@link javax.xml.parsers.DocumentBuilder} instead of the engine's internal parser.
  * </p>
  * <p>
- * Not a {@link XPathFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-hardened factory through this class
+ * Not a {@link XPathFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-secured factory through this class
  * by calling an inherited method such as {@code newDefaultInstance()}. The secure factories are instances of a nested, non-public wrapper class.
  * </p>
  *
