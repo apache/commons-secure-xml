@@ -49,7 +49,7 @@ import org.xml.sax.XMLFilter;
 import org.xml.sax.XMLReader;
 
 /**
- * Creates new, hardened {@link TransformerFactory} instances.
+ * Creates new, secure {@link TransformerFactory} instances.
  * <p>
  * Beyond the three universal guarantees on {@link org.apache.commons.xml}: {@code xsl:import}, {@code xsl:include} and {@code document()} URIs are not resolved.
  * </p>
@@ -69,7 +69,7 @@ import org.xml.sax.XMLReader;
  * </p>
  * <p>
  * Not a {@link TransformerFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-hardened factory through this class
- * by calling an inherited method such as {@code newDefaultInstance()}. The hardened factories are instances of a nested, non-public wrapper class.
+ * by calling an inherited method such as {@code newDefaultInstance()}. The secure factories are instances of a nested, non-public wrapper class.
  * </p>
  *
  * @see org.apache.commons.xml
@@ -103,7 +103,7 @@ public final class SecureTransformerFactory {
      * </ul>
      *
      * @param factory the factory to harden; never {@code null}.
-     * @return a hardened factory.
+     * @return a secure factory.
      */
     static TransformerFactory secure(final TransformerFactory factory) {
         // Required: enables secure processing (XSLTC runtime limits; Xalan's extension-function block).
@@ -114,19 +114,19 @@ public final class SecureTransformerFactory {
             // EmptySource is the empty-source shape Saxon's consumers expect.
             return new Wrapper((SAXTransformerFactory) SaxonProvider.configure(factory), SaxonProvider.emptySourceSupplier());
         }
-        // Required: source/stylesheet parsing provisions its own SAX reader otherwise; the wrapper routes every Source through a hardened one and installs the
+        // Required: source/stylesheet parsing provisions its own SAX reader otherwise; the wrapper routes every Source through a secure one and installs the
         // ignore-all URIResolver floor (blocking xsl:import/include at compile time and document() at runtime) that a caller-set resolver cannot remove.
         return new Wrapper((SAXTransformerFactory) factory);
     }
 
     /**
-     * Returns a new, hardened {@link TransformerFactory} of the system-default implementation.
+     * Returns a new, secure {@link TransformerFactory} of the system-default implementation.
      * <p>
      * Obtained as by {@code TransformerFactory.newDefaultInstance()} where the platform provides it (Java 9 or later), and by instantiating the JDK's built-in
      * implementation directly on Java 8.
      * </p>
      *
-     * @return A hardened factory.
+     * @return A secure factory.
      * @throws IllegalStateException                Thrown if a required hardening setting cannot be applied to the underlying implementation.
      * @throws TransformerFactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in
      *                                                implementation (for example Android).
@@ -150,9 +150,9 @@ public final class SecureTransformerFactory {
     }
 
     /**
-     * Returns a new, hardened {@link TransformerFactory}.
+     * Returns a new, secure {@link TransformerFactory}.
      *
-     * @return A hardened factory.
+     * @return A secure factory.
      * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
      */
     public static TransformerFactory newInstance() {
@@ -160,11 +160,11 @@ public final class SecureTransformerFactory {
     }
 
     /**
-     * Returns a new, hardened {@link TransformerFactory} of the given implementation class.
+     * Returns a new, secure {@link TransformerFactory} of the given implementation class.
      *
      * @param factoryClassName The fully qualified class name of the {@link TransformerFactory} implementation.
      * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
-     * @return A hardened factory.
+     * @return A secure factory.
      * @throws IllegalStateException                Thrown if a required hardening setting cannot be applied to the underlying implementation.
      * @throws TransformerFactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
      */
@@ -208,7 +208,7 @@ public final class SecureTransformerFactory {
      *
      * <h2>Caveats</h2>
      * <ul>
-     *   <li>A {@link SAXSource} that carries its own {@link XMLReader} is trusted as-is: the caller is expected to supply a hardened reader (via
+     *   <li>A {@link SAXSource} that carries its own {@link XMLReader} is trusted as-is: the caller is expected to supply a secure reader (via
      *       {@link SecureSAXParserFactory#newInstance()}) in that case. The same applies to the SAX events a caller feeds into a handler, and to a parent reader a
      *       caller sets on a returned {@link XMLFilter}.</li>
      * </ul>
@@ -326,8 +326,8 @@ public final class SecureTransformerFactory {
         public Source getAssociatedStylesheet(final Source source, final String media, final String title, final String charset)
                 throws TransformerConfigurationException {
             // Xalan's getAssociatedStylesheet drops a SAXSource's reader and self-provisions its own to scan for xml-stylesheet PIs (XALANJ-2849).
-            final Source hardened = isXalan(delegate) ? hardenSourceToDom(source) : SecureSAXParserFactory.secure(source, overrideDefaultParser());
-            return delegate.getAssociatedStylesheet(hardened, media, title, charset);
+            final Source secure = isXalan(delegate) ? hardenSourceToDom(source) : SecureSAXParserFactory.secure(source, overrideDefaultParser());
+            return delegate.getAssociatedStylesheet(secure, media, title, charset);
         }
 
         @Override
