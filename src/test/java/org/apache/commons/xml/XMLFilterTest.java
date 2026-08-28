@@ -37,7 +37,7 @@ import org.xml.sax.XMLFilter;
 /**
  * {@link XMLFilter} products of the secure factory: the input document is parsed by a secure reader (never a self-provisioned permissive one), and the
  * transformation runs on the resolver floor, so neither an external entity in the input nor a stylesheet's runtime {@code document()} fetches. The
- * unconfigured controls prove both vectors leak without the hardening. The {@code Templates} overload doubles as a regression test for handing the factory a
+ * unconfigured controls prove both vectors leak without the securing. The {@code Templates} overload doubles as a regression test for handing the factory a
  * wrapped {@code Templates}.
  */
 @Tag("trax")
