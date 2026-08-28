@@ -40,6 +40,7 @@ The <action> type attribute can be add, update, fix, or remove.
       <action type="add" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Harden the SAXTransformerFactory extension surface (TransformerHandler, TemplatesHandler, and XMLFilter) and TransformerFactory.getAssociatedStylesheet.</action>
       <action type="add" dev="ppkarwasz" due-to="Piotr P. Karwasz, Jarek Potiuk, Gary Gregory">Document the threat model on the project site, including the denied-fetch contract and the supported runtime floor (OpenJDK 8 and Android API 33 or later).</action>
       <action type="add" dev="ppkarwasz" due-to="Gary Gregory, Piotr P. Karwasz" issue="COMMONSXML-11">Add GitHub CI builds for Java 26 and 27-EA.</action>
+      <action type="add" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Mirror on each factory class every JAXP static factory method, including the Java 9 newDefaultInstance and Java 13 newNSInstance families, all usable on Java 8.</action>
       <!-- FIX -->
       <action type="fix" dev="ppkarwasz" due-to="Ta Duc Thien, Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-10">Block XInclude (xi:include) href resolution by default, since the JAXP external-access properties do not govern it.</action>
       <action type="fix" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Restore the hardened configuration when a factory or parser is reset() instead of reverting to the implementation defaults.</action>
