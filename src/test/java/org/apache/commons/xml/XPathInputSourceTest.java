@@ -61,7 +61,7 @@ class XPathInputSourceTest {
         // Positive control: the secure pre-parse still evaluates an entity-free document end to end.
         final String result = SecureXPathFactory.newInstance().newXPath().evaluate(EXPRESSION,
                 AttackTestSupport.inputSource(AttackTestSupport.xmlBody("plain text")));
-        assertEquals("plain text", result, "hardened XPath should evaluate a plain document");
+        assertEquals("plain text", result, "secured XPath should evaluate a plain document");
     }
 
     @Test
