@@ -153,7 +153,7 @@ public final class SecureSchemaFactory {
      *       through {@link SecureSAXParserFactory#harden(Source, boolean)}.</li>
      *   <li>{@link SecureSchema} wraps every Validator/ValidatorHandler the inner Schema produces and re-installs the floor on each (blocking
      *       {@code xsi:schemaLocation} at validation time), since neither the JDK nor Xerces reliably propagates it through {@code Schema}.</li>
-     *   <li>{@link HardeningValidator} rewrites the Source on every {@link Validator#validate(Source)} call.</li>
+     *   <li>{@link SecureValidator} rewrites the Source on every {@link Validator#validate(Source)} call.</li>
      * </ol>
      *
      * <p>

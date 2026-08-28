@@ -25,7 +25,7 @@ import javax.xml.validation.ValidatorHandler;
 
 /**
  * {@link Schema} wrapper that hardens every {@link Validator} and {@link ValidatorHandler} the inner Schema produces: each {@link Validator} is wrapped in
- * {@link HardeningValidator} (which rewrites the Source through {@link SecureSAXParserFactory#harden(javax.xml.transform.Source, boolean)} and installs the resolver
+ * {@link SecureValidator} (which rewrites the Source through {@link SecureSAXParserFactory#harden(javax.xml.transform.Source, boolean)} and installs the resolver
  * floor), and each {@link ValidatorHandler} is wrapped in a {@link HardeningValidatorHandler} that keeps the same ignore-all resolver floor so
  * {@code xsi:schemaLocation} is not resolved during SAX-driven validation.
  */
@@ -52,7 +52,7 @@ final class SecureSchema extends Schema {
 
     @Override
     public Validator newValidator() {
-        return new HardeningValidator(delegate.newValidator(), overrideDefaultParser);
+        return new SecureValidator(delegate.newValidator(), overrideDefaultParser);
     }
 
     @Override

@@ -37,7 +37,7 @@ import org.xml.sax.SAXNotSupportedException;
  * {@link SecureSAXParserFactory#harden(Source, boolean)} before delegating, and keeps an ignore-all {@link LSResourceResolver} floor so {@code xsi:schemaLocation} is not resolved at
  * validation time. {@link #reset()} re-establishes the bare ignore-all floor, matching the just-constructed state.
  */
-final class HardeningValidator extends Validator {
+final class SecureValidator extends Validator {
 
     private final Validator delegate;
 
@@ -56,7 +56,7 @@ final class HardeningValidator extends Validator {
      * @param overrideDefaultParser whether the source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningValidator(final Validator delegate, final boolean overrideDefaultParser) {
+    SecureValidator(final Validator delegate, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
         this.overrideDefaultParser = overrideDefaultParser;
         // Block xsi:schemaLocation resolution; neither the JDK nor Xerces reliably propagates the factory's resolver to its Validators. The floor is a
