@@ -49,108 +49,6 @@ import javax.xml.transform.Source;
  */
 public final class SecureXMLInputFactory {
 
-    /** Woodstox property: resolver consulted for the external DTD subset. */
-    static final String WSTX_DTD_RESOLVER = "com.ctc.wstx.dtdResolver";
-    /** Woodstox property: resolver consulted for declared external general entities. */
-    static final String WSTX_ENTITY_RESOLVER = "com.ctc.wstx.entityResolver";
-    /** Woodstox property: resolver consulted for undeclared entity references. */
-    static final String WSTX_UNDECLARED_ENTITY_RESOLVER = "com.ctc.wstx.undeclaredEntityResolver";
-    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultFactory()}. */
-    private static final String JDK_XML_INPUT_FACTORY = "com.sun.xml.internal.stream.XMLInputFactoryImpl";
-
-    private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(XMLInputFactory.class, "newDefaultFactory",
-            MethodType.methodType(XMLInputFactory.class));
-
-    /**
-     * Capability-driven secure for any {@link XMLInputFactory} (StAX) on the classpath.
-     *
-     * <p>One recipe covers both the JDK Zephyr and Woodstox: the wrapper installs a non-removable {@link FallbackIgnoreXMLResolver} floor on
-     * every entity-resolution hook, leaving the standard {@code SUPPORT_DTD} / {@code IS_SUPPORTING_EXTERNAL_ENTITIES} defaults untouched; see the wrapper's
-     * Javadoc for the per-implementation hook routing.</p>
-     *
-     * @param factory the factory to harden; never {@code null}.
-     * @return a secure factory.
-     */
-    static XMLInputFactory secure(final XMLInputFactory factory) {
-        // The wrapper installs the non-removable ignore-all resolver floor that resolves every external DTD and entity to empty content.
-        return new Wrapper(factory);
-    }
-
-    /**
-     * Returns a new, secure {@link XMLInputFactory} of the system-default implementation.
-     * <p>
-     * Obtained as by {@code XMLInputFactory.newDefaultFactory()} where the platform provides it (Java 9 or later), and by instantiating the JDK's built-in
-     * implementation directly on Java 8.
-     * </p>
-     *
-     * @return A secure factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultFactory()} nor the JDK's built-in implementation
-     *                                   (for example Android).
-     */
-    public static XMLInputFactory newDefaultFactory() {
-        if (MH_newDefaultInstance != null) {
-            final XMLInputFactory factory;
-            try {
-                factory = (XMLInputFactory) MH_newDefaultInstance.invokeExact();
-            } catch (final FactoryConfigurationError e) {
-                throw e;
-            } catch (final Throwable e) {
-                // Unreachable: the looked-up method declares no other exceptions.
-                throw new IllegalStateException(e);
-            }
-            return secure(factory);
-        }
-        try {
-            // Java 8: the method does not exist, and XMLInputFactory has no class-name-taking lookup; instantiate the JDK's built-in default directly.
-            return secure((XMLInputFactory) Class.forName(JDK_XML_INPUT_FACTORY).getConstructor().newInstance());
-        } catch (final ReflectiveOperationException e) {
-            // Where the class does not exist either (for example Android), report the miss like any StAX factory lookup: with FactoryConfigurationError.
-            throw new FactoryConfigurationError(e, "Neither XMLInputFactory.newDefaultFactory() nor " + JDK_XML_INPUT_FACTORY + " is available");
-        }
-    }
-
-    /**
-     * Returns a new, secure {@link XMLInputFactory}, as by {@link XMLInputFactory#newFactory()}.
-     *
-     * @return A secure factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown if an instance of this factory cannot be loaded.
-     */
-    public static XMLInputFactory newFactory() {
-        // XMLInputFactory.newInstance, not newFactory: the same specified lookup, but Android's StAX API predates newFactory.
-        return secure(XMLInputFactory.newInstance());
-    }
-
-    /**
-     * Returns a new, secure {@link XMLInputFactory} resolved from the given factory id.
-     *
-     * @param factoryId   The name of the factory to find; a system property or service id to look up, not the class name of the implementation.
-     * @param classLoader The class loader used in the lookup; {@code null} means the current thread's context class loader.
-     * @return A secure factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown in case of a service configuration error or if the implementation is not available or cannot be instantiated.
-     * @throws NullPointerException      Thrown if {@code factoryId} is {@code null}.
-     */
-    public static XMLInputFactory newFactory(final String factoryId, final ClassLoader classLoader) {
-        return secure(XMLInputFactory.newFactory(factoryId, classLoader));
-    }
-
-    /**
-     * Returns a new, secure {@link XMLInputFactory}.
-     *
-     * @return A secure factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown if an instance of this factory cannot be loaded.
-     */
-    public static XMLInputFactory newInstance() {
-        return secure(XMLInputFactory.newInstance());
-    }
-
-    private SecureXMLInputFactory() {
-        // static only
-    }
-
     /**
      * {@link XMLInputFactory} wrapper that installs a non-removable {@link FallbackIgnoreXMLResolver} floor on the delegate's entity-resolution hook and keeps it
      * non-removable by the caller.
@@ -346,5 +244,107 @@ public final class SecureXMLInputFactory {
         public void setXMLResolver(final XMLResolver resolver) {
             setResolverProperty(XMLInputFactory.RESOLVER, resolver);
         }
+    }
+    /** Woodstox property: resolver consulted for the external DTD subset. */
+    static final String WSTX_DTD_RESOLVER = "com.ctc.wstx.dtdResolver";
+    /** Woodstox property: resolver consulted for declared external general entities. */
+    static final String WSTX_ENTITY_RESOLVER = "com.ctc.wstx.entityResolver";
+    /** Woodstox property: resolver consulted for undeclared entity references. */
+    static final String WSTX_UNDECLARED_ENTITY_RESOLVER = "com.ctc.wstx.undeclaredEntityResolver";
+
+    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultFactory()}. */
+    private static final String JDK_XML_INPUT_FACTORY = "com.sun.xml.internal.stream.XMLInputFactoryImpl";
+
+    private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(XMLInputFactory.class, "newDefaultFactory",
+            MethodType.methodType(XMLInputFactory.class));
+
+    /**
+     * Returns a new, secure {@link XMLInputFactory} of the system-default implementation.
+     * <p>
+     * Obtained as by {@code XMLInputFactory.newDefaultFactory()} where the platform provides it (Java 9 or later), and by instantiating the JDK's built-in
+     * implementation directly on Java 8.
+     * </p>
+     *
+     * @return A secure factory.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultFactory()} nor the JDK's built-in implementation
+     *                                   (for example Android).
+     */
+    public static XMLInputFactory newDefaultFactory() {
+        if (MH_newDefaultInstance != null) {
+            final XMLInputFactory factory;
+            try {
+                factory = (XMLInputFactory) MH_newDefaultInstance.invokeExact();
+            } catch (final FactoryConfigurationError e) {
+                throw e;
+            } catch (final Throwable e) {
+                // Unreachable: the looked-up method declares no other exceptions.
+                throw new IllegalStateException(e);
+            }
+            return secure(factory);
+        }
+        try {
+            // Java 8: the method does not exist, and XMLInputFactory has no class-name-taking lookup; instantiate the JDK's built-in default directly.
+            return secure((XMLInputFactory) Class.forName(JDK_XML_INPUT_FACTORY).getConstructor().newInstance());
+        } catch (final ReflectiveOperationException e) {
+            // Where the class does not exist either (for example Android), report the miss like any StAX factory lookup: with FactoryConfigurationError.
+            throw new FactoryConfigurationError(e, "Neither XMLInputFactory.newDefaultFactory() nor " + JDK_XML_INPUT_FACTORY + " is available");
+        }
+    }
+
+    /**
+     * Returns a new, secure {@link XMLInputFactory}, as by {@link XMLInputFactory#newFactory()}.
+     *
+     * @return A secure factory.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if an instance of this factory cannot be loaded.
+     */
+    public static XMLInputFactory newFactory() {
+        // XMLInputFactory.newInstance, not newFactory: the same specified lookup, but Android's StAX API predates newFactory.
+        return secure(XMLInputFactory.newInstance());
+    }
+
+    /**
+     * Returns a new, secure {@link XMLInputFactory} resolved from the given factory id.
+     *
+     * @param factoryId   The name of the factory to find; a system property or service id to look up, not the class name of the implementation.
+     * @param classLoader The class loader used in the lookup; {@code null} means the current thread's context class loader.
+     * @return A secure factory.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown in case of a service configuration error or if the implementation is not available or cannot be instantiated.
+     * @throws NullPointerException      Thrown if {@code factoryId} is {@code null}.
+     */
+    public static XMLInputFactory newFactory(final String factoryId, final ClassLoader classLoader) {
+        return secure(XMLInputFactory.newFactory(factoryId, classLoader));
+    }
+
+    /**
+     * Returns a new, secure {@link XMLInputFactory}.
+     *
+     * @return A secure factory.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if an instance of this factory cannot be loaded.
+     */
+    public static XMLInputFactory newInstance() {
+        return secure(XMLInputFactory.newInstance());
+    }
+
+    /**
+     * Capability-driven secure for any {@link XMLInputFactory} (StAX) on the classpath.
+     *
+     * <p>One recipe covers both the JDK Zephyr and Woodstox: the wrapper installs a non-removable {@link FallbackIgnoreXMLResolver} floor on
+     * every entity-resolution hook, leaving the standard {@code SUPPORT_DTD} / {@code IS_SUPPORTING_EXTERNAL_ENTITIES} defaults untouched; see the wrapper's
+     * Javadoc for the per-implementation hook routing.</p>
+     *
+     * @param factory the factory to harden; never {@code null}.
+     * @return a secure factory.
+     */
+    static XMLInputFactory secure(final XMLInputFactory factory) {
+        // The wrapper installs the non-removable ignore-all resolver floor that resolves every external DTD and entity to empty content.
+        return new Wrapper(factory);
+    }
+
+    private SecureXMLInputFactory() {
+        // static only
     }
 }

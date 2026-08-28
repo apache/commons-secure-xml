@@ -48,47 +48,145 @@ import org.xml.sax.EntityResolver;
  */
 public final class SecureDocumentBuilderFactory {
 
+    /**
+     * {@link DocumentBuilderFactory} wrapper that keeps an ignore-all {@link EntityResolver} floor on every {@link DocumentBuilder} produced.
+     * <p>
+     * Wraps each produced builder in a {@link SecureDocumentBuilder}; required when the underlying factory carries no resolver of its own and does not honor
+     * JAXP 1.5 {@code ACCESS_EXTERNAL_*} (e.g. the external Xerces distribution). A caller-set resolver is routed through the floor rather than replacing it. Kept
+     * as a standalone wrapper so any hardener can reuse the floor.
+     * </p>
+     *
+     * @see org.apache.commons.xml
+     */
+    private static final class Wrapper extends DocumentBuilderFactory {
+
+        private final DocumentBuilderFactory delegate;
+
+        /**
+         * Constructs a new instance.
+         *
+         * @param delegate the delegate to wrap; must not be {@code null}.
+         * @throws NullPointerException if {@code delegate} is {@code null}.
+         */
+        private Wrapper(final DocumentBuilderFactory delegate) {
+            this.delegate = Objects.requireNonNull(delegate, "delegate");
+        }
+
+        @Override
+        public Object getAttribute(final String name) {
+            return delegate.getAttribute(name);
+        }
+
+        @Override
+        public boolean getFeature(final String name) throws ParserConfigurationException {
+            return delegate.getFeature(name);
+        }
+
+        @Override
+        public Schema getSchema() {
+            return delegate.getSchema();
+        }
+
+        @Override
+        public boolean isCoalescing() {
+            return delegate.isCoalescing();
+        }
+
+        @Override
+        public boolean isExpandEntityReferences() {
+            return delegate.isExpandEntityReferences();
+        }
+
+        @Override
+        public boolean isIgnoringComments() {
+            return delegate.isIgnoringComments();
+        }
+
+        @Override
+        public boolean isIgnoringElementContentWhitespace() {
+            return delegate.isIgnoringElementContentWhitespace();
+        }
+
+        @Override
+        public boolean isNamespaceAware() {
+            return delegate.isNamespaceAware();
+        }
+
+        @Override
+        public boolean isValidating() {
+            return delegate.isValidating();
+        }
+
+        @Override
+        public boolean isXIncludeAware() {
+            return delegate.isXIncludeAware();
+        }
+
+        @Override
+        public DocumentBuilder newDocumentBuilder() throws ParserConfigurationException {
+            return new SecureDocumentBuilder(delegate.newDocumentBuilder());
+        }
+
+        @Override
+        public void setAttribute(final String name, final Object value) {
+            delegate.setAttribute(name, value);
+        }
+
+        @Override
+        public void setCoalescing(final boolean coalescing) {
+            delegate.setCoalescing(coalescing);
+        }
+
+        @Override
+        public void setExpandEntityReferences(final boolean expandEntityRef) {
+            delegate.setExpandEntityReferences(expandEntityRef);
+        }
+
+        @Override
+        public void setFeature(final String name, final boolean value) throws ParserConfigurationException {
+            delegate.setFeature(name, value);
+        }
+
+        @Override
+        public void setIgnoringComments(final boolean ignoreComments) {
+            delegate.setIgnoringComments(ignoreComments);
+        }
+
+        @Override
+        public void setIgnoringElementContentWhitespace(final boolean whitespace) {
+            delegate.setIgnoringElementContentWhitespace(whitespace);
+        }
+
+        @Override
+        public void setNamespaceAware(final boolean awareness) {
+            delegate.setNamespaceAware(awareness);
+        }
+
+        @Override
+        public void setSchema(final Schema schema) {
+            delegate.setSchema(schema);
+        }
+
+        @Override
+        public void setValidating(final boolean validating) {
+            delegate.setValidating(validating);
+        }
+
+        @Override
+        public void setXIncludeAware(final boolean state) {
+            delegate.setXIncludeAware(state);
+        }
+    }
     /** Class name of Android's Harmony-based {@link DocumentBuilderFactory}, which exposes no secure surface. */
     private static final String ANDROID_DOCUMENT_BUILDER_FACTORY = "org.apache.harmony.xml.parsers.DocumentBuilderFactoryImpl";
     /** System property naming the {@link DocumentBuilderFactory} implementation, the JDK's own mechanism for reconfiguring the default parser. */
     private static final String DOM_FACTORY_ID = "javax.xml.parsers.DocumentBuilderFactory";
+
     /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
     private static final String JDK_DOCUMENT_BUILDER_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl";
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(DocumentBuilderFactory.class, "newDefaultInstance",
             MethodType.methodType(DocumentBuilderFactory.class));
-
-    /**
-     * Capability-driven secure for any {@link DocumentBuilderFactory} on the classpath.
-     *
-     * <p>Rather than branching on the implementation class, this method probes what the factory supports and adapts:</p>
-     * <ul>
-     *     <li><strong>Android</strong> (Harmony / KXmlParser): recognized by class name and left untouched. It exposes no {@link XMLConstants#FEATURE_SECURE_PROCESSING
-     *         FSP}, no JAXP 1.5 {@code ACCESS_EXTERNAL_*} and no attribute API at all, while KXmlParser silently drops user-defined entities, so there is nothing to
-     *         apply.</li>
-     *     <li><strong>FSP</strong>: required. It switches on the implementation's built-in security manager, which is what carries the processing limits.</li>
-     *     <li><strong>Ignore-all resolver floor</strong>: every produced {@link DocumentBuilder} is wrapped by the nested wrapper, which keeps an
-     *         ignore-all {@link EntityResolver} floor. That floor blocks external DTD, entity, schema and {@code xi:include} fetches in one place: the stock JDK's
-     *         XInclude processor ignores {@code ACCESS_EXTERNAL_*} and consults the {@link EntityResolver} instead, so no {@code ACCESS_EXTERNAL_*} attributes are
-     *         needed here. A caller can chain its own resolver onto the floor to allow-list resources, but cannot remove it.</li>
-     * </ul>
-     *
-     * @param factory The factory to harden.
-     * @return A new secure factory or the original factory, as-is, if it is a known Android factory.
-     * @throws SecureException Thrown if a (non-Andoid) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
-     */
-    static DocumentBuilderFactory secure(final DocumentBuilderFactory factory) {
-        // Android exposes no FSP, ACCESS_EXTERNAL_* or attribute API, and KXmlParser drops user-defined entities; nothing to apply.
-        if (ANDROID_DOCUMENT_BUILDER_FACTORY.equals(factory.getClass().getName())) {
-            return factory;
-        }
-        // Required: enables the implementation's security manager, which carries the limits.
-        setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        // Required: the wrapper installs an ignore-all EntityResolver floor on every DocumentBuilder.
-        // That floor blocks external DTD, entity, schema and xi:include fetches in one place: no ACCESS_EXTERNAL_* attributes are needed here.
-        // Callers can chain their resolvers, but not override the floor.
-        return new Wrapper(factory);
-    }
 
     /**
      * Enables namespace awareness on the given factory; the {@code NSInstance} counterpart of each factory method routes its result through here.
@@ -220,6 +318,38 @@ public final class SecureDocumentBuilderFactory {
     }
 
     /**
+     * Capability-driven secure for any {@link DocumentBuilderFactory} on the classpath.
+     *
+     * <p>Rather than branching on the implementation class, this method probes what the factory supports and adapts:</p>
+     * <ul>
+     *     <li><strong>Android</strong> (Harmony / KXmlParser): recognized by class name and left untouched. It exposes no {@link XMLConstants#FEATURE_SECURE_PROCESSING
+     *         FSP}, no JAXP 1.5 {@code ACCESS_EXTERNAL_*} and no attribute API at all, while KXmlParser silently drops user-defined entities, so there is nothing to
+     *         apply.</li>
+     *     <li><strong>FSP</strong>: required. It switches on the implementation's built-in security manager, which is what carries the processing limits.</li>
+     *     <li><strong>Ignore-all resolver floor</strong>: every produced {@link DocumentBuilder} is wrapped by the nested wrapper, which keeps an
+     *         ignore-all {@link EntityResolver} floor. That floor blocks external DTD, entity, schema and {@code xi:include} fetches in one place: the stock JDK's
+     *         XInclude processor ignores {@code ACCESS_EXTERNAL_*} and consults the {@link EntityResolver} instead, so no {@code ACCESS_EXTERNAL_*} attributes are
+     *         needed here. A caller can chain its own resolver onto the floor to allow-list resources, but cannot remove it.</li>
+     * </ul>
+     *
+     * @param factory The factory to harden.
+     * @return A new secure factory or the original factory, as-is, if it is a known Android factory.
+     * @throws SecureException Thrown if a (non-Andoid) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
+     */
+    static DocumentBuilderFactory secure(final DocumentBuilderFactory factory) {
+        // Android exposes no FSP, ACCESS_EXTERNAL_* or attribute API, and KXmlParser drops user-defined entities; nothing to apply.
+        if (ANDROID_DOCUMENT_BUILDER_FACTORY.equals(factory.getClass().getName())) {
+            return factory;
+        }
+        // Required: enables the implementation's security manager, which carries the limits.
+        setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        // Required: the wrapper installs an ignore-all EntityResolver floor on every DocumentBuilder.
+        // That floor blocks external DTD, entity, schema and xi:include fetches in one place: no ACCESS_EXTERNAL_* attributes are needed here.
+        // Callers can chain their resolvers, but not override the floor.
+        return new Wrapper(factory);
+    }
+
+    /**
      * Sets a feature on the given factory, throwing a {@link SecureException} if the implementation does not recognize it.
      *
      * @param factory The factory to harden.
@@ -238,135 +368,5 @@ public final class SecureDocumentBuilderFactory {
 
     private SecureDocumentBuilderFactory() {
         // static only
-    }
-
-    /**
-     * {@link DocumentBuilderFactory} wrapper that keeps an ignore-all {@link EntityResolver} floor on every {@link DocumentBuilder} produced.
-     * <p>
-     * Wraps each produced builder in a {@link SecureDocumentBuilder}; required when the underlying factory carries no resolver of its own and does not honor
-     * JAXP 1.5 {@code ACCESS_EXTERNAL_*} (e.g. the external Xerces distribution). A caller-set resolver is routed through the floor rather than replacing it. Kept
-     * as a standalone wrapper so any hardener can reuse the floor.
-     * </p>
-     *
-     * @see org.apache.commons.xml
-     */
-    private static final class Wrapper extends DocumentBuilderFactory {
-
-        private final DocumentBuilderFactory delegate;
-
-        /**
-         * Constructs a new instance.
-         *
-         * @param delegate the delegate to wrap; must not be {@code null}.
-         * @throws NullPointerException if {@code delegate} is {@code null}.
-         */
-        private Wrapper(final DocumentBuilderFactory delegate) {
-            this.delegate = Objects.requireNonNull(delegate, "delegate");
-        }
-
-        @Override
-        public Object getAttribute(final String name) {
-            return delegate.getAttribute(name);
-        }
-
-        @Override
-        public boolean getFeature(final String name) throws ParserConfigurationException {
-            return delegate.getFeature(name);
-        }
-
-        @Override
-        public Schema getSchema() {
-            return delegate.getSchema();
-        }
-
-        @Override
-        public boolean isCoalescing() {
-            return delegate.isCoalescing();
-        }
-
-        @Override
-        public boolean isExpandEntityReferences() {
-            return delegate.isExpandEntityReferences();
-        }
-
-        @Override
-        public boolean isIgnoringComments() {
-            return delegate.isIgnoringComments();
-        }
-
-        @Override
-        public boolean isIgnoringElementContentWhitespace() {
-            return delegate.isIgnoringElementContentWhitespace();
-        }
-
-        @Override
-        public boolean isNamespaceAware() {
-            return delegate.isNamespaceAware();
-        }
-
-        @Override
-        public boolean isValidating() {
-            return delegate.isValidating();
-        }
-
-        @Override
-        public boolean isXIncludeAware() {
-            return delegate.isXIncludeAware();
-        }
-
-        @Override
-        public DocumentBuilder newDocumentBuilder() throws ParserConfigurationException {
-            return new SecureDocumentBuilder(delegate.newDocumentBuilder());
-        }
-
-        @Override
-        public void setAttribute(final String name, final Object value) {
-            delegate.setAttribute(name, value);
-        }
-
-        @Override
-        public void setCoalescing(final boolean coalescing) {
-            delegate.setCoalescing(coalescing);
-        }
-
-        @Override
-        public void setExpandEntityReferences(final boolean expandEntityRef) {
-            delegate.setExpandEntityReferences(expandEntityRef);
-        }
-
-        @Override
-        public void setFeature(final String name, final boolean value) throws ParserConfigurationException {
-            delegate.setFeature(name, value);
-        }
-
-        @Override
-        public void setIgnoringComments(final boolean ignoreComments) {
-            delegate.setIgnoringComments(ignoreComments);
-        }
-
-        @Override
-        public void setIgnoringElementContentWhitespace(final boolean whitespace) {
-            delegate.setIgnoringElementContentWhitespace(whitespace);
-        }
-
-        @Override
-        public void setNamespaceAware(final boolean awareness) {
-            delegate.setNamespaceAware(awareness);
-        }
-
-        @Override
-        public void setSchema(final Schema schema) {
-            delegate.setSchema(schema);
-        }
-
-        @Override
-        public void setValidating(final boolean validating) {
-            delegate.setValidating(validating);
-        }
-
-        @Override
-        public void setXIncludeAware(final boolean state) {
-            delegate.setXIncludeAware(state);
-        }
     }
 }

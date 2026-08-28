@@ -283,13 +283,13 @@ class ShadingFootprintTest {
     }
 
     @Test
-    void xmlInputFactoryFootprint() {
-        assertEquals(XML_INPUT_FACTORY, closureOf("SecureXMLInputFactory"));
+    void transformerFactoryFootprint() {
+        assertEquals(TRANSFORMER_FACTORY, closureOf("SecureTransformerFactory"));
     }
 
     @Test
-    void transformerFactoryFootprint() {
-        assertEquals(TRANSFORMER_FACTORY, closureOf("SecureTransformerFactory"));
+    void xmlInputFactoryFootprint() {
+        assertEquals(XML_INPUT_FACTORY, closureOf("SecureXMLInputFactory"));
     }
 
     @Test

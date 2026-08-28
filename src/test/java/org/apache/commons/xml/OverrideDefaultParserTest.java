@@ -61,6 +61,25 @@ class OverrideDefaultParserTest {
         return out.toString();
     }
 
+    private static boolean xercesOnClasspath() {
+        try {
+            Class.forName("org.apache.xerces.jaxp.SAXParserFactoryImpl");
+            return true;
+        } catch (final ClassNotFoundException e) {
+            return false;
+        }
+    }
+
+    @Test
+    void schemaFactoryReadsFeatureAtCreation() throws Exception {
+        assumeFalse(AttackTestSupport.IS_ANDROID);
+        final SchemaFactory factory = SecureSchemaFactory.newDefaultInstance();
+        assertFalse(factory.getFeature(FEATURE));
+        assertFalse(((SecureSchema) factory.newSchema(AttackTestSupport.streamSource(AttackTestSupport.BENIGN_SCHEMA))).overrideDefaultParser);
+        factory.setFeature(FEATURE, true);
+        assertTrue(((SecureSchema) factory.newSchema(AttackTestSupport.streamSource(AttackTestSupport.BENIGN_SCHEMA))).overrideDefaultParser);
+    }
+
     @Test
     void secureReaderFollowsFlag() throws Exception {
         assumeFalse(AttackTestSupport.IS_ANDROID);
@@ -73,16 +92,6 @@ class OverrideDefaultParserTest {
             // The two families genuinely differ only where a third-party parser wins the lookup (the test-jdk-xerces execution).
             assertNotEquals(pinned.getClass(), pluggable.getClass());
         }
-    }
-
-    @Test
-    void schemaFactoryReadsFeatureAtCreation() throws Exception {
-        assumeFalse(AttackTestSupport.IS_ANDROID);
-        final SchemaFactory factory = SecureSchemaFactory.newDefaultInstance();
-        assertFalse(factory.getFeature(FEATURE));
-        assertFalse(((SecureSchema) factory.newSchema(AttackTestSupport.streamSource(AttackTestSupport.BENIGN_SCHEMA))).overrideDefaultParser);
-        factory.setFeature(FEATURE, true);
-        assertTrue(((SecureSchema) factory.newSchema(AttackTestSupport.streamSource(AttackTestSupport.BENIGN_SCHEMA))).overrideDefaultParser);
     }
 
     @Test
@@ -107,15 +116,6 @@ class OverrideDefaultParserTest {
         factory.setFeature(FEATURE, true);
         // Feature true: same result through the pluggable lookup.
         assertTrue(transform(factory, "pluggable").contains("pluggable"));
-    }
-
-    private static boolean xercesOnClasspath() {
-        try {
-            Class.forName("org.apache.xerces.jaxp.SAXParserFactoryImpl");
-            return true;
-        } catch (final ClassNotFoundException e) {
-            return false;
-        }
     }
 
     @Test

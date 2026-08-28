@@ -36,6 +36,15 @@ final class SecureException extends IllegalStateException {
     private static final long serialVersionUID = 1L;
 
     /**
+     * System property that switches unresolved external references from the default empty resolution to a thrown exception.
+     * <p>
+     * How to enable: set {@code -Dorg.apache.commons.xml.throwOnUnresolved=true}. The property is read at resolution time, so it also applies to factories
+     * created before it was set; references resolved by a caller-supplied resolver are unaffected.
+     * </p>
+     */
+    static final String THROW_ON_UNRESOLVED = "org.apache.commons.xml.throwOnUnresolved";
+
+    /**
      * Builds the standard "forbidden" message shared by every resolver floor when {@link #throwOnUnresolved()} rejects an unresolved reference.
      *
      * @param type      the resource kind, or {@code null} if not applicable.
@@ -73,15 +82,6 @@ final class SecureException extends IllegalStateException {
     static boolean throwOnUnresolved() {
         return Boolean.getBoolean(SecureException.THROW_ON_UNRESOLVED);
     }
-
-    /**
-     * System property that switches unresolved external references from the default empty resolution to a thrown exception.
-     * <p>
-     * How to enable: set {@code -Dorg.apache.commons.xml.throwOnUnresolved=true}. The property is read at resolution time, so it also applies to factories
-     * created before it was set; references resolved by a caller-supplied resolver are unaffected.
-     * </p>
-     */
-    static final String THROW_ON_UNRESOLVED = "org.apache.commons.xml.throwOnUnresolved";
 
     SecureException(final String message, final Throwable cause) {
         super(message, cause);

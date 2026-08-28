@@ -56,10 +56,115 @@ import org.xml.sax.XMLReader;
  */
 public final class SecureSAXParserFactory {
 
+    /**
+     * {@link SecureXMLReader} for Android's {@code org.apache.harmony.xml.ExpatReader} that additionally surfaces its {@code namespace-prefixes} limitation at
+     * configuration time.
+     *
+     * <p>ExpatReader does not actually support the {@code namespace-prefixes} feature: enabling it is accepted by {@code setFeature} but fails later, during
+     * {@code parse}, with a {@link SAXNotSupportedException}. Reporting the rejection eagerly from {@link #setFeature(String, boolean)} lets consumers that probe
+     * the feature, such as Xalan's identity transformer, catch the exception and fall back instead of failing the whole parse.</p>
+     */
+    static final class SecureExpatXMLReader extends SecureXMLReader {
+
+        private static final String NAMESPACE_PREFIXES_FEATURE = "http://xml.org/sax/features/namespace-prefixes";
+
+        SecureExpatXMLReader(final XMLReader delegate) {
+            super(delegate);
+        }
+
+        @Override
+        public void setFeature(final String name, final boolean value) throws SAXNotRecognizedException, SAXNotSupportedException {
+            if (value && NAMESPACE_PREFIXES_FEATURE.equals(name)) {
+                throw new SAXNotSupportedException("ExpatReader does not support enabling the '" + NAMESPACE_PREFIXES_FEATURE + "' feature");
+            }
+            super.setFeature(name, value);
+        }
+    }
+    /**
+     * Universal SAX factory wrapper that funnels every produced parser through {@link SecureSAXParserFactory#secure(XMLReader)}.
+     * <p>
+     * {@link SAXParserFactory} exposes only a feature API and no property API, so the per-parse secure (limits, entity blocking, implementation-specific fixups)
+     * has to run on each {@link XMLReader} the factory produces. This wrapper returns a {@link SecureSAXParser}, which applies that securing lazily to both the
+     * SAX 2 {@link XMLReader} and the SAX 1 {@link org.xml.sax.Parser} it exposes.
+     * </p>
+     *
+     * @see org.apache.commons.xml
+     */
+    private static final class Wrapper extends SAXParserFactory {
+
+        private final SAXParserFactory delegate;
+
+        /**
+         * Constructs a new instance.
+         *
+         * @param delegate the delegate to wrap; must not be {@code null}.
+         * @throws NullPointerException if {@code delegate} is {@code null}.
+         */
+        private Wrapper(final SAXParserFactory delegate) {
+            this.delegate = Objects.requireNonNull(delegate, "delegate");
+        }
+
+        @Override
+        public boolean getFeature(final String name) throws ParserConfigurationException, SAXNotRecognizedException, SAXNotSupportedException {
+            return delegate.getFeature(name);
+        }
+
+        @Override
+        public Schema getSchema() {
+            return delegate.getSchema();
+        }
+
+        @Override
+        public boolean isNamespaceAware() {
+            return delegate.isNamespaceAware();
+        }
+
+        @Override
+        public boolean isValidating() {
+            return delegate.isValidating();
+        }
+
+        @Override
+        public boolean isXIncludeAware() {
+            return delegate.isXIncludeAware();
+        }
+
+        @Override
+        public SAXParser newSAXParser() throws ParserConfigurationException, SAXException {
+            return new SecureSAXParser(delegate.newSAXParser());
+        }
+
+        @Override
+        public void setFeature(final String name, final boolean value) throws ParserConfigurationException, SAXNotRecognizedException, SAXNotSupportedException {
+            delegate.setFeature(name, value);
+        }
+
+        @Override
+        public void setNamespaceAware(final boolean awareness) {
+            delegate.setNamespaceAware(awareness);
+        }
+
+        @Override
+        public void setSchema(final Schema schema) {
+            delegate.setSchema(schema);
+        }
+
+        @Override
+        public void setValidating(final boolean validating) {
+            delegate.setValidating(validating);
+        }
+
+        @Override
+        public void setXIncludeAware(final boolean state) {
+            delegate.setXIncludeAware(state);
+        }
+    }
     /** Class name of Android's Expat-backed {@link XMLReader}. */
     private static final String ANDROID_EXPAT_READER = "org.apache.harmony.xml.ExpatReader";
+
     /** Class name of Android's Harmony-based {@link SAXParserFactory}, backed by the native Expat parser. */
     private static final String ANDROID_SAX_PARSER_FACTORY = "org.apache.harmony.xml.parsers.SAXParserFactoryImpl";
+
     /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
     private static final String JDK_SAX_PARSER_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl";
 
@@ -74,6 +179,148 @@ public final class SecureSAXParserFactory {
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(SAXParserFactory.class, "newDefaultInstance",
             MethodType.methodType(SAXParserFactory.class));
+
+    /**
+     * Enables namespace awareness on the given factory; the {@code NSInstance} counterpart of each factory method routes its result through here.
+     *
+     * @param factory the factory to configure; never {@code null}.
+     * @return The given factory, namespace-aware.
+     */
+    private static SAXParserFactory makeNSAware(final SAXParserFactory factory) {
+        factory.setNamespaceAware(true);
+        return factory;
+    }
+
+    /**
+     * Returns a new, secure {@link SAXParserFactory} of the system-default implementation.
+     * <p>
+     * Obtained as by {@code SAXParserFactory.newDefaultInstance()} where the platform provides it (Java 9 or later), and by
+     * instantiating the JDK's built-in implementation directly on Java 8.
+     * </p>
+     *
+     * @return A secure factory.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation
+     *                                   (for example Android).
+     */
+    public static SAXParserFactory newDefaultInstance() {
+        if (MH_newDefaultInstance != null) {
+            final SAXParserFactory factory;
+            try {
+                factory = (SAXParserFactory) MH_newDefaultInstance.invokeExact();
+            } catch (final FactoryConfigurationError e) {
+                throw e;
+            } catch (final Throwable e) {
+                // Unreachable: the looked-up method declares no other exceptions.
+                throw new IllegalStateException(e);
+            }
+            return secure(factory);
+        }
+        // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead. Where that class does not exist either (for
+        // example Android), the lookup miss surfaces as the factory's own FactoryConfigurationError, like any newInstance miss.
+        return newInstance(JDK_SAX_PARSER_FACTORY, null);
+    }
+
+    /**
+     * Returns a new, secure, namespace-aware {@link SAXParserFactory} of the system-default implementation, enabling namespace awareness on
+     * {@link #newDefaultInstance()}, the behavior {@code SAXParserFactory.newDefaultNSInstance()} (Java 13 or later) is specified to have.
+     *
+     * @return A secure, namespace-aware factory.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation
+     *                                   (for example Android).
+     */
+    public static SAXParserFactory newDefaultNSInstance() {
+        return makeNSAware(newDefaultInstance());
+    }
+
+    /**
+     * Returns a new, secure {@link SAXParserFactory}.
+     *
+     * @return A secure factory.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown from {@link SAXParserFactory} in case of a {@link java.util.ServiceConfigurationError service configuration
+     *                                   error} or if the implementation is not available or cannot be instantiated.
+     */
+    public static SAXParserFactory newInstance() {
+        return secure(SAXParserFactory.newInstance());
+    }
+
+    /**
+     * Returns a new, secure {@link SAXParserFactory} of the given implementation class.
+     *
+     * @param factoryClassName The fully qualified class name of the {@link SAXParserFactory} implementation.
+     * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
+     * @return A secure factory.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
+     */
+    public static SAXParserFactory newInstance(final String factoryClassName, final ClassLoader classLoader) {
+        return secure(SAXParserFactory.newInstance(factoryClassName, classLoader));
+    }
+
+    /**
+     * Returns a new, secure, namespace-aware {@link SAXParserFactory}, enabling namespace awareness on {@link #newInstance()}, the behavior
+     * {@code SAXParserFactory.newNSInstance()} (Java 13 or later) is specified to have.
+     *
+     * @return A secure, namespace-aware factory.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown from {@link SAXParserFactory} in case of a {@link java.util.ServiceConfigurationError service configuration
+     *                                   error} or if the implementation is not available or cannot be instantiated.
+     */
+    public static SAXParserFactory newNSInstance() {
+        return makeNSAware(newInstance());
+    }
+
+    /**
+     * Returns the secure, namespace-aware factory the Source-rewriting wrappers parse with.
+     * <p>
+     * While {@code overrideDefaultParser} is {@code false} the factory is the JDK's "default parser" factory, determined the way the JDK itself determines it: the built-in parser,
+     * unless the {@value #SAX_FACTORY_ID} system property is set — that property is the JDK's own mechanism for reconfiguring the default
+     * parser, so it is honored through the standard lookup rather than bypassed.
+     * </p>
+     *
+     * @param overrideDefaultParser whether {@value #OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
+     * @return A secure, namespace-aware factory.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
+     *                                   implementation is not available or cannot be instantiated.
+     */
+    static SAXParserFactory newNSInstance(final boolean overrideDefaultParser) {
+        return overrideDefaultParser || System.getProperty(SAX_FACTORY_ID) != null ? newNSInstance() : newDefaultNSInstance();
+    }
+
+    /**
+     * Returns a new, secure, namespace-aware {@link SAXParserFactory} of the given implementation class, enabling namespace awareness on
+     * {@link #newInstance(String, ClassLoader)}, the behavior {@code SAXParserFactory.newNSInstance(String, ClassLoader)} (Java 13 or later) is specified to have.
+     *
+     * @param factoryClassName The fully qualified class name of the {@link SAXParserFactory} implementation.
+     * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
+     * @return A secure, namespace-aware factory.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
+     */
+    public static SAXParserFactory newNSInstance(final String factoryClassName, final ClassLoader classLoader) {
+        return makeNSAware(newInstance(factoryClassName, classLoader));
+    }
+
+    /**
+     * Creates a new secure, namespace-aware {@link XMLReader} for the TrAX, XPath and schema wrappers to parse sources with, from the factory
+     * {@link #newNSInstance(boolean)} selects.
+     *
+     * @param overrideDefaultParser whether {@value #OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
+     * @return a secure reader.
+     * @throws TransformerConfigurationException if a secure reader cannot be obtained.
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     */
+    static XMLReader newSecureXMLReader(final boolean overrideDefaultParser) throws TransformerConfigurationException {
+        try {
+            return newNSInstance(overrideDefaultParser).newSAXParser().getXMLReader();
+        } catch (final ParserConfigurationException | SAXException e) {
+            throw new TransformerConfigurationException("Failed to obtain a secure XMLReader for source parsing", e);
+        }
+    }
 
     /**
      * Capability-driven securing for any {@link SAXParserFactory} on the classpath.
@@ -155,148 +402,6 @@ public final class SecureSAXParserFactory {
         return new SecureXMLReader(reader);
     }
 
-    /**
-     * Enables namespace awareness on the given factory; the {@code NSInstance} counterpart of each factory method routes its result through here.
-     *
-     * @param factory the factory to configure; never {@code null}.
-     * @return The given factory, namespace-aware.
-     */
-    private static SAXParserFactory makeNSAware(final SAXParserFactory factory) {
-        factory.setNamespaceAware(true);
-        return factory;
-    }
-
-    /**
-     * Returns a new, secure {@link SAXParserFactory} of the system-default implementation.
-     * <p>
-     * Obtained as by {@code SAXParserFactory.newDefaultInstance()} where the platform provides it (Java 9 or later), and by
-     * instantiating the JDK's built-in implementation directly on Java 8.
-     * </p>
-     *
-     * @return A secure factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation
-     *                                   (for example Android).
-     */
-    public static SAXParserFactory newDefaultInstance() {
-        if (MH_newDefaultInstance != null) {
-            final SAXParserFactory factory;
-            try {
-                factory = (SAXParserFactory) MH_newDefaultInstance.invokeExact();
-            } catch (final FactoryConfigurationError e) {
-                throw e;
-            } catch (final Throwable e) {
-                // Unreachable: the looked-up method declares no other exceptions.
-                throw new IllegalStateException(e);
-            }
-            return secure(factory);
-        }
-        // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead. Where that class does not exist either (for
-        // example Android), the lookup miss surfaces as the factory's own FactoryConfigurationError, like any newInstance miss.
-        return newInstance(JDK_SAX_PARSER_FACTORY, null);
-    }
-
-    /**
-     * Returns a new, secure, namespace-aware {@link SAXParserFactory} of the system-default implementation, enabling namespace awareness on
-     * {@link #newDefaultInstance()}, the behavior {@code SAXParserFactory.newDefaultNSInstance()} (Java 13 or later) is specified to have.
-     *
-     * @return A secure, namespace-aware factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation
-     *                                   (for example Android).
-     */
-    public static SAXParserFactory newDefaultNSInstance() {
-        return makeNSAware(newDefaultInstance());
-    }
-
-    /**
-     * Creates a new secure, namespace-aware {@link XMLReader} for the TrAX, XPath and schema wrappers to parse sources with, from the factory
-     * {@link #newNSInstance(boolean)} selects.
-     *
-     * @param overrideDefaultParser whether {@value #OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
-     * @return a secure reader.
-     * @throws TransformerConfigurationException if a secure reader cannot be obtained.
-     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
-     */
-    static XMLReader newSecureXMLReader(final boolean overrideDefaultParser) throws TransformerConfigurationException {
-        try {
-            return newNSInstance(overrideDefaultParser).newSAXParser().getXMLReader();
-        } catch (final ParserConfigurationException | SAXException e) {
-            throw new TransformerConfigurationException("Failed to obtain a secure XMLReader for source parsing", e);
-        }
-    }
-
-    /**
-     * Returns a new, secure {@link SAXParserFactory}.
-     *
-     * @return A secure factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown from {@link SAXParserFactory} in case of a {@link java.util.ServiceConfigurationError service configuration
-     *                                   error} or if the implementation is not available or cannot be instantiated.
-     */
-    public static SAXParserFactory newInstance() {
-        return secure(SAXParserFactory.newInstance());
-    }
-
-    /**
-     * Returns a new, secure {@link SAXParserFactory} of the given implementation class.
-     *
-     * @param factoryClassName The fully qualified class name of the {@link SAXParserFactory} implementation.
-     * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
-     * @return A secure factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
-     */
-    public static SAXParserFactory newInstance(final String factoryClassName, final ClassLoader classLoader) {
-        return secure(SAXParserFactory.newInstance(factoryClassName, classLoader));
-    }
-
-    /**
-     * Returns a new, secure, namespace-aware {@link SAXParserFactory}, enabling namespace awareness on {@link #newInstance()}, the behavior
-     * {@code SAXParserFactory.newNSInstance()} (Java 13 or later) is specified to have.
-     *
-     * @return A secure, namespace-aware factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown from {@link SAXParserFactory} in case of a {@link java.util.ServiceConfigurationError service configuration
-     *                                   error} or if the implementation is not available or cannot be instantiated.
-     */
-    public static SAXParserFactory newNSInstance() {
-        return makeNSAware(newInstance());
-    }
-
-    /**
-     * Returns the secure, namespace-aware factory the Source-rewriting wrappers parse with.
-     * <p>
-     * While {@code overrideDefaultParser} is {@code false} the factory is the JDK's "default parser" factory, determined the way the JDK itself determines it: the built-in parser,
-     * unless the {@value #SAX_FACTORY_ID} system property is set — that property is the JDK's own mechanism for reconfiguring the default
-     * parser, so it is honored through the standard lookup rather than bypassed.
-     * </p>
-     *
-     * @param overrideDefaultParser whether {@value #OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
-     * @return A secure, namespace-aware factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
-     *                                   implementation is not available or cannot be instantiated.
-     */
-    static SAXParserFactory newNSInstance(final boolean overrideDefaultParser) {
-        return overrideDefaultParser || System.getProperty(SAX_FACTORY_ID) != null ? newNSInstance() : newDefaultNSInstance();
-    }
-
-    /**
-     * Returns a new, secure, namespace-aware {@link SAXParserFactory} of the given implementation class, enabling namespace awareness on
-     * {@link #newInstance(String, ClassLoader)}, the behavior {@code SAXParserFactory.newNSInstance(String, ClassLoader)} (Java 13 or later) is specified to have.
-     *
-     * @param factoryClassName The fully qualified class name of the {@link SAXParserFactory} implementation.
-     * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
-     * @return A secure, namespace-aware factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
-     */
-    public static SAXParserFactory newNSInstance(final String factoryClassName, final ClassLoader classLoader) {
-        return makeNSAware(newInstance(factoryClassName, classLoader));
-    }
-
     private static void setFeature(final SAXParserFactory factory, final String feature, final boolean value) {
         try {
             factory.setFeature(feature, value);
@@ -315,110 +420,5 @@ public final class SecureSAXParserFactory {
 
     private SecureSAXParserFactory() {
         // static only
-    }
-
-    /**
-     * {@link SecureXMLReader} for Android's {@code org.apache.harmony.xml.ExpatReader} that additionally surfaces its {@code namespace-prefixes} limitation at
-     * configuration time.
-     *
-     * <p>ExpatReader does not actually support the {@code namespace-prefixes} feature: enabling it is accepted by {@code setFeature} but fails later, during
-     * {@code parse}, with a {@link SAXNotSupportedException}. Reporting the rejection eagerly from {@link #setFeature(String, boolean)} lets consumers that probe
-     * the feature, such as Xalan's identity transformer, catch the exception and fall back instead of failing the whole parse.</p>
-     */
-    static final class SecureExpatXMLReader extends SecureXMLReader {
-
-        private static final String NAMESPACE_PREFIXES_FEATURE = "http://xml.org/sax/features/namespace-prefixes";
-
-        SecureExpatXMLReader(final XMLReader delegate) {
-            super(delegate);
-        }
-
-        @Override
-        public void setFeature(final String name, final boolean value) throws SAXNotRecognizedException, SAXNotSupportedException {
-            if (value && NAMESPACE_PREFIXES_FEATURE.equals(name)) {
-                throw new SAXNotSupportedException("ExpatReader does not support enabling the '" + NAMESPACE_PREFIXES_FEATURE + "' feature");
-            }
-            super.setFeature(name, value);
-        }
-    }
-
-    /**
-     * Universal SAX factory wrapper that funnels every produced parser through {@link SecureSAXParserFactory#secure(XMLReader)}.
-     * <p>
-     * {@link SAXParserFactory} exposes only a feature API and no property API, so the per-parse secure (limits, entity blocking, implementation-specific fixups)
-     * has to run on each {@link XMLReader} the factory produces. This wrapper returns a {@link SecureSAXParser}, which applies that securing lazily to both the
-     * SAX 2 {@link XMLReader} and the SAX 1 {@link org.xml.sax.Parser} it exposes.
-     * </p>
-     *
-     * @see org.apache.commons.xml
-     */
-    private static final class Wrapper extends SAXParserFactory {
-
-        private final SAXParserFactory delegate;
-
-        /**
-         * Constructs a new instance.
-         *
-         * @param delegate the delegate to wrap; must not be {@code null}.
-         * @throws NullPointerException if {@code delegate} is {@code null}.
-         */
-        private Wrapper(final SAXParserFactory delegate) {
-            this.delegate = Objects.requireNonNull(delegate, "delegate");
-        }
-
-        @Override
-        public boolean getFeature(final String name) throws ParserConfigurationException, SAXNotRecognizedException, SAXNotSupportedException {
-            return delegate.getFeature(name);
-        }
-
-        @Override
-        public Schema getSchema() {
-            return delegate.getSchema();
-        }
-
-        @Override
-        public boolean isNamespaceAware() {
-            return delegate.isNamespaceAware();
-        }
-
-        @Override
-        public boolean isValidating() {
-            return delegate.isValidating();
-        }
-
-        @Override
-        public boolean isXIncludeAware() {
-            return delegate.isXIncludeAware();
-        }
-
-        @Override
-        public SAXParser newSAXParser() throws ParserConfigurationException, SAXException {
-            return new SecureSAXParser(delegate.newSAXParser());
-        }
-
-        @Override
-        public void setFeature(final String name, final boolean value) throws ParserConfigurationException, SAXNotRecognizedException, SAXNotSupportedException {
-            delegate.setFeature(name, value);
-        }
-
-        @Override
-        public void setNamespaceAware(final boolean awareness) {
-            delegate.setNamespaceAware(awareness);
-        }
-
-        @Override
-        public void setSchema(final Schema schema) {
-            delegate.setSchema(schema);
-        }
-
-        @Override
-        public void setValidating(final boolean validating) {
-            delegate.setValidating(validating);
-        }
-
-        @Override
-        public void setXIncludeAware(final boolean state) {
-            delegate.setXIncludeAware(state);
-        }
     }
 }

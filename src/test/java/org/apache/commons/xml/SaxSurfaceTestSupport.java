@@ -47,11 +47,6 @@ final class SaxSurfaceTestSupport {
         reader.parse(input);
     }
 
-    /** The secure factory, as its runtime {@link SAXTransformerFactory} type. */
-    static SAXTransformerFactory secureFactory() {
-        return (SAXTransformerFactory) SecureTransformerFactory.newInstance();
-    }
-
     /** Opens a fixture under {@code leaked/} as an {@link InputSource} preserving its system id, so relative hrefs resolve normally. */
     static InputSource resourceInput(final String name) throws IOException {
         final URL url = AttackTestSupport.resourceUrl(name);
@@ -63,6 +58,11 @@ final class SaxSurfaceTestSupport {
     /** A benign {@code <root/>} input document. */
     static InputSource rootInput() {
         return new InputSource(new StringReader("<root/>"));
+    }
+
+    /** The secure factory, as its runtime {@link SAXTransformerFactory} type. */
+    static SAXTransformerFactory secureFactory() {
+        return (SAXTransformerFactory) SecureTransformerFactory.newInstance();
     }
 
     private SaxSurfaceTestSupport() {

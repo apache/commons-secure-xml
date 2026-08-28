@@ -52,25 +52,152 @@ class SecureFactoriesSmokeTest {
 
     private static final String BENIGN_XML = "<?xml version=\"1.0\"?>\n<root><child>hello</child></root>\n";
 
-    /**
-     * The public classes must not extend their JAXP factory type: extending it would inherit the JAXP static factory methods, letting a caller obtain a
-     * non-hardened factory through an inherited method such as {@code newInstance(String, ClassLoader)} or {@code newDefaultInstance()}.
-     */
-    @Test
-    void publicClassesDoNotExtendTheirJaxpFactoryType() {
-        assertFalse(DocumentBuilderFactory.class.isAssignableFrom(SecureDocumentBuilderFactory.class));
-        assertFalse(SAXParserFactory.class.isAssignableFrom(SecureSAXParserFactory.class));
-        assertFalse(SchemaFactory.class.isAssignableFrom(SecureSchemaFactory.class));
-        assertFalse(TransformerFactory.class.isAssignableFrom(SecureTransformerFactory.class));
-        assertFalse(XMLInputFactory.class.isAssignableFrom(SecureXMLInputFactory.class));
-        assertFalse(XPathFactory.class.isAssignableFrom(SecureXPathFactory.class));
-    }
-
     @Test
     void benignDocumentParses() throws Exception {
         final Document doc = SecureDocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(BENIGN_XML)));
         assertNotNull(doc);
         assertNotNull(doc.getDocumentElement());
+    }
+
+    // The explicit-class-name tests discover the runtime default implementation through the raw JAXP factory,
+    // so they stay portable across the JAXP implementations of the surefire matrix.
+    @Test
+    void explicitClassNameDocumentBuilderFactoryIsSecure() throws Exception {
+        final Class<?> impl = DocumentBuilderFactory.newInstance().getClass();
+        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance(impl.getName(), impl.getClassLoader());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void explicitClassNameNSDocumentBuilderFactoryIsNamespaceAware() throws Exception {
+        final Class<?> impl = DocumentBuilderFactory.newInstance().getClass();
+        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newNSInstance(impl.getName(), impl.getClassLoader());
+        assertTrue(factory.isNamespaceAware());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void explicitClassNameNSSAXParserFactoryIsNamespaceAware() throws Exception {
+        final Class<?> impl = SAXParserFactory.newInstance().getClass();
+        final SAXParserFactory factory = SecureSAXParserFactory.newNSInstance(impl.getName(), impl.getClassLoader());
+        assertTrue(factory.isNamespaceAware());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void explicitClassNameSAXParserFactoryIsSecure() throws Exception {
+        final Class<?> impl = SAXParserFactory.newInstance().getClass();
+        final SAXParserFactory factory = SecureSAXParserFactory.newInstance(impl.getName(), impl.getClassLoader());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void explicitClassNameSchemaFactoryIsSecure() throws Exception {
+        final Class<?> impl = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).getClass();
+        final SchemaFactory factory = SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI, impl.getName(), impl.getClassLoader());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void explicitClassNameTransformerFactoryIsSecure() {
+        final Class<?> impl = TransformerFactory.newInstance().getClass();
+        final TransformerFactory factory = SecureTransformerFactory.newInstance(impl.getName(), impl.getClassLoader());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void explicitClassNameXPathFactoryIsSecure() throws Exception {
+        final Class<?> impl = XPathFactory.newInstance().getClass();
+        final XPathFactory factory = SecureXPathFactory.newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI, impl.getName(), impl.getClassLoader());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void factoryIdXMLInputFactoryIsSecure() {
+        final String factoryId = "org.apache.commons.xml.test.staxFactory";
+        // XMLInputFactory.newInstance, not newFactory: Android's StAX API predates newFactory, and this file also compiles against android.jar.
+        System.setProperty(factoryId, XMLInputFactory.newInstance().getClass().getName());
+        try {
+            final XMLInputFactory factory = SecureXMLInputFactory.newFactory(factoryId, getClass().getClassLoader());
+            assertEquals(Boolean.TRUE, factory.getProperty(XMLInputFactory.SUPPORT_DTD));
+        } finally {
+            System.clearProperty(factoryId);
+        }
+    }
+
+    @Test
+    void newDefaultFactoryXMLInputFactoryIsSecure() {
+        final XMLInputFactory factory = SecureXMLInputFactory.newDefaultFactory();
+        assertEquals(Boolean.TRUE, factory.getProperty(XMLInputFactory.SUPPORT_DTD));
+    }
+
+    // The newDefault* methods resolve the Java 9 JAXP method at runtime and fall back to the JDK's built-in implementation on Java 8. The dom and sax
+    // variants also run on Android, whose JAXP predates newDefaultInstance and carries no JDK-internal fallback: the lookup miss surfaces there as the
+    // factory's own FactoryConfigurationError, like any newInstance miss.
+    @Test
+    @Tag("dom")
+    void newDefaultInstanceDocumentBuilderFactoryIsUsable() throws Exception {
+        if (AttackTestSupport.IS_ANDROID) {
+            assertThrows(FactoryConfigurationError.class, SecureDocumentBuilderFactory::newDefaultInstance);
+            return;
+        }
+        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newDefaultInstance();
+        assertNotNull(factory.newDocumentBuilder().parse(new InputSource(new StringReader(BENIGN_XML))).getDocumentElement());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    @Tag("sax")
+    void newDefaultInstanceSAXParserFactoryIsUsable() throws Exception {
+        if (AttackTestSupport.IS_ANDROID) {
+            assertThrows(FactoryConfigurationError.class, SecureSAXParserFactory::newDefaultInstance);
+            return;
+        }
+        final SAXParserFactory factory = SecureSAXParserFactory.newDefaultInstance();
+        factory.newSAXParser().parse(new InputSource(new StringReader(BENIGN_XML)), new DefaultHandler());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void newDefaultInstanceSchemaFactoryIsSecure() throws Exception {
+        final SchemaFactory factory = SecureSchemaFactory.newDefaultInstance();
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void newDefaultInstanceTransformerFactoryIsSecure() {
+        final TransformerFactory factory = SecureTransformerFactory.newDefaultInstance();
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void newDefaultInstanceXPathFactoryIsSecure() throws Exception {
+        final XPathFactory factory = SecureXPathFactory.newDefaultInstance();
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    @Tag("dom")
+    void newDefaultNSInstanceDocumentBuilderFactoryIsNamespaceAware() throws Exception {
+        if (AttackTestSupport.IS_ANDROID) {
+            assertThrows(FactoryConfigurationError.class, SecureDocumentBuilderFactory::newDefaultNSInstance);
+            return;
+        }
+        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newDefaultNSInstance();
+        assertTrue(factory.isNamespaceAware());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    @Tag("sax")
+    void newDefaultNSInstanceSAXParserFactoryIsNamespaceAware() throws Exception {
+        if (AttackTestSupport.IS_ANDROID) {
+            assertThrows(FactoryConfigurationError.class, SecureSAXParserFactory::newDefaultNSInstance);
+            return;
+        }
+        final SAXParserFactory factory = SecureSAXParserFactory.newDefaultNSInstance();
+        assertTrue(factory.isNamespaceAware());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 
     @Test
@@ -93,6 +220,38 @@ class SecureFactoriesSmokeTest {
         assertNotNull(a);
         assertNotNull(b);
         assertNotSame(a, b);
+    }
+
+    @Test
+    void newFactoryReturnsFreshInstance() {
+        final XMLInputFactory a = SecureXMLInputFactory.newFactory();
+        final XMLInputFactory b = SecureXMLInputFactory.newFactory();
+        assertNotSame(a, b);
+        assertEquals(Boolean.TRUE, a.getProperty(XMLInputFactory.SUPPORT_DTD));
+    }
+
+    // The newNSInstance family (Java 13) falls back to enabling namespace awareness on the corresponding newInstance lookup, the behavior the JAXP methods
+    // are specified to have, so the non-default variants work on every platform including Android.
+    @Test
+    @Tag("dom")
+    void newNSInstanceDocumentBuilderFactoryIsNamespaceAware() throws Exception {
+        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newNSInstance();
+        assertTrue(factory.isNamespaceAware());
+        assertNotNull(factory.newDocumentBuilder().parse(new InputSource(new StringReader(BENIGN_XML))).getDocumentElement());
+        if (!AttackTestSupport.IS_ANDROID) {
+            assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        }
+    }
+
+    @Test
+    @Tag("sax")
+    void newNSInstanceSAXParserFactoryIsNamespaceAware() throws Exception {
+        final SAXParserFactory factory = SecureSAXParserFactory.newNSInstance();
+        assertTrue(factory.isNamespaceAware());
+        factory.newSAXParser().parse(new InputSource(new StringReader(BENIGN_XML)), new DefaultHandler());
+        if (!AttackTestSupport.IS_ANDROID) {
+            assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        }
     }
 
     @Test
@@ -136,181 +295,22 @@ class SecureFactoriesSmokeTest {
         assertTrue(a.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 
-    // The explicit-class-name tests discover the runtime default implementation through the raw JAXP factory,
-    // so they stay portable across the JAXP implementations of the surefire matrix.
+    /**
+     * The public classes must not extend their JAXP factory type: extending it would inherit the JAXP static factory methods, letting a caller obtain a
+     * non-hardened factory through an inherited method such as {@code newInstance(String, ClassLoader)} or {@code newDefaultInstance()}.
+     */
     @Test
-    void explicitClassNameDocumentBuilderFactoryIsSecure() throws Exception {
-        final Class<?> impl = DocumentBuilderFactory.newInstance().getClass();
-        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance(impl.getName(), impl.getClassLoader());
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-    }
-
-    @Test
-    void explicitClassNameSAXParserFactoryIsSecure() throws Exception {
-        final Class<?> impl = SAXParserFactory.newInstance().getClass();
-        final SAXParserFactory factory = SecureSAXParserFactory.newInstance(impl.getName(), impl.getClassLoader());
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-    }
-
-    @Test
-    void explicitClassNameSchemaFactoryIsSecure() throws Exception {
-        final Class<?> impl = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).getClass();
-        final SchemaFactory factory = SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI, impl.getName(), impl.getClassLoader());
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-    }
-
-    @Test
-    void explicitClassNameTransformerFactoryIsSecure() {
-        final Class<?> impl = TransformerFactory.newInstance().getClass();
-        final TransformerFactory factory = SecureTransformerFactory.newInstance(impl.getName(), impl.getClassLoader());
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-    }
-
-    @Test
-    void explicitClassNameXPathFactoryIsSecure() throws Exception {
-        final Class<?> impl = XPathFactory.newInstance().getClass();
-        final XPathFactory factory = SecureXPathFactory.newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI, impl.getName(), impl.getClassLoader());
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-    }
-
-    @Test
-    void newFactoryReturnsFreshInstance() {
-        final XMLInputFactory a = SecureXMLInputFactory.newFactory();
-        final XMLInputFactory b = SecureXMLInputFactory.newFactory();
-        assertNotSame(a, b);
-        assertEquals(Boolean.TRUE, a.getProperty(XMLInputFactory.SUPPORT_DTD));
-    }
-
-    @Test
-    void factoryIdXMLInputFactoryIsSecure() {
-        final String factoryId = "org.apache.commons.xml.test.staxFactory";
-        // XMLInputFactory.newInstance, not newFactory: Android's StAX API predates newFactory, and this file also compiles against android.jar.
-        System.setProperty(factoryId, XMLInputFactory.newInstance().getClass().getName());
-        try {
-            final XMLInputFactory factory = SecureXMLInputFactory.newFactory(factoryId, getClass().getClassLoader());
-            assertEquals(Boolean.TRUE, factory.getProperty(XMLInputFactory.SUPPORT_DTD));
-        } finally {
-            System.clearProperty(factoryId);
-        }
+    void publicClassesDoNotExtendTheirJaxpFactoryType() {
+        assertFalse(DocumentBuilderFactory.class.isAssignableFrom(SecureDocumentBuilderFactory.class));
+        assertFalse(SAXParserFactory.class.isAssignableFrom(SecureSAXParserFactory.class));
+        assertFalse(SchemaFactory.class.isAssignableFrom(SecureSchemaFactory.class));
+        assertFalse(TransformerFactory.class.isAssignableFrom(SecureTransformerFactory.class));
+        assertFalse(XMLInputFactory.class.isAssignableFrom(SecureXMLInputFactory.class));
+        assertFalse(XPathFactory.class.isAssignableFrom(SecureXPathFactory.class));
     }
 
     @Test
     void unknownFactoryClassNameThrows() {
         assertThrows(FactoryConfigurationError.class, () -> SecureDocumentBuilderFactory.newInstance("no.such.FactoryClass", null));
-    }
-
-    // The newDefault* methods resolve the Java 9 JAXP method at runtime and fall back to the JDK's built-in implementation on Java 8. The dom and sax
-    // variants also run on Android, whose JAXP predates newDefaultInstance and carries no JDK-internal fallback: the lookup miss surfaces there as the
-    // factory's own FactoryConfigurationError, like any newInstance miss.
-    @Test
-    @Tag("dom")
-    void newDefaultInstanceDocumentBuilderFactoryIsUsable() throws Exception {
-        if (AttackTestSupport.IS_ANDROID) {
-            assertThrows(FactoryConfigurationError.class, SecureDocumentBuilderFactory::newDefaultInstance);
-            return;
-        }
-        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newDefaultInstance();
-        assertNotNull(factory.newDocumentBuilder().parse(new InputSource(new StringReader(BENIGN_XML))).getDocumentElement());
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-    }
-
-    @Test
-    @Tag("sax")
-    void newDefaultInstanceSAXParserFactoryIsUsable() throws Exception {
-        if (AttackTestSupport.IS_ANDROID) {
-            assertThrows(FactoryConfigurationError.class, SecureSAXParserFactory::newDefaultInstance);
-            return;
-        }
-        final SAXParserFactory factory = SecureSAXParserFactory.newDefaultInstance();
-        factory.newSAXParser().parse(new InputSource(new StringReader(BENIGN_XML)), new DefaultHandler());
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-    }
-
-    // The newNSInstance family (Java 13) falls back to enabling namespace awareness on the corresponding newInstance lookup, the behavior the JAXP methods
-    // are specified to have, so the non-default variants work on every platform including Android.
-    @Test
-    @Tag("dom")
-    void newNSInstanceDocumentBuilderFactoryIsNamespaceAware() throws Exception {
-        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newNSInstance();
-        assertTrue(factory.isNamespaceAware());
-        assertNotNull(factory.newDocumentBuilder().parse(new InputSource(new StringReader(BENIGN_XML))).getDocumentElement());
-        if (!AttackTestSupport.IS_ANDROID) {
-            assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-        }
-    }
-
-    @Test
-    @Tag("dom")
-    void newDefaultNSInstanceDocumentBuilderFactoryIsNamespaceAware() throws Exception {
-        if (AttackTestSupport.IS_ANDROID) {
-            assertThrows(FactoryConfigurationError.class, SecureDocumentBuilderFactory::newDefaultNSInstance);
-            return;
-        }
-        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newDefaultNSInstance();
-        assertTrue(factory.isNamespaceAware());
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-    }
-
-    @Test
-    @Tag("sax")
-    void newNSInstanceSAXParserFactoryIsNamespaceAware() throws Exception {
-        final SAXParserFactory factory = SecureSAXParserFactory.newNSInstance();
-        assertTrue(factory.isNamespaceAware());
-        factory.newSAXParser().parse(new InputSource(new StringReader(BENIGN_XML)), new DefaultHandler());
-        if (!AttackTestSupport.IS_ANDROID) {
-            assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-        }
-    }
-
-    @Test
-    @Tag("sax")
-    void newDefaultNSInstanceSAXParserFactoryIsNamespaceAware() throws Exception {
-        if (AttackTestSupport.IS_ANDROID) {
-            assertThrows(FactoryConfigurationError.class, SecureSAXParserFactory::newDefaultNSInstance);
-            return;
-        }
-        final SAXParserFactory factory = SecureSAXParserFactory.newDefaultNSInstance();
-        assertTrue(factory.isNamespaceAware());
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-    }
-
-    @Test
-    void explicitClassNameNSDocumentBuilderFactoryIsNamespaceAware() throws Exception {
-        final Class<?> impl = DocumentBuilderFactory.newInstance().getClass();
-        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newNSInstance(impl.getName(), impl.getClassLoader());
-        assertTrue(factory.isNamespaceAware());
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-    }
-
-    @Test
-    void explicitClassNameNSSAXParserFactoryIsNamespaceAware() throws Exception {
-        final Class<?> impl = SAXParserFactory.newInstance().getClass();
-        final SAXParserFactory factory = SecureSAXParserFactory.newNSInstance(impl.getName(), impl.getClassLoader());
-        assertTrue(factory.isNamespaceAware());
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-    }
-
-    @Test
-    void newDefaultInstanceSchemaFactoryIsSecure() throws Exception {
-        final SchemaFactory factory = SecureSchemaFactory.newDefaultInstance();
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-    }
-
-    @Test
-    void newDefaultInstanceTransformerFactoryIsSecure() {
-        final TransformerFactory factory = SecureTransformerFactory.newDefaultInstance();
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-    }
-
-    @Test
-    void newDefaultFactoryXMLInputFactoryIsSecure() {
-        final XMLInputFactory factory = SecureXMLInputFactory.newDefaultFactory();
-        assertEquals(Boolean.TRUE, factory.getProperty(XMLInputFactory.SUPPORT_DTD));
-    }
-
-    @Test
-    void newDefaultInstanceXPathFactoryIsSecure() throws Exception {
-        final XPathFactory factory = SecureXPathFactory.newDefaultInstance();
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 }

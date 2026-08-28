@@ -76,114 +76,6 @@ import org.xml.sax.XMLReader;
  */
 public final class SecureTransformerFactory {
 
-    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
-    private static final String JDK_TRANSFORMER_FACTORY = "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl";
-
-    private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(TransformerFactory.class, "newDefaultInstance",
-            MethodType.methodType(TransformerFactory.class));
-
-    /**
-     * Capability-driven secure for any {@link TransformerFactory} on the classpath.
-     *
-     * <p>Rather than branching on the implementation class, this method probes what the factory supports and adapts:</p>
-     * <ul>
-     *     <li><strong>Saxon</strong> ({@code net.sf.saxon}): recognized by package prefix and handed to {@link SaxonProvider#configure(TransformerFactory)} for the
-     *         channels the standard JAXP knobs cannot close (reflection-based extension functions, the collection finder, the internal SAX parser). It is then
-     *         wrapped like every other implementation to install the {@link FallbackIgnoreURIResolver} floor; the only
-     *         difference is the empty-{@link Source} shape the floor returns, {@code EmptySource} for Saxon rather than the default empty DOM document.</li>
-     *     <li><strong>FSP</strong> ({@link XMLConstants#FEATURE_SECURE_PROCESSING}): required. On XSLTC it enables the runtime evaluator limits; on Xalan it disables
-     *         reflection-based extension functions.</li>
-     *     <li><strong>{@link FallbackIgnoreURIResolver} floor</strong>: required. An ignore-all {@link URIResolver} floor, installed by
-     *         the nested wrapper and carried onto every produced {@link Transformer}, resolves {@code xsl:import}/{@code xsl:include} at compile
-     *         time and {@code document()} at runtime to an empty document, the one channel both XSLTC and Xalan route through. A caller-set {@link URIResolver} is
-     *         routed through the floor rather than replacing it, so a caller can opt a specific URI in but cannot reopen the fetch.</li>
-     *     <li><strong>The nested wrapper</strong>: required. Both implementations fall back to {@code SAXParserFactory.newInstance()} to parse a
-     *         stylesheet or source document that does not carry its own reader, and only set FSP on it; wrapping the factory rewrites every {@link Source} through an
-     *         {@link org.apache.commons.xml}-hardened reader instead.</li>
-     * </ul>
-     *
-     * @param factory the factory to harden; never {@code null}.
-     * @return a secure factory.
-     */
-    static TransformerFactory secure(final TransformerFactory factory) {
-        // Required: enables secure processing (XSLTC runtime limits; Xalan's extension-function block).
-        setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        if (SaxonProvider.isSaxon(factory.getClass())) {
-            // Saxon keeps its vendor Configuration for the channels JAXP cannot close,
-            // then goes through the same wrapper as every other implementation for the URIResolver floor;
-            // EmptySource is the empty-source shape Saxon's consumers expect.
-            return new Wrapper((SAXTransformerFactory) SaxonProvider.configure(factory), SaxonProvider.emptySourceSupplier());
-        }
-        // Required: source/stylesheet parsing provisions its own SAX reader otherwise; the wrapper routes every Source through a secure one and installs the
-        // ignore-all URIResolver floor (blocking xsl:import/include at compile time and document() at runtime) that a caller-set resolver cannot remove.
-        return new Wrapper((SAXTransformerFactory) factory);
-    }
-
-    /**
-     * Returns a new, secure {@link TransformerFactory} of the system-default implementation.
-     * <p>
-     * Obtained as by {@code TransformerFactory.newDefaultInstance()} where the platform provides it (Java 9 or later), and by instantiating the JDK's built-in
-     * implementation directly on Java 8.
-     * </p>
-     *
-     * @return A secure factory.
-     * @throws IllegalStateException                Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws TransformerFactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in
-     *                                                implementation (for example Android).
-     */
-    public static TransformerFactory newDefaultInstance() {
-        if (MH_newDefaultInstance != null) {
-            final TransformerFactory factory;
-            try {
-                factory = (TransformerFactory) MH_newDefaultInstance.invokeExact();
-            } catch (final TransformerFactoryConfigurationError e) {
-                throw e;
-            } catch (final Throwable e) {
-                // Unreachable: the looked-up method declares no other exceptions.
-                throw new IllegalStateException(e);
-            }
-            return secure(factory);
-        }
-        // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead. Where that class does not exist either (for
-        // example Android), the lookup miss surfaces as TransformerFactoryConfigurationError, like any newInstance miss.
-        return newInstance(JDK_TRANSFORMER_FACTORY, null);
-    }
-
-    /**
-     * Returns a new, secure {@link TransformerFactory}.
-     *
-     * @return A secure factory.
-     * @throws IllegalStateException if a required secure setting cannot be applied to the underlying implementation.
-     */
-    public static TransformerFactory newInstance() {
-        return secure(TransformerFactory.newInstance());
-    }
-
-    /**
-     * Returns a new, secure {@link TransformerFactory} of the given implementation class.
-     *
-     * @param factoryClassName The fully qualified class name of the {@link TransformerFactory} implementation.
-     * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
-     * @return A secure factory.
-     * @throws IllegalStateException                Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws TransformerFactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
-     */
-    public static TransformerFactory newInstance(final String factoryClassName, final ClassLoader classLoader) {
-        return secure(TransformerFactory.newInstance(factoryClassName, classLoader));
-    }
-
-    private static void setFeature(final TransformerFactory factory, final String feature, final boolean value) {
-        try {
-            factory.setFeature(feature, value);
-        } catch (final Exception e) {
-            throw SecureException.settingFailed("feature", feature, factory, e);
-        }
-    }
-
-    private SecureTransformerFactory() {
-        // static only
-    }
-
     /**
      * {@link TransformerFactory} wrapper that rewrites every Source-taking entry point through {@link SecureSAXParserFactory#secure(Source, boolean)} before
      * delegating.
@@ -216,34 +108,6 @@ public final class SecureTransformerFactory {
      * @see org.apache.commons.xml
      */
     private static final class Wrapper extends SAXTransformerFactory {
-
-        /**
-         * Parses a reader-less source into a DOM through a secure, namespace-aware {@link javax.xml.parsers.DocumentBuilder} and returns a {@link DOMSource}
-         * carrying its system id, so the consumer walks the tree instead of provisioning its own reader. Any other source is left to
-         * {@link SecureSAXParserFactory#secure(Source, boolean)}.
-         *
-         * @param source The source to scan for an associated stylesheet.
-         * @return A {@link DOMSource} for a reader-less source, otherwise the result of {@link SecureSAXParserFactory#secure(Source, boolean)}.
-         * @throws TransformerConfigurationException if the source cannot be parsed.
-         * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-         *                                   configuration error} or if the implementation is not available or cannot be instantiated.
-         * @throws SecureException Thrown if a (non-Andoid) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
-         */
-        private Source hardenSourceToDom(final Source source) throws TransformerConfigurationException {
-            if (source instanceof StreamSource || source instanceof SAXSource && ((SAXSource) source).getXMLReader() == null) {
-                final InputSource inputSource = SAXSource.sourceToInputSource(source);
-                if (inputSource != null) {
-                    try {
-                        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newNSInstance(overrideDefaultParser());
-                        final Document document = factory.newDocumentBuilder().parse(inputSource);
-                        return new DOMSource(document, inputSource.getSystemId());
-                    } catch (final ParserConfigurationException | SAXException | IOException e) {
-                        throw new TransformerConfigurationException("Failed to parse the source for associated-stylesheet lookup", e);
-                    }
-                }
-            }
-            return SecureSAXParserFactory.secure(source, overrideDefaultParser());
-        }
 
         /**
          * Whether the delegate is Apache Xalan (either its interpretive or its XSLTC factory), whose {@code getAssociatedStylesheet} ignores a SAXSource reader.
@@ -355,6 +219,34 @@ public final class SecureTransformerFactory {
         }
 
         /**
+         * Parses a reader-less source into a DOM through a secure, namespace-aware {@link javax.xml.parsers.DocumentBuilder} and returns a {@link DOMSource}
+         * carrying its system id, so the consumer walks the tree instead of provisioning its own reader. Any other source is left to
+         * {@link SecureSAXParserFactory#secure(Source, boolean)}.
+         *
+         * @param source The source to scan for an associated stylesheet.
+         * @return A {@link DOMSource} for a reader-less source, otherwise the result of {@link SecureSAXParserFactory#secure(Source, boolean)}.
+         * @throws TransformerConfigurationException if the source cannot be parsed.
+         * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+         *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+         * @throws SecureException Thrown if a (non-Andoid) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
+         */
+        private Source hardenSourceToDom(final Source source) throws TransformerConfigurationException {
+            if (source instanceof StreamSource || source instanceof SAXSource && ((SAXSource) source).getXMLReader() == null) {
+                final InputSource inputSource = SAXSource.sourceToInputSource(source);
+                if (inputSource != null) {
+                    try {
+                        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newNSInstance(overrideDefaultParser());
+                        final Document document = factory.newDocumentBuilder().parse(inputSource);
+                        return new DOMSource(document, inputSource.getSystemId());
+                    } catch (final ParserConfigurationException | SAXException | IOException e) {
+                        throw new TransformerConfigurationException("Failed to parse the source for associated-stylesheet lookup", e);
+                    }
+                }
+            }
+            return SecureSAXParserFactory.secure(source, overrideDefaultParser());
+        }
+
+        /**
          * {@inheritDoc}
          *
          * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
@@ -431,27 +323,6 @@ public final class SecureTransformerFactory {
                     : new SecureTemplates(templates, getURIResolver(), emptySource, overrideDefaultParser()));
         }
 
-        @Override
-        public void setAttribute(final String name, final Object value) {
-            delegate.setAttribute(name, value);
-        }
-
-        @Override
-        public void setErrorListener(final ErrorListener listener) {
-            delegate.setErrorListener(listener);
-        }
-
-        @Override
-        public void setFeature(final String name, final boolean value) throws TransformerConfigurationException {
-            delegate.setFeature(name, value);
-        }
-
-
-        @Override
-        public void setURIResolver(final URIResolver resolver) {
-            floor.setDelegate(resolver);
-        }
-
         /**
          * Checks whether parsers should be instantiated via {@code newInstance()} instead of {@code newDefaultInstance()}.
          *
@@ -463,5 +334,134 @@ public final class SecureTransformerFactory {
         private boolean overrideDefaultParser() {
             return !supportsOverrideDefaultParser || delegate.getFeature(SecureSAXParserFactory.OVERRIDE_DEFAULT_PARSER);
         }
+
+        @Override
+        public void setAttribute(final String name, final Object value) {
+            delegate.setAttribute(name, value);
+        }
+
+        @Override
+        public void setErrorListener(final ErrorListener listener) {
+            delegate.setErrorListener(listener);
+        }
+
+
+        @Override
+        public void setFeature(final String name, final boolean value) throws TransformerConfigurationException {
+            delegate.setFeature(name, value);
+        }
+
+        @Override
+        public void setURIResolver(final URIResolver resolver) {
+            floor.setDelegate(resolver);
+        }
+    }
+
+    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
+    private static final String JDK_TRANSFORMER_FACTORY = "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl";
+
+    private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(TransformerFactory.class, "newDefaultInstance",
+            MethodType.methodType(TransformerFactory.class));
+
+    /**
+     * Returns a new, secure {@link TransformerFactory} of the system-default implementation.
+     * <p>
+     * Obtained as by {@code TransformerFactory.newDefaultInstance()} where the platform provides it (Java 9 or later), and by instantiating the JDK's built-in
+     * implementation directly on Java 8.
+     * </p>
+     *
+     * @return A secure factory.
+     * @throws IllegalStateException                Thrown if a required secure setting cannot be applied to the underlying implementation.
+     * @throws TransformerFactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in
+     *                                                implementation (for example Android).
+     */
+    public static TransformerFactory newDefaultInstance() {
+        if (MH_newDefaultInstance != null) {
+            final TransformerFactory factory;
+            try {
+                factory = (TransformerFactory) MH_newDefaultInstance.invokeExact();
+            } catch (final TransformerFactoryConfigurationError e) {
+                throw e;
+            } catch (final Throwable e) {
+                // Unreachable: the looked-up method declares no other exceptions.
+                throw new IllegalStateException(e);
+            }
+            return secure(factory);
+        }
+        // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead. Where that class does not exist either (for
+        // example Android), the lookup miss surfaces as TransformerFactoryConfigurationError, like any newInstance miss.
+        return newInstance(JDK_TRANSFORMER_FACTORY, null);
+    }
+
+    /**
+     * Returns a new, secure {@link TransformerFactory}.
+     *
+     * @return A secure factory.
+     * @throws IllegalStateException if a required secure setting cannot be applied to the underlying implementation.
+     */
+    public static TransformerFactory newInstance() {
+        return secure(TransformerFactory.newInstance());
+    }
+
+    /**
+     * Returns a new, secure {@link TransformerFactory} of the given implementation class.
+     *
+     * @param factoryClassName The fully qualified class name of the {@link TransformerFactory} implementation.
+     * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
+     * @return A secure factory.
+     * @throws IllegalStateException                Thrown if a required secure setting cannot be applied to the underlying implementation.
+     * @throws TransformerFactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
+     */
+    public static TransformerFactory newInstance(final String factoryClassName, final ClassLoader classLoader) {
+        return secure(TransformerFactory.newInstance(factoryClassName, classLoader));
+    }
+
+    /**
+     * Capability-driven secure for any {@link TransformerFactory} on the classpath.
+     *
+     * <p>Rather than branching on the implementation class, this method probes what the factory supports and adapts:</p>
+     * <ul>
+     *     <li><strong>Saxon</strong> ({@code net.sf.saxon}): recognized by package prefix and handed to {@link SaxonProvider#configure(TransformerFactory)} for the
+     *         channels the standard JAXP knobs cannot close (reflection-based extension functions, the collection finder, the internal SAX parser). It is then
+     *         wrapped like every other implementation to install the {@link FallbackIgnoreURIResolver} floor; the only
+     *         difference is the empty-{@link Source} shape the floor returns, {@code EmptySource} for Saxon rather than the default empty DOM document.</li>
+     *     <li><strong>FSP</strong> ({@link XMLConstants#FEATURE_SECURE_PROCESSING}): required. On XSLTC it enables the runtime evaluator limits; on Xalan it disables
+     *         reflection-based extension functions.</li>
+     *     <li><strong>{@link FallbackIgnoreURIResolver} floor</strong>: required. An ignore-all {@link URIResolver} floor, installed by
+     *         the nested wrapper and carried onto every produced {@link Transformer}, resolves {@code xsl:import}/{@code xsl:include} at compile
+     *         time and {@code document()} at runtime to an empty document, the one channel both XSLTC and Xalan route through. A caller-set {@link URIResolver} is
+     *         routed through the floor rather than replacing it, so a caller can opt a specific URI in but cannot reopen the fetch.</li>
+     *     <li><strong>The nested wrapper</strong>: required. Both implementations fall back to {@code SAXParserFactory.newInstance()} to parse a
+     *         stylesheet or source document that does not carry its own reader, and only set FSP on it; wrapping the factory rewrites every {@link Source} through an
+     *         {@link org.apache.commons.xml}-hardened reader instead.</li>
+     * </ul>
+     *
+     * @param factory the factory to harden; never {@code null}.
+     * @return a secure factory.
+     */
+    static TransformerFactory secure(final TransformerFactory factory) {
+        // Required: enables secure processing (XSLTC runtime limits; Xalan's extension-function block).
+        setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        if (SaxonProvider.isSaxon(factory.getClass())) {
+            // Saxon keeps its vendor Configuration for the channels JAXP cannot close,
+            // then goes through the same wrapper as every other implementation for the URIResolver floor;
+            // EmptySource is the empty-source shape Saxon's consumers expect.
+            return new Wrapper((SAXTransformerFactory) SaxonProvider.configure(factory), SaxonProvider.emptySourceSupplier());
+        }
+        // Required: source/stylesheet parsing provisions its own SAX reader otherwise; the wrapper routes every Source through a secure one and installs the
+        // ignore-all URIResolver floor (blocking xsl:import/include at compile time and document() at runtime) that a caller-set resolver cannot remove.
+        return new Wrapper((SAXTransformerFactory) factory);
+    }
+
+    private static void setFeature(final TransformerFactory factory, final String feature, final boolean value) {
+        try {
+            factory.setFeature(feature, value);
+        } catch (final Exception e) {
+            throw SecureException.settingFailed("feature", feature, factory, e);
+        }
+    }
+
+    private SecureTransformerFactory() {
+        // static only
     }
 }

@@ -89,10 +89,6 @@ class SaxonXPathExternalCallsTest {
                 DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
     }
 
-    private static XPathFactory secureSaxonXPathFactory() {
-        return SaxonProvider.configure(saxonXPathFactory());
-    }
-
     private static String jsonDocExpression() {
         return "json-doc('" + AttackTestSupport.resourceUrl("referenced.json") + "')?leaked";
     }
@@ -109,6 +105,10 @@ class SaxonXPathExternalCallsTest {
         } catch (final ReflectiveOperationException e) {
             throw new AssertionError("Cannot instantiate " + SAXON_XPATH_FACTORY_CLASS, e);
         }
+    }
+
+    private static XPathFactory secureSaxonXPathFactory() {
+        return SaxonProvider.configure(saxonXPathFactory());
     }
 
     private static String unparsedTextExpression() {

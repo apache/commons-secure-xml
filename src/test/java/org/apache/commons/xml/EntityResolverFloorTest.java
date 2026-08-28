@@ -125,30 +125,6 @@ class EntityResolverFloorTest {
         return factory;
     }
 
-    private static DocumentBuilder secureBuilder() throws Exception {
-        final DocumentBuilder builder = SecureDocumentBuilderFactory.newInstance().newDocumentBuilder();
-        builder.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
-        return builder;
-    }
-
-    private static XMLReader secureXMLReader() throws Exception {
-        final XMLReader reader = SecureSAXParserFactory.newInstance().newSAXParser().getXMLReader();
-        reader.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
-        return reader;
-    }
-
-    /**
-     * A secure {@link TransformerFactory} with a re-throwing error listener. XSLTC and Xalan enforce the block through the
-     * {@link FallbackIgnoreURIResolver} floor; Saxon enforces it through the ignore-all resolver floor on its {@code Configuration}. Either way a caller-set
-     * resolver that returns {@code null} cannot re-open the fetch. The strict listener turns any reported-and-recovered error into a test failure, so an
-     * implementation cannot quietly recover from a floor resolution while the test asserts clean completion.
-     */
-    private static TransformerFactory secureTransformerFactory() {
-        final TransformerFactory factory = SecureTransformerFactory.newInstance();
-        factory.setErrorListener(AttackTestSupport.STRICT_REPORTER);
-        return factory;
-    }
-
     /** An {@link LSInput} naming the resource but carrying no content: a redirect the implementation fetches itself, like an identifier-only {@code InputSource}. */
     private static LSInput identifierOnlyLsInput(final String systemId) {
         return assertDoesNotThrow(() -> {
@@ -165,6 +141,30 @@ class EntityResolverFloorTest {
             input.setByteStream(new URL(systemId).openStream());
             return input;
         }, "Failed to build LSInput for " + systemId);
+    }
+
+    private static DocumentBuilder secureBuilder() throws Exception {
+        final DocumentBuilder builder = SecureDocumentBuilderFactory.newInstance().newDocumentBuilder();
+        builder.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
+        return builder;
+    }
+
+    /**
+     * A secure {@link TransformerFactory} with a re-throwing error listener. XSLTC and Xalan enforce the block through the
+     * {@link FallbackIgnoreURIResolver} floor; Saxon enforces it through the ignore-all resolver floor on its {@code Configuration}. Either way a caller-set
+     * resolver that returns {@code null} cannot re-open the fetch. The strict listener turns any reported-and-recovered error into a test failure, so an
+     * implementation cannot quietly recover from a floor resolution while the test asserts clean completion.
+     */
+    private static TransformerFactory secureTransformerFactory() {
+        final TransformerFactory factory = SecureTransformerFactory.newInstance();
+        factory.setErrorListener(AttackTestSupport.STRICT_REPORTER);
+        return factory;
+    }
+
+    private static XMLReader secureXMLReader() throws Exception {
+        final XMLReader reader = SecureSAXParserFactory.newInstance().newSAXParser().getXMLReader();
+        reader.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
+        return reader;
     }
 
     private static DocumentBuilder xIncludeAwareBuilder() throws Exception {

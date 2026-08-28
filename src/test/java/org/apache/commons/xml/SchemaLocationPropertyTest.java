@@ -80,29 +80,6 @@ class SchemaLocationPropertyTest {
         }
     }
 
-    private static DocumentBuilder secureValidatingDom(final String property, final String value) {
-        return configureOrSkip(() -> {
-            final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(true);
-            factory.setValidating(true);
-            factory.setAttribute(SCHEMA_LANGUAGE, XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            factory.setAttribute(property, value);
-            return strictDocumentBuilder(factory);
-        });
-    }
-
-    private static XMLReader secureValidatingSax(final String property, final String value) {
-        return configureOrSkip(() -> {
-            final SAXParserFactory factory = SecureSAXParserFactory.newInstance();
-            factory.setNamespaceAware(true);
-            factory.setValidating(true);
-            final SAXParser parser = factory.newSAXParser();
-            parser.setProperty(SCHEMA_LANGUAGE, XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            parser.setProperty(property, value);
-            return strictXMLReader(parser.getXMLReader());
-        });
-    }
-
     private static String namespacedLocation() {
         return LEAKED_NS + " " + resourceUrl("included.xsd");
     }
@@ -137,28 +114,27 @@ class SchemaLocationPropertyTest {
         });
     }
 
-    @Test
-    void secureDomRefusesNoNamespaceSchemaLocation() {
-        final DocumentBuilder builder = secureValidatingDom(EXTERNAL_NO_NS, noNamespaceLocation());
-        assertParseFails(() -> builder.parse(inputSource(NO_NS_INSTANCE)), "DOM external-noNamespaceSchemaLocation", SAXException.class);
+    private static DocumentBuilder secureValidatingDom(final String property, final String value) {
+        return configureOrSkip(() -> {
+            final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            factory.setValidating(true);
+            factory.setAttribute(SCHEMA_LANGUAGE, XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            factory.setAttribute(property, value);
+            return strictDocumentBuilder(factory);
+        });
     }
 
-    @Test
-    void secureDomRefusesSchemaLocation() {
-        final DocumentBuilder builder = secureValidatingDom(EXTERNAL_SCHEMA_LOCATION, namespacedLocation());
-        assertParseFails(() -> builder.parse(inputSource(NAMESPACED_INSTANCE)), "DOM external-schemaLocation", SAXException.class);
-    }
-
-    @Test
-    void secureSaxRefusesNoNamespaceSchemaLocation() {
-        final XMLReader reader = secureValidatingSax(EXTERNAL_NO_NS, noNamespaceLocation());
-        assertParseFails(() -> reader.parse(inputSource(NO_NS_INSTANCE)), "SAX external-noNamespaceSchemaLocation", SAXException.class);
-    }
-
-    @Test
-    void secureSaxRefusesSchemaLocation() {
-        final XMLReader reader = secureValidatingSax(EXTERNAL_SCHEMA_LOCATION, namespacedLocation());
-        assertParseFails(() -> reader.parse(inputSource(NAMESPACED_INSTANCE)), "SAX external-schemaLocation", SAXException.class);
+    private static XMLReader secureValidatingSax(final String property, final String value) {
+        return configureOrSkip(() -> {
+            final SAXParserFactory factory = SecureSAXParserFactory.newInstance();
+            factory.setNamespaceAware(true);
+            factory.setValidating(true);
+            final SAXParser parser = factory.newSAXParser();
+            parser.setProperty(SCHEMA_LANGUAGE, XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            parser.setProperty(property, value);
+            return strictXMLReader(parser.getXMLReader());
+        });
     }
 
     @Test
@@ -183,5 +159,29 @@ class SchemaLocationPropertyTest {
     void permissiveSaxFetchesSchemaLocation() {
         final XMLReader reader = permissiveValidatingSax(EXTERNAL_SCHEMA_LOCATION, namespacedLocation());
         assertParseSucceeds(() -> reader.parse(inputSource(NAMESPACED_INSTANCE)), "SAX external-schemaLocation (permissive)");
+    }
+
+    @Test
+    void secureDomRefusesNoNamespaceSchemaLocation() {
+        final DocumentBuilder builder = secureValidatingDom(EXTERNAL_NO_NS, noNamespaceLocation());
+        assertParseFails(() -> builder.parse(inputSource(NO_NS_INSTANCE)), "DOM external-noNamespaceSchemaLocation", SAXException.class);
+    }
+
+    @Test
+    void secureDomRefusesSchemaLocation() {
+        final DocumentBuilder builder = secureValidatingDom(EXTERNAL_SCHEMA_LOCATION, namespacedLocation());
+        assertParseFails(() -> builder.parse(inputSource(NAMESPACED_INSTANCE)), "DOM external-schemaLocation", SAXException.class);
+    }
+
+    @Test
+    void secureSaxRefusesNoNamespaceSchemaLocation() {
+        final XMLReader reader = secureValidatingSax(EXTERNAL_NO_NS, noNamespaceLocation());
+        assertParseFails(() -> reader.parse(inputSource(NO_NS_INSTANCE)), "SAX external-noNamespaceSchemaLocation", SAXException.class);
+    }
+
+    @Test
+    void secureSaxRefusesSchemaLocation() {
+        final XMLReader reader = secureValidatingSax(EXTERNAL_SCHEMA_LOCATION, namespacedLocation());
+        assertParseFails(() -> reader.parse(inputSource(NAMESPACED_INSTANCE)), "SAX external-schemaLocation", SAXException.class);
     }
 }

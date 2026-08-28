@@ -44,6 +44,33 @@ import net.sf.saxon.xpath.XPathFactoryImpl;
 final class SaxonProvider {
 
     /**
+     * Sole holder of Saxon symbolic references, so that the outer class verifies without Saxon on the classpath.
+     *
+     * <p>{@link SaxonProvider#isSaxon} runs on every harden call, Saxon present or not, and the JVM verifier may load classes eagerly to prove class-typed
+     * assignability; keeping every Saxon reference in this nested class defers that loading until a Saxon factory has actually been recognized.</p>
+     */
+    private static final class SaxonProviderConfigurer {
+
+        private static TransformerFactory configure(final TransformerFactory factory) {
+            // The URIResolver floor is installed by the SecureTransformerFactory wrapper that SecureTransformerFactory.harden puts around this factory.
+            ((SaxonTransformerFactory) factory).setConfiguration(new SecureConfiguration());
+            return factory;
+        }
+
+        private static XPathFactory configure(final XPathFactory factory) {
+            final SecureConfiguration config = new SecureConfiguration();
+            // XPath has no factory wrapper, so the ignore-all floor lives on the Configuration; reuse FallbackIgnoreURIResolver, adapted to a ResourceResolver.
+            config.setResourceResolver(new ResourceResolverWrappingURIResolver(new FallbackIgnoreURIResolver(null, emptySourceSupplier(), () -> false)));
+            ((XPathFactoryImpl) factory).setConfiguration(config);
+            return factory;
+        }
+
+        private static Supplier<Source> emptySourceSupplier() {
+            return EmptySource::getInstance;
+        }
+    }
+
+    /**
      * A Saxon {@link Configuration} carrying the vendor-specific restrictions that the standard JAXP knobs cannot express.
      *
      * <p>The ignore-all {@link javax.xml.transform.URIResolver} floor is not one of them: it is installed from outside by the shared
@@ -91,33 +118,6 @@ final class SaxonProvider {
             } catch (final SecureException e) {
                 throw new TransformerFactoryConfigurationError(e);
             }
-        }
-    }
-
-    /**
-     * Sole holder of Saxon symbolic references, so that the outer class verifies without Saxon on the classpath.
-     *
-     * <p>{@link SaxonProvider#isSaxon} runs on every harden call, Saxon present or not, and the JVM verifier may load classes eagerly to prove class-typed
-     * assignability; keeping every Saxon reference in this nested class defers that loading until a Saxon factory has actually been recognized.</p>
-     */
-    private static final class SaxonProviderConfigurer {
-
-        private static TransformerFactory configure(final TransformerFactory factory) {
-            // The URIResolver floor is installed by the SecureTransformerFactory wrapper that SecureTransformerFactory.harden puts around this factory.
-            ((SaxonTransformerFactory) factory).setConfiguration(new SecureConfiguration());
-            return factory;
-        }
-
-        private static XPathFactory configure(final XPathFactory factory) {
-            final SecureConfiguration config = new SecureConfiguration();
-            // XPath has no factory wrapper, so the ignore-all floor lives on the Configuration; reuse FallbackIgnoreURIResolver, adapted to a ResourceResolver.
-            config.setResourceResolver(new ResourceResolverWrappingURIResolver(new FallbackIgnoreURIResolver(null, emptySourceSupplier(), () -> false)));
-            ((XPathFactoryImpl) factory).setConfiguration(config);
-            return factory;
-        }
-
-        private static Supplier<Source> emptySourceSupplier() {
-            return EmptySource::getInstance;
         }
     }
 
