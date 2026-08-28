@@ -27,7 +27,7 @@ notifications:
 
 github:
   description: "Apache Commons XML"
-  homepage: https://commons.apache.org/sandbox/commons-xml/
+  homepage: https://commons.apache.org/proper/commons-xml/
 
   pull_requests:
     # allow auto-merge

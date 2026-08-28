@@ -37,10 +37,10 @@
       </item>
       <item name="License" href="https://www.apache.org/licenses/LICENSE-2.0" />
       <item name="Code of Conduct" href="https://www.apache.org/foundation/policies/conduct.html" />
-<!-- TODO      <item name="Download" href="https://commons.apache.org/sandbox/commons-xml/download_xml.cgi" />-->
+      <item name="Download" href="https://commons.apache.org/proper/commons-xml/download_xml.cgi" />
       <item name="Javadoc">
         <item name="Javadoc Current" href="apidocs/index.html" />
-<!-- TODO       <item name="Javadoc Archive" href="https://javadoc.io/doc/org.apache.commons/commons-xml/" />-->
+        <item name="Javadoc Archive" href="https://javadoc.io/doc/org.apache.commons/commons-xml/" />
       </item>
       <!-- End: For all components. -->
     </menu>

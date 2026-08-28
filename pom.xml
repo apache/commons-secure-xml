@@ -26,7 +26,7 @@ limitations under the License.
   <artifactId>commons-xml</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <name>Apache Commons XML</name>
-  <url>https://commons.apache.org/sandbox/commons-xml/</url>
+  <url>https://commons.apache.org/proper/commons-xml/</url>
   <inceptionYear>2026</inceptionYear>
   <description>Apache Commons XML provides secure-by-default JAXP factory creation, abstracting over
     implementation-specific XXE hardening differences between the stock JDK and external JAXP implementations
@@ -50,8 +50,7 @@ limitations under the License.
     <commons.packageId>xml</commons.packageId>
     <commons.module.name>org.apache.commons.xml</commons.module.name>
     <commons.jira.id>COMMONSXML</commons.jira.id>
-    <!-- Sandbox component: publish the site under the sandbox tree (the parent defaults to proper/). -->
-    <commons.scmPubUrl>https://svn.apache.org/repos/infra/websites/production/commons/content/sandbox/commons-xml</commons.scmPubUrl>
+    <commons.scmPubUrl>https://svn.apache.org/repos/infra/websites/production/commons/content/proper/commons-xml</commons.scmPubUrl>
     <!-- OSGi bundle metadata: override commons-parent's org.apache.commons.* defaults. -->
     <commons.osgi.symbolicName>org.apache.commons.xml</commons.osgi.symbolicName>
     <commons.osgi.export>org.apache.commons.xml.*;version=${project.version};-noimport:=true</commons.osgi.export>

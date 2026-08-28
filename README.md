@@ -56,13 +56,13 @@ Apache Commons XML provides secure-by-default JAXP factory creation, abstracting
 Documentation
 -------------
 
-More information can be found on the [Apache Commons XML homepage](https://commons.apache.org/sandbox/commons-xml/).
-The [Javadoc](https://commons.apache.org/sandbox/commons-xml/apidocs) can be browsed.
+More information can be found on the [Apache Commons XML homepage](https://commons.apache.org/proper/commons-xml).
+The [Javadoc](https://commons.apache.org/proper/commons-xml/apidocs) can be browsed.
 Questions related to the usage of Apache Commons XML should be posted to the [user mailing list](https://commons.apache.org/mail-lists.html).
 
 Getting the latest release
 --------------------------
-You can download source and binaries from our [download page](https://commons.apache.org/sandbox/commons-xml/download_xml.cgi).
+You can download source and binaries from our [download page](https://commons.apache.org/proper/commons-xml/download_xml.cgi).
 
 Alternatively, you can pull it from the central Maven repositories:
 
