@@ -40,7 +40,7 @@
  * </p>
  * <h2>Security Guarantees</h2>
  * <p>
- * Every factory returned by makes the same three guarantees, regardless of which JAXP implementation is on the classpath:
+ * Every factory returned by this library makes the same three guarantees, regardless of which JAXP implementation is on the classpath:
  * </p>
  * <ul>
  * <li><strong>External DTDs are not fetched.</strong></li>
