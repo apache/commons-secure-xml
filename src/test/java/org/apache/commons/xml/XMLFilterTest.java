@@ -107,7 +107,7 @@ class XMLFilterTest {
 
     @Test
     void unconfiguredFilterLeaksExternalEntity() throws Exception {
-        // Android's platform parser does not resolve the input's external general entity in this path, so the vector cannot be demonstrated there; the hardened
+        // Android's platform parser does not resolve the input's external general entity in this path, so the vector cannot be demonstrated there; the secure
         // counterpart still runs on Android and must not leak.
         Assumptions.assumeFalse(AttackTestSupport.IS_ANDROID, "Android's Expat does not resolve the external general entity here");
         final SAXTransformerFactory factory = (SAXTransformerFactory) TransformerFactory.newInstance();
