@@ -23,7 +23,6 @@ import java.util.Objects;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
@@ -67,8 +66,7 @@ final class SecureXPath implements XPath {
     static Document parse(final InputSource source, final boolean overrideDefaultParser) throws XPathExpressionException {
         Objects.requireNonNull(source, "source");
         try {
-            final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newNSInstance(overrideDefaultParser);
-            return factory.newDocumentBuilder().parse(source);
+            return SecureDocumentBuilderFactory.newNSInstance(overrideDefaultParser).newDocumentBuilder().parse(source);
         } catch (final ParserConfigurationException | SAXException | IOException e) {
             throw new XPathExpressionException(e);
         }
