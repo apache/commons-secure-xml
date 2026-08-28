@@ -138,24 +138,14 @@ public final class SecureXPathFactory {
      */
     public static XPathFactory newDefaultInstance() {
         if (MH_newDefaultInstance != null) {
-            final XPathFactory factory;
-            try {
-                factory = (XPathFactory) MH_newDefaultInstance.invokeExact();
-            } catch (final RuntimeException e) {
-                throw e;
-            } catch (final Throwable e) {
-                // Unreachable: the looked-up method declares no other exceptions.
-                throw new IllegalStateException(e);
-            }
-            return secure(factory);
+            return secure(MethodHandleFactory.invokeExact(() -> (XPathFactory) MH_newDefaultInstance.invokeExact(), RuntimeException.class));
         }
         try {
             // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead.
             return newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI, JDK_XPATH_FACTORY, null);
         } catch (final XPathFactoryConfigurationException e) {
             // newDefaultInstance declares no checked exception; mirror XPathFactory.newInstance(), which reports a default-model miss as a RuntimeException.
-            throw new RuntimeException(
-                    "Neither XPathFactory.newDefaultInstance() nor " + JDK_XPATH_FACTORY + " is available", e);
+            throw new RuntimeException("Neither XPathFactory.newDefaultInstance() nor " + JDK_XPATH_FACTORY + " is available", e);
         }
     }
 

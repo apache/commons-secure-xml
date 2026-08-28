@@ -50,7 +50,7 @@ class MethodHandleFactory {
         }
     }
 
-    static <T, E extends Error> T invokeExact(final ThrowableCallable<T> methodHandle, final Class<E> rethrow) throws E {
+    static <T, E extends Throwable> T invokeExact(final ThrowableCallable<T> methodHandle, final Class<E> rethrow) throws E {
         try {
             return methodHandle.call();
         } catch (final Throwable e) {
