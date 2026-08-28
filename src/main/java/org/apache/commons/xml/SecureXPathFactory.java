@@ -239,7 +239,7 @@ public final class SecureXPathFactory {
         try {
             factory.setFeature(feature, value);
         } catch (final XPathFactoryConfigurationException e) {
-            throw SecureException.settingFailed("feature", feature, factory, e);
+            throw SecureException.featureFailed(feature, factory, e);
         }
     }
 

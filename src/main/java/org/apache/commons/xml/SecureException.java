@@ -45,6 +45,18 @@ final class SecureException extends IllegalStateException {
     static final String THROW_ON_UNRESOLVED = "org.apache.commons.xml.throwOnUnresolved";
 
     /**
+     * Builds the standard exception for a rejected secure setting.
+     * @param name   the name of the feature, attribute or property that could not be set.
+     * @param target the factory, parser, validator or reader that rejected the setting; its concrete class names the offending implementation.
+     * @param cause  the original checked or unchecked exception from the JAXP implementation.
+     *
+     * @return the exception to throw.
+     */
+    static SecureException featureFailed(final String name, final Object target, final Throwable cause) {
+        return new SecureException("Failed to set feature '" + name + "' on " + target.getClass().getName(), cause);
+    }
+
+    /**
      * Builds the standard "forbidden" message shared by every resolver floor when {@link #throwOnUnresolved()} rejects an unresolved reference.
      *
      * @param type      the resource kind, or {@code null} if not applicable.
@@ -57,19 +69,6 @@ final class SecureException extends IllegalStateException {
     static String forbidden(final String type, final String namespace, final String publicId, final String systemId, final String baseURI) {
         return String.format("External resource fetch forbidden by %s: type=%s, namespace=%s, publicId=%s, systemId=%s, baseURI=%s",
                 SecureException.THROW_ON_UNRESOLVED, type, namespace, publicId, systemId, baseURI);
-    }
-
-    /**
-     * Builds the standard exception for a rejected secure setting.
-     *
-     * @param kind   the kind of setting: {@code "feature"}, {@code "attribute"} or {@code "property"}.
-     * @param name   the name of the feature, attribute or property that could not be set.
-     * @param target the factory, parser, validator or reader that rejected the setting; its concrete class names the offending implementation.
-     * @param cause  the original checked or unchecked exception from the JAXP implementation.
-     * @return the exception to throw.
-     */
-    static SecureException settingFailed(final String kind, final String name, final Object target, final Throwable cause) {
-        return new SecureException("Failed to set " + kind + " '" + name + "' on " + target.getClass().getName(), cause);
     }
 
     /**

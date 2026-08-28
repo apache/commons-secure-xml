@@ -397,7 +397,7 @@ public final class SecureSAXParserFactory {
         try {
             factory.setFeature(feature, value);
         } catch (final Exception e) {
-            throw SecureException.settingFailed("feature", feature, factory, e);
+            throw SecureException.featureFailed(feature, factory, e);
         }
     }
 
@@ -405,7 +405,7 @@ public final class SecureSAXParserFactory {
         try {
             reader.setFeature(feature, value);
         } catch (final Exception e) {
-            throw SecureException.settingFailed("feature", feature, reader, e);
+            throw SecureException.featureFailed(feature, reader, e);
         }
     }
 

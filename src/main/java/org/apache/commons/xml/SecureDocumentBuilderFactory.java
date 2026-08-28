@@ -353,7 +353,7 @@ public final class SecureDocumentBuilderFactory {
         try {
             factory.setFeature(feature, value);
         } catch (final ParserConfigurationException e) {
-            throw SecureException.settingFailed("feature", feature, factory, e);
+            throw SecureException.featureFailed(feature, factory, e);
         }
     }
 
