@@ -44,7 +44,7 @@ import org.xml.sax.XMLReader;
  *
  * <p>The fixtures declare the instance's root element, so a parser that fetches the schema validates the instance
  * cleanly and one that does not cannot. The permissive controls prove the external schema is reachable in principle, so
- * the hardened side throwing means the fetch was refused, not merely misconfigured. The stock JDK refuses it through
+ * the secure side throwing means the fetch was refused, not merely misconfigured. The stock JDK refuses it through
  * {@code accessExternalSchema=""}; external Apache Xerces, which ignores that property, refuses it through the ignore-all
  * entity-resolver floor.</p>
  *
