@@ -52,7 +52,7 @@ final class SaxonProvider {
      *
      * <ol>
      *   <li><b>SAX layer.</b> {@link #makeParser} hands every {@link XMLReader} Saxon would otherwise use through
-     *   {@link SecureSAXParserFactory#secure(XMLReader)}, which routes it to the matching bundled hardening recipe. External DTDs, entities and XInclude
+     *   {@link SecureSAXParserFactory#secure(XMLReader)}, which routes it to the matching bundled secure recipe. External DTDs, entities and XInclude
      *   resolve to empty content at parse time.</li>
      *   <li><b>Collection layer.</b> {@code fn:collection} bypasses the resource resolver and fetches directly, so an empty {@link CollectionFinder} supplies its
      *   ignore outcome instead.</li>
