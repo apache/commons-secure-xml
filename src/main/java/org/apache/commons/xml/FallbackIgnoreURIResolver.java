@@ -34,7 +34,7 @@ import org.w3c.dom.Document;
  * {@link URIResolver} floor: consults an optional caller-supplied resolver and ignores (resolves to empty) whatever the caller does not resolve.
  * <p>
  * The XSLT counterpart of {@link FallbackIgnoreEntityResolver2}, guarding {@code xsl:import}/{@code xsl:include} at compile time and {@code document()} at
- * transform time. The hardened {@link javax.xml.transform.TransformerFactory} and {@link javax.xml.transform.Transformer} wrappers install one of these and
+ * transform time. The secure {@link javax.xml.transform.TransformerFactory} and {@link javax.xml.transform.Transformer} wrappers install one of these and
  * route a caller-set resolver through {@link #setDelegate} rather than letting it replace the floor. A caller opts a specific URI in by returning a
  * non-{@code null} {@link Source}; anything left unresolved resolves to an empty {@link Source}, so the external resource is neither fetched nor leaked.
  * </p>
@@ -43,7 +43,7 @@ import org.w3c.dom.Document;
  * while the Saxon path supplies {@code EmptySource.getInstance()} so its consumers get the "empty" shape they expect.
  * </p>
  * <p>
- * An opted-in {@link javax.xml.transform.stream.StreamSource} or reader-less {@link javax.xml.transform.sax.SAXSource} is rewritten to carry a hardened reader
+ * An opted-in {@link javax.xml.transform.stream.StreamSource} or reader-less {@link javax.xml.transform.sax.SAXSource} is rewritten to carry a secure reader
  * before it is returned, so the implementation parses the opted-in content on the same floor instead of with an internal reader at its own defaults. A
  * {@link javax.xml.transform.dom.DOMSource} or a {@link javax.xml.transform.sax.SAXSource} carrying the caller's own reader is returned as-is.
  * </p>
@@ -124,7 +124,7 @@ final class FallbackIgnoreURIResolver implements URIResolver {
     public Source resolve(final String href, final String base) throws TransformerException {
         final Source resolved = delegate != null ? delegate.resolve(href, base) : null;
         if (resolved != null) {
-            // The implementation parses the opted-in handle with an internal reader at its own defaults; the rewrite hands it a hardened reader instead.
+            // The implementation parses the opted-in handle with an internal reader at its own defaults; the rewrite hands it a secure reader instead.
             return SecureSAXParserFactory.secure(resolved, overrideDefaultParser.getAsBoolean());
         }
         if (SecureException.throwOnUnresolved()) {
