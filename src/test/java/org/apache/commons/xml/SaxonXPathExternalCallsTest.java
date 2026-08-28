@@ -89,7 +89,7 @@ class SaxonXPathExternalCallsTest {
                 DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
     }
 
-    private static XPathFactory hardenedSaxonXPathFactory() {
+    private static XPathFactory secureSaxonXPathFactory() {
         return SaxonProvider.configure(saxonXPathFactory());
     }
 
@@ -117,17 +117,17 @@ class SaxonXPathExternalCallsTest {
 
     @Test
     void secureXPathBlocksDoc() {
-        assertCallExcludesMarker(hardenedSaxonXPathFactory(), docExpression());
+        assertCallExcludesMarker(secureSaxonXPathFactory(), docExpression());
     }
 
     @Test
     void secureXPathBlocksJsonDoc() {
-        assertCallExcludesMarker(hardenedSaxonXPathFactory(), jsonDocExpression());
+        assertCallExcludesMarker(secureSaxonXPathFactory(), jsonDocExpression());
     }
 
     @Test
     void secureXPathBlocksUnparsedText() {
-        assertCallExcludesMarker(hardenedSaxonXPathFactory(), unparsedTextExpression());
+        assertCallExcludesMarker(secureSaxonXPathFactory(), unparsedTextExpression());
     }
 
     @Test

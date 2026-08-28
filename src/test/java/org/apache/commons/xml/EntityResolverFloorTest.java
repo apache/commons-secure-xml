@@ -125,13 +125,13 @@ class EntityResolverFloorTest {
         return factory;
     }
 
-    private static DocumentBuilder hardenedBuilder() throws Exception {
+    private static DocumentBuilder secureBuilder() throws Exception {
         final DocumentBuilder builder = SecureDocumentBuilderFactory.newInstance().newDocumentBuilder();
         builder.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
         return builder;
     }
 
-    private static XMLReader hardenedReader() throws Exception {
+    private static XMLReader secureXMLReader() throws Exception {
         final XMLReader reader = SecureSAXParserFactory.newInstance().newSAXParser().getXMLReader();
         reader.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
         return reader;
@@ -143,7 +143,7 @@ class EntityResolverFloorTest {
      * resolver that returns {@code null} cannot re-open the fetch. The strict listener turns any reported-and-recovered error into a test failure, so an
      * implementation cannot quietly recover from a floor resolution while the test asserts clean completion.
      */
-    private static TransformerFactory hardenedTransformerFactory() {
+    private static TransformerFactory secureTransformerFactory() {
         final TransformerFactory factory = SecureTransformerFactory.newInstance();
         factory.setErrorListener(AttackTestSupport.STRICT_REPORTER);
         return factory;
@@ -189,7 +189,7 @@ class EntityResolverFloorTest {
     @Tag("dom")
     void domDoesNotLeakUnlisted() throws Exception {
         Assumptions.assumeTrue(AttackTestSupport.DOM_RESOLVES_INTERNAL_ENTITIES, "platform DOM does not resolve user-defined entities");
-        final DocumentBuilder builder = hardenedBuilder();
+        final DocumentBuilder builder = secureBuilder();
         builder.setEntityResolver(ENTITY_ALLOW_LIST);
         // The caller returns null for the unlisted entity, so the floor resolves it to empty rather than fetching it: the parse completes (or is rejected)
         // without leaking the entity's content.
@@ -205,7 +205,7 @@ class EntityResolverFloorTest {
     @Tag("dom")
     void domResolvesAllowListed() throws Exception {
         Assumptions.assumeTrue(AttackTestSupport.DOM_RESOLVES_INTERNAL_ENTITIES, "platform DOM does not resolve user-defined entities");
-        final DocumentBuilder builder = hardenedBuilder();
+        final DocumentBuilder builder = secureBuilder();
         builder.setEntityResolver(ENTITY_ALLOW_LIST);
         final Document doc = builder.parse(AttackTestSupport.inputSource(entityPayload(ALLOWED)));
         assertTrue(doc.getDocumentElement().getTextContent().contains(AttackTestSupport.LEAKED_MARKER),
@@ -240,7 +240,7 @@ class EntityResolverFloorTest {
     @Test
     @Tag("sax")
     void saxReaderDoesNotLeakUnlisted() throws Exception {
-        final XMLReader reader = hardenedReader();
+        final XMLReader reader = secureXMLReader();
         reader.setEntityResolver(ENTITY_ALLOW_LIST);
         // The caller returns null for the unlisted entity, so the floor resolves it to empty rather than fetching it.
         final String text;
@@ -255,7 +255,7 @@ class EntityResolverFloorTest {
     @Test
     @Tag("sax")
     void saxReaderResolvesAllowListed() throws Exception {
-        final XMLReader reader = hardenedReader();
+        final XMLReader reader = secureXMLReader();
         reader.setEntityResolver(ENTITY_ALLOW_LIST);
         final String text = AttackTestSupport.captureCharacters(reader, entityPayload(ALLOWED));
         assertTrue(text.contains(AttackTestSupport.LEAKED_MARKER),
@@ -354,7 +354,7 @@ class EntityResolverFloorTest {
     @Test
     @Tag("trax")
     void transformerDoesNotLeakUnlisted() {
-        final TransformerFactory factory = hardenedTransformerFactory();
+        final TransformerFactory factory = secureTransformerFactory();
         factory.setURIResolver((href, base) -> null);
         // Deterministic on every implementation: XSLTC and Xalan compile the empty document the URIResolver floor
         // returns, Saxon the EmptySource its Configuration floor returns, so the import contributes nothing.
@@ -368,7 +368,7 @@ class EntityResolverFloorTest {
     @Tag("trax")
     void transformerParsesOptedInDocumentSecured() {
         // Same contract on the runtime document() channel, which reaches a different internal reader than the compile-time import.
-        final TransformerFactory factory = hardenedTransformerFactory();
+        final TransformerFactory factory = secureTransformerFactory();
         factory.setURIResolver((href, base) ->
                 href != null && href.endsWith("referenced.xml") ? AttackTestSupport.resourceSource("referenced-with-entity.xml") : null);
         // Same undeclared-entity outcome as the import above: skipped, never expanded.
@@ -382,7 +382,7 @@ class EntityResolverFloorTest {
     @Tag("trax")
     void transformerParsesOptedInImportSecured() {
         // The opted-in module carries an external DTD reference; parsed on the floor the DTD is empty, so its entity cannot expand into the output.
-        final TransformerFactory factory = hardenedTransformerFactory();
+        final TransformerFactory factory = secureTransformerFactory();
         factory.setURIResolver((href, base) ->
                 href != null && href.endsWith("included.xsl") ? AttackTestSupport.resourceSource("included-with-entity.xsl") : null);
         // The emptied DTD leaves the entity undeclared — only a validity violation when an external subset is
@@ -397,7 +397,7 @@ class EntityResolverFloorTest {
     @Tag("trax")
     void transformerResolvesAllowListed() {
         // with-import.xsl imports included.xsl, so it compiles only if the import is resolved.
-        final TransformerFactory factory = hardenedTransformerFactory();
+        final TransformerFactory factory = secureTransformerFactory();
         factory.setURIResolver(XSL_ALLOW_LIST);
         assertParseSucceeds(() -> factory.newTemplates(AttackTestSupport.resourceSource("with-import.xsl")), "Stylesheet import via caller resolver");
     }

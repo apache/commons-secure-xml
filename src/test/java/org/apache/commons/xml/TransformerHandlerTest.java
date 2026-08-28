@@ -51,7 +51,7 @@ class TransformerHandlerTest {
     @Test
     void secureGetTransformerDoesNotLeakDocument() throws Exception {
         // The f004 bypass: pull the inner Transformer out of the handler and transform directly; the floor must ride along.
-        final SAXTransformerFactory factory = SaxSurfaceTestSupport.hardenedFactory();
+        final SAXTransformerFactory factory = SaxSurfaceTestSupport.secureFactory();
         final TransformerHandler handler = factory.newTransformerHandler(AttackTestSupport.resourceSource("with-document.xsl"));
         final StringWriter sink = new StringWriter();
         handler.getTransformer().transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink));
@@ -60,14 +60,14 @@ class TransformerHandlerTest {
 
     @Test
     void secureTransformerHandlerDoesNotLeakDocument() throws Exception {
-        final SAXTransformerFactory factory = SaxSurfaceTestSupport.hardenedFactory();
+        final SAXTransformerFactory factory = SaxSurfaceTestSupport.secureFactory();
         final TransformerHandler handler = factory.newTransformerHandler(AttackTestSupport.resourceSource("with-document.xsl"));
         assertFalse(transformViaHandler(handler).contains(AttackTestSupport.LEAKED_MARKER), "document() through TransformerHandler leaked");
     }
 
     @Test
     void secureTransformerHandlerFromTemplatesDoesNotLeakDocument() throws Exception {
-        final SAXTransformerFactory factory = SaxSurfaceTestSupport.hardenedFactory();
+        final SAXTransformerFactory factory = SaxSurfaceTestSupport.secureFactory();
         final Templates templates = factory.newTemplates(AttackTestSupport.resourceSource("with-document.xsl"));
         assertNotNull(templates, "stylesheet failed to compile");
         final TransformerHandler handler = factory.newTransformerHandler(templates);

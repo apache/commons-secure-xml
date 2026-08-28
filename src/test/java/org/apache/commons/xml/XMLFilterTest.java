@@ -76,20 +76,20 @@ class XMLFilterTest {
 
     @Test
     void secureFilterDoesNotLeakDocument() throws Exception {
-        final XMLFilter filter = SaxSurfaceTestSupport.hardenedFactory().newXMLFilter(AttackTestSupport.resourceSource("with-document.xsl"));
+        final XMLFilter filter = SaxSurfaceTestSupport.secureFactory().newXMLFilter(AttackTestSupport.resourceSource("with-document.xsl"));
         assertFalse(filterAndCapture(filter, "<root/>").contains(AttackTestSupport.LEAKED_MARKER), "document() through XMLFilter leaked");
     }
 
     @Test
     void secureFilterDoesNotLeakExternalEntity() throws Exception {
         // The f003 vector: with no caller-set parent, the input must be parsed by a secure reader, not a self-provisioned permissive one.
-        final XMLFilter filter = SaxSurfaceTestSupport.hardenedFactory().newXMLFilter(AttackTestSupport.streamSource(IDENTITY_XSLT));
+        final XMLFilter filter = SaxSurfaceTestSupport.secureFactory().newXMLFilter(AttackTestSupport.streamSource(IDENTITY_XSLT));
         assertFalse(filterAndCapture(filter, entityPayload()).contains(AttackTestSupport.LEAKED_MARKER), "external entity through XMLFilter leaked");
     }
 
     @Test
     void secureFilterFromTemplatesDoesNotLeakDocument() throws Exception {
-        final SAXTransformerFactory factory = SaxSurfaceTestSupport.hardenedFactory();
+        final SAXTransformerFactory factory = SaxSurfaceTestSupport.secureFactory();
         final Templates templates = factory.newTemplates(AttackTestSupport.resourceSource("with-document.xsl"));
         assertNotNull(templates, "stylesheet failed to compile");
         final XMLFilter filter = factory.newXMLFilter(templates);

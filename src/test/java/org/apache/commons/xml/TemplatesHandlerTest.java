@@ -56,14 +56,14 @@ class TemplatesHandlerTest {
     @Test
     void secureTemplatesHandlerDoesNotLeakDocument() throws Exception {
         // The f004 product path: the Templates from getTemplates() must produce floored Transformers for runtime document().
-        final TemplatesHandler handler = SaxSurfaceTestSupport.hardenedFactory().newTemplatesHandler();
+        final TemplatesHandler handler = SaxSurfaceTestSupport.secureFactory().newTemplatesHandler();
         assertFalse(compileAndTransform(handler, "with-document.xsl").contains(AttackTestSupport.LEAKED_MARKER),
                 "document() through TemplatesHandler.getTemplates() leaked");
     }
 
     @Test
     void secureTemplatesHandlerDoesNotLeakInclude() throws Exception {
-        final TemplatesHandler handler = SaxSurfaceTestSupport.hardenedFactory().newTemplatesHandler();
+        final TemplatesHandler handler = SaxSurfaceTestSupport.secureFactory().newTemplatesHandler();
         assertFalse(compileAndTransform(handler, "with-include.xsl").contains(AttackTestSupport.LEAKED_MARKER),
                 "xsl:include through TemplatesHandler leaked");
     }
