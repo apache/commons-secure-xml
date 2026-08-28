@@ -37,7 +37,7 @@ import org.xml.sax.SAXNotSupportedException;
  * <p>Blocks {@code xsi:schemaLocation} resolution during SAX-driven validation. A caller-set resolver is routed through a {@link
  * FallbackIgnoreLSResourceResolver} rather than replacing the floor, so a schema the caller does not resolve resolves to empty instead of being fetched.</p>
  */
-final class HardeningValidatorHandler extends ValidatorHandler {
+final class SecureValidatorHandler extends ValidatorHandler {
 
     private final ValidatorHandler delegate;
 
@@ -49,7 +49,7 @@ final class HardeningValidatorHandler extends ValidatorHandler {
      * @param delegate the delegate to wrap; must not be {@code null}.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningValidatorHandler(final ValidatorHandler delegate) {
+    SecureValidatorHandler(final ValidatorHandler delegate) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
         delegate.setResourceResolver(floor);
     }

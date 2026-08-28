@@ -165,7 +165,7 @@ class ShadingFootprintTest {
             "SecureSchemaFactory$1",
             "SecureSchemaFactory$Wrapper",
             "SecureValidator",
-            "HardeningValidatorHandler",
+            "SecureValidatorHandler",
             "HardeningXMLReader");
     // @formatter:on
 
