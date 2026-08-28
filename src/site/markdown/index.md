@@ -66,7 +66,7 @@ so the parse continues without it
 
 ### Supported runtimes
 
-The library requires OpenJDK 8 or later (or a JDK distribution built from it), or Android API level 19 or later.
+The library requires OpenJDK 8 or later (or a JDK distribution built from it), or Android API level 26 or later.
 
 The security guarantees are defined only on the OpenJDK family
 (see the [Threat Model](threat_model.html)).
@@ -145,6 +145,29 @@ HardeningSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         .newValidator()
         .validate(new StreamSource(inputStream));
 ```
+
+### Factory methods
+
+Each factory class mirrors every static factory method its JAXP counterpart offers,
+so a hardened factory is a drop-in replacement at any construction site:
+the class-name/class-loader overloads and the StAX `newFactory` family (JDK 8),
+`newDefaultInstance()` (Java 9, [JDK-8169778](https://bugs.openjdk.org/browse/JDK-8169778)),
+and the namespace-aware `newNSInstance()` family (Java 13, [JDK-8223423](https://bugs.openjdk.org/browse/JDK-8223423)).
+
+All of these methods work on every supported runtime, including Java 8:
+- The `newNSInstance` methods enable namespace awareness on their non-NS counterpart,
+  the behavior the JAXP methods are specified to have.
+- The `newDefaultInstance` methods resolve the platform's own `newDefaultInstance` at run time
+  and use it wherever the runtime provides one —
+  Java 9 or later, and the Android API levels that ship the method —
+  falling back to instantiating the JDK's built-in implementation by class name on Java 8.
+
+The `newDefaultInstance` methods are an opt-out of JAXP pluggability:
+they pin the platform's built-in implementation
+instead of whatever a classpath lookup would resolve.
+That suits a library with minimal XML requirements,
+which can parse with the well-known platform parser
+rather than delegate the choice of implementation to the application developer.
 
 ### Stylesheets and schemas
 

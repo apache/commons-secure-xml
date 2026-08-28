@@ -17,6 +17,9 @@
 
 package org.apache.commons.xml;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.Objects;
 
 import javax.xml.XMLConstants;
@@ -31,6 +34,13 @@ import org.xml.sax.EntityResolver;
 /**
  * Creates new, hardened {@link DocumentBuilderFactory} instances.
  * <p>
+ * Beyond the three universal guarantees on {@link org.apache.commons.xml}, XInclude resolution is denied by default. When
+ * {@link DocumentBuilderFactory#setXIncludeAware(boolean) setXIncludeAware(true)} is called on the returned factory, the parser will process
+ * {@code xi:include} elements but every external resource lookup is rejected. To permit specific trusted resources, install an
+ * {@link org.xml.sax.EntityResolver EntityResolver} on the {@link DocumentBuilder} that allow-lists them; any href the resolver does not explicitly allow
+ * stays blocked.
+ * </p>
+ * <p>
  * Not a {@link DocumentBuilderFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-hardened factory through this class
  * by calling an inherited method such as {@code newDefaultInstance()}. The hardened factories are instances of a nested, non-public wrapper class.
  * </p>
@@ -41,6 +51,19 @@ public final class HardeningDocumentBuilderFactory {
 
     /** Class name of Android's Harmony-based {@link DocumentBuilderFactory}, which exposes no hardening surface. */
     private static final String ANDROID_DOCUMENT_BUILDER_FACTORY = "org.apache.harmony.xml.parsers.DocumentBuilderFactoryImpl";
+    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
+    private static final String JDK_DOCUMENT_BUILDER_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl";
+
+    private static final MethodHandle NEW_DEFAULT_INSTANCE = findStatic("newDefaultInstance", MethodType.methodType(DocumentBuilderFactory.class));
+
+    private static MethodHandle findStatic(final String name, final MethodType type) {
+        try {
+            return MethodHandles.publicLookup().findStatic(DocumentBuilderFactory.class, name, type);
+        } catch (final ReflectiveOperationException e) {
+            // The method is absent: the running platform predates it.
+            return null;
+        }
+    }
 
     /**
      * Capability-driven hardening for any {@link DocumentBuilderFactory} on the classpath.
@@ -75,14 +98,61 @@ public final class HardeningDocumentBuilderFactory {
     }
 
     /**
-     * Returns a new, hardened {@link DocumentBuilderFactory}.
+     * Enables namespace awareness on the given factory; the {@code NSInstance} counterpart of each factory method routes its result through here.
+     *
+     * @param factory the factory to configure; never {@code null}.
+     * @return The given factory, namespace-aware.
+     */
+    private static DocumentBuilderFactory makeNSAware(final DocumentBuilderFactory factory) {
+        factory.setNamespaceAware(true);
+        return factory;
+    }
+
+    /**
+     * Returns a new, hardened {@link DocumentBuilderFactory} of the system-default implementation.
      * <p>
-     * Beyond the three universal guarantees on {@link org.apache.commons.xml}, XInclude resolution is denied by default. When
-     * {@link DocumentBuilderFactory#setXIncludeAware(boolean) setXIncludeAware(true)} is called on the returned factory, the parser will process
-     * {@code xi:include} elements but every external resource lookup is rejected. To permit specific trusted resources, install an
-     * {@link org.xml.sax.EntityResolver EntityResolver} on the {@link DocumentBuilder} that allow-lists them; any href the resolver does not explicitly allow
-     * stays blocked.
+     * Obtained as by {@code DocumentBuilderFactory.newDefaultInstance()} where the platform provides it (Java 9 or later), and
+     * by instantiating the JDK's built-in implementation directly on Java 8.
      * </p>
+     *
+     * @return A hardened factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation
+     *                                   (for example Android).
+     */
+    public static DocumentBuilderFactory newDefaultInstance() {
+        if (NEW_DEFAULT_INSTANCE != null) {
+            final DocumentBuilderFactory factory;
+            try {
+                factory = (DocumentBuilderFactory) NEW_DEFAULT_INSTANCE.invokeExact();
+            } catch (final FactoryConfigurationError e) {
+                throw e;
+            } catch (final Throwable e) {
+                // Unreachable: the looked-up method declares no other exceptions.
+                throw new IllegalStateException(e);
+            }
+            return harden(factory);
+        }
+        // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead. Where that class does not exist either (for
+        // example Android), the lookup miss surfaces as the factory's own FactoryConfigurationError, like any newInstance miss.
+        return newInstance(JDK_DOCUMENT_BUILDER_FACTORY, null);
+    }
+
+    /**
+     * Returns a new, hardened, namespace-aware {@link DocumentBuilderFactory} of the system-default implementation, enabling namespace awareness on
+     * {@link #newDefaultInstance()}, the behavior {@code DocumentBuilderFactory.newDefaultNSInstance()} (Java 13 or later) is specified to have.
+     *
+     * @return A hardened, namespace-aware factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation
+     *                                   (for example Android).
+     */
+    public static DocumentBuilderFactory newDefaultNSInstance() {
+        return makeNSAware(newDefaultInstance());
+    }
+
+    /**
+     * Returns a new, hardened {@link DocumentBuilderFactory}.
      *
      * @return A hardened factory.
      * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
@@ -93,6 +163,49 @@ public final class HardeningDocumentBuilderFactory {
      */
     public static DocumentBuilderFactory newInstance() {
         return harden(DocumentBuilderFactory.newInstance());
+    }
+
+    /**
+     * Returns a new, hardened {@link DocumentBuilderFactory} of the given implementation class.
+     *
+     * @param factoryClassName The fully qualified class name of the {@link DocumentBuilderFactory} implementation.
+     * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
+     * @return A hardened factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException     Thrown if a (non-Andoid) factory cannot support the secure processing feature
+     *                                   {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
+     * @throws FactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
+     */
+    public static DocumentBuilderFactory newInstance(final String factoryClassName, final ClassLoader classLoader) {
+        return harden(DocumentBuilderFactory.newInstance(factoryClassName, classLoader));
+    }
+
+    /**
+     * Returns a new, hardened, namespace-aware {@link DocumentBuilderFactory}, enabling namespace awareness on {@link #newInstance()}, the behavior
+     * {@code DocumentBuilderFactory.newNSInstance()} (Java 13 or later) is specified to have.
+     *
+     * @return A hardened, namespace-aware factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
+     *                                   implementation is not available or cannot be instantiated.
+     */
+    public static DocumentBuilderFactory newNSInstance() {
+        return makeNSAware(newInstance());
+    }
+
+    /**
+     * Returns a new, hardened, namespace-aware {@link DocumentBuilderFactory} of the given implementation class, enabling namespace awareness on
+     * {@link #newInstance(String, ClassLoader)}, the behavior {@code DocumentBuilderFactory.newNSInstance(String, ClassLoader)} (Java 13 or later) is specified
+     * to have.
+     *
+     * @param factoryClassName The fully qualified class name of the {@link DocumentBuilderFactory} implementation.
+     * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
+     * @return A hardened, namespace-aware factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
+     */
+    public static DocumentBuilderFactory newNSInstance(final String factoryClassName, final ClassLoader classLoader) {
+        return makeNSAware(newInstance(factoryClassName, classLoader));
     }
 
     /**

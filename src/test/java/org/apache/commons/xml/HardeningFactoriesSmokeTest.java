@@ -21,21 +21,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.StringReader;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.xpath.XPathFactory;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Public-API smoke tests for {@link org.apache.commons.xml}.
@@ -130,5 +134,183 @@ class HardeningFactoriesSmokeTest {
         final XPathFactory b = HardeningXPathFactory.newInstance();
         assertNotSame(a, b);
         assertTrue(a.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    // The explicit-class-name tests discover the runtime default implementation through the raw JAXP factory,
+    // so they stay portable across the JAXP implementations of the surefire matrix.
+    @Test
+    void explicitClassNameDocumentBuilderFactoryIsHardened() throws Exception {
+        final Class<?> impl = DocumentBuilderFactory.newInstance().getClass();
+        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newInstance(impl.getName(), impl.getClassLoader());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void explicitClassNameSAXParserFactoryIsHardened() throws Exception {
+        final Class<?> impl = SAXParserFactory.newInstance().getClass();
+        final SAXParserFactory factory = HardeningSAXParserFactory.newInstance(impl.getName(), impl.getClassLoader());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void explicitClassNameSchemaFactoryIsHardened() throws Exception {
+        final Class<?> impl = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).getClass();
+        final SchemaFactory factory = HardeningSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI, impl.getName(), impl.getClassLoader());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void explicitClassNameTransformerFactoryIsHardened() {
+        final Class<?> impl = TransformerFactory.newInstance().getClass();
+        final TransformerFactory factory = HardeningTransformerFactory.newInstance(impl.getName(), impl.getClassLoader());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void explicitClassNameXPathFactoryIsHardened() throws Exception {
+        final Class<?> impl = XPathFactory.newInstance().getClass();
+        final XPathFactory factory = HardeningXPathFactory.newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI, impl.getName(), impl.getClassLoader());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void newFactoryReturnsFreshInstance() {
+        final XMLInputFactory a = HardeningXMLInputFactory.newFactory();
+        final XMLInputFactory b = HardeningXMLInputFactory.newFactory();
+        assertNotSame(a, b);
+        assertEquals(Boolean.TRUE, a.getProperty(XMLInputFactory.SUPPORT_DTD));
+    }
+
+    @Test
+    void factoryIdXMLInputFactoryIsHardened() {
+        final String factoryId = "org.apache.commons.xml.test.staxFactory";
+        // XMLInputFactory.newInstance, not newFactory: Android's StAX API predates newFactory, and this file also compiles against android.jar.
+        System.setProperty(factoryId, XMLInputFactory.newInstance().getClass().getName());
+        try {
+            final XMLInputFactory factory = HardeningXMLInputFactory.newFactory(factoryId, getClass().getClassLoader());
+            assertEquals(Boolean.TRUE, factory.getProperty(XMLInputFactory.SUPPORT_DTD));
+        } finally {
+            System.clearProperty(factoryId);
+        }
+    }
+
+    @Test
+    void unknownFactoryClassNameThrows() {
+        assertThrows(FactoryConfigurationError.class, () -> HardeningDocumentBuilderFactory.newInstance("no.such.FactoryClass", null));
+    }
+
+    // The newDefault* methods resolve the Java 9 JAXP method at runtime and fall back to the JDK's built-in implementation on Java 8. The dom and sax
+    // variants also run on Android, whose JAXP predates newDefaultInstance and carries no JDK-internal fallback: the lookup miss surfaces there as the
+    // factory's own FactoryConfigurationError, like any newInstance miss.
+    @Test
+    @Tag("dom")
+    void newDefaultInstanceDocumentBuilderFactoryIsUsable() throws Exception {
+        if (AttackTestSupport.IS_ANDROID) {
+            assertThrows(FactoryConfigurationError.class, HardeningDocumentBuilderFactory::newDefaultInstance);
+            return;
+        }
+        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newDefaultInstance();
+        assertNotNull(factory.newDocumentBuilder().parse(new InputSource(new StringReader(BENIGN_XML))).getDocumentElement());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    @Tag("sax")
+    void newDefaultInstanceSAXParserFactoryIsUsable() throws Exception {
+        if (AttackTestSupport.IS_ANDROID) {
+            assertThrows(FactoryConfigurationError.class, HardeningSAXParserFactory::newDefaultInstance);
+            return;
+        }
+        final SAXParserFactory factory = HardeningSAXParserFactory.newDefaultInstance();
+        factory.newSAXParser().parse(new InputSource(new StringReader(BENIGN_XML)), new DefaultHandler());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    // The newNSInstance family (Java 13) falls back to enabling namespace awareness on the corresponding newInstance lookup, the behavior the JAXP methods
+    // are specified to have, so the non-default variants work on every platform including Android.
+    @Test
+    @Tag("dom")
+    void newNSInstanceDocumentBuilderFactoryIsNamespaceAware() throws Exception {
+        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newNSInstance();
+        assertTrue(factory.isNamespaceAware());
+        assertNotNull(factory.newDocumentBuilder().parse(new InputSource(new StringReader(BENIGN_XML))).getDocumentElement());
+        if (!AttackTestSupport.IS_ANDROID) {
+            assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        }
+    }
+
+    @Test
+    @Tag("dom")
+    void newDefaultNSInstanceDocumentBuilderFactoryIsNamespaceAware() throws Exception {
+        if (AttackTestSupport.IS_ANDROID) {
+            assertThrows(FactoryConfigurationError.class, HardeningDocumentBuilderFactory::newDefaultNSInstance);
+            return;
+        }
+        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newDefaultNSInstance();
+        assertTrue(factory.isNamespaceAware());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    @Tag("sax")
+    void newNSInstanceSAXParserFactoryIsNamespaceAware() throws Exception {
+        final SAXParserFactory factory = HardeningSAXParserFactory.newNSInstance();
+        assertTrue(factory.isNamespaceAware());
+        factory.newSAXParser().parse(new InputSource(new StringReader(BENIGN_XML)), new DefaultHandler());
+        if (!AttackTestSupport.IS_ANDROID) {
+            assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        }
+    }
+
+    @Test
+    @Tag("sax")
+    void newDefaultNSInstanceSAXParserFactoryIsNamespaceAware() throws Exception {
+        if (AttackTestSupport.IS_ANDROID) {
+            assertThrows(FactoryConfigurationError.class, HardeningSAXParserFactory::newDefaultNSInstance);
+            return;
+        }
+        final SAXParserFactory factory = HardeningSAXParserFactory.newDefaultNSInstance();
+        assertTrue(factory.isNamespaceAware());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void explicitClassNameNSDocumentBuilderFactoryIsNamespaceAware() throws Exception {
+        final Class<?> impl = DocumentBuilderFactory.newInstance().getClass();
+        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newNSInstance(impl.getName(), impl.getClassLoader());
+        assertTrue(factory.isNamespaceAware());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void explicitClassNameNSSAXParserFactoryIsNamespaceAware() throws Exception {
+        final Class<?> impl = SAXParserFactory.newInstance().getClass();
+        final SAXParserFactory factory = HardeningSAXParserFactory.newNSInstance(impl.getName(), impl.getClassLoader());
+        assertTrue(factory.isNamespaceAware());
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void newDefaultInstanceSchemaFactoryIsHardened() throws Exception {
+        final SchemaFactory factory = HardeningSchemaFactory.newDefaultInstance();
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void newDefaultInstanceTransformerFactoryIsHardened() {
+        final TransformerFactory factory = HardeningTransformerFactory.newDefaultInstance();
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+    }
+
+    @Test
+    void newDefaultFactoryXMLInputFactoryIsHardened() {
+        final XMLInputFactory factory = HardeningXMLInputFactory.newDefaultFactory();
+        assertEquals(Boolean.TRUE, factory.getProperty(XMLInputFactory.SUPPORT_DTD));
+    }
+
+    @Test
+    void newDefaultInstanceXPathFactoryIsHardened() throws Exception {
+        final XPathFactory factory = HardeningXPathFactory.newDefaultInstance();
+        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 }

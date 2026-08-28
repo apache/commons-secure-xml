@@ -18,6 +18,9 @@
 package org.apache.commons.xml;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -31,6 +34,7 @@ import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
@@ -48,6 +52,23 @@ import org.xml.sax.XMLReader;
 /**
  * Creates new, hardened {@link TransformerFactory} instances.
  * <p>
+ * Beyond the three universal guarantees on {@link org.apache.commons.xml}: {@code xsl:import}, {@code xsl:include} and {@code document()} URIs are not resolved.
+ * </p>
+ * <p>
+ * The guarantees govern what the transform reads, not what it writes: an output instruction like {@code xsl:result-document} still writes wherever the
+ * stylesheet directs, so an untrusted stylesheet's output destinations must be restricted outside the library.
+ * </p>
+ * <p>
+ * The guarantees apply to every parser the factory creates internally for the standard {@link TransformerFactory} entry points: stylesheet compilation
+ * ({@link TransformerFactory#newTemplates(javax.xml.transform.Source) newTemplates(Source)},
+ * {@link TransformerFactory#newTransformer(javax.xml.transform.Source) newTransformer(Source)}) and source-document reading at
+ * {@code Transformer.transform(Source, Result)} time.
+ * </p>
+ * <p>
+ * The {@link javax.xml.transform.sax.SAXTransformerFactory} extension methods ({@code newTransformerHandler(..)}, {@code newTemplatesHandler()},
+ * {@code newXMLFilter(..)}), if reachable by casting the returned factory, produce objects carrying the same guarantees.
+ * </p>
+ * <p>
  * Not a {@link TransformerFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-hardened factory through this class
  * by calling an inherited method such as {@code newDefaultInstance()}. The hardened factories are instances of a nested, non-public wrapper class.
  * </p>
@@ -55,6 +76,21 @@ import org.xml.sax.XMLReader;
  * @see org.apache.commons.xml
  */
 public final class HardeningTransformerFactory {
+
+    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
+    private static final String JDK_TRANSFORMER_FACTORY = "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl";
+
+    private static final MethodHandle NEW_DEFAULT_INSTANCE = findNewDefaultInstance();
+
+    private static MethodHandle findNewDefaultInstance() {
+        try {
+            return MethodHandles.publicLookup().findStatic(TransformerFactory.class, "newDefaultInstance",
+                    MethodType.methodType(TransformerFactory.class));
+        } catch (final ReflectiveOperationException e) {
+            // The method is absent: the running platform predates it.
+            return null;
+        }
+    }
 
     /**
      * Capability-driven hardening for any {@link TransformerFactory} on the classpath.
@@ -94,30 +130,56 @@ public final class HardeningTransformerFactory {
     }
 
     /**
+     * Returns a new, hardened {@link TransformerFactory} of the system-default implementation.
+     * <p>
+     * Obtained as by {@code TransformerFactory.newDefaultInstance()} where the platform provides it (Java 9 or later), and by instantiating the JDK's built-in
+     * implementation directly on Java 8.
+     * </p>
+     *
+     * @return A hardened factory.
+     * @throws IllegalStateException                Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws TransformerFactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in
+     *                                                implementation (for example Android).
+     */
+    public static TransformerFactory newDefaultInstance() {
+        if (NEW_DEFAULT_INSTANCE != null) {
+            final TransformerFactory factory;
+            try {
+                factory = (TransformerFactory) NEW_DEFAULT_INSTANCE.invokeExact();
+            } catch (final TransformerFactoryConfigurationError e) {
+                throw e;
+            } catch (final Throwable e) {
+                // Unreachable: the looked-up method declares no other exceptions.
+                throw new IllegalStateException(e);
+            }
+            return harden(factory);
+        }
+        // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead. Where that class does not exist either (for
+        // example Android), the lookup miss surfaces as TransformerFactoryConfigurationError, like any newInstance miss.
+        return newInstance(JDK_TRANSFORMER_FACTORY, null);
+    }
+
+    /**
      * Returns a new, hardened {@link TransformerFactory}.
-     * <p>
-     * Beyond the three universal guarantees on {@link org.apache.commons.xml}: {@code xsl:import}, {@code xsl:include} and {@code document()} URIs are not resolved.
-     * </p>
-     * <p>
-     * The guarantees govern what the transform reads, not what it writes: an output instruction like {@code xsl:result-document} still writes wherever the
-     * stylesheet directs, so an untrusted stylesheet's output destinations must be restricted outside the library.
-     * </p>
-     * <p>
-     * The guarantees apply to every parser the factory creates internally for the standard {@link TransformerFactory} entry points: stylesheet compilation
-     * ({@link TransformerFactory#newTemplates(javax.xml.transform.Source) newTemplates(Source)},
-     * {@link TransformerFactory#newTransformer(javax.xml.transform.Source) newTransformer(Source)}) and source-document reading at
-     * {@code Transformer.transform(Source, Result)} time.
-     * </p>
-     * <p>
-     * The {@link javax.xml.transform.sax.SAXTransformerFactory} extension methods ({@code newTransformerHandler(..)}, {@code newTemplatesHandler()},
-     * {@code newXMLFilter(..)}), if reachable by casting the returned factory, produce objects carrying the same guarantees.
-     * </p>
      *
      * @return A hardened factory.
      * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
      */
     public static TransformerFactory newInstance() {
         return harden(TransformerFactory.newInstance());
+    }
+
+    /**
+     * Returns a new, hardened {@link TransformerFactory} of the given implementation class.
+     *
+     * @param factoryClassName The fully qualified class name of the {@link TransformerFactory} implementation.
+     * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
+     * @return A hardened factory.
+     * @throws IllegalStateException                Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws TransformerFactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
+     */
+    public static TransformerFactory newInstance(final String factoryClassName, final ClassLoader classLoader) {
+        return harden(TransformerFactory.newInstance(factoryClassName, classLoader));
     }
 
     private static void setFeature(final TransformerFactory factory, final String feature, final boolean value) {
@@ -182,8 +244,7 @@ public final class HardeningTransformerFactory {
                 final InputSource inputSource = SAXSource.sourceToInputSource(source);
                 if (inputSource != null) {
                     try {
-                        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.harden(DocumentBuilderFactory.newInstance());
-                        factory.setNamespaceAware(true);
+                        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newNSInstance();
                         final Document document = factory.newDocumentBuilder().parse(inputSource);
                         return new DOMSource(document, inputSource.getSystemId());
                     } catch (final ParserConfigurationException | SAXException | IOException e) {

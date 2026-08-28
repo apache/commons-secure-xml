@@ -17,8 +17,12 @@
 
 package org.apache.commons.xml;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.Objects;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerConfigurationException;
@@ -36,6 +40,17 @@ import org.xml.sax.SAXNotSupportedException;
 /**
  * Creates new, hardened {@link SchemaFactory} instances.
  * <p>
+ * Beyond the three universal guarantees on {@link org.apache.commons.xml}:
+ * </p>
+ * <ul>
+ * <li>{@code xs:import}, {@code xs:include} and {@code xs:redefine} schemaLocation URIs are not resolved during schema compilation, and</li>
+ * <li>{@code xsi:schemaLocation} / {@code xsi:noNamespaceSchemaLocation} hints in instance documents are not resolved during validation.</li>
+ * </ul>
+ * <p>
+ * The same guarantees apply to {@link javax.xml.validation.Validator} and {@link javax.xml.validation.ValidatorHandler} instances produced from the
+ * resulting {@link javax.xml.validation.Schema}.
+ * </p>
+ * <p>
  * Not a {@link SchemaFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-hardened factory through this class
  * by calling an inherited method such as {@code newDefaultInstance()}. The hardened factories are instances of a nested, non-public wrapper class.
  * </p>
@@ -43,6 +58,21 @@ import org.xml.sax.SAXNotSupportedException;
  * @see org.apache.commons.xml
  */
 public final class HardeningSchemaFactory {
+
+    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
+    private static final String JDK_SCHEMA_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory";
+
+    private static final MethodHandle NEW_DEFAULT_INSTANCE = findNewDefaultInstance();
+
+    private static MethodHandle findNewDefaultInstance() {
+        try {
+            return MethodHandles.publicLookup().findStatic(SchemaFactory.class, "newDefaultInstance",
+                    MethodType.methodType(SchemaFactory.class));
+        } catch (final ReflectiveOperationException e) {
+            // The method is absent: the running platform predates it.
+            return null;
+        }
+    }
 
     /**
      * Hardening for any {@link SchemaFactory} on the classpath.
@@ -60,18 +90,37 @@ public final class HardeningSchemaFactory {
     }
 
     /**
+     * Returns a new, hardened {@link SchemaFactory} of the system-default implementation, supporting W3C XML Schema 1.0.
+     * <p>
+     * Obtained as by {@code SchemaFactory.newDefaultInstance()} where the platform provides it (Java 9 or later), and by instantiating the JDK's built-in
+     * implementation directly on Java 8.
+     * </p>
+     *
+     * @return A hardened factory.
+     * @throws IllegalStateException    Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalArgumentException Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation
+     *                                 (for example Android).
+     */
+    public static SchemaFactory newDefaultInstance() {
+        if (NEW_DEFAULT_INSTANCE != null) {
+            final SchemaFactory factory;
+            try {
+                factory = (SchemaFactory) NEW_DEFAULT_INSTANCE.invokeExact();
+            } catch (final SchemaFactoryConfigurationError e) {
+                throw e;
+            } catch (final Throwable e) {
+                // Unreachable: the looked-up method declares no other exceptions.
+                throw new IllegalStateException(e);
+            }
+            return harden(factory);
+        }
+        // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead. Where that class does not exist either (for
+        // example Android), the lookup miss surfaces as IllegalArgumentException, the error SchemaFactory.newInstance(String, String, ClassLoader) defines.
+        return newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI, JDK_SCHEMA_FACTORY, null);
+    }
+
+    /**
      * Returns a new, hardened {@link SchemaFactory} for the given schema language.
-     * <p>
-     * Beyond the three universal guarantees on {@link org.apache.commons.xml}:
-     * </p>
-     * <ul>
-     * <li>{@code xs:import}, {@code xs:include} and {@code xs:redefine} schemaLocation URIs are not resolved during schema compilation, and</li>
-     * <li>{@code xsi:schemaLocation} / {@code xsi:noNamespaceSchemaLocation} hints in instance documents are not resolved during validation.</li>
-     * </ul>
-     * <p>
-     * The same guarantees apply to {@link javax.xml.validation.Validator} and {@link javax.xml.validation.ValidatorHandler} instances produced from the
-     * resulting {@link javax.xml.validation.Schema}.
-     * </p>
      *
      * @param schemaLanguage The schema language, as accepted by {@link SchemaFactory#newInstance(String)}.
      * @return A hardened factory.
@@ -81,6 +130,21 @@ public final class HardeningSchemaFactory {
      */
     public static SchemaFactory newInstance(final String schemaLanguage) {
         return harden(SchemaFactory.newInstance(schemaLanguage));
+    }
+
+    /**
+     * Returns a new, hardened {@link SchemaFactory} of the given implementation class.
+     *
+     * @param schemaLanguage   The schema language, as accepted by {@link SchemaFactory#newInstance(String)}.
+     * @param factoryClassName The fully qualified class name of the {@link SchemaFactory} implementation.
+     * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
+     * @return A hardened factory.
+     * @throws IllegalArgumentException Thrown if {@code factoryClassName} is {@code null}, or if the factory class cannot be loaded or instantiated, or does
+     *                                  not support {@code schemaLanguage}.
+     * @throws NullPointerException     Thrown if {@code schemaLanguage} is {@code null}.
+     */
+    public static SchemaFactory newInstance(final String schemaLanguage, final String factoryClassName, final ClassLoader classLoader) {
+        return harden(SchemaFactory.newInstance(schemaLanguage, factoryClassName, classLoader));
     }
 
     private HardeningSchemaFactory() {

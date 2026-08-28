@@ -54,7 +54,9 @@ limitations under the License.
     <!-- OSGi bundle metadata: override commons-parent's org.apache.commons.* defaults. -->
     <commons.osgi.symbolicName>org.apache.commons.xml</commons.osgi.symbolicName>
     <commons.osgi.export>org.apache.commons.xml.*;version=${project.version};-noimport:=true</commons.osgi.export>
+    <!-- The negation drops the JDK-internal package bnd infers from the reflective Java 8 fallback in HardeningXMLInputFactory.newDefaultFactory(). -->
     <commons.osgi.import>
+      !com.sun.xml.internal.stream,
       net.sf.saxon.*;resolution:=optional,
       org.apache.xerces.*;resolution:=optional,
       *
@@ -126,6 +128,18 @@ limitations under the License.
             <rulesets>
               <ruleset>src/conf/maven-pmd-plugin.xml</ruleset>
             </rulesets>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>animal-sniffer-maven-plugin</artifactId>
+          <configuration>
+            <ignores>
+              <!-- MethodHandle.invokeExact is signature-polymorphic: javac records the ad-hoc call-site descriptor, which no signature
+                   database lists, so the checker flags a false positive. The method itself exists on every supported runtime (Java 7+);
+                   absent *looked-up* methods are handled at runtime by findStatic returning null. -->
+              <ignore>java.lang.invoke.MethodHandle</ignore>
+            </ignores>
           </configuration>
         </plugin>
       </plugins>

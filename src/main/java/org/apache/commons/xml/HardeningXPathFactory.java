@@ -17,6 +17,9 @@
 
 package org.apache.commons.xml;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.Objects;
 
 import javax.xml.XMLConstants;
@@ -29,6 +32,14 @@ import javax.xml.xpath.XPathVariableResolver;
 /**
  * Creates new, hardened {@link XPathFactory} instances.
  * <p>
+ * Beyond the three universal guarantees on {@link org.apache.commons.xml}, URI-fetching XPath 3.1+ functions ({@code doc()}, {@code collection()},
+ * {@code unparsed-text()}) are not resolved.
+ * </p>
+ * <p>
+ * The guarantees also cover the document parse behind {@code XPath.evaluate(String, InputSource)} and {@code XPathExpression.evaluate(InputSource)}: the
+ * input document is built through a hardened, namespace-aware {@link javax.xml.parsers.DocumentBuilder} instead of the engine's internal parser.
+ * </p>
+ * <p>
  * Not a {@link XPathFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-hardened factory through this class
  * by calling an inherited method such as {@code newDefaultInstance()}. The hardened factories are instances of a nested, non-public wrapper class.
  * </p>
@@ -37,23 +48,19 @@ import javax.xml.xpath.XPathVariableResolver;
  */
 public final class HardeningXPathFactory {
 
-    /**
-     * Returns a new, hardened {@link XPathFactory} for the default XPath object model.
-     * <p>
-     * Beyond the three universal guarantees on {@link org.apache.commons.xml}, URI-fetching XPath 3.1+ functions ({@code doc()}, {@code collection()},
-     * {@code unparsed-text()}) are not resolved.
-     * </p>
-     * <p>
-     * The guarantees also cover the document parse behind {@code XPath.evaluate(String, InputSource)} and {@code XPathExpression.evaluate(InputSource)}: the
-     * input document is built through a hardened, namespace-aware {@link javax.xml.parsers.DocumentBuilder} instead of the engine's internal parser.
-     * </p>
-     *
-     * @return A hardened factory.
-     * @throws IllegalStateException Thrown if a required hardening setting cannot be applied to the underlying implementation.
-     * @throws RuntimeException      Thrown if there is a failure in creating an {@link XPathFactory} for the default object model.
-     */
-    public static XPathFactory newInstance() {
-        return harden(XPathFactory.newInstance());
+    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
+    private static final String JDK_XPATH_FACTORY = "com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl";
+
+    private static final MethodHandle NEW_DEFAULT_INSTANCE = findNewDefaultInstance();
+
+    private static MethodHandle findNewDefaultInstance() {
+        try {
+            return MethodHandles.publicLookup().findStatic(XPathFactory.class, "newDefaultInstance",
+                    MethodType.methodType(XPathFactory.class));
+        } catch (final ReflectiveOperationException e) {
+            // The method is absent: the running platform predates it.
+            return null;
+        }
     }
 
     /**
@@ -92,6 +99,84 @@ public final class HardeningXPathFactory {
         setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);
         // Required: FSP does not reach the parser the engine provisions for InputSource-taking evaluate calls; the wrapper parses those itself.
         return new Wrapper(factory);
+    }
+
+    /**
+     * Returns a new, hardened {@link XPathFactory} of the system-default implementation, supporting the default XPath object model.
+     * <p>
+     * Obtained as by {@code XPathFactory.newDefaultInstance()} where the platform provides it (Java 9 or later), and by instantiating the JDK's built-in
+     * implementation directly on Java 8.
+     * </p>
+     *
+     * @return A hardened factory.
+     * @throws IllegalStateException Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws RuntimeException      Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation (for
+     *                               example Android).
+     */
+    public static XPathFactory newDefaultInstance() {
+        if (NEW_DEFAULT_INSTANCE != null) {
+            final XPathFactory factory;
+            try {
+                factory = (XPathFactory) NEW_DEFAULT_INSTANCE.invokeExact();
+            } catch (final RuntimeException e) {
+                throw e;
+            } catch (final Throwable e) {
+                // Unreachable: the looked-up method declares no other exceptions.
+                throw new IllegalStateException(e);
+            }
+            return harden(factory);
+        }
+        try {
+            // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead.
+            return newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI, JDK_XPATH_FACTORY, null);
+        } catch (final XPathFactoryConfigurationException e) {
+            // newDefaultInstance declares no checked exception; mirror XPathFactory.newInstance(), which reports a default-model miss as a RuntimeException.
+            throw new RuntimeException(
+                    "Neither XPathFactory.newDefaultInstance() nor " + JDK_XPATH_FACTORY + " is available", e);
+        }
+    }
+
+    /**
+     * Returns a new, hardened {@link XPathFactory} for the default XPath object model.
+     *
+     * @return A hardened factory.
+     * @throws IllegalStateException Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws RuntimeException      Thrown if there is a failure in creating an {@link XPathFactory} for the default object model.
+     */
+    public static XPathFactory newInstance() {
+        return harden(XPathFactory.newInstance());
+    }
+
+    /**
+     * Returns a new, hardened {@link XPathFactory} for the given object model.
+     *
+     * @param uri The underlying object model identifier, as accepted by {@link XPathFactory#newInstance(String)}.
+     * @return A hardened factory.
+     * @throws IllegalStateException              Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws XPathFactoryConfigurationException Thrown if no implementation of the object model is available.
+     * @throws NullPointerException               Thrown if {@code uri} is {@code null}.
+     * @throws IllegalArgumentException           Thrown if {@code uri} is empty.
+     */
+    public static XPathFactory newInstance(final String uri) throws XPathFactoryConfigurationException {
+        return harden(XPathFactory.newInstance(uri));
+    }
+
+    /**
+     * Returns a new, hardened {@link XPathFactory} of the given implementation class.
+     *
+     * @param uri              The underlying object model identifier, as accepted by {@link XPathFactory#newInstance(String)}.
+     * @param factoryClassName The fully qualified class name of the {@link XPathFactory} implementation.
+     * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
+     * @return A hardened factory.
+     * @throws IllegalStateException              Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws XPathFactoryConfigurationException Thrown if {@code factoryClassName} is {@code null}, or if the factory class cannot be loaded or
+     *                                            instantiated, or does not support {@code uri}.
+     * @throws NullPointerException               Thrown if {@code uri} is {@code null}.
+     * @throws IllegalArgumentException           Thrown if {@code uri} is empty.
+     */
+    public static XPathFactory newInstance(final String uri, final String factoryClassName, final ClassLoader classLoader)
+            throws XPathFactoryConfigurationException {
+        return harden(XPathFactory.newInstance(uri, factoryClassName, classLoader));
     }
 
     /**

@@ -33,7 +33,7 @@
  * </ul>
  * <p>
  * These guarantees are defined on OpenJDK 8 or later (and JDK distributions built from it). No version of Android supports
- * {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING}, so on Android (API level 19 or later) the hardening is applied as best-effort without a guarantee,
+ * {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING}, so on Android (API level 26 or later) the hardening is applied as best-effort without a guarantee,
  * tested as complete starting with API level 33; see the threat model's "Assumptions about the environment".
  * </p>
  * <p>
@@ -44,6 +44,19 @@
  * </p>
  * <p>
  * Each method adds factory-specific guarantees on top of the three above, documented on the corresponding {@code newXxxFactory()} method.
+ * </p>
+ * <p>
+ * Each factory class mirrors every static factory method of its JAXP counterpart:
+ * </p>
+ * <ul>
+ * <li>the class-name/class-loader overloads and the StAX {@code newFactory} family (JDK 8),</li>
+ * <li>{@code newDefaultInstance()} (Java 9), and</li>
+ * <li>the namespace-aware {@code newNSInstance()} family (Java 13).</li>
+ * </ul>
+ * <p>
+ * All of them work, with the same semantics, on every supported runtime, including Java 8. The {@code newDefaultInstance} methods are an <strong>opt-out of
+ * JAXP pluggability</strong>: they pin the platform's built-in implementation instead of whatever a classpath lookup would resolve, which suits a library with
+ * minimal XML requirements that does not want to delegate the choice of implementation to the application developer.
  * </p>
  * <p>
  * An unresolved external reference resolves to empty content by default, so the parse continues without the resource. To reject it with an exception instead,
@@ -62,5 +75,4 @@
  * be thread-safe</strong>. Create a new factory per thread or synchronize externally.
  * </p>
  */
-
 package org.apache.commons.xml;

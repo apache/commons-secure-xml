@@ -19,10 +19,13 @@ package org.apache.commons.xml;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.Objects;
 
-import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.stream.EventFilter;
+import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.StreamFilter;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -35,6 +38,9 @@ import javax.xml.transform.Source;
 
 /**
  * Creates new, hardened {@link XMLInputFactory} instances.
+ * <p>
+ * The three universal guarantees on {@link org.apache.commons.xml} apply; StAX exposes no additional vectors beyond them.
+ * </p>
  * <p>
  * Not a {@link XMLInputFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-hardened factory through this class
  * by calling an inherited method such as {@code newDefaultFactory()}. The hardened factories are instances of a nested, non-public wrapper class.
@@ -50,6 +56,20 @@ public final class HardeningXMLInputFactory {
     static final String WSTX_ENTITY_RESOLVER = "com.ctc.wstx.entityResolver";
     /** Woodstox property: resolver consulted for undeclared entity references. */
     static final String WSTX_UNDECLARED_ENTITY_RESOLVER = "com.ctc.wstx.undeclaredEntityResolver";
+    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultFactory()}. */
+    private static final String JDK_XML_INPUT_FACTORY = "com.sun.xml.internal.stream.XMLInputFactoryImpl";
+
+    private static final MethodHandle NEW_DEFAULT_FACTORY = findNewDefaultFactory();
+
+    private static MethodHandle findNewDefaultFactory() {
+        try {
+            return MethodHandles.publicLookup().findStatic(XMLInputFactory.class, "newDefaultFactory",
+                    MethodType.methodType(XMLInputFactory.class));
+        } catch (final ReflectiveOperationException e) {
+            // The method is absent: the running platform predates it.
+            return null;
+        }
+    }
 
     /**
      * Capability-driven hardening for any {@link XMLInputFactory} (StAX) on the classpath.
@@ -67,10 +87,67 @@ public final class HardeningXMLInputFactory {
     }
 
     /**
-     * Returns a new, hardened {@link XMLInputFactory}.
+     * Returns a new, hardened {@link XMLInputFactory} of the system-default implementation.
      * <p>
-     * The three universal guarantees on {@link org.apache.commons.xml} apply; StAX exposes no additional vectors beyond them.
+     * Obtained as by {@code XMLInputFactory.newDefaultFactory()} where the platform provides it (Java 9 or later), and by instantiating the JDK's built-in
+     * implementation directly on Java 8.
      * </p>
+     *
+     * @return A hardened factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultFactory()} nor the JDK's built-in implementation
+     *                                   (for example Android).
+     */
+    public static XMLInputFactory newDefaultFactory() {
+        if (NEW_DEFAULT_FACTORY != null) {
+            final XMLInputFactory factory;
+            try {
+                factory = (XMLInputFactory) NEW_DEFAULT_FACTORY.invokeExact();
+            } catch (final FactoryConfigurationError e) {
+                throw e;
+            } catch (final Throwable e) {
+                // Unreachable: the looked-up method declares no other exceptions.
+                throw new IllegalStateException(e);
+            }
+            return harden(factory);
+        }
+        try {
+            // Java 8: the method does not exist, and XMLInputFactory has no class-name-taking lookup; instantiate the JDK's built-in default directly.
+            return harden((XMLInputFactory) Class.forName(JDK_XML_INPUT_FACTORY).getConstructor().newInstance());
+        } catch (final ReflectiveOperationException e) {
+            // Where the class does not exist either (for example Android), report the miss like any StAX factory lookup: with FactoryConfigurationError.
+            throw new FactoryConfigurationError(e, "Neither XMLInputFactory.newDefaultFactory() nor " + JDK_XML_INPUT_FACTORY + " is available");
+        }
+    }
+
+    /**
+     * Returns a new, hardened {@link XMLInputFactory}, as by {@link XMLInputFactory#newFactory()}.
+     *
+     * @return A hardened factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown if an instance of this factory cannot be loaded.
+     */
+    public static XMLInputFactory newFactory() {
+        // XMLInputFactory.newInstance, not newFactory: the same specified lookup, but Android's StAX API predates newFactory.
+        return harden(XMLInputFactory.newInstance());
+    }
+
+    /**
+     * Returns a new, hardened {@link XMLInputFactory} resolved from the given factory id.
+     *
+     * @param factoryId   The name of the factory to find; a system property or service id to look up, not the class name of the implementation.
+     * @param classLoader The class loader used in the lookup; {@code null} means the current thread's context class loader.
+     * @return A hardened factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown in case of a service configuration error or if the implementation is not available or cannot be instantiated.
+     * @throws NullPointerException      Thrown if {@code factoryId} is {@code null}.
+     */
+    public static XMLInputFactory newFactory(final String factoryId, final ClassLoader classLoader) {
+        return harden(XMLInputFactory.newFactory(factoryId, classLoader));
+    }
+
+    /**
+     * Returns a new, hardened {@link XMLInputFactory}.
      *
      * @return A hardened factory.
      * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
