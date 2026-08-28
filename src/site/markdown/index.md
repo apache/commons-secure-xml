@@ -21,14 +21,14 @@ Apache Commons Secure XML is part of the
 [Apache Commons](https://commons.apache.org/index.html) project.
 
 Apache Commons Secure XML provides secure-by-default JAXP factory creation,
-abstracting over implementation-specific XXE hardening differences between the
+abstracting over implementation-specific XXE securing differences between the
 stock JDK and external JAXP implementations.
 
 
 ## Why
 
 Any Java library that parses XML has to secure JAXP before handing a factory to user code, and every library ends up
-copy-pasting the same hardening snippet. The snippet is fragile: the attributes and features needed to secure a factory
+copy-pasting the same securing snippet. The snippet is fragile: the attributes and features needed to secure a factory
 are not standardized, each JAXP implementation exposes a slightly different set, and setting an unknown one throws an
 exception that callers routinely swallow. Writing this block correctly for every implementation is real work, and
 duplicating it across projects means every project owns the maintenance burden on its own.
@@ -39,10 +39,10 @@ such as standalone Xerces, Woodstox, or Saxon's TrAX, need further configuration
 library author has no control over which implementation is on the classpath at runtime, so the effective security
 posture of their code depends on a deployment decision made elsewhere.
 
-This library provides that baseline. Each `org.apache.commons.xml` factory call returns a new factory hardened by an
+This library provides that baseline. Each `org.apache.commons.xml` factory call returns a new factory secured by an
 implementation-specific recipe, so the returned object behaves the same way security-wise regardless of which JAXP
 implementation resolved. Security becomes a property of the call, not of the classpath, and there is one place to
-update when a new hardening setting becomes available or a default changes.
+update when a new securing setting becomes available or a default changes.
 
 ## Usage
 
@@ -56,10 +56,10 @@ Add the library to your build:
 </dependency>
 ```
 
-Every factory method in `org.apache.commons.xml` returns a new, hardened factory.
+Every factory method in `org.apache.commons.xml` returns a new, secured factory.
 Pick the one that matches the API you already use;
 no other configuration is required.
-On hardened factories an external resource reference (DTD, entity, schema, stylesheet) is never fetched:
+On secured factories an external resource reference (DTD, entity, schema, stylesheet) is never fetched:
 it resolves to empty content,
 so the parse continues without it
 (see Configuration below).
@@ -79,7 +79,7 @@ it is not a JAXP API.
 ### Supported Implementations
 
 Out of the box the library recognizes the stock JDK JAXP implementations, Apache Xerces 2.x, Woodstox, and Saxon-HE. If
-a factory resolves to an implementation not covered by any bundled hardening recipe, every `org.apache.commons.xml` factory method throws
+a factory resolves to an implementation not covered by any bundled securing recipe, every `org.apache.commons.xml` factory method throws
 `IllegalStateException` with a message naming the unsupported class. Adding support for a new JAXP implementation
 requires a code change to this library.
 
@@ -89,7 +89,7 @@ requires a code change to this library.
 import org.w3c.dom.Document;
 import org.apache.commons.xml.SecureDocumentBuilderFactory;
 
-Document doc = HardeningDocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputStream);
+Document doc = SecureDocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputStream);
 ```
 
 **SAX Parsing** via `SAXParserFactory`:
@@ -97,7 +97,7 @@ Document doc = HardeningDocumentBuilderFactory.newInstance().newDocumentBuilder(
 ```java
 import org.apache.commons.xml.SecureSAXParserFactory;
 
-HardeningSAXParserFactory.newInstance().newSAXParser().parse(inputStream, myDefaultHandler);
+SecureSAXParserFactory.newInstance().newSAXParser().parse(inputStream, myDefaultHandler);
 ```
 
 **Streaming (StAX) Parsing** via `XMLInputFactory`:
@@ -106,7 +106,7 @@ HardeningSAXParserFactory.newInstance().newSAXParser().parse(inputStream, myDefa
 import javax.xml.stream.XMLStreamReader;
 import org.apache.commons.xml.SecureXMLInputFactory;
 
-XMLStreamReader reader = HardeningXMLInputFactory.newInstance().createXMLStreamReader(inputStream);
+XMLStreamReader reader = SecureXMLInputFactory.newInstance().createXMLStreamReader(inputStream);
 ```
 
 **XSLT Transforms** via `TransformerFactory`:
@@ -116,7 +116,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.xml.SecureTransformerFactory;
 
-HardeningTransformerFactory.newInstance()
+SecureTransformerFactory.newInstance()
         .newTransformer(new StreamSource(stylesheet))
         .transform(new StreamSource(inputStream), new StreamResult(outputStream));
 ```
@@ -128,7 +128,7 @@ import javax.xml.xpath.XPathConstants;
 import org.w3c.dom.NodeList;
 import org.apache.commons.xml.SecureXPathFactory;
 
-NodeList hits = (NodeList) HardeningXPathFactory.newInstance()
+NodeList hits = (NodeList) SecureXPathFactory.newInstance()
         .newXPath()
         .evaluate("//item", doc, XPathConstants.NODESET);
 ```
@@ -140,7 +140,7 @@ import javax.xml.XMLConstants;
 import javax.xml.transform.stream.StreamSource;
 import org.apache.commons.xml.SecureSchemaFactory;
 
-HardeningSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
+SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         .newSchema(new StreamSource(xsdStream))
         .newValidator()
         .validate(new StreamSource(inputStream));
@@ -153,7 +153,7 @@ It might be (and usually is) a wrapper around it,
 so it cannot be cast to the implementation's own class.
 Everything else about the implementation's behavior is preserved:
 features, properties, and attributes delegate to it,
-and only the security behavior is hardened.
+and only the security behavior is applied.
 
 Preserved behavior includes the choice of internal parsers.
 Each TrAX, XPath, or schema implementation has its own way of instantiating them,
@@ -165,12 +165,12 @@ and the library respects it:
   to switch to parsers instantiated through `ServiceLoader`.
 - Saxon selects its parsers through its own configuration.
 
-Whichever parser is selected, it is hardened.
+Whichever parser is selected, it is secured.
 
 ### Factory Methods
 
 Each factory class mirrors every static factory method its JAXP counterpart offers,
-so a hardened factory is a drop-in replacement at any construction site:
+so a secured factory is a drop-in replacement at any construction site:
 the class-name/class-loader overloads and the StAX `newFactory` family (JDK 8),
 `newDefaultInstance()` (Java 9, [JDK-8169778](https://bugs.openjdk.org/browse/JDK-8169778)),
 and the namespace-aware `newNSInstance()` family (Java 13, [JDK-8223423](https://bugs.openjdk.org/browse/JDK-8223423)).
@@ -192,23 +192,23 @@ rather than delegate the choice of implementation to the application developer.
 
 ### Stylesheets and Schemas
 
-The hardening applies to documents parsed through the returned factory. Stylesheets given to
+The securing applies to documents parsed through the returned factory. Stylesheets given to
 `TransformerFactory.newTransformer(Source)` and schemas given to `SchemaFactory.newSchema(Source)` are read by a parser
-the implementation picks internally, and that parser may not be hardened (Saxon's TrAX is one such case, see Building
-below). Treat stylesheets and schemas as trusted input, or pre-parse them through a hardened `org.apache.commons.xml` parser and
+the implementation picks internally, and that parser may not be secured (Saxon's TrAX is one such case, see Building
+below). Treat stylesheets and schemas as trusted input, or pre-parse them through a secured `org.apache.commons.xml` parser and
 pass the result as a `DOMSource` or `SAXSource`.
 A stylesheet also chooses where the transform writes (`xsl:result-document`):
-the hardening governs reads only,
+the securing governs reads only,
 so restrict output destinations yourself when running an untrusted stylesheet
 (see the [Threat Model](threat_model.html)).
 
 ### Transformer Handlers and Filters
 
 The `SAXTransformerFactory` extension methods, `newTransformerHandler(...)`, `newTemplatesHandler()` and `newXMLFilter(...)`,
-if reachable by casting the factory from `HardeningTransformerFactory.newInstance()`,
-produce handlers, filters and `Templates` carrying the same hardening as the standard entry points:
+if reachable by casting the factory from `SecureTransformerFactory.newInstance()`,
+produce handlers, filters and `Templates` carrying the same securing as the standard entry points:
 runtime `document()` resolves to empty content,
-and a filter with no caller-set parent parses its input through a hardened reader.
+and a filter with no caller-set parent parses its input through a secured reader.
 The SAX events you feed into a handler, and a parent reader you set on a filter,
 are your own configuration, like any caller-supplied parser.
 See the [Threat Model](threat_model.html) for the exact scope.
@@ -221,10 +221,10 @@ they are not thread-safe. Create a new factory per thread or synchronize externa
 
 ## Configuration
 
-The hardened factories need no configuration.
+The secured factories need no configuration.
 When a document references an external resource
 (a DTD, an external entity, a schema, an XInclude target, or an XSLT document),
-the hardening layer resolves the reference to an empty stream:
+the securing layer resolves the reference to an empty stream:
 nothing is fetched,
 nothing leaks into the result,
 and the parse continues wherever the implementation can proceed with empty content.
@@ -232,7 +232,7 @@ This forgiving default accommodates documents that merely carry such references 
 
 If your application should reject such documents instead of parsing them,
 tighten the factory yourself.
-The hardening floor stays underneath whatever you configure,
+The securing floor stays underneath whatever you configure,
 so the tightening carries **no security weight**
 and can be as strict as the application needs:
 
@@ -242,7 +242,7 @@ and can be as strict as the application needs:
   on implementations that support the feature.
 - Install a resolver that throws.
   A caller-supplied `EntityResolver`, `XMLResolver`, `LSResourceResolver` or `URIResolver`
-  is consulted before the hardening floor,
+  is consulted before the securing floor,
   so an allow-list and a deny-all are both one resolver away.
 
 As a temporary debugging measure,
