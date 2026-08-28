@@ -55,7 +55,7 @@ public final class SecureDocumentBuilderFactory {
     /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
     private static final String JDK_DOCUMENT_BUILDER_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl";
 
-    private static final MethodHandle NEW_DEFAULT_INSTANCE = MethodHandleFactory.findStatic(DocumentBuilderFactory.class, "newDefaultInstance",
+    private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(DocumentBuilderFactory.class, "newDefaultInstance",
             MethodType.methodType(DocumentBuilderFactory.class));
 
     /**
@@ -114,10 +114,10 @@ public final class SecureDocumentBuilderFactory {
      *                                   (for example Android).
      */
     public static DocumentBuilderFactory newDefaultInstance() {
-        if (NEW_DEFAULT_INSTANCE != null) {
+        if (MH_newDefaultInstance != null) {
             final DocumentBuilderFactory factory;
             try {
-                factory = (DocumentBuilderFactory) NEW_DEFAULT_INSTANCE.invokeExact();
+                factory = (DocumentBuilderFactory) MH_newDefaultInstance.invokeExact();
             } catch (final FactoryConfigurationError e) {
                 throw e;
             } catch (final Throwable e) {
