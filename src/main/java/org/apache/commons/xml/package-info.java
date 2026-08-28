@@ -21,6 +21,23 @@
  * Every method returns <em>new, hardened</em> factory instances. No caching or pooling is performed; callers on a hot path are responsible for their own
  * caching.
  * </p>
+ * <p>
+ * A returned factory is not necessarily an instance of the underlying implementation — it might be (and usually is) a wrapper around it, so it cannot be cast
+ * to the implementation's own class. Everything else about the implementation's behavior is preserved — features, properties, and attributes delegate to it —
+ * and only the security behavior is hardened.
+ * </p>
+ * <p>
+ * Preserved behavior includes the choice of internal parsers. Each TrAX, XPath, or schema implementation has its own way of instantiating them, and the
+ * library respects it:
+ * </p>
+ * <ul>
+ * <li>Stock JDK factories use the JDK parsers by default, and expose the {@code jdk.xml.overrideDefaultParser} feature (and Java system property of the same
+ * name) to switch to parsers instantiated through {@link java.util.ServiceLoader}.</li>
+ * <li>Saxon selects its parsers through its own configuration.</li>
+ * </ul>
+ * <p>
+ * Whichever parser is selected, it is hardened.
+ * </p>
  * <h2>Hardening guarantees</h2>
  * <p>
  * Every factory returned by makes the same three guarantees, regardless of which JAXP implementation is on the classpath:

@@ -146,6 +146,27 @@ HardeningSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         .validate(new StreamSource(inputStream));
 ```
 
+### Wrappers, not the original factories
+
+A returned factory is not necessarily an instance of the underlying implementation:
+it might be (and usually is) a wrapper around it,
+so it cannot be cast to the implementation's own class.
+Everything else about the implementation's behavior is preserved —
+features, properties, and attributes delegate to it —
+and only the security behavior is hardened.
+
+Preserved behavior includes the choice of internal parsers.
+Each TrAX, XPath, or schema implementation has its own way of instantiating them,
+and the library respects it:
+
+- Stock JDK factories use the JDK parsers by default,
+  and expose the `jdk.xml.overrideDefaultParser` feature
+  (and Java system property of the same name)
+  to switch to parsers instantiated through `ServiceLoader`.
+- Saxon selects its parsers through its own configuration.
+
+Whichever parser is selected, it is hardened.
+
 ### Factory methods
 
 Each factory class mirrors every static factory method its JAXP counterpart offers,
