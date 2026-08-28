@@ -37,7 +37,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
- * {@link XPath} wrapper that performs the document build behind every {@link InputSource}-taking {@code evaluate} call with a hardened, namespace-aware
+ * {@link XPath} wrapper that performs the document build behind every {@link InputSource}-taking {@code evaluate} call with a secure, namespace-aware
  * {@link javax.xml.parsers.DocumentBuilder} and evaluates the delegate against the parsed {@link Document}, so the engine's own parser never runs.
  *
  * <p>The JAXP contract for {@link XPath#evaluate(String, InputSource, QName)} is "build a document from the source, then evaluate against it", and both the
@@ -52,7 +52,7 @@ import org.xml.sax.SAXException;
 final class SecureXPath implements XPath {
 
     /**
-     * Parses the source through a hardened, namespace-aware {@link javax.xml.parsers.DocumentBuilder}, mirroring the namespace awareness of the parser the
+     * Parses the source through a secure, namespace-aware {@link javax.xml.parsers.DocumentBuilder}, mirroring the namespace awareness of the parser the
      * engine would have provisioned.
      *
      * @param source           The document to evaluate against.
