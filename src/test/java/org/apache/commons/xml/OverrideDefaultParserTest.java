@@ -123,8 +123,8 @@ class OverrideDefaultParserTest {
         assumeFalse(AttackTestSupport.IS_ANDROID);
         final XPathFactory factory = HardeningXPathFactory.newDefaultInstance();
         assertFalse(factory.getFeature(FEATURE));
-        assertFalse(((HardeningXPath) factory.newXPath()).overrideDefaultParser);
+        assertFalse(((SecureXPath) factory.newXPath()).overrideDefaultParser);
         factory.setFeature(FEATURE, true);
-        assertTrue(((HardeningXPath) factory.newXPath()).overrideDefaultParser);
+        assertTrue(((SecureXPath) factory.newXPath()).overrideDefaultParser);
     }
 }

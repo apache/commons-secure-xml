@@ -187,11 +187,11 @@ public final class HardeningXPathFactory {
     }
 
     /**
-     * {@link XPathFactory} wrapper that returns a {@link HardeningXPath} from {@link #newXPath()}.
+     * {@link XPathFactory} wrapper that returns a {@link SecureXPath} from {@link #newXPath()}.
      *
      * <p>Required because {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING} on the factory governs only the XPath engine: the stock JDK and Apache Xalan
      * implement the {@link org.xml.sax.InputSource}-taking {@code evaluate} entry points by provisioning an internal document parser the feature does not reach.
-     * The wrapper performs that document build itself through a hardened parser instead; see {@link HardeningXPath}.</p>
+     * The wrapper performs that document build itself through a hardened parser instead; see {@link SecureXPath}.</p>
      *
      * @see org.apache.commons.xml
      */
@@ -222,7 +222,7 @@ public final class HardeningXPathFactory {
         @Override
         public XPath newXPath() {
             final XPath xpath = delegate.newXPath();
-            return xpath == null ? null : new HardeningXPath(xpath, overrideDefaultParser());
+            return xpath == null ? null : new SecureXPath(xpath, overrideDefaultParser());
         }
 
         @Override

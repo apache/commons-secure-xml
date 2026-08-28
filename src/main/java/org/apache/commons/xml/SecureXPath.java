@@ -49,7 +49,7 @@ import org.xml.sax.SAXException;
  * <p>The {@code evaluateExpression} default methods added to the interface by Java 9 route through the {@code evaluate} overloads overridden here, so they
  * carry the same rewrite on newer runtimes even though this class targets Java 8.</p>
  */
-final class HardeningXPath implements XPath {
+final class SecureXPath implements XPath {
 
     /**
      * Parses the source through a hardened, namespace-aware {@link javax.xml.parsers.DocumentBuilder}, mirroring the namespace awareness of the parser the
@@ -88,7 +88,7 @@ final class HardeningXPath implements XPath {
      * @param overrideDefaultParser whether the {@link InputSource} document builds should use the pluggable parser lookup instead of the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningXPath(final XPath delegate, final boolean overrideDefaultParser) {
+    SecureXPath(final XPath delegate, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
         this.overrideDefaultParser = overrideDefaultParser;
     }

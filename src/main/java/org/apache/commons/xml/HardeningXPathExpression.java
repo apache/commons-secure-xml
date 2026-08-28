@@ -27,9 +27,9 @@ import javax.xml.xpath.XPathExpressionException;
 import org.xml.sax.InputSource;
 
 /**
- * {@link XPathExpression} wrapper that applies the same {@link InputSource} rewrite as {@link HardeningXPath} to the compiled evaluation entry points.
+ * {@link XPathExpression} wrapper that applies the same {@link InputSource} rewrite as {@link SecureXPath} to the compiled evaluation entry points.
  * <p>
- * {@link HardeningXPath#compile(String)} returns one of these, so {@link #evaluate(InputSource)} and {@link #evaluate(InputSource, QName)} build the document
+ * {@link SecureXPath#compile(String)} returns one of these, so {@link #evaluate(InputSource)} and {@link #evaluate(InputSource, QName)} build the document
  * through a hardened, namespace-aware parser instead of the engine's own; the {@code evaluateExpression} default methods added by Java 9 route through these
  * overloads as well.
  * </p>
@@ -39,7 +39,7 @@ final class HardeningXPathExpression implements XPathExpression {
     private final XPathExpression delegate;
 
     /**
-     * Snapshot of the factory's {@code jdk.xml.overrideDefaultParser} outcome, inherited from the {@link HardeningXPath} that compiled this expression.
+     * Snapshot of the factory's {@code jdk.xml.overrideDefaultParser} outcome, inherited from the {@link SecureXPath} that compiled this expression.
      */
     private final boolean overrideDefaultParser;
 
@@ -63,7 +63,7 @@ final class HardeningXPathExpression implements XPathExpression {
      */
     @Override
     public String evaluate(final InputSource source) throws XPathExpressionException {
-        return delegate.evaluate(HardeningXPath.parse(source, overrideDefaultParser));
+        return delegate.evaluate(SecureXPath.parse(source, overrideDefaultParser));
     }
 
     /**
@@ -74,7 +74,7 @@ final class HardeningXPathExpression implements XPathExpression {
      */
     @Override
     public Object evaluate(final InputSource source, final QName returnType) throws XPathExpressionException {
-        return delegate.evaluate(HardeningXPath.parse(source, overrideDefaultParser), returnType);
+        return delegate.evaluate(SecureXPath.parse(source, overrideDefaultParser), returnType);
     }
 
     @Override
