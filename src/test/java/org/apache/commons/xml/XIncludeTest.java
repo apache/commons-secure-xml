@@ -122,8 +122,6 @@ class XIncludeTest {
                 + "</root>";
     }
 
-    //region Baseline: unhardened JAXP resolves the include
-
     @Test
     @Tag("dom")
     void baselineDomLeaksParseText() throws Exception {
@@ -320,10 +318,6 @@ class XIncludeTest {
         }, "Secured SAX parse=xml should throw");
     }
 
-    //endregion
-
-    //region hardenReader: reader with XInclude enabled before securing is blocked (the internal recipe behind the secure factory and SaxonProvider)
-
     @Test
     @Tag("sax")
     void secureSaxNullResolverDoesNotLeak() throws Exception {
@@ -368,5 +362,4 @@ class XIncludeTest {
                 "SAX parse=xml with allow-list should resolve to the resolver's content");
     }
 
-    //endregion
 }
