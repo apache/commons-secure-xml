@@ -40,7 +40,7 @@ import org.xml.sax.XMLReader;
  *
  * <p>Every other method forwards to the wrapped delegate; subclasses (e.g. {@code HardeningExpatXMLReader}) add per-implementation fixups on top of the floor.</p>
  */
-class HardeningXMLReader implements XMLReader {
+class SecureXMLReader implements XMLReader {
 
     private final XMLReader delegate;
 
@@ -52,7 +52,7 @@ class HardeningXMLReader implements XMLReader {
      * @param delegate the delegate to wrap; must not be {@code null}.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningXMLReader(final XMLReader delegate) {
+    SecureXMLReader(final XMLReader delegate) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
         this.floor = new FallbackIgnoreEntityResolver2(null);
         delegate.setEntityResolver(floor);

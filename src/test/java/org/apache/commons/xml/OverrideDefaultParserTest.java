@@ -64,10 +64,10 @@ class OverrideDefaultParserTest {
     @Test
     void hardenedReaderFollowsFlag() throws Exception {
         assumeFalse(AttackTestSupport.IS_ANDROID);
-        final XMLReader pinned = ((HardeningXMLReader) SecureSAXParserFactory.newHardenedReader(false)).getDelegate();
+        final XMLReader pinned = ((SecureXMLReader) SecureSAXParserFactory.newHardenedReader(false)).getDelegate();
         assertTrue(pinned.getClass().getName().startsWith(JDK_INTERNAL_PREFIX), pinned.getClass().getName());
-        final XMLReader pluggable = ((HardeningXMLReader) SecureSAXParserFactory.newHardenedReader(true)).getDelegate();
-        final XMLReader lookedUp = ((HardeningXMLReader) SecureSAXParserFactory.newNSInstance().newSAXParser().getXMLReader()).getDelegate();
+        final XMLReader pluggable = ((SecureXMLReader) SecureSAXParserFactory.newHardenedReader(true)).getDelegate();
+        final XMLReader lookedUp = ((SecureXMLReader) SecureSAXParserFactory.newNSInstance().newSAXParser().getXMLReader()).getDelegate();
         assertEquals(lookedUp.getClass(), pluggable.getClass());
         if (xercesOnClasspath()) {
             // The two families genuinely differ only where a third-party parser wins the lookup (the test-jdk-xerces execution).

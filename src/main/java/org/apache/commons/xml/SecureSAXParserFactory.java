@@ -89,7 +89,7 @@ public final class SecureSAXParserFactory {
      *         configuration time rather than mid-parse.</li>
      *     <li><strong>FSP</strong>: required on every other reader. It switches on the implementation's built-in security manager, which is what carries the
      *         processing limits.</li>
-     *     <li><strong>Ignore-all resolver floor</strong>: every reader is wrapped in a {@link HardeningXMLReader} that keeps an ignore-all {@link EntityResolver} floor.
+     *     <li><strong>Ignore-all resolver floor</strong>: every reader is wrapped in a {@link SecureXMLReader} that keeps an ignore-all {@link EntityResolver} floor.
      *         That floor blocks external DTD, entity, schema and {@code xi:include} fetches in one place: the stock JDK's XInclude processor ignores
      *         {@code ACCESS_EXTERNAL_*} and consults the {@link EntityResolver} instead, so no {@code ACCESS_EXTERNAL_*} properties are needed here. A caller can
      *         chain its own resolver onto the floor to allow-list resources, but cannot remove it.</li>
@@ -137,7 +137,7 @@ public final class SecureSAXParserFactory {
      * @throws IllegalStateException if a required hardening setting cannot be applied to the underlying implementation.
      */
     static XMLReader harden(final XMLReader reader) {
-        if (reader instanceof HardeningXMLReader) {
+        if (reader instanceof SecureXMLReader) {
             // Already hardened (for example, a reader from a hardened factory passed back through harden(XMLReader)); the floor is already in place.
             return reader;
         }
@@ -149,10 +149,10 @@ public final class SecureSAXParserFactory {
         }
         // Required: enables the JDK XMLSecurityManager / Xerces SecurityManager limits.
         setFeature(reader, XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        // Required: HardeningXMLReader installs an ignore-all EntityResolver floor on the reader.
+        // Required: SecureXMLReader installs an ignore-all EntityResolver floor on the reader.
         // That floor blocks external DTD, entity, schema and xi:include fetches in one place: no ACCESS_EXTERNAL_* properties are needed here.
         // Callers can chain their resolvers, but not override the floor.
-        return new HardeningXMLReader(reader);
+        return new SecureXMLReader(reader);
     }
 
     /**
@@ -318,14 +318,14 @@ public final class SecureSAXParserFactory {
     }
 
     /**
-     * {@link HardeningXMLReader} for Android's {@code org.apache.harmony.xml.ExpatReader} that additionally surfaces its {@code namespace-prefixes} limitation at
+     * {@link SecureXMLReader} for Android's {@code org.apache.harmony.xml.ExpatReader} that additionally surfaces its {@code namespace-prefixes} limitation at
      * configuration time.
      *
      * <p>ExpatReader does not actually support the {@code namespace-prefixes} feature: enabling it is accepted by {@code setFeature} but fails later, during
      * {@code parse}, with a {@link SAXNotSupportedException}. Reporting the rejection eagerly from {@link #setFeature(String, boolean)} lets consumers that probe
      * the feature, such as Xalan's identity transformer, catch the exception and fall back instead of failing the whole parse.</p>
      */
-    static final class HardeningExpatXMLReader extends HardeningXMLReader {
+    static final class HardeningExpatXMLReader extends SecureXMLReader {
 
         private static final String NAMESPACE_PREFIXES_FEATURE = "http://xml.org/sax/features/namespace-prefixes";
 

@@ -75,7 +75,7 @@ class ShadingFootprintTest {
             "SecureSAXParserFactory$1",
             "SecureSAXParserFactory$HardeningExpatXMLReader",
             "SecureSAXParserFactory$Wrapper",
-            "HardeningXMLReader",
+            "SecureXMLReader",
             "MethodHandleFactory");
     // @formatter:on
 
@@ -116,7 +116,7 @@ class ShadingFootprintTest {
             "SecureTransformerFactory$Wrapper",
             "SecureTransformerHandler",
             "SecureXMLFilter",
-            "HardeningXMLReader",
+            "SecureXMLReader",
             "SaxonProvider",
             "SaxonProvider$1",
             "SaxonProvider$HardenedConfiguration",
@@ -138,7 +138,7 @@ class ShadingFootprintTest {
             "SecureSAXParserFactory$1",
             "SecureSAXParserFactory$HardeningExpatXMLReader",
             "SecureSAXParserFactory$Wrapper",
-            "HardeningXMLReader",
+            "SecureXMLReader",
             "HardeningXPath",
             "HardeningXPathExpression",
             "HardeningXPathFactory",
@@ -166,7 +166,7 @@ class ShadingFootprintTest {
             "SecureSchemaFactory$Wrapper",
             "SecureValidator",
             "SecureValidatorHandler",
-            "HardeningXMLReader");
+            "SecureXMLReader");
     // @formatter:on
 
     /**
