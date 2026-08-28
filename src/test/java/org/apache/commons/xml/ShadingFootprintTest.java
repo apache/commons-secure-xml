@@ -62,7 +62,8 @@ class ShadingFootprintTest {
             "HardeningDocumentBuilderFactory",
             "HardeningDocumentBuilderFactory$1",
             "HardeningDocumentBuilderFactory$Wrapper",
-            "HardeningException");
+            "HardeningException",
+            "MethodHandleFactory");
     // @formatter:on
 
     // @formatter:off
@@ -74,7 +75,8 @@ class ShadingFootprintTest {
             "HardeningSAXParserFactory$1",
             "HardeningSAXParserFactory$HardeningExpatXMLReader",
             "HardeningSAXParserFactory$Wrapper",
-            "HardeningXMLReader");
+            "HardeningXMLReader",
+            "MethodHandleFactory");
     // @formatter:on
 
     // @formatter:off
@@ -83,7 +85,8 @@ class ShadingFootprintTest {
             "HardeningException",
             "HardeningXMLInputFactory",
             "HardeningXMLInputFactory$1",
-            "HardeningXMLInputFactory$Wrapper");
+            "HardeningXMLInputFactory$Wrapper",
+            "MethodHandleFactory");
     // @formatter:on
 
     /**
@@ -128,6 +131,7 @@ class ShadingFootprintTest {
             "HardeningDocumentBuilderFactory",
             "HardeningDocumentBuilderFactory$1",
             "HardeningDocumentBuilderFactory$Wrapper",
+            "MethodHandleFactory",
             "HardeningException",
             "HardeningSAXParser",
             "HardeningSAXParserFactory",
@@ -168,7 +172,7 @@ class ShadingFootprintTest {
     /**
      * Class count of the {@link #rootClosure()} DOM entry point, the baseline the {@link #reportFootprint()} percentages are computed against.
      */
-    private static final int LIBRARY_CLASS_COUNT = 6;
+    private static final int LIBRARY_CLASS_COUNT = 7;
 
     /**
      * Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library.

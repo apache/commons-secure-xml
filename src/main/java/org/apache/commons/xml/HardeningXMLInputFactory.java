@@ -20,7 +20,6 @@ package org.apache.commons.xml;
 import java.io.InputStream;
 import java.io.Reader;
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.Objects;
 
@@ -59,17 +58,8 @@ public final class HardeningXMLInputFactory {
     /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultFactory()}. */
     private static final String JDK_XML_INPUT_FACTORY = "com.sun.xml.internal.stream.XMLInputFactoryImpl";
 
-    private static final MethodHandle NEW_DEFAULT_FACTORY = findNewDefaultFactory();
-
-    private static MethodHandle findNewDefaultFactory() {
-        try {
-            return MethodHandles.publicLookup().findStatic(XMLInputFactory.class, "newDefaultFactory",
-                    MethodType.methodType(XMLInputFactory.class));
-        } catch (final ReflectiveOperationException e) {
-            // The method is absent: the running platform predates it.
-            return null;
-        }
-    }
+    private static final MethodHandle NEW_DEFAULT_FACTORY = MethodHandleFactory.findStatic(XMLInputFactory.class, "newDefaultFactory",
+            MethodType.methodType(XMLInputFactory.class));
 
     /**
      * Capability-driven hardening for any {@link XMLInputFactory} (StAX) on the classpath.

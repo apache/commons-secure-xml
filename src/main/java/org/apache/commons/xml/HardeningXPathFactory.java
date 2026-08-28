@@ -18,7 +18,6 @@
 package org.apache.commons.xml;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.Objects;
 
@@ -51,17 +50,8 @@ public final class HardeningXPathFactory {
     /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
     private static final String JDK_XPATH_FACTORY = "com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl";
 
-    private static final MethodHandle NEW_DEFAULT_INSTANCE = findNewDefaultInstance();
-
-    private static MethodHandle findNewDefaultInstance() {
-        try {
-            return MethodHandles.publicLookup().findStatic(XPathFactory.class, "newDefaultInstance",
-                    MethodType.methodType(XPathFactory.class));
-        } catch (final ReflectiveOperationException e) {
-            // The method is absent: the running platform predates it.
-            return null;
-        }
-    }
+    private static final MethodHandle NEW_DEFAULT_INSTANCE = MethodHandleFactory.findStatic(XPathFactory.class, "newDefaultInstance",
+            MethodType.methodType(XPathFactory.class));
 
     /**
      * Capability-driven hardening for any {@link XPathFactory} on the classpath.
