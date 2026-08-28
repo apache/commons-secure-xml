@@ -36,11 +36,11 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * Checks that a hardened {@link DocumentBuilderFactory} performing JAXP 1.2 XSD validation does not fetch an external schema named by an
+ * Checks that a secure {@link DocumentBuilderFactory} performing JAXP 1.2 XSD validation does not fetch an external schema named by an
  * {@code xsi:noNamespaceSchemaLocation} hint in the instance document.
  *
  * <p>The instance is empty {@code <root/>}; the referenced schema declares a default {@code leak} attribute carrying {@link AttackTestSupport#LEAKED_MARKER}. A
- * parser that fetches the schema inlines that default into the DOM (the permissive control), while a hardened parser resolves the schema reference to empty
+ * parser that fetches the schema inlines that default into the DOM (the permissive control), while a secure parser resolves the schema reference to empty
  * content instead. Either the empty schema makes the validating parse fail, or the parse completes but the default is never inlined; either way the marker never
  * reaches the DOM.</p>
  *
