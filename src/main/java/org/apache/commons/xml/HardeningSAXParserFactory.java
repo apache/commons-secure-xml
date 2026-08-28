@@ -207,12 +207,8 @@ public final class HardeningSAXParserFactory {
     }
 
     /**
-     * Creates a new hardened, namespace-aware {@link XMLReader} for the TrAX, XPath and schema wrappers to parse sources with.
-     * <p>
-     * Mirrors the JDK's own internal parser choice: with {@code useDefaultParser} the platform's built-in parser is pinned, unless the
-     * {@code javax.xml.parsers.SAXParserFactory} system property explicitly requests another implementation, which overrides the pin like it does inside the
-     * JDK.
-     * </p>
+     * Creates a new hardened, namespace-aware {@link XMLReader} for the TrAX, XPath and schema wrappers to parse sources with, from the factory
+     * {@link #newNSInstance(boolean)} selects.
      *
      * @param useDefaultParser whether {@value #OVERRIDE_DEFAULT_PARSER} on the originating factory asks for the platform's built-in parser.
      * @return a hardened reader.
@@ -222,10 +218,7 @@ public final class HardeningSAXParserFactory {
      */
     static XMLReader newHardenedReader(final boolean useDefaultParser) throws TransformerConfigurationException {
         try {
-            final SAXParserFactory factory = useDefaultParser && System.getProperty("javax.xml.parsers.SAXParserFactory") == null
-                    ? newDefaultNSInstance()
-                    : newNSInstance();
-            return factory.newSAXParser().getXMLReader();
+            return newNSInstance(useDefaultParser).newSAXParser().getXMLReader();
         } catch (final ParserConfigurationException | SAXException e) {
             throw new TransformerConfigurationException("Failed to obtain a hardened XMLReader for source parsing", e);
         }
@@ -267,6 +260,24 @@ public final class HardeningSAXParserFactory {
      */
     public static SAXParserFactory newNSInstance() {
         return makeNSAware(newInstance());
+    }
+
+    /**
+     * Returns the hardened, namespace-aware factory the Source-rewriting wrappers parse with.
+     * <p>
+     * With {@code useDefaultParser} the factory is the JDK's "default parser" factory, determined the way the JDK itself determines it: the built-in parser,
+     * unless the {@code javax.xml.parsers.SAXParserFactory} system property is set — that property is the JDK's own mechanism for reconfiguring the default
+     * parser, so it is honored through the standard lookup rather than bypassed.
+     * </p>
+     *
+     * @param useDefaultParser whether {@value #OVERRIDE_DEFAULT_PARSER} on the originating factory asks for the JDK's default parser.
+     * @return A hardened, namespace-aware factory.
+     * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
+     *                                   implementation is not available or cannot be instantiated.
+     */
+    static SAXParserFactory newNSInstance(final boolean useDefaultParser) {
+        return useDefaultParser && System.getProperty("javax.xml.parsers.SAXParserFactory") == null ? newDefaultNSInstance() : newNSInstance();
     }
 
     /**
