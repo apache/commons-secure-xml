@@ -58,7 +58,7 @@ public final class SecureXMLInputFactory {
     /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultFactory()}. */
     private static final String JDK_XML_INPUT_FACTORY = "com.sun.xml.internal.stream.XMLInputFactoryImpl";
 
-    private static final MethodHandle NEW_DEFAULT_FACTORY = MethodHandleFactory.findStatic(XMLInputFactory.class, "newDefaultFactory",
+    private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(XMLInputFactory.class, "newDefaultFactory",
             MethodType.methodType(XMLInputFactory.class));
 
     /**
@@ -89,10 +89,10 @@ public final class SecureXMLInputFactory {
      *                                   (for example Android).
      */
     public static XMLInputFactory newDefaultFactory() {
-        if (NEW_DEFAULT_FACTORY != null) {
+        if (MH_newDefaultInstance != null) {
             final XMLInputFactory factory;
             try {
-                factory = (XMLInputFactory) NEW_DEFAULT_FACTORY.invokeExact();
+                factory = (XMLInputFactory) MH_newDefaultInstance.invokeExact();
             } catch (final FactoryConfigurationError e) {
                 throw e;
             } catch (final Throwable e) {
