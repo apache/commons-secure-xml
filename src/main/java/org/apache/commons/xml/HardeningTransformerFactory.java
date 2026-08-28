@@ -244,8 +244,7 @@ public final class HardeningTransformerFactory {
                 final InputSource inputSource = SAXSource.sourceToInputSource(source);
                 if (inputSource != null) {
                     try {
-                        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.harden(DocumentBuilderFactory.newInstance());
-                        factory.setNamespaceAware(true);
+                        final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newNSInstance();
                         final Document document = factory.newDocumentBuilder().parse(inputSource);
                         return new DOMSource(document, inputSource.getSystemId());
                     } catch (final ParserConfigurationException | SAXException | IOException e) {

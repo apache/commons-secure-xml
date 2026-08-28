@@ -66,13 +66,6 @@ public final class HardeningSAXParserFactory {
 
     private static final MethodHandle NEW_DEFAULT_INSTANCE = findStatic("newDefaultInstance", MethodType.methodType(SAXParserFactory.class));
 
-    private static final MethodHandle NEW_DEFAULT_NS_INSTANCE = findStatic("newDefaultNSInstance", MethodType.methodType(SAXParserFactory.class));
-
-    private static final MethodHandle NEW_NS_INSTANCE = findStatic("newNSInstance", MethodType.methodType(SAXParserFactory.class));
-
-    private static final MethodHandle NEW_NS_INSTANCE_BY_CLASS_NAME = findStatic("newNSInstance",
-            MethodType.methodType(SAXParserFactory.class, String.class, ClassLoader.class));
-
     private static MethodHandle findStatic(final String name, final MethodType type) {
         try {
             return MethodHandles.publicLookup().findStatic(SAXParserFactory.class, name, type);
@@ -162,6 +155,17 @@ public final class HardeningSAXParserFactory {
     }
 
     /**
+     * Enables namespace awareness on the given factory; the {@code NSInstance} counterpart of each factory method routes its result through here.
+     *
+     * @param factory the factory to configure; never {@code null}.
+     * @return The given factory, namespace-aware.
+     */
+    private static SAXParserFactory makeNSAware(final SAXParserFactory factory) {
+        factory.setNamespaceAware(true);
+        return factory;
+    }
+
+    /**
      * Returns a new, hardened {@link SAXParserFactory} of the system-default implementation.
      * <p>
      * Obtained as by {@code SAXParserFactory.newDefaultInstance()} where the platform provides it (Java 9 or later), and by
@@ -192,11 +196,8 @@ public final class HardeningSAXParserFactory {
     }
 
     /**
-     * Returns a new, hardened, namespace-aware {@link SAXParserFactory} of the system-default implementation.
-     * <p>
-     * Obtained as by {@code SAXParserFactory.newDefaultNSInstance()} where the platform provides it (Java 13 or later), and by enabling namespace awareness on
-     * {@link #newDefaultInstance()} otherwise, the behavior the JAXP method is specified to have.
-     * </p>
+     * Returns a new, hardened, namespace-aware {@link SAXParserFactory} of the system-default implementation, enabling namespace awareness on
+     * {@link #newDefaultInstance()}, the behavior {@code SAXParserFactory.newDefaultNSInstance()} (Java 13 or later) is specified to have.
      *
      * @return A hardened, namespace-aware factory.
      * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
@@ -204,21 +205,7 @@ public final class HardeningSAXParserFactory {
      *                                   (for example Android).
      */
     public static SAXParserFactory newDefaultNSInstance() {
-        if (NEW_DEFAULT_NS_INSTANCE != null) {
-            final SAXParserFactory factory;
-            try {
-                factory = (SAXParserFactory) NEW_DEFAULT_NS_INSTANCE.invokeExact();
-            } catch (final FactoryConfigurationError e) {
-                throw e;
-            } catch (final Throwable e) {
-                // Unreachable: the looked-up method declares no other exceptions.
-                throw new IllegalStateException(e);
-            }
-            return harden(factory);
-        }
-        final SAXParserFactory factory = newDefaultInstance();
-        factory.setNamespaceAware(true);
-        return factory;
+        return makeNSAware(newDefaultInstance());
     }
 
     /**
@@ -231,9 +218,7 @@ public final class HardeningSAXParserFactory {
      */
     static XMLReader newHardenedReader() throws TransformerConfigurationException {
         try {
-            final SAXParserFactory factory = harden(SAXParserFactory.newInstance());
-            factory.setNamespaceAware(true);
-            return factory.newSAXParser().getXMLReader();
+            return newNSInstance().newSAXParser().getXMLReader();
         } catch (final ParserConfigurationException | SAXException e) {
             throw new TransformerConfigurationException("Failed to obtain a hardened XMLReader for source parsing", e);
         }
@@ -265,11 +250,8 @@ public final class HardeningSAXParserFactory {
     }
 
     /**
-     * Returns a new, hardened, namespace-aware {@link SAXParserFactory}.
-     * <p>
-     * Obtained as by {@code SAXParserFactory.newNSInstance()} where the platform provides it (Java 13 or later), and by enabling namespace awareness on
-     * {@link #newInstance()} otherwise, the behavior the JAXP method is specified to have.
-     * </p>
+     * Returns a new, hardened, namespace-aware {@link SAXParserFactory}, enabling namespace awareness on {@link #newInstance()}, the behavior
+     * {@code SAXParserFactory.newNSInstance()} (Java 13 or later) is specified to have.
      *
      * @return A hardened, namespace-aware factory.
      * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
@@ -277,29 +259,12 @@ public final class HardeningSAXParserFactory {
      *                                   error} or if the implementation is not available or cannot be instantiated.
      */
     public static SAXParserFactory newNSInstance() {
-        if (NEW_NS_INSTANCE != null) {
-            final SAXParserFactory factory;
-            try {
-                factory = (SAXParserFactory) NEW_NS_INSTANCE.invokeExact();
-            } catch (final FactoryConfigurationError e) {
-                throw e;
-            } catch (final Throwable e) {
-                // Unreachable: the looked-up method declares no other exceptions.
-                throw new IllegalStateException(e);
-            }
-            return harden(factory);
-        }
-        final SAXParserFactory factory = newInstance();
-        factory.setNamespaceAware(true);
-        return factory;
+        return makeNSAware(newInstance());
     }
 
     /**
-     * Returns a new, hardened, namespace-aware {@link SAXParserFactory} of the given implementation class.
-     * <p>
-     * Obtained as by {@code SAXParserFactory.newNSInstance(String, ClassLoader)} where the platform provides it (Java 13 or later), and by enabling namespace
-     * awareness on {@link #newInstance(String, ClassLoader)} otherwise, the behavior the JAXP method is specified to have.
-     * </p>
+     * Returns a new, hardened, namespace-aware {@link SAXParserFactory} of the given implementation class, enabling namespace awareness on
+     * {@link #newInstance(String, ClassLoader)}, the behavior {@code SAXParserFactory.newNSInstance(String, ClassLoader)} (Java 13 or later) is specified to have.
      *
      * @param factoryClassName The fully qualified class name of the {@link SAXParserFactory} implementation.
      * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
@@ -308,21 +273,7 @@ public final class HardeningSAXParserFactory {
      * @throws FactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
      */
     public static SAXParserFactory newNSInstance(final String factoryClassName, final ClassLoader classLoader) {
-        if (NEW_NS_INSTANCE_BY_CLASS_NAME != null) {
-            final SAXParserFactory factory;
-            try {
-                factory = (SAXParserFactory) NEW_NS_INSTANCE_BY_CLASS_NAME.invokeExact(factoryClassName, classLoader);
-            } catch (final FactoryConfigurationError e) {
-                throw e;
-            } catch (final Throwable e) {
-                // Unreachable: the looked-up method declares no other exceptions.
-                throw new IllegalStateException(e);
-            }
-            return harden(factory);
-        }
-        final SAXParserFactory factory = newInstance(factoryClassName, classLoader);
-        factory.setNamespaceAware(true);
-        return factory;
+        return makeNSAware(newInstance(factoryClassName, classLoader));
     }
 
     private static void setFeature(final SAXParserFactory factory, final String feature, final boolean value) {

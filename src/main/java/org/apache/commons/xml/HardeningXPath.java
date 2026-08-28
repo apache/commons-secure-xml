@@ -66,8 +66,7 @@ final class HardeningXPath implements XPath {
     static Document parse(final InputSource source) throws XPathExpressionException {
         Objects.requireNonNull(source, "source");
         try {
-            final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.harden(DocumentBuilderFactory.newInstance());
-            factory.setNamespaceAware(true);
+            final DocumentBuilderFactory factory = HardeningDocumentBuilderFactory.newNSInstance();
             return factory.newDocumentBuilder().parse(source);
         } catch (final ParserConfigurationException | SAXException | IOException e) {
             throw new XPathExpressionException(e);
