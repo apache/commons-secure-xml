@@ -41,13 +41,13 @@ a finding that falls under [What is out of scope](#what-is-out-of-scope) will be
 ### Scope and Intended Use
 
 This library is a helper for **safely creating JAXP factories**. Each `XxxFactory.newYyy()` method returns a
-new, hardened factory whose parsers reject the common XML attacks (external entity / DTD resolution, XXE, SSRF through
+new, secured factory whose parsers reject the common XML attacks (external entity / DTD resolution, XXE, SSRF through
 external references, and entity-expansion denial of service such as Billion Laughs). The exact guarantee each factory
 makes is documented in the Javadoc:
 
 https://commons.apache.org/index/commons-xml/apidocs/org/apache/commons/xml/package-summary.html
 
-The hardening applies to the factory and to the parsers, readers, transformers, validators, schemas and XPath objects it produces.
+Thesecuring applies to the factory and to the parsers, readers, transformers, validators, schemas and XPath objects it produces.
 It governs what those objects read;
 what a transform writes is the stylesheet author's capability
 (see **Transform output destinations** under [What is out of scope](#what-is-out-of-scope)).
@@ -55,7 +55,7 @@ what a transform writes is the stylesheet author's capability
 ### Adversary Model and Trust Boundary
 
 The adversary is whoever controls the XML an application parses, together with any external system an XML
-document tries to reach through an entity, DTD, schema, stylesheet, or XInclude reference. The hardening
+document tries to reach through an entity, DTD, schema, stylesheet, or XInclude reference. Thesecuring
 exists to stop that untrusted document from reading local resources, reaching the network, or exhausting
 memory or CPU.
 
@@ -71,17 +71,17 @@ an `XMLReader` wrapped in a `SAXSource`,
 a StAX reader inside a `StAXSource`,
 or a document parsed elsewhere and handed over as a `DOMSource`
 are **trusted** configuration, not untrusted input.
-The library hardens what it creates;
+The library secures what it creates;
 it does not re-harden what you built,
 because your reader's settings are indistinguishable from configuration you chose deliberately.
 
 ### What is in Scope
 
-- The hardening recipes applied by `org.apache.commons.xml`.
+- Thesecuring recipes applied by `org.apache.commons.xml`.
   Every implementation of JAXP 1.4 or later is in scope,
   as long as it respects the contract of the features, attributes, and properties the recipes use.
   An implementation that cannot accept a required setting makes the factory method throw
-  instead of returning an unhardened factory.
+  instead of returning an unsecured factory.
 
   The recipes for Android's Expat/KXmlParser are applied as best-effort and carry no guarantee
   (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)).
@@ -96,7 +96,7 @@ spawn processes,
 install signal handlers,
 or read environment variables of its own:
 each `org.apache.commons.xml` factory method only configures and returns a JAXP factory.
-Which hardening recipe applies depends on the JAXP implementation present on the classpath.
+Whichsecuring recipe applies depends on the JAXP implementation present on the classpath.
 
 **Supported runtimes**
 
@@ -108,7 +108,7 @@ Android, on every API level, carries no guarantee:
 no version of Android supports `FEATURE_SECURE_PROCESSING`
 (so states [Android's own documentation](https://developer.android.com/reference/javax/xml/parsers/DocumentBuilderFactory#setFeature%28java.lang.String,%20boolean%29)),
 the setting the guaranteed processing limits build on.
-The library still hardens Android's parsers as best-effort,
+The library still secures Android's parsers as best-effort,
 tested as complete starting with API level 33
 (see [Supported runtimes](index.html) on the main page),
 but a report demonstrated only on Android is [out of scope](#what-is-out-of-scope) on any API level.
@@ -118,7 +118,7 @@ but a report demonstrated only on Android is [out of scope](#what-is-out-of-scop
 The library reads a single system property of its own,
 `org.apache.commons.xml.throwOnUnresolved`:
 when set to `true`,
-every hardened factory rejects an unresolved external reference with an exception
+every secured factory rejects an unresolved external reference with an exception
 instead of resolving it to empty content.
 Either way the resource is not fetched,
 so the property selects an error-reporting style,
@@ -146,7 +146,7 @@ such as Billion Laughs.
 The library MAY rely on the following features, attributes and properties staying as configured. They are reserved because
 they govern external resource access, DTD, entity or schema handling, the installation of a resolver, or processing
 limits; loosening any of them, on the returned factory or on a parser, reader, transformer, validator or schema it
-produces, breaks the hardening for that instance.
+produces, breaks thesecuring for that instance.
 
 - `http://apache.org/xml/features/disallow-doctype-decl`
 - `http://apache.org/xml/features/nonvalidating/load-external-dtd`
@@ -167,12 +167,12 @@ This list is not exhaustive:
 any other feature, attribute, property, or system property that
 grants access to an external resource,
 relaxes DTD or entity processing,
-installs a resolver the hardening layer does not wrap
+installs a resolver thesecuring layer does not wrap
 (like the Xerces-specific `http://apache.org/xml/properties/internal/entity-resolver`, listed above),
 or raises a processing limit
 is reserved on the same terms.
 
-Installing a resolver through the typed `set*Resolver` methods, the `DefaultHandler` passed to `SAXParser.parse`, or the resolver properties listed under **Settings you may modify** does not loosen the hardening:
+Installing a resolver through the typed `set*Resolver` methods, the `DefaultHandler` passed to `SAXParser.parse`, or the resolver properties listed under **Settings you may modify** does not loosen thesecuring:
 those paths are wrapped by a non-removable floor.
 
 **Settings You May Modify**
@@ -180,7 +180,7 @@ those paths are wrapped by a non-removable floor.
 The following are security-relevant but safe to change on a returned factory: the protection they appear to govern is
 enforced by the reserved settings above, which a caller cannot lift.
 
-- **Resolvers.** You may install your own resolver: the hardening floor wraps it instead of being replaced, so it stays
+- **Resolvers.** You may install your own resolver: thesecuring floor wraps it instead of being replaced, so it stays
   in force. This covers the typed setters and the resolver properties:
     - `setEntityResolver(...)` (DOM and SAX), including the `DefaultHandler` passed to `SAXParser.parse(..., DefaultHandler)`,
     - `setResourceResolver(...)` (schema compilation and validation),
@@ -196,7 +196,7 @@ enforced by the reserved settings above, which a caller cannot lift.
   it does not fall through to a fetch.
 
   An opted-in resource stays on the floor:
-  a `Source` returned by a `URIResolver` is re-parsed through a hardened reader
+  a `Source` returned by a `URIResolver` is re-parsed through a secured reader
   (a `DOMSource`, or a `SAXSource` carrying your own reader, is used as returned).
 
 - **Validation.** You may turn on DTD or XSD validation, using these methods and features/properties:
@@ -222,12 +222,12 @@ enforced by the reserved settings above, which a caller cannot lift.
   On the stock JDK TrAX, XPath, and schema implementations
   you may set [`jdk.xml.overrideDefaultParser`](https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/module-summary.html#jdk.xml.overrideDefaultParser)
   to switch their internal parses from the JDK parsers to a `ServiceLoader`-resolved parser.
-  Whichever parser is selected, it is hardened,
+  Whichever parser is selected, it is secured,
   so the setting carries no security weight.
 
 ### What is Out of Scope
 
-A returned factory is hardened as delivered; reconfiguring it is a decision to take over hardening for that instance,
+A returned factory is secured as delivered; reconfiguring it is a decision to take oversecuring for that instance,
 and reports against a factory reconfigured in any of the ways below are out of scope.
 
 - **Modifying a reserved setting.** Loosening any feature, attribute or property reserved under
@@ -238,25 +238,25 @@ and reports against a factory reconfigured in any of the ways below are out of s
   enforce.
 - **Caller-supplied top-level URIs.** A URI passed directly to a parse call (`DocumentBuilder.parse(String)`,
   `StreamSource(systemId)`, a `SAXSource` built from a system id) is fetched as-is by the JAXP implementation without
-  consulting the hardening layer. Restrict it yourself if the URI is untrusted.
+  consulting thesecuring layer. Restrict it yourself if the URI is untrusted.
 - **Caller-supplied parser instances.**
   A parser built outside `org.apache.commons.xml` and handed to a produced instance is used as configured:
   a `SAXSource` carrying its own `XMLReader`,
   a `StAXSource` carrying a stream or event reader,
   or a `DOMSource` holding a document parsed elsewhere.
   Its settings are yours, including permissive ones.
-  To parse with your own reader under the hardening guarantees,
+  To parse with your own reader under thesecuring guarantees,
   obtain it from `HardeningSAXParserFactory.newInstance()`
   before wrapping it in a `SAXSource`.
-- The behavior of a JAXP implementation that does not respect the contract of the settings a hardening recipe requires
-  (the factory method throws rather than returning an unhardened factory),
+- The behavior of a JAXP implementation that does not respect the contract of the settings asecuring recipe requires
+  (the factory method throws rather than returning an unsecured factory),
   and any defect in the underlying JAXP implementation itself.
 - **Android, on any API level.**
   No version of Android supports `FEATURE_SECURE_PROCESSING`,
-  so the hardening there is best-effort and no guarantee is defined
+  so thesecuring there is best-effort and no guarantee is defined
   (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)).
 - **Transform output destinations.**
-  The hardening governs what a parse or transform reads;
+  Thesecuring governs what a parse or transform reads;
   it does not confine what a transform writes.
   A stylesheet's output-producing instructions,
   `xsl:result-document` in particular,
@@ -268,7 +268,7 @@ and reports against a factory reconfigured in any of the ways below are out of s
 
 ### Downstream Responsibility
 
-Use the factory as returned. If you reconfigure it, you take over hardening for that instance and are responsible for
+Use the factory as returned. If you reconfigure it, you take oversecuring for that instance and are responsible for
 re-establishing any protection you remove.
 
 ### Known Non-Findings
@@ -279,13 +279,13 @@ are **not** vulnerabilities under this model:
 - A claim that a factory or instance produced by `org.apache.commons.xml` is unsafe, without showing that a reserved
   setting was loosened, a resolver was installed, or an untrusted top-level URI was passed (see
   [Assumptions about the environment](#assumptions-about-the-environment) and
-  [What is out of scope](#what-is-out-of-scope)). As delivered, the instance is hardened; the bare presence
+  [What is out of scope](#what-is-out-of-scope)). As delivered, the instance is secured; the bare presence
   of a `SAXParser`, `DocumentBuilder`, `XMLReader`, `Transformer`, `Validator` or `Schema` is not a finding.
 - XXE, external-entity, SSRF-through-external-reference, or entity-expansion (Billion Laughs) reports against
-  a factory used as delivered. Blocking these is exactly what the hardening does. A working proof against an
+  a factory used as delivered. Blocking these is exactly what thesecuring does. A working proof against an
   unmodified instance is a `VALID` finding (see below); a scanner that pattern-matches on parser type is not.
 - A report demonstrated only on Android,
-  where the hardening is best-effort and no guarantee is defined
+  where thesecuring is best-effort and no guarantee is defined
   (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)).
 - Reports against an instance after the caller installed a resolver (including the `DefaultHandler` passed to
   `SAXParser.parse(..., DefaultHandler)`) or loosened a reserved setting.
@@ -301,8 +301,8 @@ are **not** vulnerabilities under this model:
 - A path-traversal or file-write report through `xsl:result-document` or another output-producing
   instruction of a stylesheet
   (see **Transform output destinations** under [What is out of scope](#what-is-out-of-scope)).
-- Reports in a JAXP implementation that does not respect the contract of the settings a hardening recipe
-  requires: `org.apache.commons.xml` factory method throws rather than returning an unhardened factory, so there is no instance to attack.
+- Reports in a JAXP implementation that does not respect the contract of the settings asecuring recipe
+  requires: `org.apache.commons.xml` factory method throws rather than returning an unsecured factory, so there is no instance to attack.
 
 ### Triage Dispositions
 
@@ -310,10 +310,10 @@ A report judged against this model receives exactly one of:
 
 | Disposition | Meaning |
 | --- | --- |
-| `VALID` | A factory or instance used as delivered fails to provide a guarantee its Javadoc states (for example, a hardened parser still resolves an external entity, or a documented processing limit is not applied). |
+| `VALID` | A factory or instance used as delivered fails to provide a guarantee its Javadoc states (for example, a secured parser still resolves an external entity, or a documented processing limit is not applied). |
 | `OUT-OF-SCOPE: reconfigured` | A reserved setting was loosened, or a resolver was installed, on the factory or a produced instance before the reported behavior (see [What is out of scope](#what-is-out-of-scope)). |
 | `OUT-OF-SCOPE: caller input` | The behavior follows from a top-level URI, a parser instance the caller constructed outside the library, or other input the caller passed directly to a parse call. |
-| `OUT-OF-SCOPE: foreign implementation` | The behavior is in a JAXP implementation that does not respect the contract of the settings a hardening recipe requires, or is a defect in the underlying JAXP implementation itself. |
+| `OUT-OF-SCOPE: foreign implementation` | The behavior is in a JAXP implementation that does not respect the contract of the settings asecuring recipe requires, or is a defect in the underlying JAXP implementation itself. |
 | `OUT-OF-SCOPE: unsupported runtime` | The behavior is demonstrated only on a runtime the guarantees are not defined on, such as Android on any API level (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)). |
 | `MODEL-GAP` | The report fits none of the above. The model is then incomplete: revise it rather than making an ad-hoc call. |
 
