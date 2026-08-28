@@ -48,7 +48,7 @@ import org.xml.sax.XMLReader;
  *
  * <p>Each case is exercised in both {@code parse="xml"} and {@code parse="text"} modes, and for both DOM and SAX
  * paths. XInclude resolution requires namespace-aware processing; the baseline tests set it explicitly, and the
- * hardened factory tests rely on the underlying JAXP implementation being namespace-aware enough to recognize elements
+ * secure factory tests rely on the underlying JAXP implementation being namespace-aware enough to recognize elements
  * in the {@code http://www.w3.org/2001/XInclude} namespace.</p>
  */
 class XIncludeTest {
@@ -323,7 +323,7 @@ class XIncludeTest {
 
     //endregion
 
-    //region hardenReader: reader with XInclude enabled before hardening is blocked (the internal recipe behind the hardened factory and SaxonProvider)
+    //region hardenReader: reader with XInclude enabled before hardening is blocked (the internal recipe behind the secure factory and SaxonProvider)
 
     @Test
     @Tag("sax")
