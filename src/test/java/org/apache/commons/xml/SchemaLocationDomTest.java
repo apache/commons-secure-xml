@@ -104,7 +104,7 @@ class SchemaLocationDomTest {
         assumeTrue(supportsSchemaLanguage(), "parser does not support JAXP 1.2 schema-language XSD validation");
         final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
-        // Positive control: without hardening the external schema is fetched and its default attribute is inlined into the DOM.
+        // Positive control: without securing the external schema is fetched and its default attribute is inlined into the DOM.
         final Document document = parse(enableXsdValidation(factory));
         assertEquals(LEAKED_MARKER, document.getDocumentElement().getAttribute("leak"),
                 "Permissive parse should have fetched the external schema and inlined its default attribute.");
