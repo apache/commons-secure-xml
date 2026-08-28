@@ -31,7 +31,7 @@ import javax.xml.validation.Schema;
 import org.xml.sax.EntityResolver;
 
 /**
- * Creates new, hardened {@link DocumentBuilderFactory} instances.
+ * Creates new, secure {@link DocumentBuilderFactory} instances.
  * <p>
  * Beyond the three universal guarantees on {@link org.apache.commons.xml}, XInclude resolution is denied by default. When
  * {@link DocumentBuilderFactory#setXIncludeAware(boolean) setXIncludeAware(true)} is called on the returned factory, the parser will process
@@ -41,7 +41,7 @@ import org.xml.sax.EntityResolver;
  * </p>
  * <p>
  * Not a {@link DocumentBuilderFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-hardened factory through this class
- * by calling an inherited method such as {@code newDefaultInstance()}. The hardened factories are instances of a nested, non-public wrapper class.
+ * by calling an inherited method such as {@code newDefaultInstance()}. The secure factories are instances of a nested, non-public wrapper class.
  * </p>
  *
  * @see org.apache.commons.xml
@@ -74,7 +74,7 @@ public final class SecureDocumentBuilderFactory {
      * </ul>
      *
      * @param factory The factory to harden.
-     * @return A new hardened factory or the original factory, as-is, if it is a known Android factory.
+     * @return A new secure factory or the original factory, as-is, if it is a known Android factory.
      * @throws SecureException Thrown if a (non-Andoid) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
      */
     static DocumentBuilderFactory secure(final DocumentBuilderFactory factory) {
@@ -102,13 +102,13 @@ public final class SecureDocumentBuilderFactory {
     }
 
     /**
-     * Returns a new, hardened {@link DocumentBuilderFactory} of the system-default implementation.
+     * Returns a new, secure {@link DocumentBuilderFactory} of the system-default implementation.
      * <p>
      * Obtained as by {@code DocumentBuilderFactory.newDefaultInstance()} where the platform provides it (Java 9 or later), and
      * by instantiating the JDK's built-in implementation directly on Java 8.
      * </p>
      *
-     * @return A hardened factory.
+     * @return A secure factory.
      * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation
      *                                   (for example Android).
@@ -145,9 +145,9 @@ public final class SecureDocumentBuilderFactory {
     }
 
     /**
-     * Returns a new, hardened {@link DocumentBuilderFactory}.
+     * Returns a new, secure {@link DocumentBuilderFactory}.
      *
-     * @return A hardened factory.
+     * @return A secure factory.
      * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
      * @throws IllegalStateException     Thrown if a (non-Andoid) factory cannot support the secure processing feature
      *                                   {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
@@ -159,11 +159,11 @@ public final class SecureDocumentBuilderFactory {
     }
 
     /**
-     * Returns a new, hardened {@link DocumentBuilderFactory} of the given implementation class.
+     * Returns a new, secure {@link DocumentBuilderFactory} of the given implementation class.
      *
      * @param factoryClassName The fully qualified class name of the {@link DocumentBuilderFactory} implementation.
      * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
-     * @return A hardened factory.
+     * @return A secure factory.
      * @throws IllegalStateException     Thrown if a required hardening setting cannot be applied to the underlying implementation.
      * @throws IllegalStateException     Thrown if a (non-Andoid) factory cannot support the secure processing feature
      *                                   {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
