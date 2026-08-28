@@ -35,7 +35,7 @@ import org.junit.jupiter.api.Test;
 /**
  * {@link TransformerHandler} products of the secure factory sit on the resolver floor: a stylesheet's runtime {@code document()} resolves to empty content
  * whether the transform runs through the handler's SAX events or through the {@link TransformerHandler#getTransformer()} bypass. The unconfigured control
- * proves the vector leaks without the hardening. The {@code Templates} overload doubles as a regression test for handing the factory a wrapped
+ * proves the vector leaks without the securing. The {@code Templates} overload doubles as a regression test for handing the factory a wrapped
  * {@code Templates} (implementations cast its {@code newTransformer()} to their own type).
  */
 @Tag("trax")
