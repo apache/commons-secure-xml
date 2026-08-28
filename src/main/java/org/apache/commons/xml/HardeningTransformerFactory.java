@@ -19,7 +19,6 @@ package org.apache.commons.xml;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -80,17 +79,8 @@ public final class HardeningTransformerFactory {
     /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
     private static final String JDK_TRANSFORMER_FACTORY = "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl";
 
-    private static final MethodHandle NEW_DEFAULT_INSTANCE = findNewDefaultInstance();
-
-    private static MethodHandle findNewDefaultInstance() {
-        try {
-            return MethodHandles.publicLookup().findStatic(TransformerFactory.class, "newDefaultInstance",
-                    MethodType.methodType(TransformerFactory.class));
-        } catch (final ReflectiveOperationException e) {
-            // The method is absent: the running platform predates it.
-            return null;
-        }
-    }
+    private static final MethodHandle NEW_DEFAULT_INSTANCE = MethodHandleFactory.findStatic(TransformerFactory.class, "newDefaultInstance",
+            MethodType.methodType(TransformerFactory.class));
 
     /**
      * Capability-driven hardening for any {@link TransformerFactory} on the classpath.

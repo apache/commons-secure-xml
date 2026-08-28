@@ -18,7 +18,6 @@
 package org.apache.commons.xml;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.Objects;
 
@@ -62,17 +61,8 @@ public final class HardeningSchemaFactory {
     /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
     private static final String JDK_SCHEMA_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory";
 
-    private static final MethodHandle NEW_DEFAULT_INSTANCE = findNewDefaultInstance();
-
-    private static MethodHandle findNewDefaultInstance() {
-        try {
-            return MethodHandles.publicLookup().findStatic(SchemaFactory.class, "newDefaultInstance",
-                    MethodType.methodType(SchemaFactory.class));
-        } catch (final ReflectiveOperationException e) {
-            // The method is absent: the running platform predates it.
-            return null;
-        }
-    }
+    private static final MethodHandle NEW_DEFAULT_INSTANCE = MethodHandleFactory.findStatic(SchemaFactory.class, "newDefaultInstance",
+            MethodType.methodType(SchemaFactory.class));
 
     /**
      * Hardening for any {@link SchemaFactory} on the classpath.

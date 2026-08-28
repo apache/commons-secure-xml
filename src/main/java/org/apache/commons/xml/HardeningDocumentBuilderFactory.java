@@ -18,7 +18,6 @@
 package org.apache.commons.xml;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.Objects;
 
@@ -54,16 +53,8 @@ public final class HardeningDocumentBuilderFactory {
     /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
     private static final String JDK_DOCUMENT_BUILDER_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl";
 
-    private static final MethodHandle NEW_DEFAULT_INSTANCE = findStatic("newDefaultInstance", MethodType.methodType(DocumentBuilderFactory.class));
-
-    private static MethodHandle findStatic(final String name, final MethodType type) {
-        try {
-            return MethodHandles.publicLookup().findStatic(DocumentBuilderFactory.class, name, type);
-        } catch (final ReflectiveOperationException e) {
-            // The method is absent: the running platform predates it.
-            return null;
-        }
-    }
+    private static final MethodHandle NEW_DEFAULT_INSTANCE = MethodHandleFactory.findStatic(DocumentBuilderFactory.class, "newDefaultInstance",
+            MethodType.methodType(DocumentBuilderFactory.class));
 
     /**
      * Capability-driven hardening for any {@link DocumentBuilderFactory} on the classpath.
