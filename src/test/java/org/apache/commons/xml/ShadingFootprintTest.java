@@ -114,7 +114,7 @@ class ShadingFootprintTest {
             "SecureTransformerFactory",
             "SecureTransformerFactory$1",
             "SecureTransformerFactory$Wrapper",
-            "HardeningTransformerHandler",
+            "SecureTransformerHandler",
             "HardeningXMLFilter",
             "HardeningXMLReader",
             "SaxonProvider",

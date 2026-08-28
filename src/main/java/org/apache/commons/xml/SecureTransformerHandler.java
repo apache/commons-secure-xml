@@ -39,7 +39,7 @@ import org.xml.sax.SAXException;
  * construction installs the floor on the live instance, so runtime {@code document()} during the handler's transform is covered, and so is a caller who pulls
  * the transformer out through {@code getTransformer()}.</p>
  */
-final class HardeningTransformerHandler implements TransformerHandler {
+final class SecureTransformerHandler implements TransformerHandler {
 
     private final TransformerHandler delegate;
 
@@ -57,7 +57,7 @@ final class HardeningTransformerHandler implements TransformerHandler {
      * @param overrideDefaultParser whether the live transformer's source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
-    HardeningTransformerHandler(final TransformerHandler delegate, final URIResolver uriResolver, final Supplier<Source> emptySource,
+    SecureTransformerHandler(final TransformerHandler delegate, final URIResolver uriResolver, final Supplier<Source> emptySource,
             final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
         this.transformer = new SecureTransformer(delegate.getTransformer(), uriResolver, emptySource, overrideDefaultParser);
