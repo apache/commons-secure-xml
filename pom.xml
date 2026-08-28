@@ -29,7 +29,7 @@ limitations under the License.
   <url>https://commons.apache.org/proper/commons-xml/</url>
   <inceptionYear>2026</inceptionYear>
   <description>Apache Commons Secure XML provides secure-by-default JAXP factory creation, abstracting over
-    implementation-specific XXE hardening differences between the stock JDK and external JAXP implementations
+    implementation-specific XXE securing differences between the stock JDK and external JAXP implementations
     (Android, Apache Xalan, Apache Xerces, Woodstox, Saxon-HE).</description>
   <scm>
     <connection>scm:git:https://gitbox.apache.org/repos/asf/commons-xml.git</connection>
@@ -54,7 +54,7 @@ limitations under the License.
     <!-- OSGi bundle metadata: override commons-parent's org.apache.commons.* defaults. -->
     <commons.osgi.symbolicName>org.apache.commons.xml</commons.osgi.symbolicName>
     <commons.osgi.export>org.apache.commons.xml.*;version=${project.version};-noimport:=true</commons.osgi.export>
-    <!-- The negation drops the JDK-internal package bnd infers from the reflective Java 8 fallback in HardeningXMLInputFactory.newDefaultFactory(). -->
+    <!-- The negation drops the JDK-internal package bnd infers from the reflective Java 8 fallback in SecureXMLInputFactory.newDefaultFactory(). -->
     <commons.osgi.import>
       !com.sun.xml.internal.stream,
       net.sf.saxon.*;resolution:=optional,
@@ -72,7 +72,7 @@ limitations under the License.
     <commons.woodstox.version>7.1.1</commons.woodstox.version>
     <commons.xalan.version>2.7.3</commons.xalan.version>
     <commons.xerces.version>2.12.2</commons.xerces.version>
-    <!-- Test-only: computes each hardener's shade closure, mirroring maven-shade minimizeJar, for ShadingFootprintTest. -->
+    <!-- Test-only: computes each secure class' shade closure, mirroring maven-shade minimizeJar, for ShadingFootprintTest. -->
     <commons.jdependency.version>2.16</commons.jdependency.version>
   </properties>
   <dependencies>
@@ -92,7 +92,7 @@ limitations under the License.
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
-    <!-- Reads the compiled classes to compute each hardener's transitive class closure (the same computation maven-shade minimizeJar performs). -->
+    <!-- Reads the compiled classes to compute each secure class' transitive class closure (the same computation maven-shade minimizeJar performs). -->
     <dependency>
       <groupId>org.vafer</groupId>
       <artifactId>jdependency</artifactId>
@@ -163,7 +163,7 @@ limitations under the License.
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <!--
-          Make the underlying JAXP factories as permissive as the JDK allows. Hardened factories produced by
+          Make the underlying JAXP factories as permissive as the JDK allows. Secure factories produced by
           org.apache.commons.xml should still block every attack the test suite throws at them; if a test passes only
           because the JDK's defaults intervened, we want it to fail here so the gap shows up.
 
@@ -333,7 +333,7 @@ limitations under the License.
               <reportsDirectory>${project.build.directory}/surefire-reports/jdk-xerces</reportsDirectory>
               <!-- The only cell pairing the JDK TrAX and XPath implementations with a third-party ServiceLoader parser: Xerces resolves the
                    SAXParserFactory/DocumentBuilderFactory lookups (and the SchemaFactory one, which is why the schema-group FODP tests pin the JDK
-                   implementation via newDefaultInstance), so jdk.xml.overrideDefaultParser genuinely decides which parser performs the hardened
+                   implementation via newDefaultInstance), so jdk.xml.overrideDefaultParser genuinely decides which parser performs the secure
                    source rewrites. -->
               <groups>trax,xpath,schema</groups>
               <additionalClasspathDependencies>
