@@ -127,7 +127,7 @@ final class SaxonProvider {
         try {
             return SaxonProviderConfigurer.configure(factory);
         } catch (final ClassCastException e) {
-            // A Saxon-package factory the configurer cannot lock down; refuse it rather than returning it unhardened.
+            // A Saxon-package factory the configurer cannot lock down; refuse it rather than returning it unsecured.
             throw new SecureException("Unsupported Saxon TransformerFactory " + factory.getClass().getName(), e);
         }
     }
@@ -136,7 +136,7 @@ final class SaxonProvider {
         try {
             return SaxonProviderConfigurer.configure(factory);
         } catch (final ClassCastException e) {
-            // A Saxon-package factory the configurer cannot lock down; refuse it rather than returning it unhardened.
+            // A Saxon-package factory the configurer cannot lock down; refuse it rather than returning it unsecured.
             throw new SecureException("Unsupported Saxon XPathFactory " + factory.getClass().getName(), e);
         }
     }
