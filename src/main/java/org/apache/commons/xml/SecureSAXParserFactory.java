@@ -110,7 +110,7 @@ public final class SecureSAXParserFactory {
     /**
      * Rewrites a {@link Source} so that any SAX parsing it triggers runs through a secure {@link XMLReader}.
      * <p>
-     * Only a {@link StreamSource} or a {@link SAXSource} without a reader is enriched with a hardened, namespace-aware reader; other source kinds are returned
+     * Only a {@link StreamSource} or a {@link SAXSource} without a reader is enriched with a secure, namespace-aware reader; other source kinds are returned
      * as-is. Used by the TrAX and schema wrappers to route every source they parse through the SAX secure path.
      * </p>
      *
@@ -197,10 +197,10 @@ public final class SecureSAXParserFactory {
     }
 
     /**
-     * Returns a new, hardened, namespace-aware {@link SAXParserFactory} of the system-default implementation, enabling namespace awareness on
+     * Returns a new, secure, namespace-aware {@link SAXParserFactory} of the system-default implementation, enabling namespace awareness on
      * {@link #newDefaultInstance()}, the behavior {@code SAXParserFactory.newDefaultNSInstance()} (Java 13 or later) is specified to have.
      *
-     * @return A hardened, namespace-aware factory.
+     * @return A secure, namespace-aware factory.
      * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation
      *                                   (for example Android).
@@ -210,7 +210,7 @@ public final class SecureSAXParserFactory {
     }
 
     /**
-     * Creates a new hardened, namespace-aware {@link XMLReader} for the TrAX, XPath and schema wrappers to parse sources with, from the factory
+     * Creates a new secure, namespace-aware {@link XMLReader} for the TrAX, XPath and schema wrappers to parse sources with, from the factory
      * {@link #newNSInstance(boolean)} selects.
      *
      * @param overrideDefaultParser whether {@value #OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
@@ -253,10 +253,10 @@ public final class SecureSAXParserFactory {
     }
 
     /**
-     * Returns a new, hardened, namespace-aware {@link SAXParserFactory}, enabling namespace awareness on {@link #newInstance()}, the behavior
+     * Returns a new, secure, namespace-aware {@link SAXParserFactory}, enabling namespace awareness on {@link #newInstance()}, the behavior
      * {@code SAXParserFactory.newNSInstance()} (Java 13 or later) is specified to have.
      *
-     * @return A hardened, namespace-aware factory.
+     * @return A secure, namespace-aware factory.
      * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown from {@link SAXParserFactory} in case of a {@link java.util.ServiceConfigurationError service configuration
      *                                   error} or if the implementation is not available or cannot be instantiated.
@@ -266,7 +266,7 @@ public final class SecureSAXParserFactory {
     }
 
     /**
-     * Returns the hardened, namespace-aware factory the Source-rewriting wrappers parse with.
+     * Returns the secure, namespace-aware factory the Source-rewriting wrappers parse with.
      * <p>
      * While {@code overrideDefaultParser} is {@code false} the factory is the JDK's "default parser" factory, determined the way the JDK itself determines it: the built-in parser,
      * unless the {@value #SAX_FACTORY_ID} system property is set — that property is the JDK's own mechanism for reconfiguring the default
@@ -274,7 +274,7 @@ public final class SecureSAXParserFactory {
      * </p>
      *
      * @param overrideDefaultParser whether {@value #OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
-     * @return A hardened, namespace-aware factory.
+     * @return A secure, namespace-aware factory.
      * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
      *                                   implementation is not available or cannot be instantiated.
@@ -284,12 +284,12 @@ public final class SecureSAXParserFactory {
     }
 
     /**
-     * Returns a new, hardened, namespace-aware {@link SAXParserFactory} of the given implementation class, enabling namespace awareness on
+     * Returns a new, secure, namespace-aware {@link SAXParserFactory} of the given implementation class, enabling namespace awareness on
      * {@link #newInstance(String, ClassLoader)}, the behavior {@code SAXParserFactory.newNSInstance(String, ClassLoader)} (Java 13 or later) is specified to have.
      *
      * @param factoryClassName The fully qualified class name of the {@link SAXParserFactory} implementation.
      * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
-     * @return A hardened, namespace-aware factory.
+     * @return A secure, namespace-aware factory.
      * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
      */
