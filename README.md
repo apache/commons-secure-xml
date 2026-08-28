@@ -50,7 +50,7 @@ Apache Commons Secure XML
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/apache/commons-xml/badge)](https://api.securityscorecards.dev/projects/github.com/apache/commons-xml)
 
 Apache Commons Secure XML provides secure-by-default JAXP factory creation, abstracting over
-    implementation-specific XXE hardening differences between the stock JDK and external JAXP implementations
+    implementation-specific XXE securing differences between the stock JDK and external JAXP implementations
     (Android, Apache Xalan, Apache Xerces, Woodstox, Saxon-HE).
 
 Documentation
