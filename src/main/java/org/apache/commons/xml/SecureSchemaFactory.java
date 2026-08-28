@@ -87,7 +87,7 @@ public final class SecureSchemaFactory {
      * </p>
      *
      * @return A secure factory.
-     * @throws IllegalStateException    Thrown if a required hardening setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException    Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws IllegalArgumentException Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation
      *                                 (for example Android).
      */
@@ -142,7 +142,7 @@ public final class SecureSchemaFactory {
     }
 
     /**
-     * Capability-driven hardening wrapper for any {@link SchemaFactory} on the classpath, the same recipe for every implementation. It is the entry point reached
+     * Capability-driven secure wrapper for any {@link SchemaFactory} on the classpath, the same recipe for every implementation. It is the entry point reached
      * by {@link SecureSchemaFactory#newInstance(String)}; there is no per-implementation branching, no {@code FEATURE_SECURE_PROCESSING} and no limit configuration on the
      * factory itself.
      *
@@ -162,7 +162,7 @@ public final class SecureSchemaFactory {
      * {@code ACCESS_EXTERNAL_*} properties are deliberately not set: the resolver floor already blocks the same fetches on every implementation, and the JDK 8
      * {@code SchemaFactory} has a bug whereby those properties keep blocking even when a caller's own resolver would grant the access. The floor is a non-removable
      * lower bound: a caller-set {@link LSResourceResolver} is routed through it (opting a specific lookup in by returning a non-{@code null} result) rather than
-     * replacing it, so hardening cannot be dropped by swapping the resolver.
+     * replacing it, so secure cannot be dropped by swapping the resolver.
      * </p>
      *
      * @see org.apache.commons.xml
