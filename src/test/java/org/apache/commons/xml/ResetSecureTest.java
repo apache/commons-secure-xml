@@ -40,7 +40,7 @@ import org.xml.sax.XMLReader;
  * Checks that the JAXP {@code reset()} lifecycle methods do not strip the hardening floors.
  *
  * <p>The JAXP reset contract returns an object to its just-created state, and the stock JDK / Xerces implementations take that literally: they re-install
- * their initial (null) resolvers, silently removing any floor the hardened wrappers installed after creation. Each test resets a hardened object and asserts
+ * their initial (null) resolvers, silently removing any floor the secure wrappers installed after creation. Each test resets a secure object and asserts
  * that an external reference is still either blocked at parse or resolved to empty content afterwards; the tests are skipped on platforms whose
  * implementation does not support {@code reset()} at all (there the hardening cannot be stripped in the first place).</p>
  */
@@ -73,7 +73,7 @@ class ResetSecureTest {
     @Tag("sax")
     void saxParserResetKeepsEntityResolverFloor() throws Exception {
         final SAXParser parser = SecureSAXParserFactory.newInstance().newSAXParser();
-        // Materialize the hardened reader before the reset, so a stale cached wrapper would be observable.
+        // Materialize the secure reader before the reset, so a stale cached wrapper would be observable.
         parser.getXMLReader();
         AttackTestSupport.assumeDoesNotThrow(parser::reset);
         final XMLReader reader = parser.getXMLReader();
