@@ -118,7 +118,7 @@ class SchemaLocationSaxTest {
         final SAXParserFactory factory = SAXParserFactory.newInstance();
         factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
         final SAXParser parser = newValidatingParser(factory);
-        // Positive control: without hardening the external schema is fetched and its default attribute is augmented onto the root element.
+        // Positive control: without securing the external schema is fetched and its default attribute is augmented onto the root element.
         final LeakCapturingHandler handler = new LeakCapturingHandler();
         parse(parser, handler);
         assertEquals(LEAKED_MARKER, handler.leak,
