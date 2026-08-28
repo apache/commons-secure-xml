@@ -265,7 +265,7 @@ final class AttackTestSupport {
             throw new AssertionError(blockedDescription(description) + " (got " + thrown.getClass().getName() + ")", thrown);
         }
         assertFalse(output.contains(LEAKED_MARKER),
-                "Hardening did not block " + description + "; output contained marker '" + LEAKED_MARKER + "'.\nFull output:\n" + output);
+                "Securing did not block " + description + "; output contained marker '" + LEAKED_MARKER + "'.\nFull output:\n" + output);
     }
 
     /**
@@ -281,7 +281,7 @@ final class AttackTestSupport {
     private static void assertNoLeakStrict(final ThrowingSupplier<String> action, final String description) {
         final String output = assertDoesNotThrow(action, "Hardened " + description + " parse must not throw");
         assertFalse(output.contains(LEAKED_MARKER),
-                "Hardening did not block " + description + "; output contained marker '" + LEAKED_MARKER + "'.\nFull output:\n" + output);
+                "Securing did not block " + description + "; output contained marker '" + LEAKED_MARKER + "'.\nFull output:\n" + output);
     }
 
     /**
@@ -743,7 +743,7 @@ final class AttackTestSupport {
      * @return The assertion-failure message string.
      */
     private static String blockedDescription(final String description) {
-        return "Hardening did not block " + description + "; parse completed successfully.";
+        return "Securing did not block " + description + "; parse completed successfully.";
     }
 
     /** Parses the source through the supplied reader, with {@link #STRICT_REPORTER} installed, and returns the accumulated character data. */

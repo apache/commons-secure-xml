@@ -64,7 +64,7 @@ class SaxonXPathExternalCallsTest {
             return; // hardening blocked at evaluation; acceptable outcome.
         }
         assertFalse(result.contains(MARKER),
-                "Hardening did not block the external reference; result contained marker '" + MARKER + "'.\nFull result:\n" + result);
+                "Securing did not block the external reference; result contained marker '" + MARKER + "'.\nFull result:\n" + result);
     }
 
     private static void assertCallLeaksMarker(final XPathFactory factory, final String expression) {
