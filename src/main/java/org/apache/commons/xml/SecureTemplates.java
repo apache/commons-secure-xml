@@ -90,9 +90,6 @@ final class SecureTemplates implements Templates {
     @Override
     public Transformer newTransformer() throws TransformerConfigurationException {
         final Transformer transformer = delegate.newTransformer();
-        if (transformer == null) {
-            return null;
-        }
-        return new SecureTransformer(transformer, uriResolver, emptySource, overrideDefaultParser);
+        return transformer != null ? new SecureTransformer(transformer, uriResolver, emptySource, overrideDefaultParser) : null;
     }
 }
