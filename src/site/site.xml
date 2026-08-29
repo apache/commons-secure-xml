@@ -34,6 +34,7 @@
       <item name="Security">
       	<item name="Security" href="security.html" />
         <item name="Threat Model" href="threat_model.html" />
+      	<item name="Commons Security Model" href="https://commons.apache.org/security.html" />
       </item>
       <item name="License" href="https://www.apache.org/licenses/LICENSE-2.0" />
       <item name="Code of Conduct" href="https://www.apache.org/foundation/policies/conduct.html" />
