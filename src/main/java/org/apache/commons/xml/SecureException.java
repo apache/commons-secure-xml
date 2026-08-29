@@ -20,10 +20,11 @@ package org.apache.commons.xml;
 /**
  * Thrown when a factory cannot be made secure.
  *
- * <p>Two failure modes share this type:</p>
+ * <p>Three failure modes share this type:</p>
  * <ul>
  *   <li>No bundled secure recipe matches the concrete factory class.</li>
  *   <li>A recipe tried to apply a secure setting and the implementation rejected it.</li>
+ *   <li>The implementation could not provide the internal secure reader the Source-rewriting wrappers parse with.</li>
  * </ul>
  *
  * <p>The message names the unsupported factory class or the specific feature, attribute or property that failed; the cause, when present, is the original
@@ -69,6 +70,19 @@ final class SecureException extends IllegalStateException {
     static String forbidden(final String type, final String namespace, final String publicId, final String systemId, final String baseURI) {
         return String.format("External resource fetch forbidden by %s: type=%s, namespace=%s, publicId=%s, systemId=%s, baseURI=%s",
                 SecureException.THROW_ON_UNRESOLVED, type, namespace, publicId, systemId, baseURI);
+    }
+
+    /**
+     * Builds the standard exception for a failed internal reader provisioning.
+     *
+     * <p>Every supported implementation provides a reader as a routine capability, so the wrapped {@code ParserConfigurationException} or
+     * {@code SAXException} signals a broken environment, not a per-parse condition — hence unchecked.</p>
+     *
+     * @param cause the original checked exception from the JAXP implementation.
+     * @return the exception to throw.
+     */
+    static SecureException readerFailed(final Throwable cause) {
+        return new SecureException("Failed to create a secure XMLReader", cause);
     }
 
     /**

@@ -26,7 +26,6 @@ import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
 
@@ -139,9 +138,9 @@ final class SecureTransformer extends Transformer {
     /**
      * {@inheritDoc}
      *
-     * @throws TransformerConfigurationException Thrown if a secure reader cannot be obtained.
-     * @throws FactoryConfigurationError         Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or
-     *                                           if the implementation is not available or cannot be instantiated.
+     * @throws IllegalStateException     Thrown if the underlying implementation cannot provide a secure reader.
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or
+     *                                   if the implementation is not available or cannot be instantiated.
      */
     @Override
     public void transform(final Source xmlSource, final Result outputTarget) throws TransformerException {

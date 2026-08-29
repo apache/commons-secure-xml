@@ -23,7 +23,6 @@ import java.util.Objects;
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.validation.Validator;
 
 import org.w3c.dom.ls.LSResourceResolver;
@@ -120,10 +119,6 @@ final class SecureValidator extends Validator {
      */
     @Override
     public void validate(final Source source, final Result result) throws SAXException, IOException {
-        try {
-            delegate.validate(SecureSAXParserFactory.secure(source, overrideDefaultParser), result);
-        } catch (final TransformerConfigurationException e) {
-            throw new SAXException("Failed to secure source for validation", e);
-        }
+        delegate.validate(SecureSAXParserFactory.secure(source, overrideDefaultParser), result);
     }
 }

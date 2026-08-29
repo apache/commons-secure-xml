@@ -27,7 +27,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
@@ -301,15 +300,16 @@ public final class SecureSAXParserFactory {
      *
      * @param overrideDefaultParser whether {@value #OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
      * @return a secure reader.
-     * @throws TransformerConfigurationException if a secure reader cannot be obtained.
+     * @throws IllegalStateException     Thrown if the underlying implementation cannot provide a secure reader; providing one is a routine capability of every
+     *                                   supported implementation, so a failure signals a broken environment, not a per-parse condition.
      * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
      *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      */
-    static XMLReader newSecureXMLReader(final boolean overrideDefaultParser) throws TransformerConfigurationException {
+    static XMLReader newXMLReader(final boolean overrideDefaultParser) {
         try {
             return newNSInstance(overrideDefaultParser).newSAXParser().getXMLReader();
-        } catch (final ParserConfigurationException | SAXException e) {
-            throw new TransformerConfigurationException("Failed to obtain a secure XMLReader for source parsing", e);
+        } catch (ParserConfigurationException | SAXException e) {
+            throw SecureException.readerFailed(e);
         }
     }
 
@@ -355,14 +355,14 @@ public final class SecureSAXParserFactory {
      * @param source           the source to secure; never {@code null}.
      * @param overrideDefaultParser whether {@value #OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
      * @return a secure source.
-     * @throws TransformerConfigurationException if a secure reader cannot be obtained.
-     * @throws FactoryConfigurationError         Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-     *                                           configuration error} or if the implementation is not available or cannot be instantiated.
+     * @throws IllegalStateException     Thrown if the underlying implementation cannot provide a secure reader.
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      */
-    static Source secure(final Source source, final boolean overrideDefaultParser) throws TransformerConfigurationException {
+    static Source secure(final Source source, final boolean overrideDefaultParser) {
         if (source instanceof StreamSource || source instanceof SAXSource && ((SAXSource) source).getXMLReader() == null) {
             final InputSource inputSource = SAXSource.sourceToInputSource(source);
-            return inputSource == null ? source : new SAXSource(newSecureXMLReader(overrideDefaultParser), inputSource);
+            return inputSource == null ? source : new SAXSource(newXMLReader(overrideDefaultParser), inputSource);
         }
         return source;
     }

@@ -83,9 +83,9 @@ class OverrideDefaultParserTest {
     @Test
     void secureReaderFollowsFlag() throws Exception {
         assumeFalse(AttackTestSupport.IS_ANDROID);
-        final XMLReader pinned = ((SecureXMLReader) SecureSAXParserFactory.newSecureXMLReader(false)).getDelegate();
+        final XMLReader pinned = ((SecureXMLReader) SecureSAXParserFactory.newXMLReader(false)).getDelegate();
         assertTrue(pinned.getClass().getName().startsWith(JDK_INTERNAL_PREFIX), pinned.getClass().getName());
-        final XMLReader pluggable = ((SecureXMLReader) SecureSAXParserFactory.newSecureXMLReader(true)).getDelegate();
+        final XMLReader pluggable = ((SecureXMLReader) SecureSAXParserFactory.newXMLReader(true)).getDelegate();
         final XMLReader lookedUp = ((SecureXMLReader) SecureSAXParserFactory.newNSInstance().newSAXParser().getXMLReader()).getDelegate();
         assertEquals(lookedUp.getClass(), pluggable.getClass());
         if (xercesOnClasspath()) {
