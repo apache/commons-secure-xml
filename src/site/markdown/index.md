@@ -46,15 +46,8 @@ update when a new securing setting becomes available or a default changes.
 
 ## Usage
 
-Add the library to your build:
-
-```xml
-<dependency>
-  <groupId>org.apache.commons</groupId>
-  <artifactId>commons-xml</artifactId>
-  <version>${commons.release.version}</version>
-</dependency>
-```
+To add the library to your build, see <a href="dependency-info.html">Maven Coordinates</a>.
+(Maven Coordinates)[dependency-info.html]
 
 Every factory method in `org.apache.commons.xml` returns a new, secured factory.
 Pick the one that matches the API you already use;
