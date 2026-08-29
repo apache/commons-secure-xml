@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 import javax.xml.parsers.FactoryConfigurationError;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.sax.SAXResult;
@@ -70,8 +71,8 @@ final class SecureXMLFilter extends XMLFilterImpl {
         }
         if (getParent() == null) {
             try {
-                setParent(SecureSAXParserFactory.newSecureXMLReader(templates.overrideDefaultParser));
-            } catch (final TransformerException e) {
+                setParent(SecureSAXParserFactory.newXMLReader(templates.overrideDefaultParser));
+            } catch (final ParserConfigurationException e) {
                 throw new SAXException(e);
             }
         }
@@ -84,6 +85,14 @@ final class SecureXMLFilter extends XMLFilterImpl {
             final Transformer transformer = templates.newTransformer();
             transformer.transform(new SAXSource(getParent(), input), result);
         } catch (final TransformerException e) {
+            // The parent reader's parse errors and the handler's own exceptions arrive wrapped; rethrow the original rather than nesting the hierarchies.
+            final Throwable cause = e.getCause();
+            if (cause instanceof SAXException) {
+                throw (SAXException) cause;
+            }
+            if (cause instanceof IOException) {
+                throw (IOException) cause;
+            }
             throw new SAXException(e);
         }
     }

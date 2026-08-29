@@ -23,8 +23,8 @@ import java.util.Objects;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.FactoryConfigurationError;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.SchemaFactoryConfigurationError;
@@ -176,7 +176,7 @@ public final class SecureSchemaFactory {
                 for (int i = 0; i < schemas.length; i++) {
                     secure[i] = SecureSAXParserFactory.secure(schemas[i], overrideDefaultParser);
                 }
-            } catch (final TransformerConfigurationException e) {
+            } catch (final ParserConfigurationException e) {
                 throw new SAXException("Failed to secure schema source", e);
             }
             return secure;

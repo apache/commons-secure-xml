@@ -77,7 +77,7 @@ import org.xml.sax.XMLReader;
 public final class SecureTransformerFactory {
 
     /**
-     * {@link TransformerFactory} wrapper that rewrites every Source-taking entry point through {@link SecureSAXParserFactory#secure(Source, boolean)} before
+     * {@link TransformerFactory} wrapper that rewrites every Source-taking entry point through {@link SecureTransformerFactory#secure(Source, boolean)} before
      * delegating.
      *
      * <p>Used by providers whose underlying TrAX implementation pulls a new {@code SAXParserFactory.newInstance()} for any Source that is not already a
@@ -190,7 +190,7 @@ public final class SecureTransformerFactory {
         public Source getAssociatedStylesheet(final Source source, final String media, final String title, final String charset)
                 throws TransformerConfigurationException {
             // Xalan's getAssociatedStylesheet drops a SAXSource's reader and self-provisions its own to scan for xml-stylesheet PIs (XALANJ-2849).
-            final Source secure = isXalan(delegate) ? secureSourceToDom(source) : SecureSAXParserFactory.secure(source, overrideDefaultParser());
+            final Source secure = isXalan(delegate) ? secureSourceToDom(source) : SecureTransformerFactory.secure(source, overrideDefaultParser());
             return delegate.getAssociatedStylesheet(secure, media, title, charset);
         }
 
@@ -221,10 +221,10 @@ public final class SecureTransformerFactory {
         /**
          * Parses a reader-less source into a DOM through a secure, namespace-aware {@link javax.xml.parsers.DocumentBuilder} and returns a {@link DOMSource}
          * carrying its system id, so the consumer walks the tree instead of provisioning its own reader. Any other source is left to
-         * {@link SecureSAXParserFactory#secure(Source, boolean)}.
+         * {@link SecureTransformerFactory#secure(Source, boolean)}.
          *
          * @param source The source to scan for an associated stylesheet.
-         * @return A {@link DOMSource} for a reader-less source, otherwise the result of {@link SecureSAXParserFactory#secure(Source, boolean)}.
+         * @return A {@link DOMSource} for a reader-less source, otherwise the result of {@link SecureTransformerFactory#secure(Source, boolean)}.
          * @throws TransformerConfigurationException if the source cannot be parsed.
          * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
          *                                   configuration error} or if the implementation is not available or cannot be instantiated.
@@ -243,7 +243,7 @@ public final class SecureTransformerFactory {
                     }
                 }
             }
-            return SecureSAXParserFactory.secure(source, overrideDefaultParser());
+            return SecureTransformerFactory.secure(source, overrideDefaultParser());
         }
 
         /**
@@ -254,7 +254,7 @@ public final class SecureTransformerFactory {
          */
         @Override
         public Templates newTemplates(final Source source) throws TransformerConfigurationException {
-            final Templates templates = delegate.newTemplates(SecureSAXParserFactory.secure(source, overrideDefaultParser()));
+            final Templates templates = delegate.newTemplates(SecureTransformerFactory.secure(source, overrideDefaultParser()));
             return templates == null ? null : new SecureTemplates(templates, getURIResolver(), emptySource, overrideDefaultParser());
         }
 
@@ -279,7 +279,7 @@ public final class SecureTransformerFactory {
          */
         @Override
         public Transformer newTransformer(final Source source) throws TransformerConfigurationException {
-            final Transformer transformer = delegate.newTransformer(SecureSAXParserFactory.secure(source, overrideDefaultParser()));
+            final Transformer transformer = delegate.newTransformer(SecureTransformerFactory.secure(source, overrideDefaultParser()));
             return transformer == null ? null : new SecureTransformer(transformer, getURIResolver(), emptySource, overrideDefaultParser());
         }
 
@@ -296,7 +296,7 @@ public final class SecureTransformerFactory {
          */
         @Override
         public TransformerHandler newTransformerHandler(final Source source) throws TransformerConfigurationException {
-            return secure(delegate.newTransformerHandler(SecureSAXParserFactory.secure(source, overrideDefaultParser())));
+            return secure(delegate.newTransformerHandler(SecureTransformerFactory.secure(source, overrideDefaultParser())));
         }
 
         @Override
@@ -430,6 +430,26 @@ public final class SecureTransformerFactory {
      * @param factory the factory to secure; never {@code null}.
      * @return a secure factory.
      */
+    /**
+     * TrAX flavor of {@link SecureSAXParserFactory#secure(Source, boolean)}: the same rewrite, with the SAX-side exceptions converted once into the
+     * {@link TransformerConfigurationException} the TrAX signatures demand.
+     *
+     * @param source           the source to secure; never {@code null}.
+     * @param overrideDefaultParser whether {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's
+     *                              default parser.
+     * @return a secure source.
+     * @throws TransformerConfigurationException if a secure reader cannot be obtained.
+     * @throws FactoryConfigurationError         Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                           configuration error} or if the implementation is not available or cannot be instantiated.
+     */
+    static Source secure(final Source source, final boolean overrideDefaultParser) throws TransformerConfigurationException {
+        try {
+            return SecureSAXParserFactory.secure(source, overrideDefaultParser);
+        } catch (ParserConfigurationException | SAXException e) {
+            throw new TransformerConfigurationException(e);
+        }
+    }
+
     static TransformerFactory secure(final TransformerFactory factory) {
         // Required: enables secure processing (XSLTC runtime limits; Xalan's extension-function block).
         setFeature(factory, XMLConstants.FEATURE_SECURE_PROCESSING, true);

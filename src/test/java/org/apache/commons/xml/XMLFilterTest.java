@@ -19,6 +19,7 @@ package org.apache.commons.xml;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.StringReader;
@@ -32,7 +33,9 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.xml.sax.XMLFilter;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * {@link XMLFilter} products of the secure factory: the input document is parsed by a secure reader (never a self-provisioned permissive one), and the
@@ -47,6 +50,13 @@ class XMLFilterTest {
     private static final String IDENTITY_XSLT = "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
             + "  <xsl:template match=\"/\"><xsl:copy-of select=\".\"/></xsl:template>\n"
             + "</xsl:stylesheet>";
+
+    /** Asserts no SAXException is buried beneath the thrown one, proving {@code parse} rethrows originals instead of re-wrapping them. */
+    private static void assertNotReWrapped(final SAXException thrown) {
+        for (Throwable cause = thrown.getCause(); cause != null; cause = cause.getCause()) {
+            assertFalse(cause instanceof SAXException, "original SAXException should be rethrown, not re-wrapped: " + thrown);
+        }
+    }
 
     private static String entityPayload() {
         return "<?xml version=\"1.0\"?>\n"
@@ -88,12 +98,44 @@ class XMLFilterTest {
     }
 
     @Test
+    void secureFilterDoesNotReWrapParseError() throws Exception {
+        // Dual contract: a malformed input's SAXParseException is swallowed (Xalan), hidden inside an implementation wrapper (XSLTC), or surfaces; when the
+        // cause chain carries it, parse must rethrow it directly rather than bury it under a fresh SAXException.
+        final XMLFilter filter = SaxSurfaceTestSupport.secureFactory().newXMLFilter(AttackTestSupport.streamSource(IDENTITY_XSLT));
+        filter.setContentHandler(AttackTestSupport.capturingHandler(new StringBuilder()));
+        try {
+            filter.parse(new InputSource(new StringReader("<root>")));
+        } catch (final SAXException e) {
+            assertNotReWrapped(e);
+        }
+    }
+
+    @Test
     void secureFilterFromTemplatesDoesNotLeakDocument() throws Exception {
         final SAXTransformerFactory factory = SaxSurfaceTestSupport.secureFactory();
         final Templates templates = factory.newTemplates(AttackTestSupport.resourceSource("with-document.xsl"));
         assertNotNull(templates, "stylesheet failed to compile");
         final XMLFilter filter = factory.newXMLFilter(templates);
         assertFalse(filterAndCapture(filter, "<root/>").contains(AttackTestSupport.LEAKED_MARKER), "document() through XMLFilter(Templates) leaked");
+    }
+
+    @Test
+    void secureFilterRethrowsHandlerSAXException() throws Exception {
+        // Dual contract: the delegate transformer either swallows the handler's exception (Xalan) or surfaces it wrapped in a TransformerException; when it
+        // surfaces, parse must rethrow the original instance, not nest it under a new SAXException.
+        final XMLFilter filter = SaxSurfaceTestSupport.secureFactory().newXMLFilter(AttackTestSupport.streamSource(IDENTITY_XSLT));
+        final SAXException handlerFailure = new SAXException("handler failure");
+        filter.setContentHandler(new DefaultHandler() {
+            @Override
+            public void startDocument() throws SAXException {
+                throw handlerFailure;
+            }
+        });
+        try {
+            filter.parse(new InputSource(new StringReader("<root/>")));
+        } catch (final SAXException e) {
+            assertSame(handlerFailure, e, "the handler's own SAXException should surface unwrapped");
+        }
     }
 
     @Test
