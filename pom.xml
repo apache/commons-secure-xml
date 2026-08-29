@@ -131,6 +131,7 @@ limitations under the License.
           </configuration>
         </plugin>
         <plugin>
+          <!-- TODO Remove when commons-parent 105 is available. -->
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>animal-sniffer-maven-plugin</artifactId>
           <configuration>
