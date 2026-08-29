@@ -300,13 +300,17 @@ public final class SecureSAXParserFactory {
      *
      * @param overrideDefaultParser whether {@value #OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
      * @return a secure reader.
-     * @throws ParserConfigurationException Thrown if the factory cannot produce a parser satisfying its configuration.
-     * @throws SAXException              Thrown if the parser cannot provide a reader.
+     * @throws IllegalStateException     Thrown if the underlying implementation cannot provide a secure reader; providing one is a routine capability of every
+     *                                   supported implementation, so a failure signals a broken environment, not a per-parse condition.
      * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
      *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      */
-    static XMLReader newXMLReader(final boolean overrideDefaultParser) throws ParserConfigurationException, SAXException {
-        return newNSInstance(overrideDefaultParser).newSAXParser().getXMLReader();
+    static XMLReader newXMLReader(final boolean overrideDefaultParser) {
+        try {
+            return newNSInstance(overrideDefaultParser).newSAXParser().getXMLReader();
+        } catch (ParserConfigurationException | SAXException e) {
+            throw SecureException.readerFailed(e);
+        }
     }
 
     /**
@@ -345,19 +349,17 @@ public final class SecureSAXParserFactory {
      * Rewrites a {@link Source} so that any SAX parsing it triggers runs through a secure {@link XMLReader}.
      * <p>
      * Only a {@link StreamSource} or a {@link SAXSource} without a reader is enriched with a secure, namespace-aware reader; other source kinds are returned
-     * as-is. Used by the schema wrappers to route every source they parse through the SAX secure path; the TrAX wrappers convert the exceptions through
-     * {@link SecureTransformerFactory#secure(Source, boolean)}.
+     * as-is. Used by the TrAX and schema wrappers to route every source they parse through the SAX secure path.
      * </p>
      *
      * @param source           the source to secure; never {@code null}.
      * @param overrideDefaultParser whether {@value #OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
      * @return a secure source.
-     * @throws ParserConfigurationException Thrown if the factory cannot produce a parser satisfying its configuration.
-     * @throws SAXException              Thrown if the parser cannot provide a reader.
+     * @throws IllegalStateException     Thrown if the underlying implementation cannot provide a secure reader.
      * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
      *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      */
-    static Source secure(final Source source, final boolean overrideDefaultParser) throws ParserConfigurationException, SAXException {
+    static Source secure(final Source source, final boolean overrideDefaultParser) {
         if (source instanceof StreamSource || source instanceof SAXSource && ((SAXSource) source).getXMLReader() == null) {
             final InputSource inputSource = SAXSource.sourceToInputSource(source);
             return inputSource == null ? source : new SAXSource(newXMLReader(overrideDefaultParser), inputSource);

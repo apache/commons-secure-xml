@@ -29,7 +29,6 @@ import javax.xml.transform.URIResolver;
 import javax.xml.transform.dom.DOMSource;
 
 import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
 /**
  * {@link URIResolver} floor: consults an optional caller-supplied resolver and ignores (resolves to empty) whatever the caller does not resolve.
@@ -126,12 +125,7 @@ final class FallbackIgnoreURIResolver implements URIResolver {
         final Source resolved = delegate != null ? delegate.resolve(href, base) : null;
         if (resolved != null) {
             // The implementation parses the opted-in handle with an internal reader at its own defaults; the rewrite hands it a secure reader instead.
-            // Converted locally, not via SecureTransformerFactory.secure: this class is in the XPath shading closure, which must not pull the TrAX wrappers.
-            try {
-                return SecureSAXParserFactory.secure(resolved, overrideDefaultParser.getAsBoolean());
-            } catch (ParserConfigurationException | SAXException e) {
-                throw new TransformerException(e);
-            }
+            return SecureSAXParserFactory.secure(resolved, overrideDefaultParser.getAsBoolean());
         }
         if (SecureException.throwOnUnresolved()) {
             throw new TransformerException(SecureException.forbidden("uri", null, null, href, base));

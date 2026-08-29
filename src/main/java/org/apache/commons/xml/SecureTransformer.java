@@ -32,7 +32,7 @@ import javax.xml.transform.URIResolver;
 
 /**
  * {@link Transformer} wrapper that rewrites the Source on every {@link Transformer#transform(Source, Result)} call through
- * {@link SecureTransformerFactory#secure(Source, boolean)} before delegating, and keeps an ignore-all {@link URIResolver} floor so runtime {@code document()} calls a
+ * {@link SecureSAXParserFactory#secure(Source, boolean)} before delegating, and keeps an ignore-all {@link URIResolver} floor so runtime {@code document()} calls a
  * caller does not resolve return empty rather than being fetched.
  * <p>
  * The floor is installed on the delegate transformer at construction, seeded with the factory's compile-time resolver; {@link #setURIResolver(URIResolver)}
@@ -139,12 +139,12 @@ final class SecureTransformer extends Transformer {
     /**
      * {@inheritDoc}
      *
-     * @throws TransformerConfigurationException Thrown if a secure reader cannot be obtained.
-     * @throws FactoryConfigurationError         Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or
-     *                                           if the implementation is not available or cannot be instantiated.
+     * @throws IllegalStateException     Thrown if the underlying implementation cannot provide a secure reader.
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or
+     *                                   if the implementation is not available or cannot be instantiated.
      */
     @Override
     public void transform(final Source xmlSource, final Result outputTarget) throws TransformerException {
-        delegate.transform(SecureTransformerFactory.secure(xmlSource, overrideDefaultParser), outputTarget);
+        delegate.transform(SecureSAXParserFactory.secure(xmlSource, overrideDefaultParser), outputTarget);
     }
 }

@@ -23,7 +23,6 @@ import java.util.Objects;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.FactoryConfigurationError;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
@@ -165,19 +164,15 @@ public final class SecureSchemaFactory {
          *
          * @param schemas the schema sources to secure; must not be {@code null}.
          * @return a new array of secure sources.
-         * @throws SAXException if any source cannot be secure.
+         * @throws IllegalStateException     Thrown if the underlying implementation cannot provide a secure reader.
          * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
          *                                   configuration error} or if the implementation is not available or cannot be instantiated.
          */
-        private Source[] secure(final Source[] schemas) throws SAXException {
+        private Source[] secure(final Source[] schemas) {
             final Source[] secure = new Source[schemas.length];
             final boolean overrideDefaultParser = overrideDefaultParser();
-            try {
-                for (int i = 0; i < schemas.length; i++) {
-                    secure[i] = SecureSAXParserFactory.secure(schemas[i], overrideDefaultParser);
-                }
-            } catch (final ParserConfigurationException e) {
-                throw new SAXException("Failed to secure schema source", e);
+            for (int i = 0; i < schemas.length; i++) {
+                secure[i] = SecureSAXParserFactory.secure(schemas[i], overrideDefaultParser);
             }
             return secure;
         }
