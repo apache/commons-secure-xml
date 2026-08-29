@@ -139,15 +139,12 @@ final class SecureTransformer extends Transformer {
     /**
      * {@inheritDoc}
      *
-     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     * @throws TransformerConfigurationException Thrown if a secure reader cannot be obtained.
+     * @throws FactoryConfigurationError         Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or
+     *                                           if the implementation is not available or cannot be instantiated.
      */
     @Override
     public void transform(final Source xmlSource, final Result outputTarget) throws TransformerException {
-        try {
-            delegate.transform(SecureSAXParserFactory.secure(xmlSource, overrideDefaultParser), outputTarget);
-        } catch (final TransformerConfigurationException e) {
-            throw new TransformerException(e);
-        }
+        delegate.transform(SecureSAXParserFactory.secure(xmlSource, overrideDefaultParser), outputTarget);
     }
 }
