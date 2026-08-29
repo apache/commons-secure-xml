@@ -132,7 +132,12 @@ final class SecureXMLFilter extends XMLFilterImpl implements ErrorListener {
         }
     }
 
-    /** Bridges a TrAX report to the SAX callback shape: the original {@link SAXParseException} where one is the cause, otherwise a synthetic one carrying the locator. */
+    /**
+     * Bridges a TrAX report to the SAX callback shape.
+     *
+     * @param e the reported exception.
+     * @return The original {@link SAXParseException} where one is the cause, otherwise a synthetic one carrying the locator.
+     */
     private static SAXParseException toSAXParseException(final TransformerException e) {
         final Throwable cause = e.getCause();
         if (cause instanceof SAXParseException) {
