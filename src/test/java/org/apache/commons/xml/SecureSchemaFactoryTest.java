@@ -28,6 +28,7 @@ import javax.xml.transform.Source;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.ErrorHandler;
@@ -36,6 +37,7 @@ import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.helpers.DefaultHandler;
 
+@Tag("schema")
 class SecureSchemaFactoryTest {
 
     private static final class PropertySchemaFactory extends SchemaFactory {
@@ -111,7 +113,8 @@ class SecureSchemaFactoryTest {
         factory.setErrorHandler(errorHandler);
         factory.setResourceResolver(resolver);
         factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        factory.setProperty(TestConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        factory.setProperty(TestConstants.EXTERNAL_SCHEMA_LOCATION, "urn:example schema.xsd");
+        assertEquals("urn:example schema.xsd", factory.getProperty(TestConstants.EXTERNAL_SCHEMA_LOCATION));
         assertSame(errorHandler, factory.getErrorHandler());
         assertSame(resolver, factory.getResourceResolver());
         assertTrue(factory.isSchemaLanguageSupported(XMLConstants.W3C_XML_SCHEMA_NS_URI));

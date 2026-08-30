@@ -22,8 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import javax.xml.XMLConstants;
 import javax.xml.validation.SchemaFactory;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+@Tag("schema")
 class SecureSchemaTest {
 
     @Test

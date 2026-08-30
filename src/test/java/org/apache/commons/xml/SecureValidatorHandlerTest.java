@@ -29,6 +29,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.TypeInfoProvider;
 import javax.xml.validation.ValidatorHandler;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.Attributes;
@@ -41,6 +42,7 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.DefaultHandler;
 
+@Tag("schema")
 class SecureValidatorHandlerTest {
 
     /**

@@ -32,4 +32,13 @@ class TestConstants {
      * See TestConstants.ACCESS_EXTERNAL_DTD
      */
     static final String ACCESS_EXTERNAL_DTD = "http://javax.xml.XMLConstants/property/accessExternalDTD";
+
+    /** JAXP 1.2 schema-language attribute, recognized by the JDK's internal and the standalone Xerces alike. */
+    static final String JAXP_SCHEMA_LANGUAGE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
+
+    /** Xerces external-schemaLocation property, recognized by the JDK's internal and the standalone Xerces schema loaders alike. */
+    static final String EXTERNAL_SCHEMA_LOCATION = "http://apache.org/xml/properties/schema/external-schemaLocation";
+
+    /** Xerces locale property, recognized by the JDK's internal and the standalone Xerces validators alike. */
+    static final String LOCALE_PROPERTY = "http://apache.org/xml/properties/locale";
 }

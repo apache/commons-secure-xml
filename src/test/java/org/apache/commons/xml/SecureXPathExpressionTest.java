@@ -24,9 +24,11 @@ import java.io.StringReader;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
+@Tag("xpath")
 class SecureXPathExpressionTest {
 
     @Test

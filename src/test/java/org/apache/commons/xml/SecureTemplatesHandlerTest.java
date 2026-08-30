@@ -31,11 +31,13 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.TemplatesHandler;
 import javax.xml.transform.stream.StreamSource;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
 import org.xml.sax.helpers.DefaultHandler;
 
+@Tag("trax")
 class SecureTemplatesHandlerTest {
 
     private static final class RecordingHandler extends DefaultHandler implements TemplatesHandler {

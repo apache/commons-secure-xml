@@ -25,11 +25,13 @@ import java.io.StringReader;
 
 import javax.xml.parsers.SAXParserFactory;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLFilterImpl;
 
+@Tag("sax")
 class SecureXMLReaderTest {
 
     private static final class RecordingReader extends XMLFilterImpl {
