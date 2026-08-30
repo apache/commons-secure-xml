@@ -195,7 +195,7 @@ class SecureTransformerFactoryTest {
 
     @Test
     @Tag("trax")
-    @DisabledIfSystemProperty(named = "android.useAndroidX", matches = ".*") // Hack
+    @Tag("sax")
     void securesAssociatedStylesheetSourcesOfEverySupportedShape() throws Exception {
         final SAXTransformerFactory factory = (SAXTransformerFactory) SecureTransformerFactory.newInstance();
         associatedStylesheet(factory, new StreamSource(new StringReader("<root/>")));
@@ -209,10 +209,7 @@ class SecureTransformerFactoryTest {
     }
 
     @Test
-    @DisabledIfSystemProperty(named = "android.useAndroidX", matches = ".*") // Hack
-    @DisabledIfSystemProperty(named = "org.graalvm.nativeimage.imagecode", matches = ".*") // Hack
-    @DisabledIfSystemProperty(named = "java.vendor.version", matches = ".*graalvm.*") // Hack
-    @DisabledIfSystemProperty(named = "java.vendor.version", matches = ".*GraalVM.*") // Hack
+    @Tag("trax")
     void wrapsEveryStandardAndSaxFactoryProduct() throws Exception {
         final SAXTransformerFactory factory = (SAXTransformerFactory) SecureTransformerFactory.newInstance();
         final URIResolver resolver = (href, base) -> null;
