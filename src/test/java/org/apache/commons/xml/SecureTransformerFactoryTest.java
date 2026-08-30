@@ -207,7 +207,7 @@ class SecureTransformerFactoryTest {
     }
 
     @Test
-    @DisabledIfSystemProperty(named = "env.target", matches = "android|graalvm") // TODO Who knows!
+    @DisabledIfSystemProperty(named = "java.vendor", matches = "android|graalvm") // TODO Who knows!
     void wrapsEveryStandardAndSaxFactoryProduct() throws Exception {
         final SAXTransformerFactory factory = (SAXTransformerFactory) SecureTransformerFactory.newInstance();
         final URIResolver resolver = (href, base) -> null;
