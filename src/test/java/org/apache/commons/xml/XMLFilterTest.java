@@ -185,14 +185,6 @@ class XMLFilterTest {
             }
 
             @Override
-            public void setFeature(final String name, final boolean value) {
-            }
-
-            @Override
-            public void setProperty(final String name, final Object value) {
-            }
-
-            @Override
             public void parse(final InputSource input) throws SAXException {
                 // Minimal well-formed document for the transformation to consume; no real parser behind this parent.
                 final ContentHandler handler = getContentHandler();
@@ -218,6 +210,14 @@ class XMLFilterTest {
             public void setErrorHandler(final ErrorHandler handler) {
                 wired.add(handler);
                 super.setErrorHandler(handler);
+            }
+
+            @Override
+            public void setFeature(final String name, final boolean value) {
+            }
+
+            @Override
+            public void setProperty(final String name, final Object value) {
             }
         };
         filter.setParent(parent);

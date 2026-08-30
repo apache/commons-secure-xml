@@ -49,6 +49,25 @@ import org.xml.sax.helpers.XMLFilterImpl;
  */
 final class SecureXMLFilter extends XMLFilterImpl implements ErrorListener {
 
+    /**
+     * Bridges a TrAX report to the SAX callback shape.
+     *
+     * @param e the reported exception.
+     * @return The original {@link SAXParseException} where one is the cause, otherwise a synthetic one carrying the locator.
+     */
+    private static SAXParseException toSAXParseException(final TransformerException e) {
+        final Throwable cause = e.getCause();
+        if (cause instanceof SAXParseException) {
+            return (SAXParseException) cause;
+        }
+        // Embed the cause rather than the TrAX wrapper, so the originating exception stays directly reachable in the reported chain.
+        final Exception embedded = cause instanceof Exception ? (Exception) cause : e;
+        final SourceLocator locator = e.getLocator();
+        return locator == null
+                ? new SAXParseException(e.getMessage(), null, null, -1, -1, embedded)
+                : new SAXParseException(e.getMessage(), locator.getPublicId(), locator.getSystemId(), locator.getLineNumber(), locator.getColumnNumber(), embedded);
+    }
+
     private final SecureTemplates templates;
 
     /**
@@ -130,25 +149,6 @@ final class SecureXMLFilter extends XMLFilterImpl implements ErrorListener {
             }
             throw new SAXException(e);
         }
-    }
-
-    /**
-     * Bridges a TrAX report to the SAX callback shape.
-     *
-     * @param e the reported exception.
-     * @return The original {@link SAXParseException} where one is the cause, otherwise a synthetic one carrying the locator.
-     */
-    private static SAXParseException toSAXParseException(final TransformerException e) {
-        final Throwable cause = e.getCause();
-        if (cause instanceof SAXParseException) {
-            return (SAXParseException) cause;
-        }
-        // Embed the cause rather than the TrAX wrapper, so the originating exception stays directly reachable in the reported chain.
-        final Exception embedded = cause instanceof Exception ? (Exception) cause : e;
-        final SourceLocator locator = e.getLocator();
-        return locator == null
-                ? new SAXParseException(e.getMessage(), null, null, -1, -1, embedded)
-                : new SAXParseException(e.getMessage(), locator.getPublicId(), locator.getSystemId(), locator.getLineNumber(), locator.getColumnNumber(), embedded);
     }
 
     /** Forwards a transformation warning to the caller-set {@link org.xml.sax.ErrorHandler}; the transformation continues unless that handler throws. */

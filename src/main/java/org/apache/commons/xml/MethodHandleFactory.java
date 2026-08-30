@@ -54,7 +54,7 @@ final class MethodHandleFactory {
         try {
             return methodHandle.call();
         } catch (final Throwable e) {
-            if (e.getClass().isInstance(rethrow)) {
+            if (rethrow.isInstance(e)) {
                 throw rethrow.cast(e);
             }
             // Unreachable: the looked-up method declares no other exceptions.

@@ -214,38 +214,6 @@ public final class SecureTransformerFactory {
             return floor.getDelegate();
         }
 
-        private TransformerHandler secure(final TransformerHandler handler) {
-            return handler == null ? null : new SecureTransformerHandler(handler, getURIResolver(), emptySource, overrideDefaultParser());
-        }
-
-        /**
-         * Parses a reader-less source into a DOM through a secure, namespace-aware {@link javax.xml.parsers.DocumentBuilder} and returns a {@link DOMSource}
-         * carrying its system id, so the consumer walks the tree instead of provisioning its own reader. Any other source is left to
-         * {@link SecureSAXParserFactory#secure(Source, boolean)}.
-         *
-         * @param source The source to scan for an associated stylesheet.
-         * @return A {@link DOMSource} for a reader-less source, otherwise the result of {@link SecureSAXParserFactory#secure(Source, boolean)}.
-         * @throws TransformerConfigurationException if the source cannot be parsed.
-         * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-         *                                   configuration error} or if the implementation is not available or cannot be instantiated.
-         * @throws SecureException Thrown if a (non-Android) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
-         */
-        private Source secureSourceToDom(final Source source) throws TransformerConfigurationException {
-            if (source instanceof StreamSource || source instanceof SAXSource && ((SAXSource) source).getXMLReader() == null) {
-                final InputSource inputSource = SAXSource.sourceToInputSource(source);
-                if (inputSource != null) {
-                    try {
-                        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newNSInstance(overrideDefaultParser());
-                        final Document document = factory.newDocumentBuilder().parse(inputSource);
-                        return new DOMSource(document, inputSource.getSystemId());
-                    } catch (final ParserConfigurationException | SAXException | IOException e) {
-                        throw new TransformerConfigurationException("Failed to parse the source for associated-stylesheet lookup", e);
-                    }
-                }
-            }
-            return SecureSAXParserFactory.secure(source, overrideDefaultParser());
-        }
-
         /**
          * {@inheritDoc}
          *
@@ -333,6 +301,38 @@ public final class SecureTransformerFactory {
          */
         private boolean overrideDefaultParser() {
             return !supportsOverrideDefaultParser || delegate.getFeature(SecureSAXParserFactory.OVERRIDE_DEFAULT_PARSER);
+        }
+
+        private TransformerHandler secure(final TransformerHandler handler) {
+            return handler == null ? null : new SecureTransformerHandler(handler, getURIResolver(), emptySource, overrideDefaultParser());
+        }
+
+        /**
+         * Parses a reader-less source into a DOM through a secure, namespace-aware {@link javax.xml.parsers.DocumentBuilder} and returns a {@link DOMSource}
+         * carrying its system id, so the consumer walks the tree instead of provisioning its own reader. Any other source is left to
+         * {@link SecureSAXParserFactory#secure(Source, boolean)}.
+         *
+         * @param source The source to scan for an associated stylesheet.
+         * @return A {@link DOMSource} for a reader-less source, otherwise the result of {@link SecureSAXParserFactory#secure(Source, boolean)}.
+         * @throws TransformerConfigurationException if the source cannot be parsed.
+         * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+         *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+         * @throws SecureException Thrown if a (non-Android) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
+         */
+        private Source secureSourceToDom(final Source source) throws TransformerConfigurationException {
+            if (source instanceof StreamSource || source instanceof SAXSource && ((SAXSource) source).getXMLReader() == null) {
+                final InputSource inputSource = SAXSource.sourceToInputSource(source);
+                if (inputSource != null) {
+                    try {
+                        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newNSInstance(overrideDefaultParser());
+                        final Document document = factory.newDocumentBuilder().parse(inputSource);
+                        return new DOMSource(document, inputSource.getSystemId());
+                    } catch (final ParserConfigurationException | SAXException | IOException e) {
+                        throw new TransformerConfigurationException("Failed to parse the source for associated-stylesheet lookup", e);
+                    }
+                }
+            }
+            return SecureSAXParserFactory.secure(source, overrideDefaultParser());
         }
 
         @Override
