@@ -219,3 +219,19 @@ jobs:
             android-tests/build/reports/androidTests/
           if-no-files-found: ignore
           retention-days: 14
+
+  # Single required check for branch protection: fails when any gating build failed, so the matrix can
+  # change shape without touching the required-checks list. Legs marked experimental keep
+  # continue-on-error, which reports success to `needs` and stays advisory.
+  build-all:
+    name: build (all)
+    # The gate runs a single shell conditional; the slim image boots faster and carries no toolchain it will not use.
+    runs-on: ubuntu-slim
+    needs: [ build, build-android ]
+    # Without always() a failed leg would leave this job skipped, and branch protection treats a skipped
+    # required check as satisfied; running and failing explicitly is the only conclusion that blocks.
+    if: always()
+    steps:
+      - name: Fail when a gating build failed
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
