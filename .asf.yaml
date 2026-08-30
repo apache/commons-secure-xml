@@ -27,7 +27,7 @@ notifications:
 
 github:
   description: "Apache Commons Secure XML"
-  homepage: https://commons.apache.org/proper/commons-xml/
+  homepage: https://commons.apache.org/proper/commons-secure-xml/
 
   pull_requests:
     # allow auto-merge

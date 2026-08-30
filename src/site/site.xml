@@ -38,10 +38,10 @@
       </item>
       <item name="License" href="https://www.apache.org/licenses/LICENSE-2.0" />
       <item name="Code of Conduct" href="https://www.apache.org/foundation/policies/conduct.html" />
-      <item name="Download" href="https://commons.apache.org/proper/commons-xml/download_xml.cgi" />
+      <item name="Download" href="https://commons.apache.org/proper/commons-secure-xml/download_xml.cgi" />
       <item name="Javadoc">
         <item name="Javadoc Current" href="apidocs/index.html" />
-        <item name="Javadoc Archive" href="https://javadoc.io/doc/org.apache.commons/commons-xml/" />
+        <item name="Javadoc Archive" href="https://javadoc.io/doc/org.apache.commons/commons-secure-xml/" />
       </item>
       <item name="Shading" href="shading.html" />
       <!-- End: For all components. -->

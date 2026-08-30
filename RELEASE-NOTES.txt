@@ -15,7 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Apache Commons Secure XML 1.0.0 Release Notes
---------------------------------------
+---------------------------------------------
 
 The Apache Commons Secure XML team is pleased to announce the release of Apache Commons Secure XML 1.0.0.
 
@@ -35,14 +35,17 @@ New features
 *                  Secure the SAXTransformerFactory extension surface (TransformerHandler, TemplatesHandler, and XMLFilter) and TransformerFactory.getAssociatedStylesheet. Thanks to Piotr P. Karwasz, Gary Gregory.
 *                  Document the threat model on the project site, including the denied-fetch contract and the supported runtime floor (OpenJDK 8 and Android API 33 or later). Thanks to Piotr P. Karwasz, Jarek Potiuk, Gary Gregory.
 * COMMONSXML-11:   Add GitHub CI builds for Java 26 and 27-EA. Thanks to Gary Gregory, Piotr P. Karwasz.
+*                  Mirror on each factory class every JAXP static factory method, including the Java 9 newDefaultInstance and Java 13 newNSInstance families, all usable on Java 8. Thanks to Piotr P. Karwasz, Gary Gregory.
 
 Fixed Bugs
 ----------
 
 * COMMONSXML-10:   Block XInclude (xi:include) href resolution by default, since the JAXP external-access properties do not govern it. Thanks to Ta Duc Thien, Piotr P. Karwasz, Gary Gregory.
-*                  Restore the secured configuration when a factory or parser is reset() instead of reverting to the implementation defaults. Thanks to Piotr P. Karwasz, Gary Gregory.
-*                  Parse a Source opted in by a caller-supplied URIResolver using a secured parser. Thanks to Piotr P. Karwasz, Gary Gregory.
+*                  Honor jdk.xml.overrideDefaultParser on TrAX, XPath and schema factories that recognize it. Thanks to Piotr P. Karwasz, Gary Gregory.
+*                  Restore the secure configuration when a factory or parser is reset() instead of reverting to the implementation defaults. Thanks to Piotr P. Karwasz, Gary Gregory.
+*                  Parse a Source opted in by a caller-supplied URIResolver using a secure parser. Thanks to Piotr P. Karwasz, Gary Gregory.
 *                  Secure the document parse behind the InputSource-taking XPath evaluation entry points. Thanks to Piotr P. Karwasz, Gary Gregory.
+*                  Fall back to the standard factory lookup in the DOM, SAX and schema newDefaultInstance methods on Android. Thanks to Piotr P. Karwasz, Gary Gregory.
 
 Changes
 -------
@@ -56,17 +59,16 @@ Removed
 
 * COMMONSXML-2:    Remove the Limits class that applied uniform processing limits across implementations. Thanks to Piotr P. Karwasz, Gary Gregory.
 
-Historical list of changes: https://commons.apache.org/proper/commons-xml//changes.html
+Historical list of changes: https://commons.apache.org/proper/commons-secure-xml//changes.html
 
 For complete information on Apache Commons Secure XML, including instructions on how to submit bug reports,
 patches, or suggestions for improvement, see the Apache Commons Secure XML website:
 
-https://commons.apache.org/proper/commons-xml/
+https://commons.apache.org/proper/commons-secure-xml/
 
-Download page: https://commons.apache.org/proper/commons-xml//download_text.cgi
+Download page: https://commons.apache.org/proper/commons-secure-xml//download_text.cgi
 
 Have fun!
 -Apache Commons Team
 
 -----------------------------------------------------------------------------
-

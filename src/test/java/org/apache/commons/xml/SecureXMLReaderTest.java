@@ -74,6 +74,6 @@ class SecureXMLReaderTest {
         reader.getErrorHandler();
         reader.getEntityResolver();
         reader.parse(new InputSource(new StringReader("<root/>")));
-        assertThrows(IOException.class, () -> reader.parse("file:/definitely-not-present-commons-xml-test.xml"));
+        assertThrows(IOException.class, () -> reader.parse("file:/definitely-not-present-commons-secure-xml-test.xml"));
     }
 }

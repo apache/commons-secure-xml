@@ -45,7 +45,7 @@ new, secured factory whose parsers reject the common XML attacks (external entit
 external references, and entity-expansion denial of service such as Billion Laughs). The exact guarantee each factory
 makes is documented in the Javadoc:
 
-https://commons.apache.org/index/commons-xml/apidocs/org/apache/commons/xml/package-summary.html
+https://commons.apache.org/index/commons-secure-xml/apidocs/org/apache/commons/xml/package-summary.html
 
 Thesecuring applies to the factory and to the parsers, readers, transformers, validators, schemas and XPath objects it produces.
 It governs what those objects read;

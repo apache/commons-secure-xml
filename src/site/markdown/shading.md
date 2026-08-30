@@ -65,7 +65,7 @@ What shading does preserve is the upgrade path:
 every rebuild against a newer release of the library
 picks up its securing recipes and fixes automatically,
 and the relocated copy cannot conflict with
-another version of `commons-xml` on the application's classpath.
+another version of `commons-secure-xml` on the application's classpath.
 
 ### Vendored Code and Copy-Pasted Recipes
 
@@ -89,7 +89,7 @@ If you maintain such code anyway, two changes give the most protection:
 
 ## Relocating with the Maven Shade Plugin
 
-The configuration below shades and relocates `commons-xml` alone,
+The configuration below shades and relocates `commons-secure-xml` alone,
 while every other dependency of your project stays an ordinary external dependency:
 
 ```xml
@@ -106,7 +106,7 @@ while every other dependency of your project stays an ordinary external dependen
         <minimizeJar>true</minimizeJar>
         <artifactSet>
           <includes>
-            <include>org.apache.commons:commons-xml</include>
+            <include>org.apache.commons:commons-secure-xml</include>
           </includes>
         </artifactSet>
         <relocations>
@@ -117,7 +117,7 @@ while every other dependency of your project stays an ordinary external dependen
         </relocations>
         <filters>
           <filter>
-            <artifact>org.apache.commons:commons-xml</artifact>
+            <artifact>org.apache.commons:commons-secure-xml</artifact>
             <excludes>
               <exclude>META-INF/versions/9/module-info.class</exclude>
             </excludes>
@@ -133,7 +133,7 @@ A few notes on the configuration:
 
 - Replace `com.example.app.internal.xml` with a package of your own,
   outside your public API.
-- The `<artifactSet>` restricts shading to `commons-xml`;
+- The `<artifactSet>` restricts shading to `commons-secure-xml`;
   the plugin removes it from the dependency-reduced POM,
   so downstream consumers never see it.
 - The `<filter>` drops the library's multi-release module descriptor,

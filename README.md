@@ -44,10 +44,10 @@ Apache Commons Secure XML
 ===================
 
 [![Java CI](https://github.com/apache/commons-xml/actions/workflows/maven.yml/badge.svg)](https://github.com/apache/commons-xml/actions/workflows/maven.yml)
-[![Maven Central](https://img.shields.io/maven-central/v/org.apache.commons/commons-xml?label=Maven%20Central)](https://search.maven.org/artifact/org.apache.commons/commons-xml)
-[![Javadocs](https://javadoc.io/badge/org.apache.commons/commons-xml/1.0.0.svg)](https://javadoc.io/doc/org.apache.commons/commons-xml/1.0.0)
+[![Maven Central](https://img.shields.io/maven-central/v/org.apache.commons/commons-secure-xml?label=Maven%20Central)](https://search.maven.org/artifact/org.apache.commons/commons-secure-xml)
+[![Javadocs](https://javadoc.io/badge/org.apache.commons/commons-secure-xml/1.0.0.svg)](https://javadoc.io/doc/org.apache.commons/commons-secure-xml/1.0.0)
 [![CodeQL](https://github.com/apache/commons-xml/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/apache/commons-xml/actions/workflows/codeql-analysis.yml)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/apache/commons-xml/badge)](https://api.securityscorecards.dev/projects/github.com/apache/commons-xml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/apache/commons-secure-xml/badge)](https://api.securityscorecards.dev/projects/github.com/apache/commons-xml)
 
 Apache Commons Secure XML provides secure-by-default JAXP factory creation, abstracting over
     implementation-specific XXE securing differences between the stock JDK and external JAXP implementations
@@ -56,20 +56,20 @@ Apache Commons Secure XML provides secure-by-default JAXP factory creation, abst
 Documentation
 -------------
 
-More information can be found on the [Apache Commons Secure XML homepage](https://commons.apache.org/proper/commons-xml).
-The [Javadoc](https://commons.apache.org/proper/commons-xml/apidocs) can be browsed.
+More information can be found on the [Apache Commons Secure XML homepage](https://commons.apache.org/proper/commons-secure-xml).
+The [Javadoc](https://commons.apache.org/proper/commons-secure-xml/apidocs) can be browsed.
 Questions related to the usage of Apache Commons Secure XML should be posted to the [user mailing list](https://commons.apache.org/mail-lists.html).
 
 Getting the latest release
 --------------------------
-You can download source and binaries from our [download page](https://commons.apache.org/proper/commons-xml/download_xml.cgi).
+You can download source and binaries from our [download page](https://commons.apache.org/proper/commons-secure-xml/download_xml.cgi).
 
 Alternatively, you can pull it from the central Maven repositories:
 
 ```xml
 <dependency>
   <groupId>org.apache.commons</groupId>
-  <artifactId>commons-xml</artifactId>
+  <artifactId>commons-secure-xml</artifactId>
   <version>1.0.0</version>
 </dependency>
 ```

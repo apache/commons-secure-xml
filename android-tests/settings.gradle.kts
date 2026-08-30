@@ -31,4 +31,4 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "commons-xml-android-tests"
+rootProject.name = "commons-secure-xml-android-tests"
