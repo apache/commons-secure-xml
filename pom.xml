@@ -74,6 +74,14 @@ limitations under the License.
     <commons.xerces.version>2.12.2</commons.xerces.version>
     <!-- Test-only: computes each secure class' shade closure, mirroring maven-shade minimizeJar, for ShadingFootprintTest. -->
     <commons.jdependency.version>2.16</commons.jdependency.version>
+    <!-- jacoco-maven-plugin: Should only get better -->
+    <commons.jacoco.haltOnFailure>true</commons.jacoco.haltOnFailure>
+    <commons.jacoco.classRatio>0.97</commons.jacoco.classRatio>
+    <commons.jacoco.instructionRatio>0.97</commons.jacoco.instructionRatio>
+    <commons.jacoco.methodRatio>0.99</commons.jacoco.methodRatio>
+    <commons.jacoco.branchRatio>0.91</commons.jacoco.branchRatio>
+    <commons.jacoco.lineRatio>0.96</commons.jacoco.lineRatio>
+    <commons.jacoco.complexityRatio>0.96</commons.jacoco.complexityRatio>
   </properties>
   <dependencies>
     <!--
