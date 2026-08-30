@@ -116,10 +116,10 @@ class SecureValidatorTest {
         assertNull(validator.getResourceResolver());
         validator.setResourceResolver(resolver);
         validator.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        validator.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        validator.setProperty(TestConstants.ACCESS_EXTERNAL_SCHEMA, "");
         assertSame(resolver, validator.getResourceResolver());
         assertTrue(validator.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-        assertThrows(SAXNotRecognizedException.class, () -> validator.getProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA));
+        assertThrows(SAXNotRecognizedException.class, () -> validator.getProperty(TestConstants.ACCESS_EXTERNAL_SCHEMA));
         validator.reset();
         assertNull(validator.getResourceResolver());
     }

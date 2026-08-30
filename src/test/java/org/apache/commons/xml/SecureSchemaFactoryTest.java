@@ -111,7 +111,7 @@ class SecureSchemaFactoryTest {
         factory.setErrorHandler(errorHandler);
         factory.setResourceResolver(resolver);
         factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        factory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        factory.setProperty(TestConstants.ACCESS_EXTERNAL_SCHEMA, "");
         assertSame(errorHandler, factory.getErrorHandler());
         assertSame(resolver, factory.getResourceResolver());
         assertTrue(factory.isSchemaLanguageSupported(XMLConstants.W3C_XML_SCHEMA_NS_URI));
