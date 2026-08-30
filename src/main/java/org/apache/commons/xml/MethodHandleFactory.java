@@ -61,4 +61,8 @@ final class MethodHandleFactory {
             throw new IllegalStateException(e);
         }
     }
+
+    private MethodHandleFactory() {
+        // Prevent instantiation.
+    }
 }
