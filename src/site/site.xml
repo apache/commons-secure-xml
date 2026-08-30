@@ -26,7 +26,6 @@
     <menu name="Apache Commons Secure XML">
       <!-- Start: For all components. -->
       <item name="About" href="index.html" />
-      <item name="Shading" href="shading.html" />
       <item name="Asking Questions" href="/mail-lists.html" />
       <item name="Release History" href="/changes.html" />
       <item name="Issue Tracking" href="/issue-management.html" />
@@ -43,6 +42,7 @@
         <item name="Javadoc Current" href="apidocs/index.html" />
         <item name="Javadoc Archive" href="https://javadoc.io/doc/org.apache.commons/commons-xml/" />
       </item>
+      <item name="Shading" href="shading.html" />
       <!-- End: For all components. -->
     </menu>
     <menu ref="reports"/>
