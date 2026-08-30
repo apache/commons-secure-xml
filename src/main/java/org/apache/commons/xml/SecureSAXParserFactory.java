@@ -193,22 +193,28 @@ public final class SecureSAXParserFactory {
     /**
      * Returns a new, secure {@link SAXParserFactory} of the system-default implementation.
      * <p>
-     * Obtained as by {@code SAXParserFactory.newDefaultInstance()} where the platform provides it (Java 9 or later), and by
-     * instantiating the JDK's built-in implementation directly on Java 8.
+     * Obtained as by {@code SAXParserFactory.newDefaultInstance()} where the platform provides it (Java 9 or later),
+     * by instantiating the JDK's built-in implementation directly on Java 8,
+     * and by the standard {@link #newInstance()} lookup where the platform provides neither
+     * (for example, Android, whose lookup is itself pinned to the platform implementation).
      * </p>
      *
      * @return A secure factory.
      * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation
-     *                                   (for example Android).
+     * @throws FactoryConfigurationError Thrown from the {@link #newInstance()} lookup this method falls back to on a platform that provides neither
+     *                                   {@code newDefaultInstance()} nor the JDK's built-in implementation (for example Android).
      */
     public static SAXParserFactory newDefaultInstance() {
         if (MH_newDefaultInstance != null) {
             return secure(MethodHandleFactory.invokeExact(() -> (SAXParserFactory) MH_newDefaultInstance.invokeExact(), FactoryConfigurationError.class));
         }
-        // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead. Where that class does not exist either (for
-        // example Android), the lookup miss surfaces as the factory's own FactoryConfigurationError, like any newInstance miss.
-        return newInstance(JDK_SAX_PARSER_FACTORY, null);
+        try {
+            // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead.
+            return newInstance(JDK_SAX_PARSER_FACTORY, null);
+        } catch (final FactoryConfigurationError e) {
+            // Neither exists (for example, Android): degrade to the regular lookup, which such platforms pin to their built-in parser.
+            return newInstance();
+        }
     }
 
     /**
@@ -217,8 +223,8 @@ public final class SecureSAXParserFactory {
      *
      * @return A secure, namespace-aware factory.
      * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation
-     *                                   (for example Android).
+     * @throws FactoryConfigurationError Thrown from the {@link #newInstance()} lookup {@link #newDefaultInstance()} falls back to on a platform that provides
+     *                                   neither {@code newDefaultInstance()} nor the JDK's built-in implementation (for example Android).
      */
     public static SAXParserFactory newDefaultNSInstance() {
         return makeNSAware(newDefaultInstance());

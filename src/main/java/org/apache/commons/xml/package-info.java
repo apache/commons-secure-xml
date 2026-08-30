@@ -71,9 +71,12 @@
  * <li>the namespace-aware {@code newNSInstance()} family (Java 13).</li>
  * </ul>
  * <p>
- * All of them work, with the same semantics, on every supported runtime, including Java 8. The {@code newDefaultInstance} methods are an <strong>opt-out of
- * JAXP pluggability</strong>: they pin the platform's built-in implementation instead of whatever a classpath lookup would resolve, which suits a library with
- * minimal XML requirements that does not want to delegate the choice of implementation to the application developer.
+ * All of them work, with the same semantics, on every supported runtime, including Java 8.
+ * The {@code newDefaultInstance} methods are an <strong>opt-out of JAXP pluggability</strong>:
+ * they pin the platform's built-in implementation instead of whatever a classpath lookup would resolve,
+ * which suits a library with minimal XML requirements that does not want to delegate the choice of implementation to the application developer.
+ * The DOM, SAX and schema variants fall back to the standard lookup where the runtime provides neither the Java 9 method nor the JDK's built-in class
+ * (for example, Android, whose own lookup is pinned to the platform parser, and for schemas falls back to exactly the Xerces implementation).
  * </p>
  * <p>
  * An unresolved external reference resolves to empty content by default, so the parse continues without the resource. To reject it with an exception instead,
