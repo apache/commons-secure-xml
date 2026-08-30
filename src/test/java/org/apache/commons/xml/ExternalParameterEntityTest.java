@@ -31,6 +31,9 @@ import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
+import javax.xml.transform.Source;
+import javax.xml.validation.Validator;
+
 /**
  * Checks whether parsers can pull in an external DTD via a parameter-entity reference inside the internal subset.
  *
@@ -48,7 +51,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * <ul>
  *   <li>DOM, SAX and StAX direct XML parsing.</li>
  *   <li>{@code SchemaFactory.newSchema(Source)} compilation of an XSD whose source has the parameter-entity DOCTYPE.</li>
- *   <li>{@link javax.xml.validation.Validator#validate(javax.xml.transform.Source)} of an instance whose source has the parameter-entity DOCTYPE.</li>
+ *   <li>{@link Validator#validate(Source)} of an instance whose source has the parameter-entity DOCTYPE.</li>
  *   <li>Identity {@code Transformer} reading the input XML.</li>
  *   <li>{@code TransformerFactory.newTransformer(Source)} compilation of a stylesheet whose source has the parameter-entity DOCTYPE.</li>
  * </ul>

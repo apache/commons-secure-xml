@@ -27,6 +27,14 @@ import javax.xml.validation.SchemaFactory;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.helpers.DefaultHandler;
 
+import javax.xml.transform.Source;
+import javax.xml.validation.Schema;
+import org.w3c.dom.ls.LSResourceResolver;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
+
 class SecureSchemaFactoryTest {
 
     private static final class PropertySchemaFactory extends SchemaFactory {
@@ -34,12 +42,12 @@ class SecureSchemaFactoryTest {
         private final SchemaFactory delegate = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 
         @Override
-        public org.xml.sax.ErrorHandler getErrorHandler() {
+        public ErrorHandler getErrorHandler() {
             return delegate.getErrorHandler();
         }
 
         @Override
-        public boolean getFeature(final String name) throws org.xml.sax.SAXNotRecognizedException, org.xml.sax.SAXNotSupportedException {
+        public boolean getFeature(final String name) throws SAXNotRecognizedException, SAXNotSupportedException {
             return delegate.getFeature(name);
         }
 
@@ -49,7 +57,7 @@ class SecureSchemaFactoryTest {
         }
 
         @Override
-        public org.w3c.dom.ls.LSResourceResolver getResourceResolver() {
+        public LSResourceResolver getResourceResolver() {
             return delegate.getResourceResolver();
         }
 
@@ -59,22 +67,22 @@ class SecureSchemaFactoryTest {
         }
 
         @Override
-        public javax.xml.validation.Schema newSchema() throws org.xml.sax.SAXException {
+        public Schema newSchema() throws SAXException {
             return delegate.newSchema();
         }
 
         @Override
-        public javax.xml.validation.Schema newSchema(final javax.xml.transform.Source[] sources) throws org.xml.sax.SAXException {
+        public Schema newSchema(final Source[] sources) throws SAXException {
             return delegate.newSchema(sources);
         }
 
         @Override
-        public void setErrorHandler(final org.xml.sax.ErrorHandler handler) {
+        public void setErrorHandler(final ErrorHandler handler) {
             delegate.setErrorHandler(handler);
         }
 
         @Override
-        public void setFeature(final String name, final boolean value) throws org.xml.sax.SAXNotRecognizedException, org.xml.sax.SAXNotSupportedException {
+        public void setFeature(final String name, final boolean value) throws SAXNotRecognizedException, SAXNotSupportedException {
             delegate.setFeature(name, value);
         }
 
@@ -83,7 +91,7 @@ class SecureSchemaFactoryTest {
         }
 
         @Override
-        public void setResourceResolver(final org.w3c.dom.ls.LSResourceResolver resolver) {
+        public void setResourceResolver(final LSResourceResolver resolver) {
             delegate.setResourceResolver(resolver);
         }
     }
@@ -98,7 +106,7 @@ class SecureSchemaFactoryTest {
     void forwardsSchemaFactoryConfigurationAndAccessors() throws Exception {
         final SchemaFactory factory = SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         final DefaultHandler errorHandler = new DefaultHandler();
-        final org.w3c.dom.ls.LSResourceResolver resolver = (type, namespace, publicId, systemId, base) -> null;
+        final LSResourceResolver resolver = (type, namespace, publicId, systemId, base) -> null;
         factory.setErrorHandler(errorHandler);
         factory.setResourceResolver(resolver);
         factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -107,7 +115,7 @@ class SecureSchemaFactoryTest {
         assertSame(resolver, factory.getResourceResolver());
         assertTrue(factory.isSchemaLanguageSupported(XMLConstants.W3C_XML_SCHEMA_NS_URI));
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-        assertThrows(org.xml.sax.SAXNotRecognizedException.class, () -> factory.getProperty("foo"));
+        assertThrows(SAXNotRecognizedException.class, () -> factory.getProperty("foo"));
     }
 
     @Test

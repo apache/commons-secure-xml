@@ -22,6 +22,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.StringReader;
+import java.util.Properties;
+
+import javax.xml.transform.Transformer;
 
 import javax.xml.transform.Templates;
 import javax.xml.transform.TransformerFactory;
@@ -46,12 +49,12 @@ class SecureTemplatesTest {
         final Templates delegate = new Templates() {
 
             @Override
-            public java.util.Properties getOutputProperties() {
-                return new java.util.Properties();
+            public Properties getOutputProperties() {
+                return new Properties();
             }
 
             @Override
-            public javax.xml.transform.Transformer newTransformer() {
+            public Transformer newTransformer() {
                 return null;
             }
         };

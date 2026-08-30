@@ -29,6 +29,8 @@ import javax.xml.xpath.XPathFactory;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import javax.xml.xpath.XPath;
+
 /**
  * Checks whether Saxon's XPath 3.1 URI-fetching functions can pull external resources into the result.
  *
@@ -97,7 +99,7 @@ class SaxonXPathExternalCallsTest {
      * Instantiates Saxon's {@code XPathFactoryImpl} reflectively.
      *
      * <p>Saxon 12.9 ships no {@code META-INF/services} entry for
-     * {@link javax.xml.xpath.XPathFactory}, so {@link XPathFactory#newInstance(String)} cannot find it; direct instantiation bypasses that lookup.</p>
+     * {@link XPathFactory}, so {@link XPathFactory#newInstance(String)} cannot find it; direct instantiation bypasses that lookup.</p>
      */
     private static XPathFactory saxonXPathFactory() {
         try {

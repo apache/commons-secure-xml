@@ -22,8 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import javax.xml.validation.Schema;
+
 /**
- * Checks that {@link SecureSchemaFactory#newInstance(String)} passes the schema language through to {@link javax.xml.validation.SchemaFactory#newInstance}.
+ * Checks that {@link SecureSchemaFactory#newInstance(String)} passes the schema language through to {@link SchemaFactory#newInstance}.
  *
  * <p>The working W3C XML Schema path is exercised by the whole schema suite; this test covers only the language-selection contract.</p>
  */

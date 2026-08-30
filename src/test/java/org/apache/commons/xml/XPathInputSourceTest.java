@@ -26,11 +26,13 @@ import javax.xml.xpath.XPathFactory;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import org.xml.sax.InputSource;
+
 /**
  * Checks that the document parse behind {@code XPath.evaluate(String, InputSource)} (and its compiled {@code XPathExpression} counterpart) cannot pull in an
  * external general entity.
  *
- * <p>The stock JDK and Apache Xalan implement the {@link org.xml.sax.InputSource}-taking {@code evaluate} entry points by provisioning an internal document
+ * <p>The stock JDK and Apache Xalan implement the {@link InputSource}-taking {@code evaluate} entry points by provisioning an internal document
  * parser that {@code FEATURE_SECURE_PROCESSING} on the {@link XPathFactory} does not reach. The {@link SecureXPathFactory} wrapper parses the input
  * through a secure {@code DocumentBuilder} instead, so the external reference resolves to empty on the floor, while the
  * evaluation itself still works. Tagged {@code xpath}, so it runs under test-stockjdk, test-jdk-xerces, test-xalan and test-xalan-xerces; the Saxon engine takes the separate

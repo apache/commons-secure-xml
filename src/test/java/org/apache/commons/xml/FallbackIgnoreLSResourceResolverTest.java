@@ -22,24 +22,28 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
+import org.w3c.dom.ls.LSException;
+import org.w3c.dom.ls.LSInput;
+import org.w3c.dom.ls.LSResourceResolver;
+
 class FallbackIgnoreLSResourceResolverTest {
 
     @Test
     void coversDelegateFallbackAndDenyBranches() {
         final FallbackIgnoreLSResourceResolver resolver = new FallbackIgnoreLSResourceResolver(null);
-        final org.w3c.dom.ls.LSInput fallback = resolver.resolveResource("t", "n", "p", "s", "b");
+        final LSInput fallback = resolver.resolveResource("t", "n", "p", "s", "b");
         assertEquals("p", fallback.getPublicId());
         assertEquals("s", fallback.getSystemId());
         assertEquals("b", fallback.getBaseURI());
-        final org.w3c.dom.ls.LSInput expected = fallback;
-        final org.w3c.dom.ls.LSResourceResolver delegate = (type, namespace, publicId, systemId, base) -> expected;
+        final LSInput expected = fallback;
+        final LSResourceResolver delegate = (type, namespace, publicId, systemId, base) -> expected;
         resolver.setDelegate(delegate);
         assertSame(delegate, resolver.getDelegate());
         assertSame(expected, resolver.resolveResource("t", "n", "p", "s", "b"));
         resolver.setDelegate(null);
         System.setProperty(SecureException.THROW_ON_UNRESOLVED, "true");
         try {
-            assertThrows(org.w3c.dom.ls.LSException.class, () -> resolver.resolveResource("t", "n", "p", "s", "b"));
+            assertThrows(LSException.class, () -> resolver.resolveResource("t", "n", "p", "s", "b"));
         } finally {
             System.clearProperty(SecureException.THROW_ON_UNRESOLVED);
         }

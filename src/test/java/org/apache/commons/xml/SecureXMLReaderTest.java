@@ -23,9 +23,13 @@ import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
 
+import java.io.IOException;
+import org.junit.jupiter.api.Assertions;
+import org.xml.sax.helpers.XMLFilterImpl;
+
 class SecureXMLReaderTest {
 
-    private static final class RecordingReader extends org.xml.sax.helpers.XMLFilterImpl {
+    private static final class RecordingReader extends XMLFilterImpl {
 
         boolean inputSourceParsed;
 
@@ -48,8 +52,8 @@ class SecureXMLReaderTest {
         final SecureXMLReader reader = new SecureXMLReader(delegate);
         reader.parse(new InputSource());
         reader.parse("system");
-        org.junit.jupiter.api.Assertions.assertTrue(delegate.inputSourceParsed);
-        org.junit.jupiter.api.Assertions.assertTrue(delegate.systemIdParsed);
+        Assertions.assertTrue(delegate.inputSourceParsed);
+        Assertions.assertTrue(delegate.systemIdParsed);
     }
 
     @Test
@@ -65,6 +69,6 @@ class SecureXMLReaderTest {
         reader.getErrorHandler();
         reader.getEntityResolver();
         reader.parse(new InputSource(new StringReader("<root/>")));
-        org.junit.jupiter.api.Assertions.assertThrows(java.io.IOException.class, () -> reader.parse("file:/definitely-not-present-commons-xml-test.xml"));
+        Assertions.assertThrows(IOException.class, () -> reader.parse("file:/definitely-not-present-commons-xml-test.xml"));
     }
 }

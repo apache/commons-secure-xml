@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.StringReader;
 import java.util.Collections;
+import java.util.Iterator;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
@@ -31,6 +32,14 @@ import javax.xml.xpath.XPathFactory;
 
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
+
+import javax.xml.namespace.QName;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFunctionResolver;
+import javax.xml.xpath.XPathVariableResolver;
 
 class SecureXPathTest {
 
@@ -50,7 +59,7 @@ class SecureXPathTest {
             }
 
             @Override
-            public java.util.Iterator<String> getPrefixes(final String namespaceUri) {
+            public Iterator<String> getPrefixes(final String namespaceUri) {
                 return Collections.<String>emptyList().iterator();
             }
         };
@@ -62,19 +71,19 @@ class SecureXPathTest {
         assertNotNull(xpath.getXPathVariableResolver());
         assertNotNull(xpath.compile("/root"));
         assertEquals("value", xpath.evaluate("/root/text()", new InputSource(new StringReader("<root>value</root>"))));
-        assertEquals("value", xpath.evaluate("/root/text()", new InputSource(new StringReader("<root>value</root>")), javax.xml.xpath.XPathConstants.STRING));
+        assertEquals("value", xpath.evaluate("/root/text()", new InputSource(new StringReader("<root>value</root>")), XPathConstants.STRING));
         assertEquals("value", xpath.evaluate("/root/text()", SecureXPath.parse(new InputSource(new StringReader("<root>value</root>")), false)));
         assertEquals("value", xpath.evaluate("/root/text()", SecureXPath.parse(new InputSource(new StringReader("<root>value</root>")), false),
-                javax.xml.xpath.XPathConstants.STRING));
+                XPathConstants.STRING));
         xpath.reset();
     }
 
     @Test
     void preservesANullCompiledExpressionFromTheDelegate() throws Exception {
-        final javax.xml.xpath.XPath delegate = new javax.xml.xpath.XPath() {
+        final XPath delegate = new XPath() {
 
             @Override
-            public javax.xml.xpath.XPathExpression compile(final String expression) {
+            public XPathExpression compile(final String expression) {
                 return null;
             }
 
@@ -84,7 +93,7 @@ class SecureXPathTest {
             }
 
             @Override
-            public Object evaluate(final String expression, final InputSource source, final javax.xml.namespace.QName returnType) {
+            public Object evaluate(final String expression, final InputSource source, final QName returnType) {
                 return null;
             }
 
@@ -94,7 +103,7 @@ class SecureXPathTest {
             }
 
             @Override
-            public Object evaluate(final String expression, final Object item, final javax.xml.namespace.QName returnType) {
+            public Object evaluate(final String expression, final Object item, final QName returnType) {
                 return null;
             }
 
@@ -104,12 +113,12 @@ class SecureXPathTest {
             }
 
             @Override
-            public javax.xml.xpath.XPathFunctionResolver getXPathFunctionResolver() {
+            public XPathFunctionResolver getXPathFunctionResolver() {
                 return null;
             }
 
             @Override
-            public javax.xml.xpath.XPathVariableResolver getXPathVariableResolver() {
+            public XPathVariableResolver getXPathVariableResolver() {
                 return null;
             }
 
@@ -122,11 +131,11 @@ class SecureXPathTest {
             }
 
             @Override
-            public void setXPathFunctionResolver(final javax.xml.xpath.XPathFunctionResolver resolver) {
+            public void setXPathFunctionResolver(final XPathFunctionResolver resolver) {
             }
 
             @Override
-            public void setXPathVariableResolver(final javax.xml.xpath.XPathVariableResolver resolver) {
+            public void setXPathVariableResolver(final XPathVariableResolver resolver) {
             }
         };
         assertNull(new SecureXPath(delegate, false).compile("/root"));
@@ -134,7 +143,7 @@ class SecureXPathTest {
 
     @Test
     void wrapsParseFailuresAsXPathExpressionExceptions() {
-        final javax.xml.xpath.XPathExpressionException exception = assertThrows(javax.xml.xpath.XPathExpressionException.class,
+        final XPathExpressionException exception = assertThrows(XPathExpressionException.class,
                 () -> SecureXPath.parse(new InputSource(new StringReader("<root>")), false));
         assertNotNull(exception.getCause());
     }

@@ -29,23 +29,33 @@ import javax.xml.validation.SchemaFactory;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.helpers.DefaultHandler;
 
+import java.io.IOException;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.validation.Validator;
+import org.w3c.dom.ls.LSResourceResolver;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
+
 class SecureValidatorTest {
 
-    private static final class PropertyValidator extends javax.xml.validation.Validator {
+    private static final class PropertyValidator extends Validator {
 
-        private final javax.xml.validation.Validator delegate;
+        private final Validator delegate;
 
-        PropertyValidator() throws org.xml.sax.SAXException {
+        PropertyValidator() throws SAXException {
             delegate = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema().newValidator();
         }
 
         @Override
-        public org.xml.sax.ErrorHandler getErrorHandler() {
+        public ErrorHandler getErrorHandler() {
             return delegate.getErrorHandler();
         }
 
         @Override
-        public boolean getFeature(final String name) throws org.xml.sax.SAXNotRecognizedException, org.xml.sax.SAXNotSupportedException {
+        public boolean getFeature(final String name) throws SAXNotRecognizedException, SAXNotSupportedException {
             return delegate.getFeature(name);
         }
 
@@ -55,7 +65,7 @@ class SecureValidatorTest {
         }
 
         @Override
-        public org.w3c.dom.ls.LSResourceResolver getResourceResolver() {
+        public LSResourceResolver getResourceResolver() {
             return delegate.getResourceResolver();
         }
 
@@ -65,12 +75,12 @@ class SecureValidatorTest {
         }
 
         @Override
-        public void setErrorHandler(final org.xml.sax.ErrorHandler errorHandler) {
+        public void setErrorHandler(final ErrorHandler errorHandler) {
             delegate.setErrorHandler(errorHandler);
         }
 
         @Override
-        public void setFeature(final String name, final boolean value) throws org.xml.sax.SAXNotRecognizedException, org.xml.sax.SAXNotSupportedException {
+        public void setFeature(final String name, final boolean value) throws SAXNotRecognizedException, SAXNotSupportedException {
             delegate.setFeature(name, value);
         }
 
@@ -80,13 +90,13 @@ class SecureValidatorTest {
         }
 
         @Override
-        public void setResourceResolver(final org.w3c.dom.ls.LSResourceResolver resourceResolver) {
+        public void setResourceResolver(final LSResourceResolver resourceResolver) {
             delegate.setResourceResolver(resourceResolver);
         }
 
         @Override
-        public void validate(final javax.xml.transform.Source source, final javax.xml.transform.Result result)
-                throws org.xml.sax.SAXException, java.io.IOException {
+        public void validate(final Source source, final Result result)
+                throws SAXException, IOException {
             delegate.validate(source, result);
         }
     }
@@ -100,7 +110,7 @@ class SecureValidatorTest {
     void preservesNonRemovableResolverFloorAndForwardsConfiguration() throws Exception {
         final SecureValidator validator = new SecureValidator(SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).newSchema().newValidator(), false);
         final DefaultHandler errorHandler = new DefaultHandler();
-        final org.w3c.dom.ls.LSResourceResolver resolver = (type, namespace, publicId, systemId, base) -> null;
+        final LSResourceResolver resolver = (type, namespace, publicId, systemId, base) -> null;
         validator.setErrorHandler(errorHandler);
         assertSame(errorHandler, validator.getErrorHandler());
         assertNull(validator.getResourceResolver());
@@ -109,7 +119,7 @@ class SecureValidatorTest {
         validator.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
         assertSame(resolver, validator.getResourceResolver());
         assertTrue(validator.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-        assertThrows(org.xml.sax.SAXNotRecognizedException.class, () -> validator.getProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA));
+        assertThrows(SAXNotRecognizedException.class, () -> validator.getProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA));
         validator.reset();
         assertNull(validator.getResourceResolver());
     }

@@ -332,7 +332,7 @@ class SecureValidatorHandlerTest {
         final SecureValidatorHandler handler = new SecureValidatorHandler(delegate);
         // Verify delegation of getProperty; setProperty may be unsupported on this implementation
         // Spelled out because Android's XMLConstants predates JAXP 1.5 and lacks ACCESS_EXTERNAL_DTD; this file also compiles in android-tests.
-        final String property = "http://javax.xml.XMLConstants/property/accessExternalDTD";
+        final String property = "http://XMLConstants/property/accessExternalDTD";
         final Object delegateValue;
         try {
             delegateValue = delegate.getProperty(property);
@@ -356,7 +356,7 @@ class SecureValidatorHandlerTest {
     void delegatesSetDocumentLocator() throws Exception {
         final ValidatorHandler delegate = newValidatorHandler();
         final SecureValidatorHandler handler = new SecureValidatorHandler(delegate);
-        final Locator locator = new org.xml.sax.Locator() {
+        final Locator locator = new Locator() {
 
             @Override
             public int getColumnNumber() {

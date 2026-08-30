@@ -25,14 +25,20 @@ import javax.xml.xpath.XPathFactory;
 
 import org.junit.jupiter.api.Test;
 
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathFactoryConfigurationException;
+import javax.xml.xpath.XPathFunctionResolver;
+import javax.xml.xpath.XPathVariableResolver;
+import org.junit.jupiter.api.Assertions;
+
 class SecureXPathFactoryTest {
 
     @Test
     void createsAndConfiguresAFactoryForTheDefaultObjectModel() throws Exception {
         final XPathFactory factory = SecureXPathFactory.newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI);
-        final javax.xml.xpath.XPathFunctionResolver resolver = (name, arity) -> null;
+        final XPathFunctionResolver resolver = (name, arity) -> null;
         factory.setXPathFunctionResolver(resolver);
-        final javax.xml.xpath.XPathVariableResolver variableResolver = name -> null;
+        final XPathVariableResolver variableResolver = name -> null;
         factory.setXPathVariableResolver(variableResolver);
         assertTrue(factory.isObjectModelSupported(XPathFactory.DEFAULT_OBJECT_MODEL_URI));
         final SecureXPath xpath = (SecureXPath) factory.newXPath();
@@ -61,7 +67,7 @@ class SecureXPathFactoryTest {
             }
 
             @Override
-            public javax.xml.xpath.XPath newXPath() {
+            public XPath newXPath() {
                 return null;
             }
 
@@ -70,11 +76,11 @@ class SecureXPathFactoryTest {
             }
 
             @Override
-            public void setXPathFunctionResolver(final javax.xml.xpath.XPathFunctionResolver resolver) {
+            public void setXPathFunctionResolver(final XPathFunctionResolver resolver) {
             }
 
             @Override
-            public void setXPathVariableResolver(final javax.xml.xpath.XPathVariableResolver resolver) {
+            public void setXPathVariableResolver(final XPathVariableResolver resolver) {
             }
         };
         assertNull(SecureXPathFactory.secure(delegate).newXPath());
@@ -95,23 +101,23 @@ class SecureXPathFactoryTest {
             }
 
             @Override
-            public javax.xml.xpath.XPath newXPath() {
+            public XPath newXPath() {
                 return null;
             }
 
             @Override
-            public void setFeature(final String name, final boolean value) throws javax.xml.xpath.XPathFactoryConfigurationException {
-                throw new javax.xml.xpath.XPathFactoryConfigurationException(name);
+            public void setFeature(final String name, final boolean value) throws XPathFactoryConfigurationException {
+                throw new XPathFactoryConfigurationException(name);
             }
 
             @Override
-            public void setXPathFunctionResolver(final javax.xml.xpath.XPathFunctionResolver resolver) {
+            public void setXPathFunctionResolver(final XPathFunctionResolver resolver) {
             }
 
             @Override
-            public void setXPathVariableResolver(final javax.xml.xpath.XPathVariableResolver resolver) {
+            public void setXPathVariableResolver(final XPathVariableResolver resolver) {
             }
         };
-        org.junit.jupiter.api.Assertions.assertThrows(SecureException.class, () -> SecureXPathFactory.secure(rejectingFactory));
+        Assertions.assertThrows(SecureException.class, () -> SecureXPathFactory.secure(rejectingFactory));
     }
 }

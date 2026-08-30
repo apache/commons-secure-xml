@@ -17,52 +17,63 @@
 
 package org.apache.commons.xml;
 
+import java.util.Locale;
+
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import javax.xml.parsers.SAXParserFactory;
 import org.junit.jupiter.api.Test;
 
+import javax.xml.parsers.SAXParser;
+import javax.xml.validation.Schema;
+import org.junit.jupiter.api.Assertions;
+import org.xml.sax.DocumentHandler;
+import org.xml.sax.Parser;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
+import org.xml.sax.XMLReader;
+
 class SecureSAXParserTest {
 
-    private static final class ParserSecureReader extends SecureXMLReader implements org.xml.sax.Parser {
+    private static final class ParserSecureReader extends SecureXMLReader implements Parser {
 
-        ParserSecureReader(final org.xml.sax.XMLReader reader) {
+        ParserSecureReader(final XMLReader reader) {
             super(reader);
         }
 
         @Override
-        public void setDocumentHandler(final org.xml.sax.DocumentHandler handler) {
+        public void setDocumentHandler(final DocumentHandler handler) {
         }
 
         @Override
-        public void setLocale(final java.util.Locale locale) {
+        public void setLocale(final Locale locale) {
         }
     }
 
-    private static final class ReaderSAXParser extends javax.xml.parsers.SAXParser {
+    private static final class ReaderSAXParser extends SAXParser {
 
-        private final org.xml.sax.XMLReader reader;
+        private final XMLReader reader;
 
-        ReaderSAXParser(final org.xml.sax.XMLReader reader) {
+        ReaderSAXParser(final XMLReader reader) {
             this.reader = reader;
         }
 
         @Override
-        public org.xml.sax.Parser getParser() {
-            return (org.xml.sax.Parser) reader;
+        public Parser getParser() {
+            return (Parser) reader;
         }
 
         @Override
-        public Object getProperty(final String name) throws org.xml.sax.SAXNotRecognizedException, org.xml.sax.SAXNotSupportedException {
+        public Object getProperty(final String name) throws SAXNotRecognizedException, SAXNotSupportedException {
             return reader.getProperty(name);
         }
 
         @Override
-        public javax.xml.validation.Schema getSchema() {
+        public Schema getSchema() {
             return null;
         }
 
         @Override
-        public org.xml.sax.XMLReader getXMLReader() {
+        public XMLReader getXMLReader() {
             return reader;
         }
 
@@ -86,7 +97,7 @@ class SecureSAXParserTest {
         }
 
         @Override
-        public void setProperty(final String name, final Object value) throws org.xml.sax.SAXNotRecognizedException, org.xml.sax.SAXNotSupportedException {
+        public void setProperty(final String name, final Object value) throws SAXNotRecognizedException, SAXNotSupportedException {
             reader.setProperty(name, value);
         }
     }
@@ -94,15 +105,15 @@ class SecureSAXParserTest {
     @Test
     void cachesSecureViewsThenRecreatesThemAfterReset() throws Exception {
         final SecureSAXParser parser = new SecureSAXParser(SAXParserFactory.newInstance().newSAXParser());
-        final org.xml.sax.XMLReader firstReader = parser.getXMLReader();
-        final org.xml.sax.Parser firstParser = parser.getParser();
-        org.junit.jupiter.api.Assertions.assertSame(firstReader, parser.getXMLReader());
-        org.junit.jupiter.api.Assertions.assertSame(firstParser, parser.getParser());
+        final XMLReader firstReader = parser.getXMLReader();
+        final Parser firstParser = parser.getParser();
+        Assertions.assertSame(firstReader, parser.getXMLReader());
+        Assertions.assertSame(firstParser, parser.getParser());
         parser.setProperty("http://xml.org/sax/properties/lexical-handler", null);
-        org.junit.jupiter.api.Assertions.assertNull(parser.getProperty("http://xml.org/sax/properties/lexical-handler"));
+        Assertions.assertNull(parser.getProperty("http://xml.org/sax/properties/lexical-handler"));
         parser.reset();
-        org.junit.jupiter.api.Assertions.assertNotSame(firstReader, parser.getXMLReader());
-        org.junit.jupiter.api.Assertions.assertNotSame(firstParser, parser.getParser());
+        Assertions.assertNotSame(firstReader, parser.getXMLReader());
+        Assertions.assertNotSame(firstParser, parser.getParser());
     }
 
     @Test
@@ -121,6 +132,6 @@ class SecureSAXParserTest {
     void reusesAReaderThatAlreadyImplementsSax1Parser() throws Exception {
         final ParserSecureReader reader = new ParserSecureReader(SAXParserFactory.newInstance().newSAXParser().getXMLReader());
         final SecureSAXParser parser = new SecureSAXParser(new ReaderSAXParser(reader));
-        org.junit.jupiter.api.Assertions.assertSame(reader, parser.getParser());
+        Assertions.assertSame(reader, parser.getParser());
     }
 }

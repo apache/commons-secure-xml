@@ -22,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
@@ -39,13 +41,20 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.XMLFilter;
 
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.sax.SAXSource;
+import org.junit.jupiter.api.Assertions;
+import org.xml.sax.InputSource;
+
 class SecureTransformerFactoryTest {
 
     private static class NullProductsFactory extends SAXTransformerFactory {
 
         private final SAXTransformerFactory delegate = (SAXTransformerFactory) TransformerFactory.newInstance();
 
-        private final java.util.Map<String, Object> attributes = new java.util.HashMap<>();
+        private final Map<String, Object> attributes = new HashMap<>();
 
         @Override
         public Source getAssociatedStylesheet(final Source source, final String media, final String title, final String charset)
@@ -173,13 +182,13 @@ class SecureTransformerFactoryTest {
         assertNull(factory.newTransformerHandler(templates));
         assertNull(factory.newXMLFilter(stylesheet()));
         factory.setAttribute("test", "value");
-        org.junit.jupiter.api.Assertions.assertEquals("value", factory.getAttribute("test"));
-        factory.setFeature(javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        Assertions.assertEquals("value", factory.getAttribute("test"));
+        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
     }
 
     @Test
     void rejectsDelegatesThatCannotEnableSecureProcessing() {
-        org.junit.jupiter.api.Assertions.assertThrows(SecureException.class, () -> SecureTransformerFactory.secure(new RejectingFeatureFactory()));
+        Assertions.assertThrows(SecureException.class, () -> SecureTransformerFactory.secure(new RejectingFeatureFactory()));
     }
 
     @Test
@@ -188,12 +197,12 @@ class SecureTransformerFactoryTest {
         final SAXTransformerFactory factory = (SAXTransformerFactory) SecureTransformerFactory.newInstance();
         associatedStylesheet(factory, new StreamSource(new StringReader("<root/>")));
         associatedStylesheet(factory, new StreamSource(new StringReader("<root>")));
-        associatedStylesheet(factory, new javax.xml.transform.sax.SAXSource(new org.xml.sax.InputSource(new StringReader("<root/>"))));
-        associatedStylesheet(factory, new javax.xml.transform.sax.SAXSource());
+        associatedStylesheet(factory, new SAXSource(new InputSource(new StringReader("<root/>"))));
+        associatedStylesheet(factory, new SAXSource());
         associatedStylesheet(factory,
-                new javax.xml.transform.sax.SAXSource(SecureSAXParserFactory.newXMLReader(false), new org.xml.sax.InputSource(new StringReader("<root/>"))));
+                new SAXSource(SecureSAXParserFactory.newXMLReader(false), new InputSource(new StringReader("<root/>"))));
         associatedStylesheet(factory,
-                new javax.xml.transform.dom.DOMSource(javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()));
+                new DOMSource(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()));
     }
 
     @Test
@@ -204,7 +213,7 @@ class SecureTransformerFactoryTest {
         assertSame(resolver, factory.getURIResolver());
         factory.setErrorListener(factory.getErrorListener());
         factory.setAttribute("indent-number", 2);
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> factory.getAttribute("indent-number"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> factory.getAttribute("indent-number"));
         final Templates templates = factory.newTemplates(stylesheet());
         assertInstanceOf(SecureTemplates.class, templates);
         assertInstanceOf(SecureTransformer.class, factory.newTransformer());

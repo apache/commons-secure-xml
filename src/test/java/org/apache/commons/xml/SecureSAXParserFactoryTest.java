@@ -37,6 +37,8 @@ import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
+import javax.xml.parsers.SAXParser;
+
 class SecureSAXParserFactoryTest {
 
     @Test
@@ -65,7 +67,7 @@ class SecureSAXParserFactoryTest {
 
     @Test
     void respectsDefaultParserSelectionAndLeavesReadersSecureOnlyOnce() throws Exception {
-        final String factoryId = "javax.xml.parsers.SAXParserFactory";
+        final String factoryId = "SAXParserFactory";
         final String previous = System.getProperty(factoryId);
         try {
             System.setProperty(factoryId, SAXParserFactory.newInstance().getClass().getName());

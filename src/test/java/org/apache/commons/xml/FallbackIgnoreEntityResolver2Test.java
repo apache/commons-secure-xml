@@ -28,6 +28,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.ext.DefaultHandler2;
 import org.xml.sax.ext.EntityResolver2;
 
+import org.xml.sax.SAXException;
+
 class FallbackIgnoreEntityResolver2Test {
 
     @Test
@@ -36,14 +38,14 @@ class FallbackIgnoreEntityResolver2Test {
         assertEquals("https://example.test/base/entity.dtd", floor.resolveEntity("name", "public", "https://example.test/base/", "entity.dtd").getSystemId());
         assertEquals("entity.dtd", floor.resolveEntity("name", "public", "not a URI", "entity.dtd").getSystemId());
         assertNotNull(floor.resolveEntity("public", null));
-        final InputSource expected = new org.xml.sax.InputSource();
+        final InputSource expected = new InputSource();
         final EntityResolver plain = (publicId, systemId) -> expected;
         floor.setDelegate(plain);
         assertSame(expected, floor.resolveEntity("name", "public", "https://example.test/base/", "entity.dtd"));
         final EntityResolver2 extended = new DefaultHandler2() {
 
             @Override
-            public org.xml.sax.InputSource resolveEntity(final String name, final String publicId, final String base, final String system) {
+            public InputSource resolveEntity(final String name, final String publicId, final String base, final String system) {
                 return expected;
             }
         };
@@ -52,7 +54,7 @@ class FallbackIgnoreEntityResolver2Test {
         floor.setDelegate(null);
         System.setProperty(SecureException.THROW_ON_UNRESOLVED, "true");
         try {
-            assertThrows(org.xml.sax.SAXException.class, () -> floor.resolveEntity("p", "s"));
+            assertThrows(SAXException.class, () -> floor.resolveEntity("p", "s"));
         } finally {
             System.clearProperty(SecureException.THROW_ON_UNRESOLVED);
         }

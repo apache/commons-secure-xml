@@ -22,6 +22,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
+import javax.xml.stream.XMLResolver;
+import javax.xml.stream.XMLStreamException;
+
 class FallbackIgnoreXMLResolverTest {
 
     @Test
@@ -29,14 +32,14 @@ class FallbackIgnoreXMLResolverTest {
         final FallbackIgnoreXMLResolver resolver = new FallbackIgnoreXMLResolver(null);
         assertNotNull(resolver.resolveEntity("p", "s", "b", "n"));
         final Object expected = new Object();
-        final javax.xml.stream.XMLResolver delegate = (publicId, systemId, base, namespace) -> expected;
+        final XMLResolver delegate = (publicId, systemId, base, namespace) -> expected;
         resolver.setDelegate(delegate);
         assertSame(delegate, resolver.getDelegate());
         assertSame(expected, resolver.resolveEntity("p", "s", "b", "n"));
         resolver.setDelegate(null);
         System.setProperty(SecureException.THROW_ON_UNRESOLVED, "true");
         try {
-            assertThrows(javax.xml.stream.XMLStreamException.class, () -> resolver.resolveEntity("p", "s", "b", "n"));
+            assertThrows(XMLStreamException.class, () -> resolver.resolveEntity("p", "s", "b", "n"));
         } finally {
             System.clearProperty(SecureException.THROW_ON_UNRESOLVED);
         }

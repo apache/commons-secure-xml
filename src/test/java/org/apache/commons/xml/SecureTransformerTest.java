@@ -32,6 +32,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.junit.jupiter.api.Test;
 
+import javax.xml.transform.ErrorListener;
+import javax.xml.transform.TransformerException;
+
 class SecureTransformerTest {
 
     @Test
@@ -48,18 +51,18 @@ class SecureTransformerTest {
         assertNotNull(transformer.getOutputProperty(OutputKeys.METHOD));
         transformer.setOutputProperties(new Properties());
         assertNotNull(transformer.getOutputProperties());
-        transformer.setErrorListener(new javax.xml.transform.ErrorListener() {
+        transformer.setErrorListener(new ErrorListener() {
 
             @Override
-            public void error(final javax.xml.transform.TransformerException e) {
+            public void error(final TransformerException e) {
             }
 
             @Override
-            public void fatalError(final javax.xml.transform.TransformerException e) {
+            public void fatalError(final TransformerException e) {
             }
 
             @Override
-            public void warning(final javax.xml.transform.TransformerException e) {
+            public void warning(final TransformerException e) {
             }
         });
         assertNotNull(transformer.getErrorListener());

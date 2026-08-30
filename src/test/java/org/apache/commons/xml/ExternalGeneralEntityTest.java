@@ -21,6 +21,9 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import javax.xml.transform.Source;
+import javax.xml.validation.Validator;
+
 /**
  * Checks whether parsers can pull in an external general entity declared inline in the internal subset.
  *
@@ -35,7 +38,7 @@ import org.junit.jupiter.api.Test;
  * <ul>
  *   <li>DOM, SAX and StAX direct XML parsing.</li>
  *   <li>{@code SchemaFactory.newSchema(Source)} compilation of an XSD whose source has the entity-bearing DOCTYPE.</li>
- *   <li>{@link javax.xml.validation.Validator#validate(javax.xml.transform.Source)} of an instance whose source has the entity-bearing DOCTYPE.</li>
+ *   <li>{@link Validator#validate(Source)} of an instance whose source has the entity-bearing DOCTYPE.</li>
  *   <li>Identity {@code Transformer} reading the input XML.</li>
  *   <li>{@code TransformerFactory.newTransformer(Source)} compilation of a stylesheet whose source has the entity-bearing DOCTYPE.</li>
  * </ul>

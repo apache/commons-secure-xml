@@ -29,6 +29,8 @@ import javax.xml.transform.stream.StreamResult;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.helpers.AttributesImpl;
 
+import org.xml.sax.helpers.LocatorImpl;
+
 class SecureTransformerHandlerTest {
 
     @Test
@@ -37,7 +39,7 @@ class SecureTransformerHandlerTest {
         final SecureTransformerHandler handler = new SecureTransformerHandler(factory.newTransformerHandler(), null, null, false);
         final char[] chars = { 'x' };
         handler.setResult(new StreamResult(new StringWriter()));
-        handler.setDocumentLocator(new org.xml.sax.helpers.LocatorImpl());
+        handler.setDocumentLocator(new LocatorImpl());
         handler.setSystemId("system");
         handler.startDocument();
         handler.startDTD("root", null, null);

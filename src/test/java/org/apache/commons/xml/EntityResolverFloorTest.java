@@ -53,6 +53,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import java.io.IOException;
+
 /**
  * Checks that a caller-supplied resolver cannot remove the secure ignore-all floor on any factory.
  *
@@ -96,7 +98,7 @@ class EntityResolverFloorTest {
         }
         try {
             return new URL(systemID).openStream();
-        } catch (final java.io.IOException e) {
+        } catch (final IOException e) {
             throw new XMLStreamException(e);
         }
     };

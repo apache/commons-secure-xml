@@ -26,14 +26,22 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.xpath.XPathFactory;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.xml.sax.SAXNotSupportedException;
+import org.xml.sax.helpers.XMLFilterImpl;
+
 class SaxonProviderTest {
 
     /** Reader used to force SecureConfiguration.makeParser through its SecureException translation path. */
-    public static final class FailingXMLReader extends org.xml.sax.helpers.XMLFilterImpl {
+    public static final class FailingXMLReader extends XMLFilterImpl {
 
         @Override
-        public void setFeature(final String name, final boolean value) throws org.xml.sax.SAXNotSupportedException {
-            throw new org.xml.sax.SAXNotSupportedException(name);
+        public void setFeature(final String name, final boolean value) throws SAXNotSupportedException {
+            throw new SAXNotSupportedException(name);
         }
     }
 
@@ -50,7 +58,7 @@ class SaxonProviderTest {
     }
 
     @Test
-    @org.junit.jupiter.api.Tag("xpath3")
+    @Tag("xpath3")
     void configuresSaxonFactoriesAndSuppliesAnEmptySource() throws ReflectiveOperationException {
         final TransformerFactory transformerFactory = TransformerFactory.class.cast(newSaxon("net.sf.saxon.TransformerFactoryImpl"));
         final XPathFactory xpathFactory = XPathFactory.class.cast(newSaxon("net.sf.saxon.xpath.XPathFactoryImpl"));
@@ -65,35 +73,35 @@ class SaxonProviderTest {
     }
 
     @Test
-    @org.junit.jupiter.api.Tag("xpath3")
+    @Tag("xpath3")
     void recognizesOpenSourceAndCommercialSaxonClasses() {
         assertTrue(SaxonProvider.isSaxon(loadSaxon("net.sf.saxon.TransformerFactoryImpl")));
         assertTrue(SaxonProvider.isSaxon(com.saxonica.ProviderMarker.class));
     }
 
     @Test
-    @org.junit.jupiter.api.Tag("xpath3")
+    @Tag("xpath3")
     void rejectsFactoriesThatDoNotImplementSaxonApis() {
-        org.junit.jupiter.api.Assertions.assertThrows(SecureException.class,
+        Assertions.assertThrows(SecureException.class,
                 () -> SaxonProvider.configure(TransformerFactory.newInstance("com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl", null)));
-        org.junit.jupiter.api.Assertions.assertThrows(SecureException.class, () -> SaxonProvider
+        Assertions.assertThrows(SecureException.class, () -> SaxonProvider
                 .configure(XPathFactory.newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI, "com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl", null)));
     }
 
     @Test
-    @org.junit.jupiter.api.Tag("xpath3")
+    @Tag("xpath3")
     void rejectsSaxonCollectionResolutionWhenConfiguredToThrow() throws Exception {
         final XPathFactory factory = XPathFactory.class.cast(newSaxon("net.sf.saxon.xpath.XPathFactoryImpl"));
         SaxonProvider.configure(factory);
         final Object configuration = factory.getClass().getMethod("getConfiguration").invoke(factory);
         final Object finder = configuration.getClass().getMethod("getCollectionFinder").invoke(configuration);
-        final java.lang.reflect.Method findCollection = finder.getClass().getMethod("findCollection", loadSaxon("net.sf.saxon.expr.XPathContext"),
+        final Method findCollection = finder.getClass().getMethod("findCollection", loadSaxon("net.sf.saxon.expr.XPathContext"),
                 String.class);
         final String previous = System.getProperty(SecureException.THROW_ON_UNRESOLVED);
         try {
             System.setProperty(SecureException.THROW_ON_UNRESOLVED, "true");
-            final java.lang.reflect.InvocationTargetException exception = org.junit.jupiter.api.Assertions
-                    .assertThrows(java.lang.reflect.InvocationTargetException.class, () -> findCollection.invoke(finder, null, "urn:collection"));
+            final InvocationTargetException exception = Assertions
+                    .assertThrows(InvocationTargetException.class, () -> findCollection.invoke(finder, null, "urn:collection"));
             assertEquals("net.sf.saxon.trans.XPathException", exception.getCause().getClass().getName());
         } finally {
             if (previous == null) {
@@ -105,16 +113,16 @@ class SaxonProviderTest {
     }
 
     @Test
-    @org.junit.jupiter.api.Tag("xpath3")
+    @Tag("xpath3")
     void translatesSecureParserFailuresToSaxonConfigurationErrors() throws Exception {
         final TransformerFactory factory = TransformerFactory.class.cast(newSaxon("net.sf.saxon.TransformerFactoryImpl"));
         SaxonProvider.configure(factory);
         final Object configuration = factory.getClass().getMethod("getConfiguration").invoke(factory);
-        final java.lang.reflect.Method makeParser = configuration.getClass().getMethod("makeParser", String.class);
-        final java.lang.reflect.InvocationTargetException exception = org.junit.jupiter.api.Assertions
-                .assertThrows(java.lang.reflect.InvocationTargetException.class, () -> makeParser.invoke(configuration, FailingXMLReader.class.getName()));
-        final javax.xml.transform.TransformerFactoryConfigurationError error = org.junit.jupiter.api.Assertions
-                .assertInstanceOf(javax.xml.transform.TransformerFactoryConfigurationError.class, exception.getCause());
-        org.junit.jupiter.api.Assertions.assertInstanceOf(SecureException.class, error.getException());
+        final Method makeParser = configuration.getClass().getMethod("makeParser", String.class);
+        final InvocationTargetException exception = Assertions
+                .assertThrows(InvocationTargetException.class, () -> makeParser.invoke(configuration, FailingXMLReader.class.getName()));
+        final TransformerFactoryConfigurationError error = Assertions
+                .assertInstanceOf(TransformerFactoryConfigurationError.class, exception.getCause());
+        Assertions.assertInstanceOf(SecureException.class, error.getException());
     }
 }

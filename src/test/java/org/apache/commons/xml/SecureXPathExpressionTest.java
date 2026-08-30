@@ -26,6 +26,9 @@ import javax.xml.xpath.XPathFactory;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+
 class SecureXPathExpressionTest {
 
     @Test
@@ -33,9 +36,9 @@ class SecureXPathExpressionTest {
         final SecureXPathExpression expression = new SecureXPathExpression(XPathFactory.newInstance().newXPath().compile("/root/text()"), false);
         final InputSource source = new InputSource(new StringReader("<root>value</root>"));
         assertEquals("value", expression.evaluate(source));
-        assertEquals("value", expression.evaluate(new InputSource(new StringReader("<root>value</root>")), javax.xml.xpath.XPathConstants.STRING));
+        assertEquals("value", expression.evaluate(new InputSource(new StringReader("<root>value</root>")), XPathConstants.STRING));
         assertEquals("value", expression.evaluate(org.apache.commons.xml.SecureXPath.parse(new InputSource(new StringReader("<root>value</root>")), false)));
         assertEquals("value",
-                expression.evaluate(SecureXPath.parse(new InputSource(new StringReader("<root>value</root>")), false), javax.xml.xpath.XPathConstants.STRING));
+                expression.evaluate(SecureXPath.parse(new InputSource(new StringReader("<root>value</root>")), false), XPathConstants.STRING));
     }
 }

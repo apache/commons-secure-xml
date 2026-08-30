@@ -21,22 +21,26 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.URIResolver;
+import javax.xml.transform.dom.DOMSource;
+
 class FallbackIgnoreURIResolverTest {
 
     @Test
     void resolvesDelegatedAndFallbackSources() throws Exception {
-        final javax.xml.transform.dom.DOMSource empty = new javax.xml.transform.dom.DOMSource();
+        final DOMSource empty = new DOMSource();
         final FallbackIgnoreURIResolver resolver = new FallbackIgnoreURIResolver(null, () -> empty, () -> false);
         assertSame(empty, resolver.resolve("href", "base"));
-        final javax.xml.transform.dom.DOMSource delegated = new javax.xml.transform.dom.DOMSource();
-        final javax.xml.transform.URIResolver delegate = (href, base) -> delegated;
+        final DOMSource delegated = new DOMSource();
+        final URIResolver delegate = (href, base) -> delegated;
         resolver.setDelegate(delegate);
         assertSame(delegate, resolver.getDelegate());
         assertSame(delegated, resolver.resolve("href", "base"));
         resolver.setDelegate(null);
         System.setProperty(SecureException.THROW_ON_UNRESOLVED, "true");
         try {
-            assertThrows(javax.xml.transform.TransformerException.class, () -> resolver.resolve("href", "base"));
+            assertThrows(TransformerException.class, () -> resolver.resolve("href", "base"));
         } finally {
             System.clearProperty(SecureException.THROW_ON_UNRESOLVED);
         }
