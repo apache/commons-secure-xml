@@ -19,6 +19,7 @@ package org.apache.commons.xml;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -32,9 +33,11 @@ import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.xpath.XPathFactory;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
@@ -53,6 +56,7 @@ class SecureFactoriesSmokeTest {
     private static final String BENIGN_XML = "<?xml version=\"1.0\"?>\n<root><child>hello</child></root>\n";
 
     @Test
+    @Tag("dom")
     void benignDocumentParses() throws Exception {
         final Document doc = SecureDocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(BENIGN_XML)));
         assertNotNull(doc);
@@ -62,43 +66,56 @@ class SecureFactoriesSmokeTest {
     // The explicit-class-name tests discover the runtime default implementation through the raw JAXP factory,
     // so they stay portable across the JAXP implementations of the surefire matrix.
     @Test
+    @Tag("dom")
     void explicitClassNameDocumentBuilderFactoryIsSecure() throws Exception {
+        Assumptions.assumeTrue(AttackTestSupport.DOM_SUPPORTS_SECURE_PROCESSING, "platform DOM does not support FEATURE_SECURE_PROCESSING");
         final Class<?> impl = DocumentBuilderFactory.newInstance().getClass();
         final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance(impl.getName(), impl.getClassLoader());
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 
     @Test
+    @Tag("dom")
     void explicitClassNameNSDocumentBuilderFactoryIsNamespaceAware() throws Exception {
         final Class<?> impl = DocumentBuilderFactory.newInstance().getClass();
         final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newNSInstance(impl.getName(), impl.getClassLoader());
         assertTrue(factory.isNamespaceAware());
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        if (AttackTestSupport.DOM_SUPPORTS_SECURE_PROCESSING) {
+            assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        }
     }
 
     @Test
+    @Tag("sax")
     void explicitClassNameNSSAXParserFactoryIsNamespaceAware() throws Exception {
         final Class<?> impl = SAXParserFactory.newInstance().getClass();
         final SAXParserFactory factory = SecureSAXParserFactory.newNSInstance(impl.getName(), impl.getClassLoader());
         assertTrue(factory.isNamespaceAware());
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        if (AttackTestSupport.SAX_SUPPORTS_SECURE_PROCESSING) {
+            assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        }
     }
 
     @Test
+    @Tag("sax")
     void explicitClassNameSAXParserFactoryIsSecure() throws Exception {
+        Assumptions.assumeTrue(AttackTestSupport.SAX_SUPPORTS_SECURE_PROCESSING, "platform SAX does not support FEATURE_SECURE_PROCESSING");
         final Class<?> impl = SAXParserFactory.newInstance().getClass();
         final SAXParserFactory factory = SecureSAXParserFactory.newInstance(impl.getName(), impl.getClassLoader());
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 
     @Test
+    @Tag("schema")
     void explicitClassNameSchemaFactoryIsSecure() throws Exception {
         final Class<?> impl = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI).getClass();
         final SchemaFactory factory = SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI, impl.getName(), impl.getClassLoader());
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        // Schema securing is the resolver floor plus wrapped products; FEATURE_SECURE_PROCESSING stays untouched (the secure sub-parsers carry it).
+        assertInstanceOf(SecureSchema.class, factory.newSchema());
     }
 
     @Test
+    @Tag("trax")
     void explicitClassNameTransformerFactoryIsSecure() {
         final Class<?> impl = TransformerFactory.newInstance().getClass();
         final TransformerFactory factory = SecureTransformerFactory.newInstance(impl.getName(), impl.getClassLoader());
@@ -106,6 +123,7 @@ class SecureFactoriesSmokeTest {
     }
 
     @Test
+    @Tag("xpath")
     void explicitClassNameXPathFactoryIsSecure() throws Exception {
         final Class<?> impl = XPathFactory.newInstance().getClass();
         final XPathFactory factory = SecureXPathFactory.newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI, impl.getName(), impl.getClassLoader());
@@ -113,6 +131,7 @@ class SecureFactoriesSmokeTest {
     }
 
     @Test
+    @Tag("stax")
     void factoryIdXMLInputFactoryIsSecure() {
         final String factoryId = "org.apache.commons.xml.test.staxFactory";
         // XMLInputFactory.newInstance, not newFactory: Android's StAX API predates newFactory, and this file also compiles against android.jar.
@@ -126,51 +145,57 @@ class SecureFactoriesSmokeTest {
     }
 
     @Test
+    @Tag("stax")
     void newDefaultFactoryXMLInputFactoryIsSecure() {
         final XMLInputFactory factory = SecureXMLInputFactory.newDefaultFactory();
         assertEquals(Boolean.TRUE, factory.getProperty(XMLInputFactory.SUPPORT_DTD));
     }
 
     // The newDefault* methods resolve the Java 9 JAXP method at runtime and fall back to the JDK's built-in implementation on Java 8. The dom and sax
-    // variants also run on Android, whose JAXP predates newDefaultInstance and carries no JDK-internal fallback: the lookup miss surfaces there as the
-    // factory's own FactoryConfigurationError, like any newInstance miss.
+    // variants also run on Android, whose JAXP predates newDefaultInstance and carries no JDK-internal fallback: the methods degrade there to the standard
+    // lookup, which Android pins to the platform implementation.
     @Test
     @Tag("dom")
     void newDefaultInstanceDocumentBuilderFactoryIsUsable() throws Exception {
-        if (AttackTestSupport.IS_ANDROID) {
-            assertThrows(FactoryConfigurationError.class, SecureDocumentBuilderFactory::newDefaultInstance);
-            return;
-        }
         final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newDefaultInstance();
         assertNotNull(factory.newDocumentBuilder().parse(new InputSource(new StringReader(BENIGN_XML))).getDocumentElement());
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        if (AttackTestSupport.DOM_SUPPORTS_SECURE_PROCESSING) {
+            assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        }
     }
 
     @Test
     @Tag("sax")
     void newDefaultInstanceSAXParserFactoryIsUsable() throws Exception {
-        if (AttackTestSupport.IS_ANDROID) {
-            assertThrows(FactoryConfigurationError.class, SecureSAXParserFactory::newDefaultInstance);
-            return;
-        }
         final SAXParserFactory factory = SecureSAXParserFactory.newDefaultInstance();
         factory.newSAXParser().parse(new InputSource(new StringReader(BENIGN_XML)), new DefaultHandler());
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        if (AttackTestSupport.SAX_SUPPORTS_SECURE_PROCESSING) {
+            assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        }
     }
 
     @Test
+    @Tag("schema")
     void newDefaultInstanceSchemaFactoryIsSecure() throws Exception {
         final SchemaFactory factory = SecureSchemaFactory.newDefaultInstance();
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        // Schema securing is the resolver floor plus wrapped products; FEATURE_SECURE_PROCESSING stays untouched (the secure sub-parsers carry it).
+        assertInstanceOf(SecureSchema.class, factory.newSchema());
     }
 
     @Test
+    @Tag("trax")
     void newDefaultInstanceTransformerFactoryIsSecure() {
+        // TrAX is outside the Android newDefaultInstance degradation: the platform provides neither the method nor the JDK class, so the miss still throws.
+        if (AttackTestSupport.IS_ANDROID) {
+            assertThrows(TransformerFactoryConfigurationError.class, SecureTransformerFactory::newDefaultInstance);
+            return;
+        }
         final TransformerFactory factory = SecureTransformerFactory.newDefaultInstance();
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
     }
 
     @Test
+    @Tag("xpath")
     void newDefaultInstanceXPathFactoryIsSecure() throws Exception {
         final XPathFactory factory = SecureXPathFactory.newDefaultInstance();
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
@@ -179,41 +204,43 @@ class SecureFactoriesSmokeTest {
     @Test
     @Tag("dom")
     void newDefaultNSInstanceDocumentBuilderFactoryIsNamespaceAware() throws Exception {
-        if (AttackTestSupport.IS_ANDROID) {
-            assertThrows(FactoryConfigurationError.class, SecureDocumentBuilderFactory::newDefaultNSInstance);
-            return;
-        }
         final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newDefaultNSInstance();
         assertTrue(factory.isNamespaceAware());
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        if (AttackTestSupport.DOM_SUPPORTS_SECURE_PROCESSING) {
+            assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        }
     }
 
     @Test
     @Tag("sax")
     void newDefaultNSInstanceSAXParserFactoryIsNamespaceAware() throws Exception {
-        if (AttackTestSupport.IS_ANDROID) {
-            assertThrows(FactoryConfigurationError.class, SecureSAXParserFactory::newDefaultNSInstance);
-            return;
-        }
         final SAXParserFactory factory = SecureSAXParserFactory.newDefaultNSInstance();
         assertTrue(factory.isNamespaceAware());
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        if (AttackTestSupport.SAX_SUPPORTS_SECURE_PROCESSING) {
+            assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        }
     }
 
     @Test
+    @Tag("dom")
     void newDocumentBuilderFactoryDisablesXIncludeAndValidation() {
         final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
-        assertFalse(factory.isXIncludeAware(), "XInclude must be off by default");
+        if (AttackTestSupport.DOM_SUPPORTS_XINCLUDE) {
+            assertFalse(factory.isXIncludeAware(), "XInclude must be off by default");
+        }
         assertFalse(factory.isValidating(), "Validation must be off by default");
     }
 
     @Test
+    @Tag("dom")
     void newDocumentBuilderFactoryEnablesSecureProcessing() throws Exception {
+        Assumptions.assumeTrue(AttackTestSupport.DOM_SUPPORTS_SECURE_PROCESSING, "platform DOM does not support FEATURE_SECURE_PROCESSING");
         final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING), "FEATURE_SECURE_PROCESSING must be on");
     }
 
     @Test
+    @Tag("dom")
     void newDocumentBuilderFactoryReturnsFreshInstance() {
         final DocumentBuilderFactory a = SecureDocumentBuilderFactory.newInstance();
         final DocumentBuilderFactory b = SecureDocumentBuilderFactory.newInstance();
@@ -223,6 +250,7 @@ class SecureFactoriesSmokeTest {
     }
 
     @Test
+    @Tag("stax")
     void newFactoryReturnsFreshInstance() {
         final XMLInputFactory a = SecureXMLInputFactory.newFactory();
         final XMLInputFactory b = SecureXMLInputFactory.newFactory();
@@ -238,7 +266,7 @@ class SecureFactoriesSmokeTest {
         final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newNSInstance();
         assertTrue(factory.isNamespaceAware());
         assertNotNull(factory.newDocumentBuilder().parse(new InputSource(new StringReader(BENIGN_XML))).getDocumentElement());
-        if (!AttackTestSupport.IS_ANDROID) {
+        if (AttackTestSupport.DOM_SUPPORTS_SECURE_PROCESSING) {
             assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
         }
     }
@@ -249,29 +277,35 @@ class SecureFactoriesSmokeTest {
         final SAXParserFactory factory = SecureSAXParserFactory.newNSInstance();
         assertTrue(factory.isNamespaceAware());
         factory.newSAXParser().parse(new InputSource(new StringReader(BENIGN_XML)), new DefaultHandler());
-        if (!AttackTestSupport.IS_ANDROID) {
+        if (AttackTestSupport.SAX_SUPPORTS_SECURE_PROCESSING) {
             assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
         }
     }
 
     @Test
+    @Tag("sax")
     void newSAXParserFactoryReturnsFreshInstance() {
         final SAXParserFactory a = SecureSAXParserFactory.newInstance();
         final SAXParserFactory b = SecureSAXParserFactory.newInstance();
         assertNotSame(a, b);
         assertFalse(a.isValidating());
-        assertFalse(a.isXIncludeAware());
+        if (AttackTestSupport.SAX_SUPPORTS_XINCLUDE) {
+            assertFalse(a.isXIncludeAware());
+        }
     }
 
     @Test
+    @Tag("schema")
     void newSchemaFactoryReturnsFreshInstance() throws Exception {
         final SchemaFactory a = SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         final SchemaFactory b = SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         assertNotSame(a, b);
-        assertTrue(a.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        // Schema securing is the resolver floor plus wrapped products; FEATURE_SECURE_PROCESSING stays untouched (the secure sub-parsers carry it).
+        assertInstanceOf(SecureSchema.class, a.newSchema());
     }
 
     @Test
+    @Tag("trax")
     void newTransformerFactoryReturnsFreshInstance() {
         final TransformerFactory a = SecureTransformerFactory.newInstance();
         final TransformerFactory b = SecureTransformerFactory.newInstance();
@@ -279,6 +313,7 @@ class SecureFactoriesSmokeTest {
     }
 
     @Test
+    @Tag("stax")
     void newXMLInputFactoryReturnsFreshInstance() {
         final XMLInputFactory a = SecureXMLInputFactory.newInstance();
         final XMLInputFactory b = SecureXMLInputFactory.newInstance();
@@ -288,6 +323,7 @@ class SecureFactoriesSmokeTest {
     }
 
     @Test
+    @Tag("xpath")
     void newXPathFactoryReturnsFreshInstance() throws Exception {
         final XPathFactory a = SecureXPathFactory.newInstance();
         final XPathFactory b = SecureXPathFactory.newInstance();
@@ -300,6 +336,12 @@ class SecureFactoriesSmokeTest {
      * non-secured factory through an inherited method such as {@code newInstance(String, ClassLoader)} or {@code newDefaultInstance()}.
      */
     @Test
+    @Tag("dom")
+    @Tag("sax")
+    @Tag("stax")
+    @Tag("trax")
+    @Tag("xpath")
+    @Tag("schema")
     void publicClassesDoNotExtendTheirJaxpFactoryType() {
         assertFalse(DocumentBuilderFactory.class.isAssignableFrom(SecureDocumentBuilderFactory.class));
         assertFalse(SAXParserFactory.class.isAssignableFrom(SecureSAXParserFactory.class));
@@ -310,6 +352,7 @@ class SecureFactoriesSmokeTest {
     }
 
     @Test
+    @Tag("dom")
     void unknownFactoryClassNameThrows() {
         assertThrows(FactoryConfigurationError.class, () -> SecureDocumentBuilderFactory.newInstance("no.such.FactoryClass", null));
     }

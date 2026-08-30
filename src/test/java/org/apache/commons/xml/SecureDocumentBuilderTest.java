@@ -40,13 +40,21 @@ class SecureDocumentBuilderTest {
         final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         factory.setValidating(false);
-        factory.setXIncludeAware(false);
-        factory.setSchema(null);
+        if (AttackTestSupport.DOM_SUPPORTS_XINCLUDE) {
+            factory.setXIncludeAware(false);
+        }
+        if (AttackTestSupport.DOM_SUPPORTS_SCHEMA) {
+            factory.setSchema(null);
+        }
         final SecureDocumentBuilder builder = new SecureDocumentBuilder(factory.newDocumentBuilder());
         assertTrue(builder.isNamespaceAware());
         assertFalse(builder.isValidating());
-        assertFalse(builder.isXIncludeAware());
-        assertNull(builder.getSchema());
+        if (AttackTestSupport.DOM_SUPPORTS_XINCLUDE) {
+            assertFalse(builder.isXIncludeAware());
+        }
+        if (AttackTestSupport.DOM_SUPPORTS_SCHEMA) {
+            assertNull(builder.getSchema());
+        }
         assertNotNull(builder.getDOMImplementation());
     }
 }

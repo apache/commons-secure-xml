@@ -126,11 +126,17 @@ class SecureSAXParserTest {
         final SecureSAXParser parser = new SecureSAXParser(SAXParserFactory.newInstance().newSAXParser());
         assertNotNull(parser.getXMLReader());
         assertNotNull(parser.getParser());
-        parser.getSchema();
         parser.isNamespaceAware();
         parser.isValidating();
-        parser.isXIncludeAware();
-        parser.reset();
+        if (AttackTestSupport.SAX_SUPPORTS_SCHEMA) {
+            parser.getSchema();
+        }
+        if (AttackTestSupport.SAX_SUPPORTS_XINCLUDE) {
+            parser.isXIncludeAware();
+        }
+        if (AttackTestSupport.SAX_SUPPORTS_RESET) {
+            parser.reset();
+        }
     }
 
     @Test

@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -35,6 +36,7 @@ class SecureDocumentBuilderFactoryTest {
 
     @Test
     void createsSecureBuildersFromEveryStaticEntryPoint() throws Exception {
+        Assumptions.assumeTrue(AttackTestSupport.DOM_RESOLVES_INTERNAL_ENTITIES, "the platform DOM is left unwrapped: it does not resolve user-defined entities");
         assertInstanceOf(SecureDocumentBuilder.class, SecureDocumentBuilderFactory.newInstance().newDocumentBuilder());
         assertInstanceOf(SecureDocumentBuilder.class, SecureDocumentBuilderFactory.newDefaultInstance().newDocumentBuilder());
         assertInstanceOf(SecureDocumentBuilder.class, SecureDocumentBuilderFactory.newNSInstance().newDocumentBuilder());
@@ -43,6 +45,7 @@ class SecureDocumentBuilderFactoryTest {
 
     @Test
     void forwardsEverySupportedFactoryConfiguration() throws Exception {
+        Assumptions.assumeTrue(AttackTestSupport.DOM_RESOLVES_INTERNAL_ENTITIES, "the platform DOM is left unwrapped: it does not resolve user-defined entities");
         final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
         factory.setCoalescing(true);
         factory.setExpandEntityReferences(false);
