@@ -42,7 +42,7 @@ class MethodHandleFactoryTest {
 
     @Test
     void findStaticReturnsHandleForExistingMethod() {
-        final MethodHandle handle = MethodHandleFactory.findStatic(XMLInputFactory.class, "newDefaultFactory", MethodType.methodType(XMLInputFactory.class));
+        final MethodHandle handle = MethodHandleFactory.findStatic(XMLInputFactory.class, "newInstance", MethodType.methodType(XMLInputFactory.class));
         assertNotNull(handle, "an existing static method must resolve to a handle");
     }
 
