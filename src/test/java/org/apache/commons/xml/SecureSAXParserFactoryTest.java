@@ -54,14 +54,20 @@ class SecureSAXParserFactoryTest {
         final SAXParserFactory factory = SecureSAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
         factory.setValidating(false);
-        factory.setXIncludeAware(false);
-        factory.setSchema(null);
-        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        if (AttackTestSupport.SAX_SUPPORTS_XINCLUDE) {
+            factory.setXIncludeAware(false);
+            assertFalse(factory.isXIncludeAware());
+        }
+        if (AttackTestSupport.SAX_SUPPORTS_SCHEMA) {
+            factory.setSchema(null);
+            assertNull(factory.getSchema());
+        }
+        if (AttackTestSupport.SAX_SUPPORTS_SECURE_PROCESSING) {
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
+        }
         assertTrue(factory.isNamespaceAware());
         assertFalse(factory.isValidating());
-        assertFalse(factory.isXIncludeAware());
-        assertNull(factory.getSchema());
-        assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
         assertInstanceOf(SecureSAXParser.class, factory.newSAXParser());
     }
 

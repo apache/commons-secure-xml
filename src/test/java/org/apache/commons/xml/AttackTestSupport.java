@@ -183,6 +183,13 @@ final class AttackTestSupport {
      * <p>Android's {@code KXmlParser} currently fails this test.</p>
      */
     static final boolean DOM_RESOLVES_INTERNAL_ENTITIES = probeDomResolvesInternalEntities();
+    /** {@code true} when the platform's default DOM factory (and its builders) support parser-attached schemas; Android inherits the throwing JAXP base methods. */
+    static final boolean DOM_SUPPORTS_SCHEMA = supportsConfiguration(() -> DocumentBuilderFactory.newInstance().setSchema(null));
+    /** {@code true} when the platform's default DOM factory accepts {@link XMLConstants#FEATURE_SECURE_PROCESSING}; Android's factory rejects it. */
+    static final boolean DOM_SUPPORTS_SECURE_PROCESSING =
+            supportsConfiguration(() -> DocumentBuilderFactory.newInstance().setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true));
+    /** {@code true} when the platform's default DOM factory (and its builders) support the XInclude switches; Android inherits the throwing JAXP base methods. */
+    static final boolean DOM_SUPPORTS_XINCLUDE = supportsConfiguration(() -> DocumentBuilderFactory.newInstance().setXIncludeAware(false));
     /** {@code true} when running on Android (Dalvik / ART), {@code false} on any standard JVM. Probed once via {@code Class.forName} on {@code android.os.Build}. */
     static final boolean IS_ANDROID = probeAndroid();
     /**
@@ -199,6 +206,15 @@ final class AttackTestSupport {
      * presence is the leak signal.</p>
      */
     static final String LEAKED_MARKER = "All your base are belong to us";
+    /** {@code true} when the platform's default SAX parser supports {@code reset()}; Android inherits the throwing JAXP base method. */
+    static final boolean SAX_SUPPORTS_RESET = supportsConfiguration(() -> SAXParserFactory.newInstance().newSAXParser().reset());
+    /** {@code true} when the platform's default SAX factory (and its parsers) support parser-attached schemas; Android inherits the throwing JAXP base methods. */
+    static final boolean SAX_SUPPORTS_SCHEMA = supportsConfiguration(() -> SAXParserFactory.newInstance().setSchema(null));
+    /** {@code true} when the platform's default SAX factory accepts {@link XMLConstants#FEATURE_SECURE_PROCESSING}; Android's Expat rejects it. */
+    static final boolean SAX_SUPPORTS_SECURE_PROCESSING =
+            supportsConfiguration(() -> SAXParserFactory.newInstance().setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true));
+    /** {@code true} when the platform's default SAX factory (and its parsers) support the XInclude switches; Android inherits the throwing JAXP base methods. */
+    static final boolean SAX_SUPPORTS_XINCLUDE = supportsConfiguration(() -> SAXParserFactory.newInstance().setXIncludeAware(false));
     static final StrictReporter STRICT_REPORTER = new StrictReporter();
     /**
      * Woodstox's entity-count limit property; it ignores the JDK properties above and enforces its own default of {@code 100000}.
@@ -1030,6 +1046,16 @@ final class AttackTestSupport {
     static XMLReader strictXMLReader(final XMLReader reader) {
         reader.setErrorHandler(STRICT_REPORTER);
         return reader;
+    }
+
+    /** Probes a JAXP configuration call once at class load; {@code false} where the platform default implementation throws (for example Android). */
+    private static boolean supportsConfiguration(final Executable action) {
+        try {
+            action.execute();
+            return true;
+        } catch (final Throwable t) {
+            return false;
+        }
     }
 
     /** Runs the action and silently swallows any thrown exception; used to apply best-effort permissive-side flags that may not be supported. */
