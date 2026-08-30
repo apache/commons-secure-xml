@@ -26,6 +26,7 @@
     <menu name="Apache Commons Secure XML">
       <!-- Start: For all components. -->
       <item name="About" href="index.html" />
+      <item name="Shading" href="shading.html" />
       <item name="Asking Questions" href="/mail-lists.html" />
       <item name="Release History" href="/changes.html" />
       <item name="Issue Tracking" href="/issue-management.html" />

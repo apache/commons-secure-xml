@@ -174,7 +174,7 @@ class ShadingFootprintTest {
     // @formatter:on
 
     /**
-     * Class count of the {@link #rootClosure()} DOM entry point, the baseline the {@link #reportFootprint()} percentages are computed against.
+     * Class count of the {@link #rootClosure()} DOM entry point, guarding that closure against drift.
      */
     private static final int LIBRARY_CLASS_COUNT = 8;
 
@@ -233,7 +233,11 @@ class ShadingFootprintTest {
      */
     @AfterAll
     static void reportFootprint() {
-        final long library = bytesOf(rootClosure());
+        final Set<String> libraryClosure = new TreeSet<>();
+        for (final String entry : REPORTED) {
+            libraryClosure.addAll(closureOf(entry));
+        }
+        final long library = bytesOf(libraryClosure);
         final StringBuilder report = new StringBuilder("\nShade footprint (uncompressed .class bytes, % of full library):\n");
         for (final String entry : REPORTED) {
             final Set<String> closure = closureOf(entry);
