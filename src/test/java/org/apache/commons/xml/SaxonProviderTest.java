@@ -19,18 +19,20 @@ package org.apache.commons.xml;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import javax.xml.transform.TransformerFactory;
-import javax.xml.xpath.XPathFactory;
-import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
-import org.junit.jupiter.api.Assertions;
+import javax.xml.xpath.XPathFactory;
+
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.helpers.XMLFilterImpl;
 
@@ -82,9 +84,9 @@ class SaxonProviderTest {
     @Test
     @Tag("xpath3")
     void rejectsFactoriesThatDoNotImplementSaxonApis() {
-        Assertions.assertThrows(SecureException.class,
+        assertThrows(SecureException.class,
                 () -> SaxonProvider.configure(TransformerFactory.newInstance("com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl", null)));
-        Assertions.assertThrows(SecureException.class, () -> SaxonProvider
+        assertThrows(SecureException.class, () -> SaxonProvider
                 .configure(XPathFactory.newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI, "com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl", null)));
     }
 
@@ -100,8 +102,7 @@ class SaxonProviderTest {
         final String previous = System.getProperty(SecureException.THROW_ON_UNRESOLVED);
         try {
             System.setProperty(SecureException.THROW_ON_UNRESOLVED, "true");
-            final InvocationTargetException exception = Assertions
-                    .assertThrows(InvocationTargetException.class, () -> findCollection.invoke(finder, null, "urn:collection"));
+            final InvocationTargetException exception = assertThrows(InvocationTargetException.class, () -> findCollection.invoke(finder, null, "urn:collection"));
             assertEquals("net.sf.saxon.trans.XPathException", exception.getCause().getClass().getName());
         } finally {
             if (previous == null) {
@@ -119,10 +120,8 @@ class SaxonProviderTest {
         SaxonProvider.configure(factory);
         final Object configuration = factory.getClass().getMethod("getConfiguration").invoke(factory);
         final Method makeParser = configuration.getClass().getMethod("makeParser", String.class);
-        final InvocationTargetException exception = Assertions
-                .assertThrows(InvocationTargetException.class, () -> makeParser.invoke(configuration, FailingXMLReader.class.getName()));
-        final TransformerFactoryConfigurationError error = Assertions
-                .assertInstanceOf(TransformerFactoryConfigurationError.class, exception.getCause());
-        Assertions.assertInstanceOf(SecureException.class, error.getException());
+        final InvocationTargetException exception = assertThrows(InvocationTargetException.class, () -> makeParser.invoke(configuration, FailingXMLReader.class.getName()));
+        final TransformerFactoryConfigurationError error = assertInstanceOf(TransformerFactoryConfigurationError.class, exception.getCause());
+        assertInstanceOf(SecureException.class, error.getException());
     }
 }

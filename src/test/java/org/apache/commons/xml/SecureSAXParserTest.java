@@ -17,15 +17,18 @@
 
 package org.apache.commons.xml;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
 import java.util.Locale;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import javax.xml.parsers.SAXParserFactory;
-import org.junit.jupiter.api.Test;
-
 import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.validation.Schema;
-import org.junit.jupiter.api.Assertions;
+
+import org.junit.jupiter.api.Test;
 import org.xml.sax.DocumentHandler;
 import org.xml.sax.Parser;
 import org.xml.sax.SAXNotRecognizedException;
@@ -107,13 +110,13 @@ class SecureSAXParserTest {
         final SecureSAXParser parser = new SecureSAXParser(SAXParserFactory.newInstance().newSAXParser());
         final XMLReader firstReader = parser.getXMLReader();
         final Parser firstParser = parser.getParser();
-        Assertions.assertSame(firstReader, parser.getXMLReader());
-        Assertions.assertSame(firstParser, parser.getParser());
+        assertSame(firstReader, parser.getXMLReader());
+        assertSame(firstParser, parser.getParser());
         parser.setProperty("http://xml.org/sax/properties/lexical-handler", null);
-        Assertions.assertNull(parser.getProperty("http://xml.org/sax/properties/lexical-handler"));
+        assertNull(parser.getProperty("http://xml.org/sax/properties/lexical-handler"));
         parser.reset();
-        Assertions.assertNotSame(firstReader, parser.getXMLReader());
-        Assertions.assertNotSame(firstParser, parser.getParser());
+        assertNotSame(firstReader, parser.getXMLReader());
+        assertNotSame(firstParser, parser.getParser());
     }
 
     @Test
@@ -132,6 +135,6 @@ class SecureSAXParserTest {
     void reusesAReaderThatAlreadyImplementsSax1Parser() throws Exception {
         final ParserSecureReader reader = new ParserSecureReader(SAXParserFactory.newInstance().newSAXParser().getXMLReader());
         final SecureSAXParser parser = new SecureSAXParser(new ReaderSAXParser(reader));
-        Assertions.assertSame(reader, parser.getParser());
+        assertSame(reader, parser.getParser());
     }
 }

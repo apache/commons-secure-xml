@@ -17,12 +17,12 @@
 
 package org.apache.commons.xml;
 
+import javax.xml.transform.Source;
+import javax.xml.validation.Validator;
+
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import javax.xml.transform.Source;
-import javax.xml.validation.Validator;
 
 /**
  * Checks whether parsers can pull in an external DTD declared via {@code <!DOCTYPE root SYSTEM "...">}.

@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URL;
 
@@ -52,8 +53,6 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-
-import java.io.IOException;
 
 /**
  * Checks that a caller-supplied resolver cannot remove the secure ignore-all floor on any factory.

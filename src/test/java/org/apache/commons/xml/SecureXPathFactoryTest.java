@@ -20,16 +20,16 @@ package org.apache.commons.xml;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import javax.xml.xpath.XPathFactory;
-
-import org.junit.jupiter.api.Test;
 
 import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathFactory;
 import javax.xml.xpath.XPathFactoryConfigurationException;
 import javax.xml.xpath.XPathFunctionResolver;
 import javax.xml.xpath.XPathVariableResolver;
-import org.junit.jupiter.api.Assertions;
+
+import org.junit.jupiter.api.Test;
 
 class SecureXPathFactoryTest {
 
@@ -118,6 +118,6 @@ class SecureXPathFactoryTest {
             public void setXPathVariableResolver(final XPathVariableResolver resolver) {
             }
         };
-        Assertions.assertThrows(SecureException.class, () -> SecureXPathFactory.secure(rejectingFactory));
+        assertThrows(SecureException.class, () -> SecureXPathFactory.secure(rejectingFactory));
     }
 }

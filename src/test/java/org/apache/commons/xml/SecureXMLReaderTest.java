@@ -17,14 +17,17 @@
 
 package org.apache.commons.xml;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.IOException;
 import java.io.StringReader;
+
 import javax.xml.parsers.SAXParserFactory;
+
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
-
-import java.io.IOException;
-import org.junit.jupiter.api.Assertions;
 import org.xml.sax.helpers.XMLFilterImpl;
 
 class SecureXMLReaderTest {
@@ -52,8 +55,8 @@ class SecureXMLReaderTest {
         final SecureXMLReader reader = new SecureXMLReader(delegate);
         reader.parse(new InputSource());
         reader.parse("system");
-        Assertions.assertTrue(delegate.inputSourceParsed);
-        Assertions.assertTrue(delegate.systemIdParsed);
+        assertTrue(delegate.inputSourceParsed);
+        assertTrue(delegate.systemIdParsed);
     }
 
     @Test
@@ -69,6 +72,6 @@ class SecureXMLReaderTest {
         reader.getErrorHandler();
         reader.getEntityResolver();
         reader.parse(new InputSource(new StringReader("<root/>")));
-        Assertions.assertThrows(IOException.class, () -> reader.parse("file:/definitely-not-present-commons-xml-test.xml"));
+        assertThrows(IOException.class, () -> reader.parse("file:/definitely-not-present-commons-xml-test.xml"));
     }
 }

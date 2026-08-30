@@ -17,22 +17,22 @@
 
 package org.apache.commons.xml;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 import java.io.StringReader;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.Source;
+import javax.xml.validation.Validator;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
-
-import javax.xml.transform.Source;
-import javax.xml.validation.Validator;
 
 /**
  * Checks whether parsers can pull in an external DTD via a parameter-entity reference inside the internal subset.
@@ -109,7 +109,7 @@ class ExternalParameterEntityTest {
 
     private static boolean probeSaxResolvesParameterEntities() {
         final AtomicBoolean called = new AtomicBoolean();
-        Assertions.assertDoesNotThrow(() -> {
+        assertDoesNotThrow(() -> {
             final XMLReader reader = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
             reader.setEntityResolver((publicId, systemId) -> {
                 if ("about:invalid".equals(systemId)) {

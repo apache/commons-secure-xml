@@ -17,14 +17,18 @@
 
 package org.apache.commons.xml;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
@@ -32,6 +36,8 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.URIResolver;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TemplatesHandler;
 import javax.xml.transform.sax.TransformerHandler;
@@ -39,14 +45,8 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.xml.sax.XMLFilter;
-
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.sax.SAXSource;
-import org.junit.jupiter.api.Assertions;
 import org.xml.sax.InputSource;
+import org.xml.sax.XMLFilter;
 
 class SecureTransformerFactoryTest {
 
@@ -182,13 +182,13 @@ class SecureTransformerFactoryTest {
         assertNull(factory.newTransformerHandler(templates));
         assertNull(factory.newXMLFilter(stylesheet()));
         factory.setAttribute("test", "value");
-        Assertions.assertEquals("value", factory.getAttribute("test"));
+        assertEquals("value", factory.getAttribute("test"));
         factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
     }
 
     @Test
     void rejectsDelegatesThatCannotEnableSecureProcessing() {
-        Assertions.assertThrows(SecureException.class, () -> SecureTransformerFactory.secure(new RejectingFeatureFactory()));
+        assertThrows(SecureException.class, () -> SecureTransformerFactory.secure(new RejectingFeatureFactory()));
     }
 
     @Test
@@ -213,7 +213,7 @@ class SecureTransformerFactoryTest {
         assertSame(resolver, factory.getURIResolver());
         factory.setErrorListener(factory.getErrorListener());
         factory.setAttribute("indent-number", 2);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> factory.getAttribute("indent-number"));
+        assertThrows(IllegalArgumentException.class, () -> factory.getAttribute("indent-number"));
         final Templates templates = factory.newTemplates(stylesheet());
         assertInstanceOf(SecureTemplates.class, templates);
         assertInstanceOf(SecureTransformer.class, factory.newTransformer());

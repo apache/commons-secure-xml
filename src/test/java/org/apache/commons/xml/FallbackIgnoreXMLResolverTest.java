@@ -20,10 +20,11 @@ package org.apache.commons.xml;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import org.junit.jupiter.api.Test;
 
 import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
+
+import org.junit.jupiter.api.Test;
 
 class FallbackIgnoreXMLResolverTest {
 

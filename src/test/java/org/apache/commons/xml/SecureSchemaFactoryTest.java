@@ -22,18 +22,19 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import javax.xml.XMLConstants;
-import javax.xml.validation.SchemaFactory;
-import org.junit.jupiter.api.Test;
-import org.xml.sax.helpers.DefaultHandler;
 
+import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
+import org.xml.sax.helpers.DefaultHandler;
 
 class SecureSchemaFactoryTest {
 

@@ -19,10 +19,10 @@ package org.apache.commons.xml;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import javax.xml.validation.SchemaFactory;
+
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import javax.xml.validation.Schema;
 
 /**
  * Checks that {@link SecureSchemaFactory#newInstance(String)} passes the schema language through to {@link SchemaFactory#newInstance}.

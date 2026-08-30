@@ -25,10 +25,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.xml.sax.ext.DefaultHandler2;
 import org.xml.sax.ext.EntityResolver2;
-
-import org.xml.sax.SAXException;
 
 class FallbackIgnoreEntityResolver2Test {
 

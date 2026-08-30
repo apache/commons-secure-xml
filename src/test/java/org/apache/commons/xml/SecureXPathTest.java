@@ -28,18 +28,17 @@ import java.util.Iterator;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
-import javax.xml.xpath.XPathFactory;
-
-import org.junit.jupiter.api.Test;
-import org.xml.sax.InputSource;
-
 import javax.xml.namespace.QName;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import javax.xml.xpath.XPathFunctionResolver;
 import javax.xml.xpath.XPathVariableResolver;
+
+import org.junit.jupiter.api.Test;
+import org.xml.sax.InputSource;
 
 class SecureXPathTest {
 

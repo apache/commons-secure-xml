@@ -18,8 +18,10 @@
 package org.apache.commons.xml;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+
 import javax.xml.XMLConstants;
 import javax.xml.validation.SchemaFactory;
+
 import org.junit.jupiter.api.Test;
 
 class SecureSchemaTest {

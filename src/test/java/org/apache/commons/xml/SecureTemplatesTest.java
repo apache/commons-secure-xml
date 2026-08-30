@@ -24,9 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import java.io.StringReader;
 import java.util.Properties;
 
-import javax.xml.transform.Transformer;
-
 import javax.xml.transform.Templates;
+import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamSource;
 

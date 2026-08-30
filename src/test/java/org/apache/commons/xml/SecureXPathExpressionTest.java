@@ -21,13 +21,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.StringReader;
 
+import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
-
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
 
 class SecureXPathExpressionTest {
 

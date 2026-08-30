@@ -19,11 +19,12 @@ package org.apache.commons.xml;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import org.junit.jupiter.api.Test;
 
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.dom.DOMSource;
+
+import org.junit.jupiter.api.Test;
 
 class FallbackIgnoreURIResolverTest {
 

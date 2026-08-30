@@ -28,7 +28,6 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.junit.jupiter.api.Test;
 import org.xml.sax.helpers.AttributesImpl;
-
 import org.xml.sax.helpers.LocatorImpl;
 
 class SecureTransformerHandlerTest {

@@ -37,8 +37,6 @@ import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
-import javax.xml.parsers.SAXParser;
-
 class SecureSAXParserFactoryTest {
 
     @Test

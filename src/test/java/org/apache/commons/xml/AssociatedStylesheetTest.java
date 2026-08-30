@@ -24,12 +24,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.sax.SAXSource;
 
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import javax.xml.transform.sax.SAXSource;
 
 /**
  * Checks that {@code getAssociatedStylesheet} scans for {@code xml-stylesheet} PIs without fetching an external DTD declared in the document prolog.

@@ -17,6 +17,8 @@
 
 package org.apache.commons.xml;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -25,25 +27,23 @@ import java.io.StringReader;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Result;
+import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.URIResolver;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamSource;
 
 import org.junit.jupiter.api.Test;
+import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
-import org.xml.sax.helpers.DefaultHandler;
-
-import javax.xml.transform.ErrorListener;
-import javax.xml.transform.Source;
-import org.junit.jupiter.api.Assertions;
-import org.xml.sax.Attributes;
 import org.xml.sax.ext.DefaultHandler2;
+import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLFilterImpl;
 
 class SecureXMLFilterTest {
@@ -66,7 +66,7 @@ class SecureXMLFilterTest {
             }
         });
         final SAXException exception = assertThrows(SAXException.class, () -> filter.parse(new InputSource(new StringReader("<root/>"))));
-        Assertions.assertEquals("handler", exception.getMessage());
+        assertEquals("handler", exception.getMessage());
     }
 
     @Test
@@ -94,7 +94,7 @@ class SecureXMLFilterTest {
         filter.error(new TransformerException("error", new SAXParseException("cause", null)));
         final TransformerException fatal = new TransformerException("fatal");
         assertSame(fatal, assertThrows(TransformerException.class, () -> filter.fatalError(fatal)));
-        Assertions.assertEquals(3, reports.get());
+        assertEquals(3, reports.get());
     }
 
     @Test
@@ -189,7 +189,7 @@ class SecureXMLFilterTest {
         final SecureXMLFilter filter = new SecureXMLFilter(new SecureTemplates(templates, null, null, false));
         filter.setContentHandler(new DefaultHandler());
         final IOException exception = assertThrows(IOException.class, () -> filter.parse(new InputSource(new StringReader("<root/>"))));
-        Assertions.assertEquals("transform", exception.getMessage());
+        assertEquals("transform", exception.getMessage());
     }
 
     @Test
@@ -229,6 +229,6 @@ class SecureXMLFilterTest {
             }
         });
         final SAXException exception = assertThrows(SAXException.class, () -> filter.parse(new InputSource(new StringReader("<root/>"))));
-        Assertions.assertNotNull(exception.getCause());
+        assertNotNull(exception.getCause());
     }
 }

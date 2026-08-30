@@ -20,8 +20,8 @@ package org.apache.commons.xml;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.ls.LSException;
 import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;

@@ -29,8 +29,6 @@ import javax.xml.xpath.XPathFactory;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import javax.xml.xpath.XPath;
-
 /**
  * Checks whether Saxon's XPath 3.1 URI-fetching functions can pull external resources into the result.
  *

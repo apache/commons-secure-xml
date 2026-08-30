@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import javax.xml.XMLConstants;
 import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.TypeInfoProvider;
 import javax.xml.validation.ValidatorHandler;
 
 import org.junit.jupiter.api.Test;
@@ -39,7 +40,6 @@ import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.DefaultHandler;
-import javax.xml.validation.TypeInfoProvider;
 
 class SecureValidatorHandlerTest {
 
