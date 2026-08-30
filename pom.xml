@@ -46,8 +46,8 @@ limitations under the License.
     <commons.bc.version>1.0.0</commons.bc.version> -->
     <japicmp.skip>true</japicmp.skip>
     <commons.release.next>1.0.1</commons.release.next>
-    <commons.componentid>xml</commons.componentid>
-    <commons.packageId>xml</commons.packageId>
+    <commons.componentid>secure-xml</commons.componentid>
+    <commons.packageId>secure-xml</commons.packageId>
     <commons.module.name>org.apache.commons.xml.secure</commons.module.name>
     <commons.jira.id>COMMONSXML</commons.jira.id>
     <commons.scmPubUrl>https://svn.apache.org/repos/infra/websites/production/commons/content/proper/commons-secure-xml</commons.scmPubUrl>
