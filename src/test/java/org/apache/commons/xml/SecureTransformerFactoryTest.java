@@ -195,6 +195,7 @@ class SecureTransformerFactoryTest {
 
     @Test
     @Tag("trax")
+    @DisabledIfSystemProperty(named = "android.useAndroidX", matches = ".*") // Hack
     void securesAssociatedStylesheetSourcesOfEverySupportedShape() throws Exception {
         final SAXTransformerFactory factory = (SAXTransformerFactory) SecureTransformerFactory.newInstance();
         associatedStylesheet(factory, new StreamSource(new StringReader("<root/>")));
