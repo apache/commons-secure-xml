@@ -20,6 +20,10 @@ limitations under the License.
     "https://checkstyle.org/dtds/configuration_1_3.dtd">
 <module name="Checker">
   <property name="localeLanguage" value="en" />
+  <!-- Generated Gradle output; a repository-root run would otherwise flag its files. -->
+  <module name="BeforeExecutionExclusionFileFilter">
+    <property name="fileNamePattern" value=".*[/\\]android-tests[/\\]build[/\\].*" />
+  </module>
   <module name="FileTabCharacter">
     <property name="fileExtensions" value="java,xml" />
   </module>
