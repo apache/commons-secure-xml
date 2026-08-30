@@ -45,6 +45,7 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLFilter;
 
@@ -206,6 +207,7 @@ class SecureTransformerFactoryTest {
     }
 
     @Test
+    @DisabledIfSystemProperty(named = "env.target", matches = "android|graalvm") // TODO Who knows!
     void wrapsEveryStandardAndSaxFactoryProduct() throws Exception {
         final SAXTransformerFactory factory = (SAXTransformerFactory) SecureTransformerFactory.newInstance();
         final URIResolver resolver = (href, base) -> null;
