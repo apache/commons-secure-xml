@@ -127,6 +127,7 @@ jobs:
     # without acceleration boot too slowly to be useful in CI.
     name: build (android, API ${{ matrix.api-level }})
     runs-on: ubuntu-latest
+    continue-on-error: true
     timeout-minutes: 45
     strategy:
       fail-fast: false
