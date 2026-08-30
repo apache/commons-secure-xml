@@ -24,6 +24,7 @@ stock JDK and external JAXP implementations.
 
 Full documentation is provided in:
 
-- [Javadoc Overview](apidocs/index.html),
-- [Javadoc Package Summary](apidocs/org/apache/commons/xml/package-summary.html), and
-- [Project Reports](project-reports.html).
+- [**TL;DR**](apidocs/index.html#tldr)
+- [Javadoc Overview](apidocs/index.html)
+- [Javadoc Package Summary](apidocs/org/apache/commons/xml/package-summary.html)
+- [Project Reports](project-reports.html)

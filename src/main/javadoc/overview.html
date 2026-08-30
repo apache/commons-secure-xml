@@ -19,17 +19,57 @@ limitations under the License.
 <title>Apache Commons Secure XML Overview</title>
 </head>
 <body>
-  <a href="https://commons.apache.org/xml"><img src="org/apache/commons/xml/doc-files/logo.png" alt="Apache Commons Secure XML">
-  </a>
+  <a href="https://commons.apache.org/xml"><img src="org/apache/commons/xml/doc-files/logo.png" alt="Apache Commons Secure XML"> </a>
   <section id="apache-commons-secure-xml">
     <h1>
       <img src="org/apache/commons/xml/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">Apache Commons Secure XML
     </h1>
     <p>
-      <a href="https://commons.apache.org/xml">Apache Commons Secure XML</a> is part of the <a href="https://commons.apache.org/index.html">Apache Commons</a> project.
+      <a href="https://commons.apache.org/xml">Apache Commons Secure XML</a> is part of the <a href="https://commons.apache.org/index.html">Apache Commons</a>
+      project.
     </p>
     <p>Apache Commons Secure XML provides secure-by-default JAXP factory creation, abstracting over implementation-specific XXE securing differences between
       the stock JDK and external JAXP implementations.</p>
+  </section>
+  <section id="tldr">
+    <h1>
+      <img src="org/apache/commons/xml/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">TL;DR
+    </h1>
+    <p>To secure XML processing:</p>
+    <table>
+      <caption>JAXP to Apache Commons Secure XML</caption>
+      <tr>
+        <th>Replace JAXP</th>
+        <th>with Commons Secure XML</th>
+      </tr>
+      <tr>
+        <td><code>javax.xml.parsers.DocumentBuilderFactory</code></td>
+        <td><code>org.apache.commons.xml.SecureDocumentBuilderFactory</code></td>
+      </tr>
+      <tr>
+        <td><code>javax.xml.parsers.SAXParserFactory</code></td>
+        <td><code>org.apache.commons.xml.SecureSAXParserFactory</code></td>
+      </tr>
+      <tr>
+        <td><code>javax.xml.validation.SchemaFactory</code></td>
+        <td><code>org.apache.commons.xml.SecureSchemaFactory</code></td>
+      </tr>
+      <tr>
+        <td><code>javax.xml.transform.TransformerFactory</code></td>
+        <td><code>org.apache.commons.xml.SecureTransformerFactory</code></td>
+      </tr>
+      <tr>
+        <td><code>javax.xml.stream.XMLInputFactory</code></td>
+        <td><code>org.apache.commons.xml.SecureXMLInputFactory</code></td>
+      </tr>
+      <tr>
+        <td><code>javax.xml.xpath.XPathFactory</code></td>
+        <td><code>org.apache.commons.xml.SecureXPathFactory</code></td>
+      </tr>
+    </table>
+    <p>
+      Or use the <a href="org/apache/commons/xml/doc-files/rewrite.yml">OpenRewrite recipe</a>.
+    </p>
   </section>
   <section id="why">
     <h1>
