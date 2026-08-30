@@ -209,7 +209,6 @@ class SecureTransformerFactoryTest {
     }
 
     @Test
-    @Tag("trax")
     void wrapsEveryStandardAndSaxFactoryProduct() throws Exception {
         final SAXTransformerFactory factory = (SAXTransformerFactory) SecureTransformerFactory.newInstance();
         final URIResolver resolver = (href, base) -> null;
