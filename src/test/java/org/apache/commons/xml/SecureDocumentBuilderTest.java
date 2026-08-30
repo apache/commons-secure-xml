@@ -24,8 +24,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+@Tag("dom")
 class SecureDocumentBuilderTest {
 
     @Test

@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.Result;
@@ -31,6 +32,7 @@ import javax.xml.transform.Source;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.ErrorHandler;
@@ -39,6 +41,7 @@ import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.helpers.DefaultHandler;
 
+@Tag("schema")
 class SecureValidatorTest {
 
     private static final class PropertyValidator extends Validator {
@@ -116,7 +119,8 @@ class SecureValidatorTest {
         assertNull(validator.getResourceResolver());
         validator.setResourceResolver(resolver);
         validator.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        validator.setProperty(TestConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        validator.setProperty(TestConstants.LOCALE_PROPERTY, Locale.ROOT);
+        assertEquals(Locale.ROOT, validator.getProperty(TestConstants.LOCALE_PROPERTY));
         assertSame(resolver, validator.getResourceResolver());
         assertTrue(validator.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
         assertThrows(SAXNotRecognizedException.class, () -> validator.getProperty(TestConstants.ACCESS_EXTERNAL_SCHEMA));

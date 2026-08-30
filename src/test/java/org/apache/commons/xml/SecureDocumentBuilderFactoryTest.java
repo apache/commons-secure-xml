@@ -17,6 +17,7 @@
 
 package org.apache.commons.xml;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -26,8 +27,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+@Tag("dom")
 class SecureDocumentBuilderFactoryTest {
 
     @Test
@@ -50,7 +53,8 @@ class SecureDocumentBuilderFactoryTest {
         factory.setXIncludeAware(false);
         factory.setSchema(null);
         factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        factory.setAttribute(TestConstants.ACCESS_EXTERNAL_DTD, "");
+        factory.setAttribute(TestConstants.JAXP_SCHEMA_LANGUAGE, XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        assertEquals(XMLConstants.W3C_XML_SCHEMA_NS_URI, factory.getAttribute(TestConstants.JAXP_SCHEMA_LANGUAGE));
         assertTrue(factory.isCoalescing());
         assertFalse(factory.isExpandEntityReferences());
         assertTrue(factory.isIgnoringComments());
@@ -60,7 +64,6 @@ class SecureDocumentBuilderFactoryTest {
         assertFalse(factory.isXIncludeAware());
         assertNull(factory.getSchema());
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-        assertNotNull(factory.getAttribute(TestConstants.ACCESS_EXTERNAL_DTD));
         assertNotNull(factory.newDocumentBuilder());
     }
 

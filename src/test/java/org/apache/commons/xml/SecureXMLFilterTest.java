@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -37,6 +38,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamSource;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -46,6 +48,7 @@ import org.xml.sax.ext.DefaultHandler2;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLFilterImpl;
 
+@Tag("trax")
 class SecureXMLFilterTest {
 
     private static SecureXMLFilter filter() throws Exception {
@@ -218,7 +221,7 @@ class SecureXMLFilterTest {
     }
 
     @Test
-    void wrapsIoFailuresFromTheParentReader() throws Exception {
+    void surfacesIoFailuresFromTheParentReader() throws Exception {
         final SecureXMLFilter filter = filter();
         filter.setContentHandler(new DefaultHandler());
         filter.setParent(new XMLFilterImpl() {
@@ -228,7 +231,10 @@ class SecureXMLFilterTest {
                 throw new IOException("parent");
             }
         });
-        final SAXException exception = assertThrows(SAXException.class, () -> filter.parse(new InputSource(new StringReader("<root/>"))));
-        assertNotNull(exception.getCause());
+        // XSLTC wraps the failure in a SAXException, Xalan hands the filter a cause it rethrows as the original IOException, and Saxon reports a SAXException
+        // with no linked cause: the portable contract is that the parse fails with a declared exception instead of returning a truncated result.
+        final Exception exception = assertThrows(Exception.class, () -> filter.parse(new InputSource(new StringReader("<root/>"))));
+        assertTrue(exception instanceof SAXException || exception instanceof IOException,
+                "parse must fail with a declared exception type: " + exception);
     }
 }

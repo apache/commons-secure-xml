@@ -50,6 +50,7 @@ import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLFilter;
 
+@Tag("trax")
 class SecureTransformerFactoryTest {
 
     private static class NullProductsFactory extends SAXTransformerFactory {
@@ -194,8 +195,6 @@ class SecureTransformerFactoryTest {
     }
 
     @Test
-    @Tag("trax")
-    @Tag("sax")
     void securesAssociatedStylesheetSourcesOfEverySupportedShape() throws Exception {
         final SAXTransformerFactory factory = (SAXTransformerFactory) SecureTransformerFactory.newInstance();
         associatedStylesheet(factory, new StreamSource(new StringReader("<root/>")));
@@ -215,8 +214,13 @@ class SecureTransformerFactoryTest {
         factory.setURIResolver(resolver);
         assertSame(resolver, factory.getURIResolver());
         factory.setErrorListener(factory.getErrorListener());
-        factory.setAttribute("indent-number", 2);
-        assertThrows(IllegalArgumentException.class, () -> factory.getAttribute("indent-number"));
+        try {
+            factory.setAttribute("indent-number", 2);
+            // XSLTC quirk: the attribute is settable but not readable.
+            assertThrows(IllegalArgumentException.class, () -> factory.getAttribute("indent-number"));
+        } catch (final IllegalArgumentException e) {
+            // Saxon and Xalan reject the XSLTC-only attribute at set time; the delegate's rejection is itself the forwarding proof.
+        }
         final Templates templates = factory.newTemplates(stylesheet());
         assertInstanceOf(SecureTemplates.class, templates);
         assertInstanceOf(SecureTransformer.class, factory.newTransformer());

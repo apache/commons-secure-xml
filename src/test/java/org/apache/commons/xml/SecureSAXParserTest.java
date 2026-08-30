@@ -28,6 +28,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.validation.Schema;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.DocumentHandler;
 import org.xml.sax.Parser;
@@ -35,6 +36,7 @@ import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.XMLReader;
 
+@Tag("sax")
 class SecureSAXParserTest {
 
     private static final class ParserSecureReader extends SecureXMLReader implements Parser {
