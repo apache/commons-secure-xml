@@ -50,7 +50,7 @@ class SecureDocumentBuilderFactoryTest {
         factory.setXIncludeAware(false);
         factory.setSchema(null);
         factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        factory.setAttribute(TestConstants.ACCESS_EXTERNAL_DTD, "");
         assertTrue(factory.isCoalescing());
         assertFalse(factory.isExpandEntityReferences());
         assertTrue(factory.isIgnoringComments());
@@ -60,7 +60,7 @@ class SecureDocumentBuilderFactoryTest {
         assertFalse(factory.isXIncludeAware());
         assertNull(factory.getSchema());
         assertTrue(factory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING));
-        assertNotNull(factory.getAttribute(XMLConstants.ACCESS_EXTERNAL_DTD));
+        assertNotNull(factory.getAttribute(TestConstants.ACCESS_EXTERNAL_DTD));
         assertNotNull(factory.newDocumentBuilder());
     }
 

@@ -25,5 +25,11 @@ class TestConstants {
      * See TestConstants.ACCESS_EXTERNAL_SCHEMA
      */
     static final String ACCESS_EXTERNAL_SCHEMA = "http://javax.xml.XMLConstants/property/accessExternalSchema";
-    
+
+    /**
+     * Hack for Android builds.
+     *
+     * See TestConstants.ACCESS_EXTERNAL_DTD
+     */
+    static final String ACCESS_EXTERNAL_DTD = "http://javax.xml.XMLConstants/property/accessExternalDTD";
 }
