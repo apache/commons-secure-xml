@@ -30,7 +30,7 @@ New features
 ------------
 
 *                  This is the first release of Apache Commons Secure XML. Thanks to Piotr P. Karwasz, Gary Gregory.
-*                  Add secure-by-default JAXP factory creation via org.apache.commons.xml, donated from the copernik-xml-factory project (https://github.com/copernik-eu/copernik-xml-factory) and covering the stock JDK, Android, Apache Xalan, Apache Xerces, Woodstox, and Saxon-HE. Thanks to Piotr P. Karwasz, Gary Gregory.
+*                  Add secure-by-default JAXP factory creation via org.apache.commons.xml.secure, donated from the copernik-xml-factory project (https://github.com/copernik-eu/copernik-xml-factory) and covering the stock JDK, Android, Apache Xalan, Apache Xerces, Woodstox, and Saxon-HE. Thanks to Piotr P. Karwasz, Gary Gregory.
 * COMMONSXML-9:    Install a non-removable resolver floor on every resolver channel (EntityResolver, LSResourceResolver, URIResolver, and XMLResolver), routing caller-supplied resolvers through it as allow-lists. Thanks to Piotr P. Karwasz, Gary Gregory.
 *                  Secure the SAXTransformerFactory extension surface (TransformerHandler, TemplatesHandler, and XMLFilter) and TransformerFactory.getAssociatedStylesheet. Thanks to Piotr P. Karwasz, Gary Gregory.
 *                  Document the threat model on the project site, including the denied-fetch contract and the supported runtime floor (OpenJDK 8 and Android API 33 or later). Thanks to Piotr P. Karwasz, Jarek Potiuk, Gary Gregory.
@@ -51,7 +51,7 @@ Changes
 -------
 
 * COMMONSXML-1,COMMONSXML-5,COMMONSXML-6,COMMONSXML-7,COMMONSXML-8: Recognize XML implementations by the JAXP features and properties they support instead of by their implementation class name, extending the securing to any compliant implementation. Thanks to Piotr P. Karwasz, Gary Gregory.
-* COMMONSXML-4:    Define a consistent contract for denied external fetches: unresolved external references resolve to empty content on every implementation, unless the org.apache.commons.xml.throwOnUnresolved system property requests rejection. Thanks to Piotr P. Karwasz, Gary Gregory.
+* COMMONSXML-4:    Define a consistent contract for denied external fetches: unresolved external references resolve to empty content on every implementation, unless the org.apache.commons.xml.secure.throwOnUnresolved system property requests rejection. Thanks to Piotr P. Karwasz, Gary Gregory.
 * COMMONSXML-3:    Reduce the shaded footprint by splitting the secure classes and resolver floors into independent entry points. Thanks to Piotr P. Karwasz, Gary Gregory.
 
 Removed

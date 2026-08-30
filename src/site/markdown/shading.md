@@ -111,7 +111,7 @@ while every other dependency of your project stays an ordinary external dependen
         </artifactSet>
         <relocations>
           <relocation>
-            <pattern>org.apache.commons.xml</pattern>
+            <pattern>org.apache.commons.xml.secure</pattern>
             <shadedPattern>com.example.app.internal.xml</shadedPattern>
           </relocation>
         </relocations>

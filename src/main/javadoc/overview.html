@@ -19,10 +19,10 @@ limitations under the License.
 <title>Apache Commons Secure XML Overview</title>
 </head>
 <body>
-  <a href="https://commons.apache.org/xml"><img src="org/apache/commons/xml/doc-files/logo.png" alt="Apache Commons Secure XML"> </a>
+  <a href="https://commons.apache.org/xml"><img src="org/apache/commons/xml/secure/doc-files/logo.png" alt="Apache Commons Secure XML"> </a>
   <section id="apache-commons-secure-xml">
     <h1>
-      <img src="org/apache/commons/xml/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">Apache Commons Secure XML
+      <img src="org/apache/commons/xml/secure/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">Apache Commons Secure XML
     </h1>
     <p>
       <a href="https://commons.apache.org/xml">Apache Commons Secure XML</a> is part of the <a href="https://commons.apache.org/index.html">Apache Commons</a>
@@ -33,7 +33,7 @@ limitations under the License.
   </section>
   <section id="tldr">
     <h1>
-      <img src="org/apache/commons/xml/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">TL;DR
+      <img src="org/apache/commons/xml/secure/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">TL;DR
     </h1>
     <p>To secure XML processing:</p>
     <table>
@@ -44,36 +44,36 @@ limitations under the License.
       </tr>
       <tr>
         <td><code>javax.xml.parsers.DocumentBuilderFactory</code></td>
-        <td><code>org.apache.commons.xml.SecureDocumentBuilderFactory</code></td>
+        <td><code>org.apache.commons.xml.secure.SecureDocumentBuilderFactory</code></td>
       </tr>
       <tr>
         <td><code>javax.xml.parsers.SAXParserFactory</code></td>
-        <td><code>org.apache.commons.xml.SecureSAXParserFactory</code></td>
+        <td><code>org.apache.commons.xml.secure.SecureSAXParserFactory</code></td>
       </tr>
       <tr>
         <td><code>javax.xml.validation.SchemaFactory</code></td>
-        <td><code>org.apache.commons.xml.SecureSchemaFactory</code></td>
+        <td><code>org.apache.commons.xml.secure.SecureSchemaFactory</code></td>
       </tr>
       <tr>
         <td><code>javax.xml.transform.TransformerFactory</code></td>
-        <td><code>org.apache.commons.xml.SecureTransformerFactory</code></td>
+        <td><code>org.apache.commons.xml.secure.SecureTransformerFactory</code></td>
       </tr>
       <tr>
         <td><code>javax.xml.stream.XMLInputFactory</code></td>
-        <td><code>org.apache.commons.xml.SecureXMLInputFactory</code></td>
+        <td><code>org.apache.commons.xml.secure.SecureXMLInputFactory</code></td>
       </tr>
       <tr>
         <td><code>javax.xml.xpath.XPathFactory</code></td>
-        <td><code>org.apache.commons.xml.SecureXPathFactory</code></td>
+        <td><code>org.apache.commons.xml.secure.SecureXPathFactory</code></td>
       </tr>
     </table>
     <p>
-      Or use the <a href="org/apache/commons/xml/doc-files/rewrite.yml">OpenRewrite recipe</a>.
+      Or use the <a href="org/apache/commons/xml/secure/doc-files/rewrite.yml">OpenRewrite recipe</a>.
     </p>
   </section>
   <section id="why">
     <h1>
-      <img src="org/apache/commons/xml/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">Why
+      <img src="org/apache/commons/xml/secure/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">Why
     </h1>
     <p>Any Java library that parses XML has to secure JAXP before handing a factory to user code, and every library ends up copy-pasting the same securing
       snippet. The snippet is fragile: the attributes and features needed to secure a factory are not standardized, each JAXP implementation exposes a slightly
@@ -88,7 +88,7 @@ limitations under the License.
     </p>
     <p>
       This library provides that baseline. Each
-      <code>org.apache.commons.xml</code>
+      <code>org.apache.commons.xml.secure</code>
       factory call returns a new factory secured by an implementation-specific recipe, so the returned object behaves the same way security-wise regardless of
       which JAXP implementation resolved. Security becomes a property of the call, not of the classpath, and there is one place to update when a new securing
       setting becomes available or a default changes.
@@ -96,14 +96,14 @@ limitations under the License.
   </section>
   <section id="usage">
     <h1>
-      <img src="org/apache/commons/xml/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">Usage
+      <img src="org/apache/commons/xml/secure/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">Usage
     </h1>
     <p>
       To add the library to your build, see <a href="dependency-info.html">Maven Coordinates</a>. (Maven Coordinates)[dependency-info.html]
     </p>
     <p>
       Every factory method in
-      <code>org.apache.commons.xml</code>
+      <code>org.apache.commons.xml.secure</code>
       returns a new, secured factory. Pick the one that matches the API you already use; no other configuration is required. On secured factories an external
       resource reference (DTD, entity, schema, stylesheet) is never fetched: it resolves to empty content, so the parse continues without it (see Configuration
       below).
@@ -125,7 +125,7 @@ limitations under the License.
       <p>
         Out of the box the library recognizes the stock JDK JAXP implementations, Apache Xerces 2.x, Woodstox, and Saxon-HE. If a factory resolves to an
         implementation not covered by any bundled securing recipe, every
-        <code>org.apache.commons.xml</code>
+        <code>org.apache.commons.xml.secure</code>
         factory method throws
         <code>IllegalStateException</code>
         with a message naming the unsupported class. Adding support for a new JAXP implementation requires a code change to this library.
@@ -139,7 +139,7 @@ limitations under the License.
         <pre class="sourceCode java">
       <code class="sourceCode java">
 import org.w3c.dom.Document;
-import org.apache.commons.xml.SecureDocumentBuilderFactory;
+import org.apache.commons.xml.secure.SecureDocumentBuilderFactory;
 
 Document doc = SecureDocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputStream);
       </code>
@@ -153,7 +153,7 @@ Document doc = SecureDocumentBuilderFactory.newInstance().newDocumentBuilder().p
       <div class="sourceCode" id="cb2">
         <pre class="sourceCode java">
       <code class="sourceCode java">
-import org.apache.commons.xml.SecureSAXParserFactory;
+import org.apache.commons.xml.secure.SecureSAXParserFactory;
 
 SecureSAXParserFactory.newInstance().newSAXParser().parse(inputStream, myDefaultHandler);
       </code>
@@ -168,7 +168,7 @@ SecureSAXParserFactory.newInstance().newSAXParser().parse(inputStream, myDefault
         <pre class="sourceCode java">
       <code class="sourceCode java">
 import javax.xml.stream.XMLStreamReader;
-import org.apache.commons.xml.SecureXMLInputFactory;
+import org.apache.commons.xml.secure.SecureXMLInputFactory;
 
 XMLStreamReader reader = SecureXMLInputFactory.newInstance().createXMLStreamReader(inputStream);
       </code>
@@ -184,7 +184,7 @@ XMLStreamReader reader = SecureXMLInputFactory.newInstance().createXMLStreamRead
       <code class="sourceCode java">
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.transform.stream.StreamResult;
-import org.apache.commons.xml.SecureTransformerFactory;
+import org.apache.commons.xml.secure.SecureTransformerFactory;
 
 SecureTransformerFactory.newInstance()
         .newTransformer(new StreamSource(stylesheet))
@@ -202,7 +202,7 @@ SecureTransformerFactory.newInstance()
       <code class="sourceCode java">
 import javax.xml.xpath.XPathConstants;
 import org.w3c.dom.NodeList;
-import org.apache.commons.xml.SecureXPathFactory;
+import org.apache.commons.xml.secure.SecureXPathFactory;
 
 NodeList hits = (NodeList) SecureXPathFactory.newInstance()
         .newXPath()
@@ -220,7 +220,7 @@ NodeList hits = (NodeList) SecureXPathFactory.newInstance()
       <code class="sourceCode java">
 import javax.xml.XMLConstants;
 import javax.xml.transform.stream.StreamSource;
-import org.apache.commons.xml.SecureSchemaFactory;
+import org.apache.commons.xml.secure.SecureSchemaFactory;
 
 SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         .newSchema(new StreamSource(xsdStream))
@@ -284,7 +284,7 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         <code>SchemaFactory.newSchema(Source)</code>
         are read by a parser the implementation picks internally, and that parser may not be secured (Saxon’s TrAX is one such case, see Building below). Treat
         stylesheets and schemas as trusted input, or pre-parse them through a secured
-        <code>org.apache.commons.xml</code>
+        <code>org.apache.commons.xml.secure</code>
         parser and pass the result as a
         <code>DOMSource</code>
         or
@@ -321,7 +321,7 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
       <h2>Caching and Thread-Safety</h2>
       <p>
         There is no caching or pooling inside
-        <code>org.apache.commons.xml</code>
+        <code>org.apache.commons.xml.secure</code>
         ; callers on a hot path are responsible for their own caching. The returned factories inherit the thread-safety properties of the underlying JAXP
         implementation, which in practice means they are not thread-safe. Create a new factory per thread or synchronize externally.
       </p>
@@ -329,7 +329,7 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
   </section>
   <section id="configuration">
     <h1>
-      <img src="org/apache/commons/xml/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">Configuration
+      <img src="org/apache/commons/xml/secure/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">Configuration
     </h1>
     <p>The secured factories need no configuration. When a document references an external resource (a DTD, an external entity, a schema, an XInclude
       target, or an XSLT document), the securing layer resolves the reference to an empty stream: nothing is fetched, nothing leaks into the result, and the
@@ -349,7 +349,7 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
     </ul>
     <p>
       As a temporary debugging measure, set the system property
-      <code>org.apache.commons.xml.throwOnUnresolved</code>
+      <code>org.apache.commons.xml.secure.throwOnUnresolved</code>
       to
       <code>true</code>
       : every unresolved external reference is then rejected with the resolution hook’s exception, and the message names the denied resource. The property is

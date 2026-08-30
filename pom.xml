@@ -48,12 +48,12 @@ limitations under the License.
     <commons.release.next>1.0.1</commons.release.next>
     <commons.componentid>xml</commons.componentid>
     <commons.packageId>xml</commons.packageId>
-    <commons.module.name>org.apache.commons.xml</commons.module.name>
+    <commons.module.name>org.apache.commons.xml.secure</commons.module.name>
     <commons.jira.id>COMMONSXML</commons.jira.id>
     <commons.scmPubUrl>https://svn.apache.org/repos/infra/websites/production/commons/content/proper/commons-secure-xml</commons.scmPubUrl>
     <!-- OSGi bundle metadata: override commons-parent's org.apache.commons.* defaults. -->
-    <commons.osgi.symbolicName>org.apache.commons.xml</commons.osgi.symbolicName>
-    <commons.osgi.export>org.apache.commons.xml.*;version=${project.version};-noimport:=true</commons.osgi.export>
+    <commons.osgi.symbolicName>org.apache.commons.xml.secure</commons.osgi.symbolicName>
+    <commons.osgi.export>org.apache.commons.xml.secure.*;version=${project.version};-noimport:=true</commons.osgi.export>
     <!-- The negation drops the JDK-internal package bnd infers from the reflective Java 8 fallback in SecureXMLInputFactory.newDefaultFactory(). -->
     <commons.osgi.import>
       !com.sun.xml.internal.stream,
@@ -180,7 +180,7 @@ limitations under the License.
         <artifactId>maven-surefire-plugin</artifactId>
         <!--
           Make the underlying JAXP factories as permissive as the JDK allows. Secure factories produced by
-          org.apache.commons.xml should still block every attack the test suite throws at them; if a test passes only
+          org.apache.commons.xml.secure should still block every attack the test suite throws at them; if a test passes only
           because the JDK's defaults intervened, we want it to fail here so the gap shows up.
 
           Inherited by every execution defined below.

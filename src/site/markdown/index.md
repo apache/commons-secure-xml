@@ -26,5 +26,5 @@ Full documentation is provided in:
 
 - [**TL;DR**](apidocs/index.html#tldr)
 - [Javadoc Overview](apidocs/index.html)
-- [Javadoc Package Summary](apidocs/org/apache/commons/xml/package-summary.html)
+- [Javadoc Package Summary](apidocs/org/apache/commons/xml/secure/package-summary.html)
 - [Project Reports](project-reports.html)

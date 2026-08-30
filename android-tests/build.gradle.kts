@@ -27,7 +27,7 @@ val libraryVersion = "1.0.0-SNAPSHOT"
 val libraryJar = rootProject.file("../target/commons-secure-xml-${libraryVersion}.jar")
 
 android {
-    namespace = "org.apache.commons.xml.androidtests"
+    namespace = "org.apache.commons.xml.secure.androidtests"
     compileSdk = 34
 
     defaultConfig {

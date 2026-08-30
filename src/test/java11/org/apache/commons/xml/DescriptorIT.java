@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.commons.xml;
+package org.apache.commons.xml.secure;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
