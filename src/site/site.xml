@@ -43,6 +43,7 @@
         <item name="Javadoc Current" href="apidocs/index.html" />
         <item name="Javadoc Archive" href="https://javadoc.io/doc/org.apache.commons/commons-xml/" />
       </item>
+      <item name="Shading" href="shading.html" />
       <!-- End: For all components. -->
     </menu>
     <menu ref="reports"/>
