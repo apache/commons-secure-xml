@@ -14,21 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /**
- * Apache Commons Secure XML provides secure-by-default JAXP factory creation for Java. A single method call returns a secure JAXP factory that can be used to
- * <em>safely</em> parse XML files.
+ * <a href="https://commons.apache.org/xml">Apache Commons Secure XML</a> provides secure-by-default JAXP factory creation for Java. A single method call
+ * returns a secure JAXP factory that can be used to <em>safely</em> parse XML files.
  * <p>
- * Every method returns <em>new, secure</em> factory instances. No caching or pooling is performed; callers on a hot path are responsible for their own
- * caching.
+ * Every method returns <em>new, secure</em> factory instances. No caching or pooling is performed; callers on a hot path are responsible for their own caching.
  * </p>
  * <p>
- * A returned factory is not necessarily an instance of the underlying implementation. It might be (and usually is) a wrapper around it, so it cannot be cast
- * to the implementation's own class. Everything else about the implementation's behavior is preserved: features, properties, and attributes delegate to it,
- * and only the security behavior is secure.
+ * A returned factory is not necessarily an instance of the underlying implementation. It might be (and usually is) a wrapper around it, so it cannot be cast to
+ * the implementation's own class. Everything else about the implementation's behavior is preserved: features, properties, and attributes delegate to it, and
+ * only the security behavior is secure.
  * </p>
  * <p>
- * Preserved behavior includes the choice of internal parsers. Each TrAX, XPath, or schema implementation has its own way of instantiating them, and the
- * library respects it:
+ * Preserved behavior includes the choice of internal parsers. Each TrAX, XPath, or schema implementation has its own way of instantiating them, and the library
+ * respects it:
  * </p>
  * <ul>
  * <li>Stock JDK factories use the JDK parsers by default, and expose the {@code jdk.xml.overrideDefaultParser} feature (and Java system property of the same
@@ -83,8 +83,8 @@
  * <h2>Caller-supplied URIs</h2>
  * <p>
  * A top-level URI passed directly by the caller is fetched as-is: {@code StreamSource(systemId)}, {@code DocumentBuilder.parse(String)}, or a {@code SAXSource}
- * built from a system id all cause the JAXP implementation to open that URI without consulting the secure layer. Use a
- * {@link javax.xml.transform.URIResolver} or {@link org.xml.sax.EntityResolver} if you need to restrict the top-level fetch.
+ * built from a system id all cause the JAXP implementation to open that URI without consulting the secure layer. Use a {@link javax.xml.transform.URIResolver}
+ * or {@link org.xml.sax.EntityResolver} if you need to restrict the top-level fetch.
  * </p>
  * <h2>Thread safety</h2>
  * <p>
@@ -92,4 +92,5 @@
  * be thread-safe</strong>. Create a new factory per thread or synchronize externally.
  * </p>
  */
+
 package org.apache.commons.xml;
