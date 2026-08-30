@@ -55,7 +55,7 @@ import org.xml.sax.ext.EntityResolver2;
  */
 class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
 
-    private static final byte[] EMPTY = new byte[0];
+    private static final byte[] EMPTY = {};
 
     /**
      * Resolves {@code systemId} against {@code baseURI}.

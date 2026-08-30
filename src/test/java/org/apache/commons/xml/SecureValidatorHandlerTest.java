@@ -125,7 +125,7 @@ class SecureValidatorHandlerTest {
         LSResourceResolver resourceResolver;
 
         @Override
-        public void characters(char[] ch, int start, int length) {
+        public void characters(final char[] ch, final int start, final int length) {
             charactersCalled = true;
             charactersChars = ch.clone();
             charactersStart = start;
@@ -138,7 +138,7 @@ class SecureValidatorHandlerTest {
         }
 
         @Override
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(final String uri, final String localName, final String qName) {
             endElementCalled = true;
             endElementUri = uri;
             endElementLocalName = localName;
@@ -146,7 +146,7 @@ class SecureValidatorHandlerTest {
         }
 
         @Override
-        public void endPrefixMapping(String prefix) {
+        public void endPrefixMapping(final String prefix) {
             endPrefixMappingCalled = true;
             endPrefixMappingPrefix = prefix;
         }
@@ -162,12 +162,12 @@ class SecureValidatorHandlerTest {
         }
 
         @Override
-        public boolean getFeature(String name) {
+        public boolean getFeature(final String name) {
             return false;
         }
 
         @Override
-        public Object getProperty(String name) {
+        public Object getProperty(final String name) {
             return null;
         }
 
@@ -182,55 +182,55 @@ class SecureValidatorHandlerTest {
         }
 
         @Override
-        public void ignorableWhitespace(char[] ch, int start, int length) {
+        public void ignorableWhitespace(final char[] ch, final int start, final int length) {
             ignorableWhitespaceCalled = true;
         }
 
         @Override
-        public void processingInstruction(String target, String data) {
+        public void processingInstruction(final String target, final String data) {
             processingInstructionCalled = true;
             piTarget = target;
             piData = data;
         }
 
         @Override
-        public void setContentHandler(ContentHandler handler) {
+        public void setContentHandler(final ContentHandler handler) {
             setContentHandlerCalled = true;
             contentHandler = handler;
         }
 
         @Override
-        public void setDocumentLocator(Locator locator) {
+        public void setDocumentLocator(final Locator locator) {
             setDocumentLocatorCalled = true;
         }
 
         @Override
-        public void setErrorHandler(ErrorHandler handler) {
+        public void setErrorHandler(final ErrorHandler handler) {
             setErrorHandlerCalled = true;
             errorHandler = handler;
         }
 
         @Override
-        public void setFeature(String name, boolean value) {
+        public void setFeature(final String name, final boolean value) {
             setFeatureCalled = true;
             setFeatureName = name;
             setFeatureValue = value;
         }
 
         @Override
-        public void setProperty(String name, Object value) {
+        public void setProperty(final String name, final Object value) {
             setPropertyCalled = true;
             setPropertyName = name;
             setPropertyValue = value;
         }
 
         @Override
-        public void setResourceResolver(LSResourceResolver resolver) {
+        public void setResourceResolver(final LSResourceResolver resolver) {
             resourceResolver = resolver;
         }
 
         @Override
-        public void skippedEntity(String name) {
+        public void skippedEntity(final String name) {
             skippedEntityCalled = true;
             skippedEntityName = name;
         }
@@ -241,7 +241,7 @@ class SecureValidatorHandlerTest {
         }
 
         @Override
-        public void startElement(String uri, String localName, String qName, Attributes atts) {
+        public void startElement(final String uri, final String localName, final String qName, final Attributes atts) {
             startElementCalled = true;
             startElementUri = uri;
             startElementLocalName = localName;
@@ -250,7 +250,7 @@ class SecureValidatorHandlerTest {
         }
 
         @Override
-        public void startPrefixMapping(String prefix, String uri) {
+        public void startPrefixMapping(final String prefix, final String uri) {
             startPrefixMappingCalled = true;
             startPrefixMappingPrefix = prefix;
             startPrefixMappingUri = uri;
