@@ -90,6 +90,8 @@ final class SecureTemplates implements Templates {
     @Override
     public Transformer newTransformer() throws TransformerConfigurationException {
         final Transformer transformer = delegate.newTransformer();
+        // Some implementations return null rather than throw, so preserve the delegate's behavior instead of enforcing the contract.
+        // For example, https://issues.apache.org/jira/browse/XALANJ-2410
         return transformer != null ? new SecureTransformer(transformer, uriResolver, emptySource, overrideDefaultParser) : null;
     }
 }
