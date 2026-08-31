@@ -356,4 +356,44 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
       read at resolution time, so it can be toggled on a running application; treat it as a diagnostic switch, not as an application configuration.
     </p>
   </section>
+  <section id="external-access-properties">
+    <h1>
+      <img src="org/apache/commons/xml/secure/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">Why Not the JAXP 1.5 External-Access Properties
+    </h1>
+    <p>
+      The securing installs deny-by-default resolver floors on every factory it returns
+      instead of setting the JAXP 1.5 external-access properties
+      (<code>accessExternalDTD</code>, <code>accessExternalSchema</code>, <code>accessExternalStylesheet</code>).
+      The two mechanisms are not interchangeable:
+      by <a href="https://docs.oracle.com/en/java/javase/21/security/java-api-xml-processing-jaxp-security-guide.html">specification</a>,
+      the external-access properties have no effect
+      when a registered resolver returns a non-null source,
+      so a resolver takes precedence over the properties on every conforming implementation.
+      Beyond that ordering, three defects make the properties unfit as the basis of the securing:
+    </p>
+    <ul>
+      <li>On older JDK 8 versions, the <code>accessExternalSchema</code> check is applied
+        even to a schema document supplied by a caller’s resolver.
+      </li>
+      <li>No external-access property governs an XInclude fetch,
+        and a value set through the API is not even honored
+        inside an XIncluded document.
+        Only a resolver can gate XInclude.
+      </li>
+      <li>Schema documents named by <code>xsi:schemaLocation</code> hints are checked
+        even when supplied by a caller’s resolver.
+      </li>
+    </ul>
+    <p>
+      The first and third defect fail closed —
+      a legitimately resolved document is denied, never fetched —
+      so they break resolver-based applications without weakening the securing;
+      the second fails open and would leave a real fetch channel unguarded.
+      A resolver floor has neither problem:
+      it covers every channel on every supported implementation,
+      and it yields to a caller’s resolver without consulting the properties.
+      The <a href="threat_model.html">Threat Model</a> documents the resulting contract.
+    </p>
+  </section>
 </body>
+</html>

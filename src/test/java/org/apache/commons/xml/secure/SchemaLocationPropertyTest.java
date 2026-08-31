@@ -44,9 +44,9 @@ import org.xml.sax.XMLReader;
  *
  * <p>The fixtures declare the instance's root element, so a parser that fetches the schema validates the instance
  * cleanly and one that does not cannot. The permissive controls prove the external schema is reachable in principle, so
- * the secure side throwing means the fetch was refused, not merely misconfigured. The stock JDK refuses it through
- * {@code accessExternalSchema=""}; external Apache Xerces, which ignores that property, refuses it through the ignore-all
- * entity-resolver floor.</p>
+ * the secure side throwing means the fetch was refused, not merely misconfigured. The ignore-all entity-resolver floor refuses
+ * it on every implementation; the suite runs with {@code javax.xml.accessExternalSchema=all}, so the JAXP 1.5 check plays no
+ * part in the refusal.</p>
  *
  * <p>Not every parser supports these schema-validation knobs (Android's KXmlParser and Expat do not), so the whole
  * configuration runs through {@link #configureOrSkip}: a parser that rejects validation, the schema language, or the
