@@ -33,18 +33,17 @@ final class MethodHandleFactory {
     }
 
     /**
-     * Finds a static method handle for the given class, method name, and method type.
+     * Finds a static method handle for the given class, method name, where the class is also the return type.
      *
-     * @param refc the class to search for the method.
+     * @param refcAndReturnType the class to search for the method and the return type.
      * @param name the name of the method.
-     * @param type the method return type.
      * @return the method handle, or {@code null} if not found.
      * @throws SecurityException    if a security manager is present and it <a href="MethodHandles.Lookup.html#secmgr">refuses access</a>.
      * @throws NullPointerException if any argument is null.
      */
-    static MethodHandle findStatic(final Class<?> refc, final String name, final Class<?> returnType) {
+    static MethodHandle findStatic(final Class<?> refcAndReturnType, final String name) {
         try {
-            return MethodHandles.publicLookup().findStatic(refc, name, MethodType.methodType(returnType));
+            return MethodHandles.publicLookup().findStatic(refcAndReturnType, name, MethodType.methodType(refcAndReturnType));
         } catch (final ReflectiveOperationException e) {
             return null;
         }

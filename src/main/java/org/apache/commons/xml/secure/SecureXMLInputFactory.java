@@ -254,8 +254,7 @@ public final class SecureXMLInputFactory {
     /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultFactory()}. */
     private static final String JDK_XML_INPUT_FACTORY = "com.sun.xml.internal.stream.XMLInputFactoryImpl";
 
-    private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(XMLInputFactory.class, "newDefaultFactory",
-            XMLInputFactory.class);
+    private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(XMLInputFactory.class, "newDefaultFactory");
 
     /**
      * Returns a new, secure {@link XMLInputFactory} of the system-default implementation.

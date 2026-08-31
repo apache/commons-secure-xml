@@ -202,8 +202,7 @@ public final class SecureSchemaFactory {
     /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
     private static final String JDK_SCHEMA_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory";
 
-    private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(SchemaFactory.class, "newDefaultInstance",
-            SchemaFactory.class);
+    private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(SchemaFactory.class, "newDefaultInstance");
 
     /**
      * Returns a new, secure {@link SchemaFactory} of the system-default implementation, supporting W3C XML Schema 1.0.

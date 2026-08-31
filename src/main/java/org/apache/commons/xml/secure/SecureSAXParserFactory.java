@@ -175,8 +175,7 @@ public final class SecureSAXParserFactory {
     /** System property naming the {@link SAXParserFactory} implementation, the JDK's own mechanism for reconfiguring the default parser. */
     private static final String SAX_FACTORY_ID = "javax.xml.parsers.SAXParserFactory";
 
-    private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(SAXParserFactory.class, "newDefaultInstance",
-            SAXParserFactory.class);
+    private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(SAXParserFactory.class, "newDefaultInstance");
 
     /**
      * Enables namespace awareness on the given factory; the {@code NSInstance} counterpart of each factory method routes its result through here.
