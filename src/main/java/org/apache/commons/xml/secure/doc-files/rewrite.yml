@@ -15,8 +15,8 @@
 
 type: specs.openrewrite.org/v1beta/recipe
 name: org.apache.commons.xml.secure.UseSecureXmlFactories
-displayName: Use Apache Commons secure XML factories
-description: Replaces JAXP factory types with their Apache Commons XML secure equivalents.
+displayName: Use Apache Commons Secure XML factories
+description: Replaces JAXP factory types with their Apache Commons Secure XML equivalents.
 recipeList:
   - org.openrewrite.java.ChangeType:
       oldFullyQualifiedTypeName: javax.xml.parsers.DocumentBuilderFactory
