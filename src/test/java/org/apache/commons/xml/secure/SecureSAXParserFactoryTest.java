@@ -22,11 +22,16 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.StringReader;
 
 import javax.xml.XMLConstants;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
@@ -39,7 +44,30 @@ import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
 @Tag("sax")
-class SecureSAXParserFactoryTest {
+public class SecureSAXParserFactoryTest {
+
+    /**
+     * Test JAXP provider that delegates parser creation to a Mockito mock.
+     */
+    public static final class MockSAXParserFactory extends SAXParserFactory {
+
+        private static SAXParserFactory delegate;
+
+        @Override
+        public boolean getFeature(final String name) {
+            return false;
+        }
+
+        @Override
+        public SAXParser newSAXParser() throws ParserConfigurationException, org.xml.sax.SAXException {
+            return delegate.newSAXParser();
+        }
+
+        @Override
+        public void setFeature(final String name, final boolean value) {
+            // no-op
+        }
+    }
 
     @Test
     void createsSecureParsersFromEveryStaticEntryPoint() throws Exception {
@@ -69,6 +97,27 @@ class SecureSAXParserFactoryTest {
         assertTrue(factory.isNamespaceAware());
         assertFalse(factory.isValidating());
         assertInstanceOf(SecureSAXParser.class, factory.newSAXParser());
+    }
+
+    @Test
+    void newXmlReaderWrapsParserConfigurationException() throws Exception {
+        final ParserConfigurationException cause = new ParserConfigurationException("test");
+        MockSAXParserFactory.delegate = mock(SAXParserFactory.class);
+        when(MockSAXParserFactory.delegate.newSAXParser()).thenThrow(cause);
+        final String factoryId = "javax.xml.parsers.SAXParserFactory";
+        final String previous = System.getProperty(factoryId);
+        try {
+            System.setProperty(factoryId, MockSAXParserFactory.class.getName());
+            final IllegalStateException exception = assertThrows(IllegalStateException.class, () -> SecureSAXParserFactory.newXMLReader(false));
+            assertSame(cause, exception.getCause());
+        } finally {
+            if (previous == null) {
+                System.clearProperty(factoryId);
+            } else {
+                System.setProperty(factoryId, previous);
+            }
+            MockSAXParserFactory.delegate = null;
+        }
     }
 
     @Test
