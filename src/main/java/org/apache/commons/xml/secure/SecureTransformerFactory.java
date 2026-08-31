@@ -19,7 +19,6 @@ package org.apache.commons.xml.secure;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodType;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -361,7 +360,7 @@ public final class SecureTransformerFactory {
     private static final String JDK_TRANSFORMER_FACTORY = "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl";
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(TransformerFactory.class, "newDefaultInstance",
-            MethodType.methodType(TransformerFactory.class));
+            TransformerFactory.class);
 
     /**
      * Returns a new, secure {@link TransformerFactory} of the system-default implementation.

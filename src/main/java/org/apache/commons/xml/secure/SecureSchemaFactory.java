@@ -18,7 +18,6 @@
 package org.apache.commons.xml.secure;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodType;
 import java.util.Objects;
 
 import javax.xml.XMLConstants;
@@ -204,7 +203,7 @@ public final class SecureSchemaFactory {
     private static final String JDK_SCHEMA_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory";
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(SchemaFactory.class, "newDefaultInstance",
-            MethodType.methodType(SchemaFactory.class));
+            SchemaFactory.class);
 
     /**
      * Returns a new, secure {@link SchemaFactory} of the system-default implementation, supporting W3C XML Schema 1.0.

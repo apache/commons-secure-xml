@@ -18,7 +18,6 @@
 package org.apache.commons.xml.secure;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodType;
 import java.util.Objects;
 
 import javax.xml.XMLConstants;
@@ -177,7 +176,7 @@ public final class SecureSAXParserFactory {
     private static final String SAX_FACTORY_ID = "javax.xml.parsers.SAXParserFactory";
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(SAXParserFactory.class, "newDefaultInstance",
-            MethodType.methodType(SAXParserFactory.class));
+            SAXParserFactory.class);
 
     /**
      * Enables namespace awareness on the given factory; the {@code NSInstance} counterpart of each factory method routes its result through here.

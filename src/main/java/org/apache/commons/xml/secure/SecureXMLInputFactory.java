@@ -20,7 +20,6 @@ package org.apache.commons.xml.secure;
 import java.io.InputStream;
 import java.io.Reader;
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodType;
 import java.util.Objects;
 
 import javax.xml.stream.EventFilter;
@@ -256,7 +255,7 @@ public final class SecureXMLInputFactory {
     private static final String JDK_XML_INPUT_FACTORY = "com.sun.xml.internal.stream.XMLInputFactoryImpl";
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(XMLInputFactory.class, "newDefaultFactory",
-            MethodType.methodType(XMLInputFactory.class));
+            XMLInputFactory.class);
 
     /**
      * Returns a new, secure {@link XMLInputFactory} of the system-default implementation.

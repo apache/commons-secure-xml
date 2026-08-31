@@ -42,13 +42,13 @@ class MethodHandleFactoryTest {
 
     @Test
     void findStaticReturnsHandleForExistingMethod() {
-        final MethodHandle handle = MethodHandleFactory.findStatic(XMLInputFactory.class, "newInstance", MethodType.methodType(XMLInputFactory.class));
+        final MethodHandle handle = MethodHandleFactory.findStatic(XMLInputFactory.class, "newInstance", XMLInputFactory.class);
         assertNotNull(handle, "an existing static method must resolve to a handle");
     }
 
     @Test
     void findStaticReturnsNullForMissingMethod() {
-        assertNull(MethodHandleFactory.findStatic(XMLInputFactory.class, "noSuchMethod", MethodType.methodType(void.class)),
+        assertNull(MethodHandleFactory.findStatic(XMLInputFactory.class, "noSuchMethod", void.class),
                 "a missing method must resolve to null");
     }
 

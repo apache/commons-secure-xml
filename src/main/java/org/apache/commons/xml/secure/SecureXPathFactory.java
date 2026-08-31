@@ -18,7 +18,6 @@
 package org.apache.commons.xml.secure;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodType;
 import java.util.Objects;
 
 import javax.xml.XMLConstants;
@@ -122,7 +121,7 @@ public final class SecureXPathFactory {
     private static final String JDK_XPATH_FACTORY = "com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl";
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(XPathFactory.class, "newDefaultInstance",
-            MethodType.methodType(XPathFactory.class));
+            XPathFactory.class);
 
     /**
      * Returns a new, secure {@link XPathFactory} of the system-default implementation, supporting the default XPath object model.
