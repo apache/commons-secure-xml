@@ -60,21 +60,18 @@ final class FallbackIgnoreURIResolver implements URIResolver {
     private static final Document EMPTY_DOCUMENT;
 
     static {
-        EMPTY_DOCUMENT = newEmptyDocument();
+        EMPTY_DOCUMENT = newEmptyDocument(DocumentBuilderFactory.newInstance());
     }
 
     /**
      * Creates a new empty document.
      *
+     * @param factory the factory to use to create a new document builder.
      * @return a new empty document.
      * @throws SecureException        Thrown if a {@link DocumentBuilder} cannot be created which satisfies the configuration requested.
      * @throws ExceptionInInitializerError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
      *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      */
-    private static Document newEmptyDocument() {
-        return newEmptyDocument(DocumentBuilderFactory.newInstance());
-    }
-
     private static Document newEmptyDocument(final DocumentBuilderFactory factory) {
         try {
             return factory.newDocumentBuilder().newDocument();
