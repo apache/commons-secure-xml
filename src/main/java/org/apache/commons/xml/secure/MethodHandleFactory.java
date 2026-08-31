@@ -42,9 +42,9 @@ final class MethodHandleFactory {
      * @throws SecurityException    if a security manager is present and it <a href="MethodHandles.Lookup.html#secmgr">refuses access</a>.
      * @throws NullPointerException if any argument is null.
      */
-    static MethodHandle findStatic(final Class<?> refc, final String name, final Class<?> returnTpe) {
+    static MethodHandle findStatic(final Class<?> refc, final String name, final Class<?> returnType) {
         try {
-            return MethodHandles.publicLookup().findStatic(refc, name, MethodType.methodType(returnTpe));
+            return MethodHandles.publicLookup().findStatic(refc, name, MethodType.methodType(returnType));
         } catch (final ReflectiveOperationException e) {
             return null;
         }
