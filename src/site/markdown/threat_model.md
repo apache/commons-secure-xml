@@ -47,17 +47,15 @@ makes is documented in the Javadoc:
 
 https://commons.apache.org/index/commons-secure-xml/apidocs/org/apache/commons/xml/secure/package-summary.html
 
-Thesecuring applies to the factory and to the parsers, readers, transformers, validators, schemas and XPath objects it produces.
+The securing applies to the factory and to the parsers, readers, transformers, validators, schemas and XPath objects it produces.
 It governs what those objects read;
 what a transform writes is the stylesheet author's capability
 (see **Transform output destinations** under [What is out of scope](#what-is-out-of-scope)).
 
 ### Adversary Model and Trust Boundary
 
-The adversary is whoever controls the XML an application parses, together with any external system an XML
-document tries to reach through an entity, DTD, schema, stylesheet, or XInclude reference. Thesecuring
-exists to stop that untrusted document from reading local resources, reaching the network, or exhausting
-memory or CPU.
+The adversary is whoever controls the XML an application parses, together with any external system an XML document tries to reach through an entity, DTD, schema, stylesheet, or XInclude reference.
+The securing exists to stop that untrusted document from reading local resources, reaching the network, or exhausting memory or CPU.
 
 The trust boundary is the factory as returned by `org.apache.commons.xml.secure`. The XML handed to a parser, reader,
 transformer, validator or schema produced by that factory is **untrusted**; the configuration of the factory
@@ -77,7 +75,7 @@ because your reader's settings are indistinguishable from configuration you chos
 
 ### What is in Scope
 
-- Thesecuring recipes applied by `org.apache.commons.xml.secure`.
+- The securing recipes applied by `org.apache.commons.xml.secure`.
   Every implementation of JAXP 1.4 or later is in scope,
   as long as it respects the contract of the features, attributes, and properties the recipes use.
   An implementation that cannot accept a required setting makes the factory method throw
@@ -96,7 +94,7 @@ spawn processes,
 install signal handlers,
 or read environment variables of its own:
 each `org.apache.commons.xml.secure` factory method only configures and returns a JAXP factory.
-Whichsecuring recipe applies depends on the JAXP implementation present on the classpath.
+Which securing recipe applies depends on the JAXP implementation present on the classpath.
 
 **Supported runtimes**
 
@@ -146,15 +144,12 @@ such as Billion Laughs.
 The library MAY rely on the following features, attributes and properties staying as configured. They are reserved because
 they govern external resource access, DTD, entity or schema handling, the installation of a resolver, or processing
 limits; loosening any of them, on the returned factory or on a parser, reader, transformer, validator or schema it
-produces, breaks thesecuring for that instance.
+produces, breaks the securing for that instance.
 
 - `http://apache.org/xml/features/disallow-doctype-decl`
 - `http://apache.org/xml/features/nonvalidating/load-external-dtd`
 - `http://apache.org/xml/properties/internal/entity-resolver`
 - `http://javax.xml.XMLConstants/feature/secure-processing`
-- `http://javax.xml.XMLConstants/property/accessExternalDTD`
-- `http://javax.xml.XMLConstants/property/accessExternalSchema`
-- `http://javax.xml.XMLConstants/property/accessExternalStylesheet`
 - `http://saxon.sf.net/feature/allow-external-functions`
 - `http://saxon.sf.net/feature/allowedProtocols`
 - `http://xml.org/sax/features/external-general-entities`
@@ -167,20 +162,23 @@ This list is not exhaustive:
 any other feature, attribute, property, or system property that
 grants access to an external resource,
 relaxes DTD or entity processing,
-installs a resolver thesecuring layer does not wrap
+installs a resolver the securing layer does not wrap
 (like the Xerces-specific `http://apache.org/xml/properties/internal/entity-resolver`, listed above),
 or raises a processing limit
 is reserved on the same terms.
 
-Installing a resolver through the typed `set*Resolver` methods, the `DefaultHandler` passed to `SAXParser.parse`, or the resolver properties listed under **Settings you may modify** does not loosen thesecuring:
+Installing a resolver through the typed `set*Resolver` methods, the `DefaultHandler` passed to `SAXParser.parse`, or the resolver properties listed under **Settings you may modify** does not loosen the securing:
 those paths are wrapped by a non-removable floor.
+Neither does setting the JAXP 1.5 external-access properties, also listed there:
+a resource supplied by a resolver bypasses their checks,
+so on a secured instance they never come into play.
 
 **Settings You May Modify**
 
 The following are security-relevant but safe to change on a returned factory: the protection they appear to govern is
 enforced by the reserved settings above, which a caller cannot lift.
 
-- **Resolvers.** You may install your own resolver: thesecuring floor wraps it instead of being replaced, so it stays
+- **Resolvers.** You may install your own resolver: the securing floor wraps it instead of being replaced, so it stays
   in force. This covers the typed setters and the resolver properties:
     - `setEntityResolver(...)` (DOM and SAX), including the `DefaultHandler` passed to `SAXParser.parse(..., DefaultHandler)`,
     - `setResourceResolver(...)` (schema compilation and validation),
@@ -218,6 +216,24 @@ enforced by the reserved settings above, which a caller cannot lift.
 
   As in the previous case, you need to provide a secure resolver.
 
+- **External-access properties.** You may set the JAXP 1.5 external-access properties, to any value:
+  - `http://javax.xml.XMLConstants/property/accessExternalDTD`,
+  - `http://javax.xml.XMLConstants/property/accessExternalSchema`,
+  - `http://javax.xml.XMLConstants/property/accessExternalStylesheet`.
+
+  The securing is independent of them:
+  a resource supplied by a resolver bypasses these checks,
+  and the securing floor resolves or ignores every external reference,
+  so on a secured instance the properties never come into play —
+  no value loosens the securing, and no value is needed to keep it
+  (see [why the securing does not build on them](apidocs/index.html#external-access-properties) in the Javadoc overview).
+  The same independence holds for their
+  `javax.xml.accessExternalDTD`, `javax.xml.accessExternalSchema` and `javax.xml.accessExternalStylesheet`
+  system-property counterparts.
+  Known JDK defects apply the checks even to a resolver-supplied document;
+  they fail closed:
+  a legitimately resolved resource may be denied, never fetched.
+
 - **Internal parser selection.**
   On the stock JDK TrAX, XPath, and schema implementations
   you may set [`jdk.xml.overrideDefaultParser`](https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/module-summary.html#jdk.xml.overrideDefaultParser)
@@ -227,7 +243,7 @@ enforced by the reserved settings above, which a caller cannot lift.
 
 ### What is Out of Scope
 
-A returned factory is secured as delivered; reconfiguring it is a decision to take oversecuring for that instance,
+A returned factory is secured as delivered; reconfiguring it is a decision to take over securing for that instance,
 and reports against a factory reconfigured in any of the ways below are out of scope.
 
 - **Modifying a reserved setting.** Loosening any feature, attribute or property reserved under
@@ -238,25 +254,25 @@ and reports against a factory reconfigured in any of the ways below are out of s
   enforce.
 - **Caller-supplied top-level URIs.** A URI passed directly to a parse call (`DocumentBuilder.parse(String)`,
   `StreamSource(systemId)`, a `SAXSource` built from a system id) is fetched as-is by the JAXP implementation without
-  consulting thesecuring layer. Restrict it yourself if the URI is untrusted.
+  consulting the securing layer. Restrict it yourself if the URI is untrusted.
 - **Caller-supplied parser instances.**
   A parser built outside `org.apache.commons.xml.secure` and handed to a produced instance is used as configured:
   a `SAXSource` carrying its own `XMLReader`,
   a `StAXSource` carrying a stream or event reader,
   or a `DOMSource` holding a document parsed elsewhere.
   Its settings are yours, including permissive ones.
-  To parse with your own reader under thesecuring guarantees,
+  To parse with your own reader under the securing guarantees,
   obtain it from `HardeningSAXParserFactory.newInstance()`
   before wrapping it in a `SAXSource`.
-- The behavior of a JAXP implementation that does not respect the contract of the settings asecuring recipe requires
+- The behavior of a JAXP implementation that does not respect the contract of the settings a securing recipe requires
   (the factory method throws rather than returning an unsecured factory),
   and any defect in the underlying JAXP implementation itself.
 - **Android, on any API level.**
   No version of Android supports `FEATURE_SECURE_PROCESSING`,
-  so thesecuring there is best-effort and no guarantee is defined
+  so the securing there is best-effort and no guarantee is defined
   (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)).
 - **Transform output destinations.**
-  Thesecuring governs what a parse or transform reads;
+  The securing governs what a parse or transform reads;
   it does not confine what a transform writes.
   A stylesheet's output-producing instructions,
   `xsl:result-document` in particular,
@@ -268,7 +284,7 @@ and reports against a factory reconfigured in any of the ways below are out of s
 
 ### Downstream Responsibility
 
-Use the factory as returned. If you reconfigure it, you take oversecuring for that instance and are responsible for
+Use the factory as returned. If you reconfigure it, you take over securing for that instance and are responsible for
 re-establishing any protection you remove.
 
 ### Known Non-Findings
@@ -282,10 +298,10 @@ are **not** vulnerabilities under this model:
   [What is out of scope](#what-is-out-of-scope)). As delivered, the instance is secured; the bare presence
   of a `SAXParser`, `DocumentBuilder`, `XMLReader`, `Transformer`, `Validator` or `Schema` is not a finding.
 - XXE, external-entity, SSRF-through-external-reference, or entity-expansion (Billion Laughs) reports against
-  a factory used as delivered. Blocking these is exactly what thesecuring does. A working proof against an
+  a factory used as delivered. Blocking these is exactly what the securing does. A working proof against an
   unmodified instance is a `VALID` finding (see below); a scanner that pattern-matches on parser type is not.
 - A report demonstrated only on Android,
-  where thesecuring is best-effort and no guarantee is defined
+  where the securing is best-effort and no guarantee is defined
   (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)).
 - Reports against an instance after the caller installed a resolver (including the `DefaultHandler` passed to
   `SAXParser.parse(..., DefaultHandler)`) or loosened a reserved setting.
@@ -301,7 +317,7 @@ are **not** vulnerabilities under this model:
 - A path-traversal or file-write report through `xsl:result-document` or another output-producing
   instruction of a stylesheet
   (see **Transform output destinations** under [What is out of scope](#what-is-out-of-scope)).
-- Reports in a JAXP implementation that does not respect the contract of the settings asecuring recipe
+- Reports in a JAXP implementation that does not respect the contract of the settings a securing recipe
   requires: `org.apache.commons.xml.secure` factory method throws rather than returning an unsecured factory, so there is no instance to attack.
 
 ### Triage Dispositions
@@ -313,7 +329,7 @@ A report judged against this model receives exactly one of:
 | `VALID` | A factory or instance used as delivered fails to provide a guarantee its Javadoc states (for example, a secured parser still resolves an external entity, or a documented processing limit is not applied). |
 | `OUT-OF-SCOPE: reconfigured` | A reserved setting was loosened, or a resolver was installed, on the factory or a produced instance before the reported behavior (see [What is out of scope](#what-is-out-of-scope)). |
 | `OUT-OF-SCOPE: caller input` | The behavior follows from a top-level URI, a parser instance the caller constructed outside the library, or other input the caller passed directly to a parse call. |
-| `OUT-OF-SCOPE: foreign implementation` | The behavior is in a JAXP implementation that does not respect the contract of the settings asecuring recipe requires, or is a defect in the underlying JAXP implementation itself. |
+| `OUT-OF-SCOPE: foreign implementation` | The behavior is in a JAXP implementation that does not respect the contract of the settings a securing recipe requires, or is a defect in the underlying JAXP implementation itself. |
 | `OUT-OF-SCOPE: unsupported runtime` | The behavior is demonstrated only on a runtime the guarantees are not defined on, such as Android on any API level (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)). |
 | `MODEL-GAP` | The report fits none of the above. The model is then incomplete: revise it rather than making an ad-hoc call. |
 

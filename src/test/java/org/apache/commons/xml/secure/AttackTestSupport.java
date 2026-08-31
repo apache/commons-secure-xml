@@ -237,7 +237,7 @@ final class AttackTestSupport {
      * not leak, while one that rejects the unresolvable systemId throws instead. Both are acceptable.</p>
      */
     static void assertDomBlocksOrDoesNotLeak(final String payload) {
-        assertNoLeakOrThrows(() -> domParseAndCaptureText(payload), "DOM", SAXException.class);
+        assertNoLeakOrThrows(() -> domParseAndCaptureText(SecureDocumentBuilderFactory.newInstance(), payload), "DOM", SAXException.class);
     }
 
     /**
@@ -247,7 +247,14 @@ final class AttackTestSupport {
      * succeeds but never resolves the external resource", for example, when the ignore-all resolver floor resolves the external subset to empty content.</p>
      */
     static void assertDomDoesNotLeak(final String payload) {
-        assertNoLeakStrict(() -> domParseAndCaptureText(payload), "DOM");
+        assertDomDoesNotLeak(SecureDocumentBuilderFactory.newInstance(), payload);
+    }
+
+    /**
+     * Same contract as {@link #assertDomDoesNotLeak(String)}, on a caller-configured secure factory.
+     */
+    static void assertDomDoesNotLeak(final DocumentBuilderFactory factory, final String payload) {
+        assertNoLeakStrict(() -> domParseAndCaptureText(factory, payload), "DOM");
     }
 
     /**
@@ -481,7 +488,14 @@ final class AttackTestSupport {
      * succeeds but never resolves the external resource", for example, when the ignore-all resolver floor resolves the external subset to empty content.</p>
      */
     static void assertSaxDoesNotLeak(final String payload) {
-        assertNoLeakStrict(() -> captureCharacters(strictXMLReader(SecureSAXParserFactory.newInstance()), payload), "SAX");
+        assertSaxDoesNotLeak(strictXMLReader(SecureSAXParserFactory.newInstance()), payload);
+    }
+
+    /**
+     * Same contract as {@link #assertSaxDoesNotLeak(String)}, on a caller-configured secure reader.
+     */
+    static void assertSaxDoesNotLeak(final XMLReader reader, final String payload) {
+        assertNoLeakStrict(() -> captureCharacters(reader, payload), "SAX");
     }
 
     /**
@@ -499,7 +513,14 @@ final class AttackTestSupport {
      * <p>{@link SchemaFactory#newSchema(Source)} via {@link SecureSchemaFactory#newInstance(String)}; only a thrown exception passes.</p>
      */
     static void assertSchemaBlocks(final Source xsd) {
-        assertParseFails(() -> strictSchema(SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), xsd), "Schema compile", SAXException.class, SecurityException.class);
+        assertSchemaBlocks(SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), xsd);
+    }
+
+    /**
+     * Same contract as {@link #assertSchemaBlocks(Source)}, on a caller-configured secure factory.
+     */
+    static void assertSchemaBlocks(final SchemaFactory factory, final Source xsd) {
+        assertParseFails(() -> strictSchema(factory, xsd), "Schema compile", SAXException.class, SecurityException.class);
     }
 
     /**
@@ -530,7 +551,14 @@ final class AttackTestSupport {
      * undeclared entity reference dropped per XML 1.0 §4.1).</p>
      */
     static void assertSchemaDoesNotLeak(final Source xsd) {
-        assertParseSucceeds(() -> strictSchema(SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), xsd), "Schema compile");
+        assertSchemaDoesNotLeak(SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), xsd);
+    }
+
+    /**
+     * Same contract as {@link #assertSchemaDoesNotLeak(Source)}, on a caller-configured secure factory.
+     */
+    static void assertSchemaDoesNotLeak(final SchemaFactory factory, final Source xsd) {
+        assertParseSucceeds(() -> strictSchema(factory, xsd), "Schema compile");
     }
 
     /**
@@ -595,7 +623,7 @@ final class AttackTestSupport {
      * Asserts a secure Templates compile-and-transform either blocks or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
      */
     static void assertTemplatesBlocksOrDoesNotLeak(final Source xslt) {
-        assertNoLeakOrThrows(() -> templatesCompileAndTransform(xslt), "Templates", TransformerException.class);
+        assertNoLeakOrThrows(() -> templatesCompileAndTransform(SecureTransformerFactory.newInstance(), xslt), "Templates", TransformerException.class);
     }
 
     /**
@@ -605,7 +633,7 @@ final class AttackTestSupport {
      * DOCTYPE-only payloads.</p>
      */
     static void assertTemplatesCompiles(final Source xslt) {
-        assertParseSucceeds(() -> templatesCompileAndTransform(xslt), "Templates compile");
+        assertParseSucceeds(() -> templatesCompileAndTransform(SecureTransformerFactory.newInstance(), xslt), "Templates compile");
     }
 
     /**
@@ -615,7 +643,14 @@ final class AttackTestSupport {
      * contract guarantees the compile and transform succeed but never resolve the external resource.</p>
      */
     static void assertTemplatesDoesNotLeak(final Source xslt) {
-        assertNoLeakStrict(() -> templatesCompileAndTransform(xslt), "Templates");
+        assertTemplatesDoesNotLeak(SecureTransformerFactory.newInstance(), xslt);
+    }
+
+    /**
+     * Same contract as {@link #assertTemplatesDoesNotLeak(Source)}, on a caller-configured secure factory.
+     */
+    static void assertTemplatesDoesNotLeak(final TransformerFactory factory, final Source xslt) {
+        assertNoLeakStrict(() -> templatesCompileAndTransform(factory, xslt), "Templates");
     }
 
     /**
@@ -634,7 +669,7 @@ final class AttackTestSupport {
      * Asserts a secure identity Transformer either blocks or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
      */
     static void assertTransformerBlocksOrDoesNotLeak(final String payload) {
-        assertNoLeakOrThrows(() -> identityTransformAndCapture(payload), "Transformer", TransformerException.class);
+        assertNoLeakOrThrows(() -> identityTransformAndCapture(SecureTransformerFactory.newInstance(), payload), "Transformer", TransformerException.class);
     }
 
     /**
@@ -644,7 +679,14 @@ final class AttackTestSupport {
      * contract guarantees the transform succeeds but never resolves the external resource.</p>
      */
     static void assertTransformerDoesNotLeak(final String payload) {
-        assertNoLeakStrict(() -> identityTransformAndCapture(payload), "Transformer");
+        assertTransformerDoesNotLeak(SecureTransformerFactory.newInstance(), payload);
+    }
+
+    /**
+     * Same contract as {@link #assertTransformerDoesNotLeak(String)}, on a caller-configured secure factory.
+     */
+    static void assertTransformerDoesNotLeak(final TransformerFactory factory, final String payload) {
+        assertNoLeakStrict(() -> identityTransformAndCapture(factory, payload), "Transformer");
     }
 
     /**
@@ -654,7 +696,7 @@ final class AttackTestSupport {
      * positive control for DOCTYPE-only payloads.</p>
      */
     static void assertTransformerTransforms(final String payload) {
-        assertParseSucceeds(() -> identityTransformAndCapture(payload), "Transformer");
+        assertParseSucceeds(() -> identityTransformAndCapture(SecureTransformerFactory.newInstance(), payload), "Transformer");
     }
 
     /**
@@ -850,8 +892,8 @@ final class AttackTestSupport {
         strictXMLReader(reader).parse(inputSource(payload));
     }
 
-    private static String domParseAndCaptureText(final String payload) throws Exception {
-        final Document doc = strictDocumentBuilder(SecureDocumentBuilderFactory.newInstance()).parse(inputSource(payload));
+    private static String domParseAndCaptureText(final DocumentBuilderFactory factory, final String payload) throws Exception {
+        final Document doc = strictDocumentBuilder(factory).parse(inputSource(payload));
         if (doc.getDocumentElement() == null) {
             return "";
         }
@@ -860,9 +902,9 @@ final class AttackTestSupport {
         return text == null ? "" : text;
     }
 
-    private static String identityTransformAndCapture(final String payload) throws TransformerException {
+    private static String identityTransformAndCapture(final TransformerFactory factory, final String payload) throws TransformerException {
         final StringWriter sink = new StringWriter();
-        strictTransformer(SecureTransformerFactory.newInstance()).transform(streamSource(payload), new StreamResult(sink));
+        strictTransformer(factory).transform(streamSource(payload), new StreamResult(sink));
         return sink.toString();
     }
 
@@ -1067,9 +1109,9 @@ final class AttackTestSupport {
         }
     }
 
-    private static String templatesCompileAndTransform(final Source xslt) throws TransformerException {
+    private static String templatesCompileAndTransform(final TransformerFactory factory, final Source xslt) throws TransformerException {
         final StringWriter sink = new StringWriter();
-        final Templates templates = strictTemplates(SecureTransformerFactory.newInstance(), xslt);
+        final Templates templates = strictTemplates(factory, xslt);
         // Xalan returns `null` if the template fails
         if (templates != null) {
             strictTransformer(templates).transform(streamSource("<root/>"), new StreamResult(sink));

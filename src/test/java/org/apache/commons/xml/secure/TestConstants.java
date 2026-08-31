@@ -22,16 +22,23 @@ class TestConstants {
     /**
      * Hack for Android builds.
      *
-     * See TestConstants.ACCESS_EXTERNAL_SCHEMA
+     * Mirrors {@code XMLConstants.ACCESS_EXTERNAL_SCHEMA}, spelled out because Android's {@code XMLConstants} predates JAXP 1.5.
      */
     static final String ACCESS_EXTERNAL_SCHEMA = "http://javax.xml.XMLConstants/property/accessExternalSchema";
 
     /**
      * Hack for Android builds.
      *
-     * See TestConstants.ACCESS_EXTERNAL_DTD
+     * Mirrors {@code XMLConstants.ACCESS_EXTERNAL_DTD}, spelled out because Android's {@code XMLConstants} predates JAXP 1.5.
      */
     static final String ACCESS_EXTERNAL_DTD = "http://javax.xml.XMLConstants/property/accessExternalDTD";
+
+    /**
+     * Hack for Android builds.
+     *
+     * Mirrors {@code XMLConstants.ACCESS_EXTERNAL_STYLESHEET}, spelled out because Android's {@code XMLConstants} predates JAXP 1.5.
+     */
+    static final String ACCESS_EXTERNAL_STYLESHEET = "http://javax.xml.XMLConstants/property/accessExternalStylesheet";
 
     /** JAXP 1.2 schema-language attribute, recognized by the JDK's internal and the standalone Xerces alike. */
     static final String JAXP_SCHEMA_LANGUAGE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
