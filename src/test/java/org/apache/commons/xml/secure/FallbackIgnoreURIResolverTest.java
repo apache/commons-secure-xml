@@ -19,7 +19,14 @@ package org.apache.commons.xml.secure;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.dom.DOMSource;
@@ -27,6 +34,18 @@ import javax.xml.transform.dom.DOMSource;
 import org.junit.jupiter.api.Test;
 
 class FallbackIgnoreURIResolverTest {
+
+    @Test
+    void newEmptyDocumentThrowsExceptionInInitializerError() throws Exception {
+        final DocumentBuilderFactory factory = mock(DocumentBuilderFactory.class);
+        final ParserConfigurationException failure = new ParserConfigurationException("test");
+        when(factory.newDocumentBuilder()).thenThrow(failure);
+        final Method method = FallbackIgnoreURIResolver.class.getDeclaredMethod("newEmptyDocument", DocumentBuilderFactory.class);
+        method.setAccessible(true);
+        final InvocationTargetException exception = assertThrows(InvocationTargetException.class, () -> method.invoke(null, factory));
+        final ExceptionInInitializerError error = (ExceptionInInitializerError) exception.getCause();
+        assertSame(failure, error.getCause());
+    }
 
     @Test
     void resolvesDelegatedAndFallbackSources() throws Exception {

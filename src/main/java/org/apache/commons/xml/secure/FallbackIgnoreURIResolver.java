@@ -72,8 +72,12 @@ final class FallbackIgnoreURIResolver implements URIResolver {
      *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      */
     private static Document newEmptyDocument() {
+        return newEmptyDocument(DocumentBuilderFactory.newInstance());
+    }
+
+    private static Document newEmptyDocument(final DocumentBuilderFactory factory) {
         try {
-            return DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+            return factory.newDocumentBuilder().newDocument();
         } catch (final ParserConfigurationException e) {
             throw new ExceptionInInitializerError(e);
         }
