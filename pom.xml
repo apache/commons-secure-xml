@@ -32,9 +32,9 @@ limitations under the License.
     implementation-specific XXE securing differences between the stock JDK and external JAXP implementations
     (Android, Apache Xalan, Apache Xerces, Woodstox, Saxon-HE).</description>
   <scm>
-    <connection>scm:git:https://gitbox.apache.org/repos/asf/commons-xml.git</connection>
-    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/commons-xml.git</developerConnection>
-    <url>https://gitbox.apache.org/repos/asf?p=commons-xml.git</url>
+    <connection>scm:git:https://gitbox.apache.org/repos/asf/commons-secure-xml.git</connection>
+    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/commons-secure-xml.git</developerConnection>
+    <url>https://gitbox.apache.org/repos/asf?p=commons-secure-xml.git</url>
     <tag>rel/commons-secure-xml-${project.version}</tag>
   </scm>
   <properties>

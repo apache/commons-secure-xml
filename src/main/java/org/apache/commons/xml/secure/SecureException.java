@@ -39,7 +39,7 @@ final class SecureException extends IllegalStateException {
     /**
      * System property that switches unresolved external references from the default empty resolution to a thrown exception.
      * <p>
-     * How to enable: set {@code -Dorg.apache.commons.xml.throwOnUnresolved=true}. The property is read at resolution time, so it also applies to factories
+     * How to enable: set {@code -Dorg.apache.commons.xml.secure.throwOnUnresolved=true}. The property is read at resolution time, so it also applies to factories
      * created before it was set; references resolved by a caller-supplied resolver are unaffected.
      * </p>
      */
