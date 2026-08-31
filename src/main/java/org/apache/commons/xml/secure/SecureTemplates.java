@@ -76,7 +76,7 @@ final class SecureTemplates implements Templates {
     /**
      * Gets the wrapped implementation Templates, for factory methods whose implementations cast {@code newTransformer()} to their own type.
      *
-     * @return the wrapped {@link Templates} implementation.
+     * @return the wrapped {@link Templates} implementation, never {@code null}.
      */
     Templates getDelegate() {
         return delegate;
