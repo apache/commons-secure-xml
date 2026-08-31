@@ -81,6 +81,7 @@ public final class SecureXPathFactory {
 
         @Override
         public XPath newXPath() {
+            // newXPath() should never return null for a specification-compliant factory.
             final XPath xpath = delegate.newXPath();
             return xpath == null ? null : new SecureXPath(xpath, overrideDefaultParser());
         }

@@ -221,12 +221,14 @@ public final class SecureTransformerFactory {
          */
         @Override
         public Templates newTemplates(final Source source) throws TransformerConfigurationException {
+            // newTemplates() should never return null for a specification-compliant factory.
             final Templates templates = delegate.newTemplates(SecureSAXParserFactory.secure(source, overrideDefaultParser()));
             return templates == null ? null : new SecureTemplates(templates, getURIResolver(), emptySource, overrideDefaultParser());
         }
 
         @Override
         public TemplatesHandler newTemplatesHandler() throws TransformerConfigurationException {
+            // newTemplatesHandler() should never return null for a specification-compliant factory.
             final TemplatesHandler handler = delegate.newTemplatesHandler();
             return handler == null ? null : new SecureTemplatesHandler(handler, getURIResolver(), emptySource, overrideDefaultParser());
         }
@@ -234,6 +236,7 @@ public final class SecureTransformerFactory {
         @Override
         public Transformer newTransformer() throws TransformerConfigurationException {
             // Identity transformer: still parses runtime sources, so wrap it to secure Transformer.transform(Source, Result).
+            // newTemplatesHandler() should never return null for a specification-compliant factory.
             final Transformer transformer = delegate.newTransformer();
             return transformer == null ? null : new SecureTransformer(transformer, getURIResolver(), emptySource, overrideDefaultParser());
         }
@@ -246,6 +249,7 @@ public final class SecureTransformerFactory {
          */
         @Override
         public Transformer newTransformer(final Source source) throws TransformerConfigurationException {
+            // newTemplatesHandler() should never return null for a specification-compliant factory.
             final Transformer transformer = delegate.newTransformer(SecureSAXParserFactory.secure(source, overrideDefaultParser()));
             return transformer == null ? null : new SecureTransformer(transformer, getURIResolver(), emptySource, overrideDefaultParser());
         }
