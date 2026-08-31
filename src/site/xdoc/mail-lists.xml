@@ -57,7 +57,7 @@ limitations under the License.
         for example:
       </p>
       <ul>
-        <li>[xml] Problem with the ...</li>
+        <li>[secure-xml] Problem with the ...</li>
       </ul>
       <p>
         Questions related to the usage of Apache Commons Secure XML should be posted to the
@@ -83,7 +83,7 @@ limitations under the License.
     <section name="Apache Commons Secure XML Mailing Lists">
       <p>
         <strong>Please prefix the subject line of any messages for <a href="index.html">Apache Commons Secure XML</a>
-        with <i>[xml]</i></strong> - <i>thanks!</i>
+        with <i>[secure-xml]</i></strong> - <i>thanks!</i>
         <br />
         <br />
       </p>
@@ -108,7 +108,7 @@ limitations under the License.
           </td>
           <td><a href="mailto:user-subscribe@commons.apache.org">Subscribe</a></td>
           <td><a href="mailto:user-unsubscribe@commons.apache.org">Unsubscribe</a></td>
-          <td><a href="mailto:user@commons.apache.org?subject=[xml]">Post</a></td>
+          <td><a href="mailto:user@commons.apache.org?subject=[secure-xml]">Post</a></td>
           <td>
               <a href="https://lists.apache.org/list.html?user@commons.apache.org">lists.apache.org</a>
           </td>
@@ -127,7 +127,7 @@ limitations under the License.
           </td>
           <td><a href="mailto:dev-subscribe@commons.apache.org">Subscribe</a></td>
           <td><a href="mailto:dev-unsubscribe@commons.apache.org">Unsubscribe</a></td>
-          <td><a href="mailto:dev@commons.apache.org?subject=[xml]">Post</a></td>
+          <td><a href="mailto:dev@commons.apache.org?subject=[secure-xml]">Post</a></td>
           <td>
               <a href="https://lists.apache.org/list.html?dev@commons.apache.org">lists.apache.org</a>
           </td>

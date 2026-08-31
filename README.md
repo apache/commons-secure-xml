@@ -62,7 +62,7 @@ Questions related to the usage of Apache Commons Secure XML should be posted to 
 
 Getting the latest release
 --------------------------
-You can download source and binaries from our [download page](https://commons.apache.org/proper/commons-secure-xml/download_xml.cgi).
+You can download source and binaries from our [download page](https://commons.apache.org/proper/commons-secure-xml/download_secure-xml.cgi).
 
 Alternatively, you can pull it from the central Maven repositories:
 

@@ -53,6 +53,7 @@ Changes
 * COMMONSXML-1,COMMONSXML-5,COMMONSXML-6,COMMONSXML-7,COMMONSXML-8: Recognize XML implementations by the JAXP features and properties they support instead of by their implementation class name, extending the securing to any compliant implementation. Thanks to Piotr P. Karwasz, Gary Gregory.
 * COMMONSXML-4:    Define a consistent contract for denied external fetches: unresolved external references resolve to empty content on every implementation, unless the org.apache.commons.xml.secure.throwOnUnresolved system property requests rejection. Thanks to Piotr P. Karwasz, Gary Gregory.
 * COMMONSXML-3:    Reduce the shaded footprint by splitting the secure classes and resolver floors into independent entry points. Thanks to Piotr P. Karwasz, Gary Gregory.
+*                  Allow the JAXP 1.5 accessExternal properties to be modified on secured factories. Thanks to Piotr P. Karwasz, Gary Gregory.
 
 Removed
 -------

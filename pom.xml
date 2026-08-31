@@ -39,6 +39,7 @@ limitations under the License.
   </scm>
   <properties>
     <!-- Release-related properties -->
+    <commons.main.branch>main</commons.main.branch>
     <commons.release.version>1.0.0</commons.release.version>
     <commons.release.desc>(Java 8+)</commons.release.desc>
     <commons.rc.version>RC1</commons.rc.version>
