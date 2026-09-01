@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
- * Checks that an untrusted schema's content-model expansion is bounded, the one processing limit no reader can supply.
+ * Tests that an untrusted schema's content-model expansion is bounded, the one processing limit no reader can supply.
  *
  * <p>{@link BillionLaughsTest} covers entity expansion, which the secure reader injected into every {@code Source} bounds before a schema document reaches the
  * loader. {@code maxOccurs} is a different mechanism: the loader expands a repeated particle into content-model nodes while building the DFA, which happens
