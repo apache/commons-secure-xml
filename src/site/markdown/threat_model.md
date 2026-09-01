@@ -33,7 +33,7 @@ If you have encountered an unlisted security vulnerability or other unexpected b
 
 ## Threat Model
 
-This is the threat model for the **0.1.x** release line.
+This is the threat model for the **1.0.x** release line.
 It is versioned with the library: a report against a released version is triaged against the model as it stood at that version, not at `HEAD`.
 A finding that breaks something listed under [What is in scope](#what-is-in-scope) should be reported through the channel above;
 a finding that falls under [What is out of scope](#what-is-out-of-scope) will be closed citing this section.
@@ -119,6 +119,48 @@ tested as complete starting with API level 33
 (see [Supported runtimes](index.html) on the main page),
 but a report demonstrated only on Android is [out of scope](#what-is-out-of-scope) on any API level.
 
+**Honored JAXP contracts**
+
+The in-scope requirement that an implementation respects the contract of the settings a recipe uses
+(see [What is in scope](#what-is-in-scope))
+extends to the JAXP API contracts themselves.
+In particular:
+
+- A method handed a `SAXSource` carrying an `XMLReader` parses with that reader,
+  as the [`SAXSource` contract](https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/sax/SAXSource.html#%3Cinit%3E(org.xml.sax.XMLReader,org.xml.sax.InputSource)) requires.
+- A method handed a `StAXSource` reads from the stream or event reader it carries,
+  as the [`StAXSource` contract](https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/stax/StAXSource.html) implies:
+  the reader must arrive positioned on `START_DOCUMENT` or `START_ELEMENT`,
+  and the source is consumed during processing.
+- A `SchemaFactory`, `Validator` or `ValidatorHandler` locates the external resources it needs through the resolver installed on it,
+  as the [`setResourceResolver` contract](https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/validation/SchemaFactory.html#setResourceResolver(org.w3c.dom.ls.LSResourceResolver)) requires
+  ("uses a `LSResourceResolver` when it needs to locate external resources"),
+  leaving each schema language to define what counts as one.
+  The same contract states that a factory's resolver is *not* inherited by the `Schema`, `Validator` and `ValidatorHandler` objects it creates,
+  which is why the securing installs the floor on each of them rather than on the factory alone.
+
+The securing injects hardened readers and installs these resolver floors,
+so an implementation that ignores what it was handed —
+parsing with an internal parser of its own,
+or reaching an external resource without consulting the resolver —
+works outside the securing.
+Guarding against such an implementation would be a valid *hardening* of this library,
+but the deviation itself is a contract violation in that implementation,
+not a vulnerability here:
+a report built on one is triaged `OUT-OF-SCOPE: foreign implementation`.
+
+**XInclude resolution**
+
+XInclude is the converse case: JAXP specifies no contract at all.
+`setXIncludeAware` turns the processor on,
+but no part of the API says which resolver — if any — a processor consults for an `xi:include` href.
+
+The XInclude guarantee is therefore restricted to implementations that follow the Xerces convention
+of routing an `xi:include` fetch through the `EntityResolver`.
+An implementation whose XInclude processor resolves a reference without consulting the entity resolver
+fetches outside the securing,
+and a report demonstrated only there is [out of scope](#what-is-out-of-scope).
+
 **System properties that modify behavior**
 
 The library reads a single system property of its own,
@@ -140,12 +182,16 @@ JDK version and the standard `jdk.xml.*` limit properties the JDK itself reads:
   default `2500` on JDK 25 and `64000` on JDK 8 through 21). These are trusted deployment configuration: an operator may
   set one to tighten (or loosen) a limit globally, but loosening through one is reconfiguration, treated like loosening
   any other reserved setting (see [What is out of scope](#what-is-out-of-scope)).
-- The bundled parsers apply their own hardcoded secure defaults instead (for example external Xerces and Woodstox cap
-  entity expansion at `100000`) and do not read `jdk.xml.*`.
+- External parsers apply their own hardcoded secure defaults instead
+  (for example, external Xerces and Woodstox cap the number of entity expansions at `100000`) and do not read `jdk.xml.*`.
 
 On the supported runtimes (see **Supported runtimes** above),
-every one of these defaults still bounds entity expansion tightly enough to reject entity-expansion denial of service
-such as Billion Laughs.
+every one of these defaults bounds the number of expansions,
+which is what rejects an exponential payload such as Billion Laughs.
+The volume those expansions produce is a separate limit,
+and implementations differ on whether they set one by default.
+Sizing it, or provisioning for the load it allows instead,
+is the operator's decision, like the other processing limits above.
 
 **Reserved Settings (must not be loosened)**
 
@@ -277,11 +323,15 @@ and reports against a factory reconfigured in any of the ways below are out of s
   or a `DOMSource` holding a document parsed elsewhere.
   Its settings are yours, including permissive ones.
   To parse with your own reader under the securing guarantees,
-  obtain it from `HardeningSAXParserFactory.newInstance()`
+  obtain it from `SecureSAXParserFactory.newInstance()`
   before wrapping it in a `SAXSource`.
 - The behavior of a JAXP implementation that does not respect the contract of the settings a securing recipe requires
   (the factory method throws rather than returning an unsecured factory),
   and any defect in the underlying JAXP implementation itself.
+- **XInclude outside the Xerces convention.**
+  JAXP does not specify which resolver an XInclude processor consults,
+  so the guarantee is restricted to implementations that route an `xi:include` fetch through the entity resolver
+  (see **XInclude resolution** under [Assumptions about the environment](#assumptions-about-the-environment)).
 - **Android, on any API level.**
   No version of Android supports `FEATURE_SECURE_PROCESSING`,
   so the securing there is best-effort and no guarantee is defined
@@ -315,6 +365,10 @@ are **not** vulnerabilities under this model:
 - XXE, external-entity, SSRF-through-external-reference, or entity-expansion (Billion Laughs) reports against
   a factory used as delivered. Blocking these is exactly what the securing does. A working proof against an
   unmodified instance is a `VALID` finding (see below); a scanner that pattern-matches on parser type is not.
+- A report that a recognized implementation bounds the number of entity expansions but not the volume they produce.
+  The library pins no processing limits at all; each is the implementation's, and a deployment that needs a volume bound
+  sets that implementation's own limit
+  (see **System properties that modify behavior** under [Assumptions about the environment](#assumptions-about-the-environment)).
 - A report demonstrated only on Android,
   where the securing is best-effort and no guarantee is defined
   (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)).

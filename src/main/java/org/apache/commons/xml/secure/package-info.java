@@ -45,8 +45,10 @@
  * <ul>
  * <li><strong>External DTDs are not fetched.</strong></li>
  * <li><strong>External entities are not resolved.</strong></li>
- * <li><strong>Internal entity expansion is bounded</strong> by the platform's secure-processing limit, so DoS payloads such as Billion Laughs are rejected
- * before they exhaust resources.</li>
+ * <li><strong>Internal entity expansion is bounded</strong> by the processing limits the parser applies, so DoS payloads such as Billion Laughs are rejected
+ * before they exhaust resources. The library enables {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING} wherever the JAXP API mandates it, and the limits
+ * are then the implementation's secure defaults. The StAX API defines no such feature, and no Android parser supports it, so there the bound is whatever the
+ * implementation applies on its own, and this guarantee is <strong>best-effort</strong>.</li>
  * </ul>
  * <p>
  * These guarantees are defined on OpenJDK 8 or later (and JDK distributions built from it). No version of Android supports
