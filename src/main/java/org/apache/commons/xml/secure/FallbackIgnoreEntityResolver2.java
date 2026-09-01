@@ -113,7 +113,7 @@ final class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
      * @throws SAXException when {@value SecureException#THROW_ON_UNRESOLVED} is set: unresolved references are rejected instead of resolved to empty.
      * @throws IOException  never by the default implementation.
      */
-    protected InputSource onUnresolved(final String name, final String publicId, final String baseURI, final String systemId) throws SAXException {
+    private InputSource onUnresolved(final String name, final String publicId, final String baseURI, final String systemId) throws SAXException {
         if (SecureException.throwOnUnresolved()) {
             throw new SAXException(SecureException.forbidden(name, null, publicId, systemId, baseURI));
         }
