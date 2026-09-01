@@ -60,11 +60,16 @@ public final class SecureXMLInputFactory {
      *
      * <p>Every resolver-valued entry point ({@link #setXMLResolver(XMLResolver)}, {@code setProperty(XMLInputFactory.RESOLVER, ...)} and the Woodstox
      * {@code com.ctc.wstx.*Resolver} keys) is routed uniformly: a caller who supplies their own {@link FallbackIgnoreXMLResolver} takes control and it is
-     * passed straight to the delegate; otherwise the current resolver on that hook is read, and if it is one of our floors the caller's resolver is set as its
-     * {@link FallbackIgnoreXMLResolver#setDelegate delegate} (an opt-in the floor cannot be removed by), or, if the hook is empty, the caller's resolver is
-     * wrapped in a new floor. This matters because Woodstox does not chain resolvers: when a resolver returns {@code null}, {@code DefaultInputResolver} falls
+     * passed straight to the delegate; otherwise the caller's resolver is wrapped in a new floor installed on that hook, an opt-in the floor cannot be removed
+     * by. This matters because Woodstox does not chain resolvers: when a resolver returns {@code null}, {@code DefaultInputResolver} falls
      * through to fetching the systemId URL itself, so a caller-set resolver that returns {@code null} must still land behind the floor. {@link #getXMLResolver()} and
      * {@code getProperty} report the caller's resolver unwrapped.</p>
+     *
+     * <p>The floor on a hook is replaced rather than mutated, which is what keeps each hook and each reader independent. Woodstox routes
+     * {@code setXMLResolver} to both its DTD-subset and entity hooks, so one floor object sits on several of them, and it copies that reference into every
+     * reader it creates; setting a delegate on the object in place would therefore also answer hooks the caller never named, and would change the resolution
+     * policy of readers already created, including ones parsing on another thread. Installing a new floor leaves both untouched: a hook keeps whatever floor it
+     * was given, and a reader keeps the one it captured when it was created.</p>
      *
      * @see org.apache.commons.xml.secure
      */
@@ -225,12 +230,9 @@ public final class SecureXMLInputFactory {
                 // The caller supplies their own floor: hand it to the delegate as-is.
                 delegate.setProperty(name, resolver);
             } else {
-                final Object current = delegate.getProperty(name);
-                if (current instanceof FallbackIgnoreXMLResolver) {
-                    ((FallbackIgnoreXMLResolver) current).setDelegate(resolver);
-                } else {
-                    delegate.setProperty(name, new FallbackIgnoreXMLResolver(resolver));
-                }
+                // A fresh floor for this hook rather than a new delegate on the floor already there: Woodstox puts one floor object on several hooks and copies
+                // the reference into every reader it creates, so mutating it would reach hooks, and readers already parsing, that this call never named.
+                delegate.setProperty(name, new FallbackIgnoreXMLResolver(resolver));
             }
         }
 
