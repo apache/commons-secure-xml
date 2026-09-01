@@ -24,6 +24,7 @@ import javax.xml.validation.Validator;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.xml.sax.SAXException;
 
 /**
  * Tests that an untrusted schema's content-model expansion is bounded, the one processing limit no reader can supply.
@@ -71,7 +72,7 @@ class SchemaContentModelLimitTest {
     @Test
     void secureSchemaBoundsContentModelExpansion() {
         AttackTestSupport.assertParseFails(() -> compileAndValidate(SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)),
-                "Schema content-model expansion", org.xml.sax.SAXException.class);
+                "Schema content-model expansion", SAXException.class);
     }
 
     @Test
@@ -89,6 +90,6 @@ class SchemaContentModelLimitTest {
             final SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             compileAndValidate(factory);
-        }, "Schema content-model expansion", org.xml.sax.SAXException.class);
+        }, "Schema content-model expansion", SAXException.class);
     }
 }
