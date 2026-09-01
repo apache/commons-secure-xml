@@ -174,7 +174,7 @@ JDK version and the standard `jdk.xml.*` limit properties the JDK itself reads:
   default `2500` on JDK 25 and `64000` on JDK 8 through 21). These are trusted deployment configuration: an operator may
   set one to tighten (or loosen) a limit globally, but loosening through one is reconfiguration, treated like loosening
   any other reserved setting (see [What is out of scope](#what-is-out-of-scope)).
-- The bundled parsers apply their own hardcoded secure defaults instead
+- External parsers apply their own hardcoded secure defaults instead
   (for example, external Xerces and Woodstox cap the number of entity expansions at `100000`) and do not read `jdk.xml.*`.
 
 On the supported runtimes (see **Supported runtimes** above),
