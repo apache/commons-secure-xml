@@ -188,21 +188,6 @@ public final class SecureTransformerFactory {
         }
 
         /**
-         * {@inheritDoc}
-         *
-         * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-         *                                   configuration error} or if the implementation is not available or cannot be instantiated.
-         */
-        @Override
-        public Source getAssociatedStylesheet(final Source source, final String media, final String title, final String charset)
-                throws TransformerConfigurationException {
-            // Xalan's getAssociatedStylesheet drops a SAXSource's reader and self-provisions its own to scan for xml-stylesheet PIs (XALANJ-2849), and the
-            // JDK's XSLTC did the same before 8u162; hand those a DOM so no parser but ours ever sees the document.
-            final Source secure = isXalan(delegate) || JAVA_8 ? secureSourceToDom(source) : SecureSAXParserFactory.secure(source, overrideDefaultParser());
-            return floorAssociated(delegate.getAssociatedStylesheet(secure, media, title, charset), secure.getSystemId());
-        }
-
-        /**
          * Routes the href an {@code xml-stylesheet} PI yielded through the floor, so a URI distilled from untrusted content is opted in by the caller's
          * resolver or resolved to empty like any other content-named reference.
          *
@@ -225,6 +210,21 @@ public final class SecureTransformerFactory {
             } catch (final TransformerException e) {
                 throw new TransformerConfigurationException("Failed to resolve the associated stylesheet " + associated.getSystemId(), e);
             }
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+         *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+         */
+        @Override
+        public Source getAssociatedStylesheet(final Source source, final String media, final String title, final String charset)
+                throws TransformerConfigurationException {
+            // Xalan's getAssociatedStylesheet drops a SAXSource's reader and self-provisions its own to scan for xml-stylesheet PIs (XALANJ-2849), and the
+            // JDK's XSLTC did the same before 8u162; hand those a DOM so no parser but ours ever sees the document.
+            final Source secure = isXalan(delegate) || JAVA_8 ? secureSourceToDom(source) : SecureSAXParserFactory.secure(source, overrideDefaultParser());
+            return floorAssociated(delegate.getAssociatedStylesheet(secure, media, title, charset), secure.getSystemId());
         }
 
         @Override

@@ -202,24 +202,6 @@ class SecureXMLFilterTest {
     }
 
     @Test
-    void wrapsErrorHandlerFailuresAndUsesTheConfiguredParent() throws Exception {
-        final SecureXMLFilter filter = filter();
-        final SAXException handlerFailure = new SAXException("error handler");
-        filter.setErrorHandler(new DefaultHandler() {
-
-            @Override
-            public void warning(final SAXParseException e) throws SAXException {
-                throw handlerFailure;
-            }
-        });
-        final TransformerException warning = assertThrows(TransformerException.class, () -> filter.warning(new TransformerException("warning")));
-        assertSame(handlerFailure, warning.getCause());
-        filter.setContentHandler(new DefaultHandler());
-        filter.setParent(SecureSAXParserFactory.newXMLReader(false));
-        filter.parse(new InputSource(new StringReader("<root/>")));
-    }
-
-    @Test
     void surfacesIoFailuresFromTheParentReader() throws Exception {
         final SecureXMLFilter filter = filter();
         filter.setContentHandler(new DefaultHandler());
@@ -235,5 +217,23 @@ class SecureXMLFilterTest {
         final Exception exception = assertThrows(Exception.class, () -> filter.parse(new InputSource(new StringReader("<root/>"))));
         assertTrue(exception instanceof SAXException || exception instanceof IOException,
                 "parse must fail with a declared exception type: " + exception);
+    }
+
+    @Test
+    void wrapsErrorHandlerFailuresAndUsesTheConfiguredParent() throws Exception {
+        final SecureXMLFilter filter = filter();
+        final SAXException handlerFailure = new SAXException("error handler");
+        filter.setErrorHandler(new DefaultHandler() {
+
+            @Override
+            public void warning(final SAXParseException e) throws SAXException {
+                throw handlerFailure;
+            }
+        });
+        final TransformerException warning = assertThrows(TransformerException.class, () -> filter.warning(new TransformerException("warning")));
+        assertSame(handlerFailure, warning.getCause());
+        filter.setContentHandler(new DefaultHandler());
+        filter.setParent(SecureSAXParserFactory.newXMLReader(false));
+        filter.parse(new InputSource(new StringReader("<root/>")));
     }
 }

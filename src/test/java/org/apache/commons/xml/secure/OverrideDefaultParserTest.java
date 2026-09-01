@@ -58,6 +58,11 @@ class OverrideDefaultParserTest {
     /** {@code true} where the runtime's factories know {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER}; JDK 8 gained it in 8u162. */
     private static final boolean SUPPORTS_FEATURE = probeFeature();
 
+    /** Skips a test on a runtime whose factories do not recognize the feature, where there is no selection to observe. */
+    private static void assumeFeatureSupported() {
+        assumeTrue(SUPPORTS_FEATURE, "runtime does not recognize " + FEATURE);
+    }
+
     private static boolean probeFeature() {
         try {
             TransformerFactory.newInstance().setFeature(FEATURE, true);
@@ -65,11 +70,6 @@ class OverrideDefaultParserTest {
         } catch (final Exception e) {
             return false;
         }
-    }
-
-    /** Skips a test on a runtime whose factories do not recognize the feature, where there is no selection to observe. */
-    private static void assumeFeatureSupported() {
-        assumeTrue(SUPPORTS_FEATURE, "runtime does not recognize " + FEATURE);
     }
 
     private static String transform(final TransformerFactory factory, final String text) throws Exception {

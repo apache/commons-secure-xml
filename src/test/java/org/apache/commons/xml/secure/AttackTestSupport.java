@@ -241,6 +241,13 @@ final class AttackTestSupport {
     }
 
     /**
+     * Same contract as {@link #assertDomDoesNotLeak(String)}, on a caller-configured secure factory.
+     */
+    static void assertDomDoesNotLeak(final DocumentBuilderFactory factory, final String payload) {
+        assertNoLeakStrict(() -> domParseAndCaptureText(factory, payload), "DOM");
+    }
+
+    /**
      * Asserts a secure DOM parse completes without throwing and without leaked content.
      *
      * <p>{@link DocumentBuilder#parse(InputSource)} via {@link SecureDocumentBuilderFactory#newInstance()}; use this when the secure guarantee is "the parse
@@ -248,13 +255,6 @@ final class AttackTestSupport {
      */
     static void assertDomDoesNotLeak(final String payload) {
         assertDomDoesNotLeak(SecureDocumentBuilderFactory.newInstance(), payload);
-    }
-
-    /**
-     * Same contract as {@link #assertDomDoesNotLeak(String)}, on a caller-configured secure factory.
-     */
-    static void assertDomDoesNotLeak(final DocumentBuilderFactory factory, final String payload) {
-        assertNoLeakStrict(() -> domParseAndCaptureText(factory, payload), "DOM");
     }
 
     /**
@@ -508,19 +508,19 @@ final class AttackTestSupport {
     }
 
     /**
+     * Same contract as {@link #assertSchemaBlocks(Source)}, on a caller-configured secure factory.
+     */
+    static void assertSchemaBlocks(final SchemaFactory factory, final Source xsd) {
+        assertParseFails(() -> strictSchema(factory, xsd), "Schema compile", SAXException.class, SecurityException.class);
+    }
+
+    /**
      * Asserts a secure Schema compilation throws.
      *
      * <p>{@link SchemaFactory#newSchema(Source)} via {@link SecureSchemaFactory#newInstance(String)}; only a thrown exception passes.</p>
      */
     static void assertSchemaBlocks(final Source xsd) {
         assertSchemaBlocks(SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), xsd);
-    }
-
-    /**
-     * Same contract as {@link #assertSchemaBlocks(Source)}, on a caller-configured secure factory.
-     */
-    static void assertSchemaBlocks(final SchemaFactory factory, final Source xsd) {
-        assertParseFails(() -> strictSchema(factory, xsd), "Schema compile", SAXException.class, SecurityException.class);
     }
 
     /**
@@ -544,6 +544,13 @@ final class AttackTestSupport {
     }
 
     /**
+     * Same contract as {@link #assertSchemaDoesNotLeak(Source)}, on a caller-configured secure factory.
+     */
+    static void assertSchemaDoesNotLeak(final SchemaFactory factory, final Source xsd) {
+        assertParseSucceeds(() -> strictSchema(factory, xsd), "Schema compile");
+    }
+
+    /**
      * Asserts a secure Schema compilation completes without throwing.
      *
      * <p>{@link SchemaFactory#newSchema(Source)} via {@link SecureSchemaFactory#newInstance(String)}; use this when the secure contract guarantees the compile
@@ -552,13 +559,6 @@ final class AttackTestSupport {
      */
     static void assertSchemaDoesNotLeak(final Source xsd) {
         assertSchemaDoesNotLeak(SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), xsd);
-    }
-
-    /**
-     * Same contract as {@link #assertSchemaDoesNotLeak(Source)}, on a caller-configured secure factory.
-     */
-    static void assertSchemaDoesNotLeak(final SchemaFactory factory, final Source xsd) {
-        assertParseSucceeds(() -> strictSchema(factory, xsd), "Schema compile");
     }
 
     /**

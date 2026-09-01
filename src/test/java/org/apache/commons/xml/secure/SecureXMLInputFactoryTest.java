@@ -478,6 +478,18 @@ class SecureXMLInputFactoryTest {
     }
 
     @Test
+    void settingAResolverInstallsAFreshFloorInsteadOfMutatingTheInstalledOne() {
+        // The implementations copy the floor reference into every reader they create, so mutating the installed floor would change the resolution policy of
+        // readers created before the call, including ones already parsing. Replacing it leaves what those readers captured alone.
+        final RecordingXMLInputFactory fake = new RecordingXMLInputFactory();
+        final XMLInputFactory secure = SecureXMLInputFactory.secure(fake);
+        final Object captured = fake.resolverHook;
+        secure.setXMLResolver((publicID, systemID, baseURI, namespace) -> null);
+        assertNotSame(captured, fake.resolverHook, "setting a resolver must install a fresh floor, not re-delegate the one already on the hook");
+        assertNull(((FallbackIgnoreXMLResolver) captured).getDelegate(), "the floor an existing reader captured must keep resolving to empty");
+    }
+
+    @Test
     void setXMLResolverNullClearsCallerDelegate() {
         final RecordingXMLInputFactory fake = new RecordingXMLInputFactory();
         final XMLInputFactory secure = SecureXMLInputFactory.secure(fake);
@@ -524,6 +536,22 @@ class SecureXMLInputFactoryTest {
         final XMLResolver second = (publicID, systemID, baseURI, namespace) -> "resolved";
         factory.setProperty(SecureXMLInputFactory.WSTX_DTD_RESOLVER, second);
         assertSame(second, factory.getProperty(SecureXMLInputFactory.WSTX_DTD_RESOLVER), "a second caller resolver must replace the first behind the floor");
+    }
+
+    @Test
+    void woodstoxResolverHooksStayIndependent() {
+        // Woodstox routes setXMLResolver to both its DTD-subset and entity hooks, so one floor object sits on several of them. Setting one hook must not
+        // answer the others, which it would if the shared floor were mutated in place.
+        final XMLInputFactory secure = SecureXMLInputFactory.newInstance();
+        final XMLResolver dtd = (publicID, systemID, baseURI, namespace) -> null;
+        try {
+            secure.setProperty(SecureXMLInputFactory.WSTX_DTD_RESOLVER, dtd);
+        } catch (final IllegalArgumentException notWoodstox) {
+            Assumptions.abort("the implementation does not support " + SecureXMLInputFactory.WSTX_DTD_RESOLVER);
+            return;
+        }
+        assertSame(dtd, secure.getProperty(SecureXMLInputFactory.WSTX_DTD_RESOLVER), "the hook the caller named must report their resolver");
+        assertNull(secure.getProperty(SecureXMLInputFactory.WSTX_ENTITY_RESOLVER), "a resolver set on the DTD hook must not answer the entity hook");
     }
 
     @Test
@@ -608,34 +636,6 @@ class SecureXMLInputFactoryTest {
                 "the exact event filter must be forwarded");
         assertTrue(fake.calls.contains(RecordingXMLInputFactory.call("createFilteredReader", streamSentinel, streamFilter)),
                 "the exact stream filter must be forwarded");
-    }
-
-    @Test
-    void settingAResolverInstallsAFreshFloorInsteadOfMutatingTheInstalledOne() {
-        // The implementations copy the floor reference into every reader they create, so mutating the installed floor would change the resolution policy of
-        // readers created before the call, including ones already parsing. Replacing it leaves what those readers captured alone.
-        final RecordingXMLInputFactory fake = new RecordingXMLInputFactory();
-        final XMLInputFactory secure = SecureXMLInputFactory.secure(fake);
-        final Object captured = fake.resolverHook;
-        secure.setXMLResolver((publicID, systemID, baseURI, namespace) -> null);
-        assertNotSame(captured, fake.resolverHook, "setting a resolver must install a fresh floor, not re-delegate the one already on the hook");
-        assertNull(((FallbackIgnoreXMLResolver) captured).getDelegate(), "the floor an existing reader captured must keep resolving to empty");
-    }
-
-    @Test
-    void woodstoxResolverHooksStayIndependent() {
-        // Woodstox routes setXMLResolver to both its DTD-subset and entity hooks, so one floor object sits on several of them. Setting one hook must not
-        // answer the others, which it would if the shared floor were mutated in place.
-        final XMLInputFactory secure = SecureXMLInputFactory.newInstance();
-        final XMLResolver dtd = (publicID, systemID, baseURI, namespace) -> null;
-        try {
-            secure.setProperty(SecureXMLInputFactory.WSTX_DTD_RESOLVER, dtd);
-        } catch (final IllegalArgumentException notWoodstox) {
-            Assumptions.abort("the implementation does not support " + SecureXMLInputFactory.WSTX_DTD_RESOLVER);
-            return;
-        }
-        assertSame(dtd, secure.getProperty(SecureXMLInputFactory.WSTX_DTD_RESOLVER), "the hook the caller named must report their resolver");
-        assertNull(secure.getProperty(SecureXMLInputFactory.WSTX_ENTITY_RESOLVER), "a resolver set on the DTD hook must not answer the entity hook");
     }
 
     @Test

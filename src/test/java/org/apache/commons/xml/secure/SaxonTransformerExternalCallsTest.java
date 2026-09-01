@@ -52,52 +52,6 @@ class SaxonTransformerExternalCallsTest {
 
     private static final String SAXON_TRANSFORMER_FACTORY_CLASS = "net.sf.saxon.TransformerFactoryImpl";
 
-    private static void assumeSaxonPresent() {
-        boolean present;
-        try {
-            Class.forName(SAXON_TRANSFORMER_FACTORY_CLASS);
-            present = true;
-        } catch (final ClassNotFoundException e) {
-            present = false;
-        }
-        Assumptions.assumeTrue(present, "Saxon is not on the classpath");
-    }
-
-    /** Wraps a single XPath 3.1 expression in an XSLT 3.0 stylesheet that copies its string value into the output. */
-    private static String stylesheet(final String expression) {
-        return "<?xml version=\"1.0\"?>\n"
-                + "<xsl:stylesheet version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
-                + "  <xsl:template match=\"/\">\n"
-                + "    <leaked><xsl:value-of select=\"" + expression + "\"/></leaked>\n"
-                + "  </xsl:template>\n"
-                + "</xsl:stylesheet>\n";
-    }
-
-    /** URL of a fixture that carries {@link AttackTestSupport#LEAKED_MARKER}; {@code name} is a file under {@code src/test/resources/leaked/}. */
-    private static String url(final String name) {
-        return AttackTestSupport.resourceUrl(name).toString();
-    }
-
-    /** URL of a sibling resource that does not exist, so a real fetch fails; used as the negative side of the existence-oracle check. */
-    private static String missingUrl() {
-        return url("referenced.txt").replaceFirst("referenced\\.txt$", "does-not-exist.txt");
-    }
-
-    private static TransformerFactory saxonFactory() {
-        try {
-            return (TransformerFactory) Class.forName(SAXON_TRANSFORMER_FACTORY_CLASS).getDeclaredConstructor().newInstance();
-        } catch (final ReflectiveOperationException e) {
-            throw new AssertionError("Cannot instantiate " + SAXON_TRANSFORMER_FACTORY_CLASS, e);
-        }
-    }
-
-    private static String transform(final TransformerFactory factory, final String expression) throws TransformerException {
-        final StringWriter sink = new StringWriter();
-        factory.newTemplates(AttackTestSupport.streamSource(stylesheet(expression))).newTransformer()
-                .transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink));
-        return sink.toString();
-    }
-
     /** Runs the expression through the secure Saxon factory; a throw is an acceptable block, otherwise the marker must be absent. */
     private static void assertSecureDoesNotLeak(final String expression) {
         try {
@@ -114,6 +68,67 @@ class SaxonTransformerExternalCallsTest {
         assertTrue(result.contains(AttackTestSupport.LEAKED_MARKER), "unconfigured Saxon was expected to resolve " + expression + ", got: " + result);
     }
 
+    private static void assumeSaxonPresent() {
+        boolean present;
+        try {
+            Class.forName(SAXON_TRANSFORMER_FACTORY_CLASS);
+            present = true;
+        } catch (final ClassNotFoundException e) {
+            present = false;
+        }
+        Assumptions.assumeTrue(present, "Saxon is not on the classpath");
+    }
+
+    /** The {@code unparsed-text-available} answer under the secure factory, or {@code "blocked"} when the transform throws. */
+    private static String availabilityUnderSecure(final String uri) {
+        try {
+            return transform(SecureTransformerFactory.secure(saxonFactory()), "unparsed-text-available('" + uri + "')").contains("true") ? "true" : "false";
+        } catch (final TransformerException blocked) {
+            return "blocked";
+        }
+    }
+
+    /** URL of a sibling resource that does not exist, so a real fetch fails; used as the negative side of the existence-oracle check. */
+    private static String missingUrl() {
+        return url("referenced.txt").replaceFirst("referenced\\.txt$", "does-not-exist.txt");
+    }
+
+    private static TransformerFactory saxonFactory() {
+        try {
+            return (TransformerFactory) Class.forName(SAXON_TRANSFORMER_FACTORY_CLASS).getDeclaredConstructor().newInstance();
+        } catch (final ReflectiveOperationException e) {
+            throw new AssertionError("Cannot instantiate " + SAXON_TRANSFORMER_FACTORY_CLASS, e);
+        }
+    }
+
+    /** Wraps a single XPath 3.1 expression in an XSLT 3.0 stylesheet that copies its string value into the output. */
+    private static String stylesheet(final String expression) {
+        return "<?xml version=\"1.0\"?>\n"
+                + "<xsl:stylesheet version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
+                + "  <xsl:template match=\"/\">\n"
+                + "    <leaked><xsl:value-of select=\"" + expression + "\"/></leaked>\n"
+                + "  </xsl:template>\n"
+                + "</xsl:stylesheet>\n";
+    }
+
+    private static String transform(final TransformerFactory factory, final String expression) throws TransformerException {
+        final StringWriter sink = new StringWriter();
+        factory.newTemplates(AttackTestSupport.streamSource(stylesheet(expression))).newTransformer()
+                .transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink));
+        return sink.toString();
+    }
+
+    /** URL of a fixture that carries {@link AttackTestSupport#LEAKED_MARKER}; {@code name} is a file under {@code src/test/resources/leaked/}. */
+    private static String url(final String name) {
+        return AttackTestSupport.resourceUrl(name).toString();
+    }
+
+    @Test
+    void secureTransformerBlocksJsonDoc() {
+        assumeSaxonPresent();
+        assertSecureDoesNotLeak("json-doc('" + url("referenced.json") + "')?leaked");
+    }
+
     @Test
     void secureTransformerBlocksUnparsedText() {
         assumeSaxonPresent();
@@ -124,12 +139,6 @@ class SaxonTransformerExternalCallsTest {
     void secureTransformerBlocksUnparsedTextLines() {
         assumeSaxonPresent();
         assertSecureDoesNotLeak("string-join(unparsed-text-lines('" + url("referenced.txt") + "'), ' ')");
-    }
-
-    @Test
-    void secureTransformerBlocksJsonDoc() {
-        assumeSaxonPresent();
-        assertSecureDoesNotLeak("json-doc('" + url("referenced.json") + "')?leaked");
     }
 
     @Test
@@ -152,13 +161,10 @@ class SaxonTransformerExternalCallsTest {
                 "secure Saxon unparsed-text-available still distinguishes an existing file from a missing one");
     }
 
-    /** The {@code unparsed-text-available} answer under the secure factory, or {@code "blocked"} when the transform throws. */
-    private static String availabilityUnderSecure(final String uri) {
-        try {
-            return transform(SecureTransformerFactory.secure(saxonFactory()), "unparsed-text-available('" + uri + "')").contains("true") ? "true" : "false";
-        } catch (final TransformerException blocked) {
-            return "blocked";
-        }
+    @Test
+    void unconfiguredTransformerLeaksJsonDoc() throws TransformerException {
+        assumeSaxonPresent();
+        assertUnconfiguredLeaks("json-doc('" + url("referenced.json") + "')?leaked");
     }
 
     @Test
@@ -171,11 +177,5 @@ class SaxonTransformerExternalCallsTest {
     void unconfiguredTransformerLeaksUnparsedTextLines() throws TransformerException {
         assumeSaxonPresent();
         assertUnconfiguredLeaks("string-join(unparsed-text-lines('" + url("referenced.txt") + "'), ' ')");
-    }
-
-    @Test
-    void unconfiguredTransformerLeaksJsonDoc() throws TransformerException {
-        assumeSaxonPresent();
-        assertUnconfiguredLeaks("json-doc('" + url("referenced.json") + "')?leaked");
     }
 }

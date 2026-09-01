@@ -44,6 +44,15 @@ class SchemaContentModelLimitTest {
     /** Above both recognized implementations' limits (3,000 nodes on Xerces, 5,000 on the stock JDK); an unbounded run still finishes in seconds. */
     private static final int MAX_OCCURS = 10_000;
 
+    /** Compiles the payload through {@code factory} and validates a matching instance, the step that forces the expansion. */
+    private static void compileAndValidate(final SchemaFactory factory) throws Exception {
+        factory.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
+        final Schema schema = factory.newSchema(AttackTestSupport.streamSource(maxOccursPayload()));
+        final Validator validator = schema.newValidator();
+        validator.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
+        validator.validate(AttackTestSupport.streamSource("<root><a>x</a><b>y</b></root>"));
+    }
+
     private static String maxOccursPayload() {
         return "<?xml version=\"1.0\"?>\n"
                 + "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n"
@@ -59,19 +68,18 @@ class SchemaContentModelLimitTest {
                 + "</xs:schema>\n";
     }
 
-    /** Compiles the payload through {@code factory} and validates a matching instance, the step that forces the expansion. */
-    private static void compileAndValidate(final SchemaFactory factory) throws Exception {
-        factory.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
-        final Schema schema = factory.newSchema(AttackTestSupport.streamSource(maxOccursPayload()));
-        final Validator validator = schema.newValidator();
-        validator.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
-        validator.validate(AttackTestSupport.streamSource("<root><a>x</a><b>y</b></root>"));
-    }
-
     @Test
     void secureSchemaBoundsContentModelExpansion() {
         AttackTestSupport.assertParseFails(() -> compileAndValidate(SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)),
                 "Schema content-model expansion", org.xml.sax.SAXException.class);
+    }
+
+    @Test
+    void unconfiguredSchemaValidatesWhereTheLimitIsOptional() {
+        // Control: the payload is a valid schema and instance, so a rejection above is the limit firing and not a malformed fixture. It is skipped on an
+        // implementation that bounds the expansion unconditionally (the stock JDK), where there is no unbounded run to compare against.
+        final SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        AttackTestSupport.assumeDoesNotThrow(() -> compileAndValidate(factory));
     }
 
     @Test
@@ -82,13 +90,5 @@ class SchemaContentModelLimitTest {
             factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             compileAndValidate(factory);
         }, "Schema content-model expansion", org.xml.sax.SAXException.class);
-    }
-
-    @Test
-    void unconfiguredSchemaValidatesWhereTheLimitIsOptional() {
-        // Control: the payload is a valid schema and instance, so a rejection above is the limit firing and not a malformed fixture. It is skipped on an
-        // implementation that bounds the expansion unconditionally (the stock JDK), where there is no unbounded run to compare against.
-        final SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        AttackTestSupport.assumeDoesNotThrow(() -> compileAndValidate(factory));
     }
 }
