@@ -39,8 +39,8 @@ import org.w3c.dom.Document;
  * non-{@code null} {@link Source}; anything left unresolved resolves to an empty {@link Source}, so the external resource is neither fetched nor leaked.
  * </p>
  * <p>
- * The shape of that empty {@link Source} is supplied by the caller: the default is a well-formed empty DOM document (which every stock TrAX consumer accepts),
- * while the Saxon path supplies {@code EmptySource.getInstance()} so its consumers get the "empty" shape they expect.
+ * The shape of that empty {@link Source} is supplied by the caller: the default is a fresh, well-formed empty DOM document per resolution (which every stock
+ * TrAX consumer accepts), while the Saxon path supplies {@code EmptySource.getInstance()} so its consumers get the "empty" shape they expect.
  * </p>
  * <p>
  * An opted-in {@link javax.xml.transform.stream.StreamSource} or reader-less {@link javax.xml.transform.sax.SAXSource} is rewritten to carry a secure reader
@@ -51,39 +51,32 @@ import org.w3c.dom.Document;
 final class FallbackIgnoreURIResolver implements URIResolver {
 
     /**
-     * Backing for the default ignore outcome. Consumers parse the resolved {@link Source}, and an empty character stream is not a well-formed XML document
-     * (XSLTC rejects it for {@code document()} and for an ignored {@code xsl:include}/{@code xsl:import}), so the default supplier answers with a well-formed
-     * empty document that evaluates to no content. It is never mutated, so one instance serves every resolution.
+     * Creates the empty document backing the default ignore outcome.
      *
-     * @see #newEmptyDocument()
-     */
-    private static final Document EMPTY_DOCUMENT;
-
-    static {
-        EMPTY_DOCUMENT = newEmptyDocument(DocumentBuilderFactory.newInstance());
-    }
-
-    /**
-     * Creates a new empty document.
+     * <p>Consumers parse the resolved {@link Source},
+     * and an empty character stream is not a well-formed XML document
+     * (XSLTC rejects it for {@code document()} and for an ignored {@code xsl:include}/{@code xsl:import}),
+     * so the default supplier answers with a well-formed empty document that evaluates to no content.</p>
      *
-     * @param factory the factory to use to create a new document builder.
+     * <p>The document escapes to the consumer with the resolved {@link Source}, so each resolution gets its own: whatever a consumer does to a document it
+     * received cannot surface in another resolution.</p>
+     *
+     * @param factory the factory to create the document builder with.
      * @return a new empty document.
-     * @throws SecureException        Thrown if a {@link DocumentBuilder} cannot be created which satisfies the configuration requested.
-     * @throws ExceptionInInitializerError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     * @throws IllegalStateException Thrown if the factory cannot supply a {@link javax.xml.parsers.DocumentBuilder} satisfying its configuration.
      */
     private static Document newEmptyDocument(final DocumentBuilderFactory factory) {
         try {
             return factory.newDocumentBuilder().newDocument();
         } catch (final ParserConfigurationException e) {
-            throw new ExceptionInInitializerError(e);
+            throw new IllegalStateException(e);
         }
     }
 
     private URIResolver delegate;
 
     /**
-     * Produces the empty {@link Source} returned for an unresolved reference; a new value per call keeps callers from mutating a shared Source.
+     * Produces the empty {@link Source} returned for an unresolved reference.
      */
     private final Supplier<Source> emptySource;
 
@@ -102,7 +95,8 @@ final class FallbackIgnoreURIResolver implements URIResolver {
      */
     FallbackIgnoreURIResolver(final URIResolver delegate, final Supplier<Source> emptySource, final BooleanSupplier overrideDefaultParser) {
         this.delegate = delegate;
-        this.emptySource = emptySource != null ? emptySource : () -> new DOMSource(EMPTY_DOCUMENT);
+        this.emptySource = emptySource != null ? emptySource
+                : () -> new DOMSource(newEmptyDocument(SecureDocumentBuilderFactory.newNSInstance(overrideDefaultParser.getAsBoolean())));
         this.overrideDefaultParser = overrideDefaultParser;
     }
 
