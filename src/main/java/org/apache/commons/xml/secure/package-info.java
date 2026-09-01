@@ -45,8 +45,9 @@
  * <ul>
  * <li><strong>External DTDs are not fetched.</strong></li>
  * <li><strong>External entities are not resolved.</strong></li>
- * <li><strong>Internal entity expansion is bounded</strong> by the platform's secure-processing limit, so DoS payloads such as Billion Laughs are rejected
- * before they exhaust resources.</li>
+ * <li><strong>Internal entity expansion is bounded</strong> by the processing limits the parser applies, so DoS payloads such as Billion Laughs are rejected
+ * before they exhaust resources. Those limits come from secure processing where the API defines it, and from the implementation's own secure defaults on StAX,
+ * which defines no such feature.</li>
  * </ul>
  * <p>
  * These guarantees are defined on OpenJDK 8 or later (and JDK distributions built from it). No version of Android supports
