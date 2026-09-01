@@ -17,6 +17,7 @@
 
 package org.apache.commons.xml.secure;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.StringReader;
+import java.lang.reflect.Field;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
@@ -38,9 +40,11 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 @Tag("sax")
@@ -67,6 +71,49 @@ public class SecureSAXParserFactoryTest {
         public void setFeature(final String name, final boolean value) {
             // no-op
         }
+    }
+
+    /** System property naming the {@link SAXParserFactory} implementation, the JVM's mechanism for reconfiguring the default parser. */
+    private static final String FACTORY_ID = "javax.xml.parsers.SAXParserFactory";
+
+    /**
+     * Asserts {@link SecureSAXParserFactory#newXMLReader(boolean)} on the given delegate throws {@link IllegalStateException} with the given cause.
+     *
+     * @param cause    the checked exception the delegate is stubbed to throw.
+     * @param delegate the stubbed factory to route {@link MockSAXParserFactory} to.
+     */
+    private static void assertNewXmlReaderWraps(final Exception cause, final SAXParserFactory delegate) {
+        MockSAXParserFactory.delegate = delegate;
+        final IllegalStateException exception = assertThrows(IllegalStateException.class, () -> SecureSAXParserFactory.newXMLReader(false));
+        assertSame(cause, exception.getCause());
+    }
+
+    /**
+     * Gets the implementation a secure factory delegates to, so the selection tests can observe which parser implementation a lookup picked.
+     *
+     * @param factory a secure factory returned by one of the {@code new*Instance} methods; never {@code null}.
+     * @return The wrapped factory.
+     */
+    private static SAXParserFactory getDelegate(final SAXParserFactory factory) throws ReflectiveOperationException {
+        final Field delegate = factory.getClass().getDeclaredField("delegate");
+        delegate.setAccessible(true);
+        return (SAXParserFactory) delegate.get(factory);
+    }
+
+    /**
+     * Selects the implementation {@link SAXParserFactory#newInstance()} returns by setting the {@value #FACTORY_ID} system property.
+     *
+     * @param factoryClassName the implementation class name to install, or {@code null} to clear the property and restore the platform lookup.
+     * @return The previous property value, {@code null} if it was not set; pass it back here to restore the original lookup.
+     */
+    private static String setFactoryIdProperty(final String factoryClassName) {
+        final String previous = System.getProperty(FACTORY_ID);
+        if (factoryClassName == null) {
+            System.clearProperty(FACTORY_ID);
+        } else {
+            System.setProperty(FACTORY_ID, factoryClassName);
+        }
+        return previous;
     }
 
     @Test
@@ -100,47 +147,73 @@ public class SecureSAXParserFactoryTest {
     }
 
     @Test
-    void newXmlReaderWrapsParserConfigurationException() throws Exception {
-        final ParserConfigurationException cause = new ParserConfigurationException("test");
-        MockSAXParserFactory.delegate = mock(SAXParserFactory.class);
-        when(MockSAXParserFactory.delegate.newSAXParser()).thenThrow(cause);
-        final String factoryId = "javax.xml.parsers.SAXParserFactory";
-        final String previous = System.getProperty(factoryId);
-        try {
-            System.setProperty(factoryId, MockSAXParserFactory.class.getName());
-            final IllegalStateException exception = assertThrows(IllegalStateException.class, () -> SecureSAXParserFactory.newXMLReader(false));
-            assertSame(cause, exception.getCause());
-        } finally {
-            if (previous == null) {
-                System.clearProperty(factoryId);
-            } else {
-                System.setProperty(factoryId, previous);
-            }
-            MockSAXParserFactory.delegate = null;
-        }
-    }
-
-    @Test
-    void respectsDefaultParserSelectionAndLeavesReadersSecureOnlyOnce() throws Exception {
-        final String factoryId = "SAXParserFactory";
-        final String previous = System.getProperty(factoryId);
-        try {
-            System.setProperty(factoryId, SAXParserFactory.newInstance().getClass().getName());
-            assertTrue(SecureSAXParserFactory.newNSInstance(false).isNamespaceAware());
-        } finally {
-            if (previous == null) {
-                System.clearProperty(factoryId);
-            } else {
-                System.setProperty(factoryId, previous);
-            }
-        }
-        assertTrue(SecureSAXParserFactory.newNSInstance(true).isNamespaceAware());
+    void leavesReadersSecureOnlyOnce() {
         final XMLReader reader = SecureSAXParserFactory.newXMLReader(false);
         assertSame(reader, SecureSAXParserFactory.secure(reader));
     }
 
     @Test
-    void securesOnlySourcesThatNeedAReader() throws Exception {
+    void newNSInstanceFollowsParserSelection() throws Exception {
+        Assumptions.assumeFalse(AttackTestSupport.IS_ANDROID, "Skipped on Android: parser selection is pinned to the platform implementation");
+        final Class<?> discovered = SAXParserFactory.newInstance().getClass();
+        // no property: the JDK built-in default, unless an override is requested
+        assertEquals(SecureSAXParserFactory.JDK_SAX_PARSER_FACTORY, getDelegate(SecureSAXParserFactory.newNSInstance(false)).getClass().getName());
+        assertEquals(discovered, getDelegate(SecureSAXParserFactory.newNSInstance(true)).getClass());
+        // the factory id property is the JDK's own default reconfiguration; both selections honor it
+        final String previous = setFactoryIdProperty(discovered.getName());
+        try {
+            assertEquals(discovered, getDelegate(SecureSAXParserFactory.newNSInstance(false)).getClass());
+            assertEquals(discovered, getDelegate(SecureSAXParserFactory.newNSInstance(true)).getClass());
+        } finally {
+            setFactoryIdProperty(previous);
+        }
+    }
+
+    @Test
+    void newXmlReaderFollowsParserSelection() throws Exception {
+        Assumptions.assumeFalse(AttackTestSupport.IS_ANDROID, "Skipped on Android: parser selection is pinned to the platform implementation");
+        final Class<?> discovered = SAXParserFactory.newInstance().newSAXParser().getXMLReader().getClass();
+        assertEquals(discovered, ((SecureXMLReader) SecureSAXParserFactory.newXMLReader(true)).getDelegate().getClass());
+        final Class<?> jdkReader =
+                SAXParserFactory.newInstance(SecureSAXParserFactory.JDK_SAX_PARSER_FACTORY, null).newSAXParser().getXMLReader().getClass();
+        assertEquals(jdkReader, ((SecureXMLReader) SecureSAXParserFactory.newXMLReader(false)).getDelegate().getClass());
+        final String previous = setFactoryIdProperty(SAXParserFactory.newInstance().getClass().getName());
+        try {
+            assertEquals(discovered, ((SecureXMLReader) SecureSAXParserFactory.newXMLReader(false)).getDelegate().getClass());
+        } finally {
+            setFactoryIdProperty(previous);
+        }
+    }
+
+    @Test
+    void newXmlReaderWrapsDeclaredExceptions() throws Exception {
+        Assumptions.assumeFalse(AttackTestSupport.IS_ANDROID, "Skipped on Android: parser selection is pinned to the platform implementation");
+        final String previous = setFactoryIdProperty(MockSAXParserFactory.class.getName());
+        try {
+            // SAXParserFactory.newSAXParser() declares ParserConfigurationException and SAXException
+            final ParserConfigurationException notConfigurable = new ParserConfigurationException("test");
+            SAXParserFactory factory = mock(SAXParserFactory.class);
+            when(factory.newSAXParser()).thenThrow(notConfigurable);
+            assertNewXmlReaderWraps(notConfigurable, factory);
+            final SAXException noParser = new SAXException("test");
+            factory = mock(SAXParserFactory.class);
+            when(factory.newSAXParser()).thenThrow(noParser);
+            assertNewXmlReaderWraps(noParser, factory);
+            // SAXParser.getXMLReader() declares SAXException
+            final SAXException noReader = new SAXException("test");
+            factory = mock(SAXParserFactory.class);
+            final SAXParser parser = mock(SAXParser.class);
+            when(factory.newSAXParser()).thenReturn(parser);
+            when(parser.getXMLReader()).thenThrow(noReader);
+            assertNewXmlReaderWraps(noReader, factory);
+        } finally {
+            setFactoryIdProperty(previous);
+            MockSAXParserFactory.delegate = null;
+        }
+    }
+
+    @Test
+    void securesOnlySourcesThatNeedAReader() {
         final StreamSource stream = new StreamSource(new StringReader("<root/>"));
         final Source securedStream = SecureSAXParserFactory.secure(stream, false);
         assertInstanceOf(SAXSource.class, securedStream);

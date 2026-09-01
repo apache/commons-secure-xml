@@ -164,7 +164,7 @@ public final class SecureSAXParserFactory {
     private static final String ANDROID_SAX_PARSER_FACTORY = "org.apache.harmony.xml.parsers.SAXParserFactoryImpl";
 
     /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
-    private static final String JDK_SAX_PARSER_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl";
+    static final String JDK_SAX_PARSER_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl";
 
     /**
      * The JDK feature governing whether an implementation's internal parser lookup may resolve a third-party parser. The secure wrappers parse every source
