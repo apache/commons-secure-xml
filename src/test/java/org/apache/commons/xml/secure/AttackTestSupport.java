@@ -553,7 +553,7 @@ final class AttackTestSupport {
     /**
      * Asserts a secure Schema compilation completes without throwing.
      *
-     * <p>{@link SchemaFactory#newSchema(Source)} via {@link SecureSchemaFactory#newInstance(String)}; use this when the secure contract guarantees the compile
+     * <p>{@link SchemaFactory#newSchema(Source)} via {@link SecureSchemaFactory#newInstance(String)}; use this when the secure contract guarantees compilation
      * succeeds but never resolves the external resource (for example, {@code XERCES_LOAD_EXTERNAL_DTD=false} silently skipping the external subset, with the body's
      * undeclared entity reference dropped per XML 1.0 §4.1).</p>
      */
@@ -727,7 +727,7 @@ final class AttackTestSupport {
      * Asserts a secure Validator validation completes without throwing.
      *
      * <p>{@link Validator#validate(Source)} on a validator from {@link #BENIGN_SCHEMA} compiled via {@link SecureSchemaFactory#newInstance(String)}; use this when the
-     * secure contract guarantees the validate succeeds but never resolves the external resource.</p>
+     * secure contract guarantees validation succeeds but never resolves the external resource.</p>
      */
     static void assertValidatorDoesNotLeak(final String xml) {
         assertParseSucceeds(

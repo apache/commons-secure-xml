@@ -405,7 +405,7 @@ limitations under the License.
           </execution>
         </executions>
       </plugin>
-      <!-- jdeps makes Saxon.HE a hard requires; flip it to static (optional). The trailing * keeps the rest. -->
+      <!-- jdeps makes Saxon.HE a hard requirement; flip it to static (optional). The trailing * keeps the rest. -->
       <plugin>
         <groupId>org.moditect</groupId>
         <artifactId>moditect-maven-plugin</artifactId>
