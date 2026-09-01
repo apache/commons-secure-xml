@@ -109,11 +109,11 @@ final class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
      * @param publicId The public identifier, or {@code null} if none.
      * @param baseURI  The base URI for relative resolution, or {@code null}.
      * @param systemId The system identifier of the unresolved entity.
-     * @return An empty {@link InputSource} carrying the requested identifiers.
+     * @return an empty {@link InputSource} carrying the requested identifiers.
      * @throws SAXException when {@value SecureException#THROW_ON_UNRESOLVED} is set: unresolved references are rejected instead of resolved to empty.
      * @throws IOException  never by the default implementation.
      */
-    private InputSource onUnresolved(final String name, final String publicId, final String baseURI, final String systemId) throws SAXException, IOException {
+    private InputSource onUnresolved(final String name, final String publicId, final String baseURI, final String systemId) throws SAXException {
         if (SecureException.throwOnUnresolved()) {
             throw new SAXException(SecureException.forbidden(name, null, publicId, systemId, baseURI));
         }

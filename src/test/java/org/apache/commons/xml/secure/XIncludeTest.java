@@ -192,7 +192,7 @@ class XIncludeTest {
 
     @Test
     @Tag("dom")
-    void secureDomBlocksParseXml() throws Exception {
+    void secureDomBlocksParseXml() {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_XML, "xml"));
 
         final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
@@ -306,7 +306,7 @@ class XIncludeTest {
 
     @Test
     @Tag("sax")
-    void secureSaxBlocksParseXml() throws Exception {
+    void secureSaxBlocksParseXml() {
         final InputSource input = inputSource(xiIncludeXml(REFERENCED_XML, "xml"));
 
         final SAXParserFactory factory = SecureSAXParserFactory.newInstance();
