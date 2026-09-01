@@ -74,6 +74,23 @@ public final class SecureXPathFactory {
             return delegate.getFeature(name);
         }
 
+        /**
+         * Reports a property of the delegate, the Java 18 {@code XPathFactory.getProperty(String)}.
+         *
+         * <p>Not marked {@code @Override}: this library compiles against the Java 8 API, where {@link XPathFactory} declares no such method, so the annotation
+         * would not compile. At run time on Java 18 or later it overrides the inherited method, which would otherwise answer for the wrapper and hide the
+         * delegate's own limits ({@code jdk.xml.xpath*}) behind an {@code UnsupportedOperationException}.</p>
+         *
+         * @param name the property name.
+         * @return the delegate's value for the property.
+         */
+        public String getProperty(final String name) {
+            if (MH_getProperty == null) {
+                throw new UnsupportedOperationException("XPathFactory.getProperty(String) requires Java 18 or later");
+            }
+            return MethodHandleFactory.invokeExact(() -> (String) MH_getProperty.invokeExact(delegate, name), RuntimeException.class);
+        }
+
         @Override
         public boolean isObjectModelSupported(final String objectModel) {
             return delegate.isObjectModelSupported(objectModel);
@@ -107,6 +124,24 @@ public final class SecureXPathFactory {
             delegate.setFeature(name, value);
         }
 
+        /**
+         * Sets a property on the delegate, the Java 18 {@code XPathFactory.setProperty(String, String)}; see {@link #getProperty(String)} for why it carries no
+         * {@code @Override}. The {@code jdk.xml.xpath*} limits reached this way are processing limits like any other: an operator may tighten them, and
+         * loosening one is reconfiguration.
+         *
+         * @param name  the property name.
+         * @param value the value to set.
+         */
+        public void setProperty(final String name, final String value) {
+            if (MH_setProperty == null) {
+                throw new UnsupportedOperationException("XPathFactory.setProperty(String, String) requires Java 18 or later");
+            }
+            MethodHandleFactory.invokeExact(() -> {
+                MH_setProperty.invokeExact(delegate, name, value);
+                return null;
+            }, RuntimeException.class);
+        }
+
         @Override
         public void setXPathFunctionResolver(final XPathFunctionResolver resolver) {
             delegate.setXPathFunctionResolver(resolver);
@@ -122,6 +157,13 @@ public final class SecureXPathFactory {
     private static final String JDK_XPATH_FACTORY = "com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl";
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(XPathFactory.class, "newDefaultInstance");
+
+    /** {@code XPathFactory.getProperty(String)}, added in Java 18; {@code null} on earlier releases, where the method does not exist to be called. */
+    private static final MethodHandle MH_getProperty = MethodHandleFactory.findVirtual(XPathFactory.class, "getProperty", String.class, String.class);
+
+    /** {@code XPathFactory.setProperty(String, String)}, added in Java 18; {@code null} on earlier releases, where the method does not exist to be called. */
+    private static final MethodHandle MH_setProperty =
+            MethodHandleFactory.findVirtual(XPathFactory.class, "setProperty", void.class, String.class, String.class);
 
     /**
      * Returns a new, secure {@link XPathFactory} of the system-default implementation, supporting the default XPath object model.
