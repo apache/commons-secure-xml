@@ -40,8 +40,8 @@ import javax.xml.transform.Source;
  * The three universal guarantees on {@link org.apache.commons.xml.secure} apply; StAX exposes no additional vectors beyond them.
  * </p>
  * <p>
- * Not a {@link XMLInputFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-secured factory through this class
- * by calling an inherited method such as {@code newDefaultFactory()}. The secure factories are instances of a nested, non-public wrapper class.
+ * This class is not itself a {@link XMLInputFactory}, so it inherits none of the static JAXP factory methods. A caller therefore cannot obtain an unsecured
+ * factory through this class by calling a method such as {@code newDefaultFactory()}. The secure factories are instances of a nested, non-public wrapper class.
  * </p>
  *
  * @see org.apache.commons.xml.secure

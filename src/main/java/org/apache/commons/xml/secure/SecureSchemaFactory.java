@@ -47,12 +47,13 @@ import org.xml.sax.SAXNotSupportedException;
  * <a href="https://xerces.apache.org/xerces2-j/properties.html#security-manager">security manager</a>, which caps that expansion at 3,000 nodes).</li>
  * </ul>
  * <p>
- * The same guarantees apply to {@link javax.xml.validation.Validator} and {@link javax.xml.validation.ValidatorHandler} instances produced from the
- * resulting {@link javax.xml.validation.Schema}.
+ * The same guarantees apply to {@link javax.xml.validation.Validator} and {@link javax.xml.validation.ValidatorHandler} instances produced from the resulting
+ * {@link javax.xml.validation.Schema}.
  * </p>
  * <p>
- * Not a {@link SchemaFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-secured factory through this class
- * by calling an inherited method such as {@code newDefaultInstance()}. The secure factories are instances of a nested, non-public wrapper class.
+ * This class is not itself a {@link SchemaFactory}, so it inherits none of the static JAXP factory methods. A caller therefore cannot obtain an unsecured
+ * factory through this class by calling a method such as {@code newDefaultInstance()}. The secure factories are instances of a nested, non-public wrapper
+ * class.
  * </p>
  *
  * @see org.apache.commons.xml.secure

@@ -51,7 +51,8 @@ import org.xml.sax.XMLReader;
 /**
  * Creates new, secure {@link TransformerFactory} instances.
  * <p>
- * Beyond the three universal guarantees on {@link org.apache.commons.xml.secure}: {@code xsl:import}, {@code xsl:include} and {@code document()} URIs are not resolved.
+ * Beyond the three universal guarantees on {@link org.apache.commons.xml.secure}: {@code xsl:import}, {@code xsl:include} and {@code document()} URIs are not
+ * resolved.
  * </p>
  * <p>
  * The guarantees govern what the transform reads, not what it writes: an output instruction like {@code xsl:result-document} still writes wherever the
@@ -74,8 +75,9 @@ import org.xml.sax.XMLReader;
  * {@code newXMLFilter(..)}), if reachable by casting the returned factory, produce objects carrying the same guarantees.
  * </p>
  * <p>
- * Not a {@link TransformerFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-secured factory through this class
- * by calling an inherited method such as {@code newDefaultInstance()}. The secure factories are instances of a nested, non-public wrapper class.
+ * This class is not itself a {@link TransformerFactory}, so it inherits none of the static JAXP factory methods. A caller therefore cannot obtain an unsecured
+ * factory through this class by calling a method such as {@code newDefaultInstance()}. The secure factories are instances of a nested, non-public wrapper
+ * class.
  * </p>
  *
  * @see org.apache.commons.xml.secure

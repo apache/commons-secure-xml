@@ -34,12 +34,13 @@ import javax.xml.xpath.XPathVariableResolver;
  * {@code unparsed-text()}) are not resolved.
  * </p>
  * <p>
- * The guarantees also cover the document parse behind {@code XPath.evaluate(String, InputSource)} and {@code XPathExpression.evaluate(InputSource)}: the
- * input document is built through a secure, namespace-aware {@link javax.xml.parsers.DocumentBuilder} instead of the engine's internal parser.
+ * The guarantees also cover the document parse behind {@code XPath.evaluate(String, InputSource)} and {@code XPathExpression.evaluate(InputSource)}: the input
+ * document is built through a secure, namespace-aware {@link javax.xml.parsers.DocumentBuilder} instead of the engine's internal parser.
  * </p>
  * <p>
- * Not a {@link XPathFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-secured factory through this class
- * by calling an inherited method such as {@code newDefaultInstance()}. The secure factories are instances of a nested, non-public wrapper class.
+ * This class is not itself a {@link XPathFactory}, so it inherits none of the static JAXP factory methods. A caller therefore cannot obtain an unsecured
+ * factory through this class by calling a method such as {@code newDefaultInstance()}. The secure factories are instances of a nested, non-public wrapper
+ * class.
  * </p>
  *
  * @see org.apache.commons.xml.secure

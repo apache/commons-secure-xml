@@ -42,12 +42,13 @@ import org.xml.sax.XMLReader;
  * <p>
  * Beyond the three universal guarantees on {@link org.apache.commons.xml.secure}, XInclude resolution is denied by default. When
  * {@link SAXParserFactory#setXIncludeAware(boolean) setXIncludeAware(true)} is called on the returned factory, the parser will process {@code xi:include}
- * elements but every external resource lookup is rejected. To permit specific trusted resources, install an {@link org.xml.sax.EntityResolver
- * EntityResolver} on the {@link org.xml.sax.XMLReader} that allow-lists them; any href the resolver does not explicitly allow stays blocked.
+ * elements but every external resource lookup is rejected. To permit specific trusted resources, install an {@link org.xml.sax.EntityResolver EntityResolver}
+ * on the {@link org.xml.sax.XMLReader} that allow-lists them; any href the resolver does not explicitly allow stays blocked.
  * </p>
  * <p>
- * Not a {@link SAXParserFactory} itself, so none of the JAXP static factory methods is inherited: a caller cannot reach a non-secured factory through this class
- * by calling an inherited method such as {@code newDefaultInstance()}. The secure factories are instances of a nested, non-public wrapper class.
+ * This class is not itself a {@link SAXParserFactory}, so it inherits none of the static JAXP factory methods. A caller therefore cannot obtain an unsecured
+ * factory through this class by calling a method such as {@code newDefaultInstance()}. The secure factories are instances of a nested, non-public wrapper
+ * class.
  * </p>
  *
  * @see org.apache.commons.xml.secure
