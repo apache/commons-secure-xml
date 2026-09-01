@@ -34,13 +34,13 @@
                 <include>RELEASE-NOTES.txt</include>
                 <include>SECURITY.md</include>
                 <include>pom.xml</include>
-                <include>src/conf/checkstyle.xml</include>
-                <include>src/conf/maven-pmd-plugin.xml</include>
-                <include>src/conf/spotbugs-exclude-filter.xml</include>
             </includes>
         </fileSet>
         <fileSet>
             <directory>src</directory>
+        </fileSet>
+        <fileSet>
+            <directory>android-tests</directory>
         </fileSet>
     </fileSets>
 </assembly>
