@@ -44,6 +44,6 @@ The workflows in this repository rest on the following trust assumptions:
   the organisation that already runs the workflows and holds our secrets,
   so trusting its actions adds no party that could not compromise the workflows anyway.
 
-A workflow reference into any of these — by branch or tag instead of a pinned commit —
+A workflow reference into any of these, by branch or tag instead of a pinned commit,
 stays inside the accepted boundary.
 Reports about such unpinned references are out of scope.
