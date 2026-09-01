@@ -61,7 +61,7 @@ class SecureXPathTest {
 
             @Override
             public Iterator<String> getPrefixes(final String namespaceUri) {
-                return Collections.<String>emptyList().iterator();
+                return Collections.emptyIterator();
             }
         };
         xpath.setNamespaceContext(context);
