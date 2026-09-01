@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
- * Checks whether Saxon's XSLT 3.0 URI-fetching functions can pull external resources into a transform result through a secure {@code TransformerFactory}.
+ * Tests whether Saxon's XSLT 3.0 URI-fetching functions can pull external resources into a transform result through a secure {@code TransformerFactory}.
  *
  * <p>The XPath 3.1 {@code unparsed-text} family and {@code json-doc} do not go through the JAXP {@code URIResolver} that governs {@code document()} and
  * {@code xsl:include}/{@code xsl:import}: Saxon routes them through the {@code Configuration}'s resource resolver. This test is the TrAX-side companion of
