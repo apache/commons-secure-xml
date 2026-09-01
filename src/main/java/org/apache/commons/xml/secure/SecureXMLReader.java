@@ -107,6 +107,14 @@ class SecureXMLReader implements XMLReader {
         delegate.parse(systemId);
     }
 
+    /**
+     * Re-installs the floor as the wrapped reader's entity resolver and drops any caller-supplied resolver, restoring the just-created state.
+     */
+    void restoreFloor() {
+        floor.setDelegate(null);
+        delegate.setEntityResolver(floor);
+    }
+
     @Override
     public void setContentHandler(final ContentHandler handler) {
         delegate.setContentHandler(handler);

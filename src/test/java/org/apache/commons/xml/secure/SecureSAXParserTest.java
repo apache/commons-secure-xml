@@ -17,8 +17,8 @@
 
 package org.apache.commons.xml.secure;
 
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -108,7 +108,7 @@ class SecureSAXParserTest {
     }
 
     @Test
-    void cachesSecureViewsThenRecreatesThemAfterReset() throws Exception {
+    void cachesSecureViewsAndKeepsThemSecuredAfterReset() throws Exception {
         final SecureSAXParser parser = new SecureSAXParser(SAXParserFactory.newInstance().newSAXParser());
         final XMLReader firstReader = parser.getXMLReader();
         final Parser firstParser = parser.getParser();
@@ -117,8 +117,11 @@ class SecureSAXParserTest {
         parser.setProperty("http://xml.org/sax/properties/lexical-handler", null);
         assertNull(parser.getProperty("http://xml.org/sax/properties/lexical-handler"));
         parser.reset();
-        assertNotSame(firstReader, parser.getXMLReader());
-        assertNotSame(firstParser, parser.getParser());
+        // The views survive the reset rather than being recreated: a caller holding one from before keeps parsing on the floor the reset stripped.
+        assertSame(firstReader, parser.getXMLReader());
+        assertSame(firstParser, parser.getParser());
+        assertInstanceOf(FallbackIgnoreEntityResolver2.class, ((SecureXMLReader) firstReader).getDelegate().getEntityResolver(),
+                "the reset must put the floor back on the underlying reader");
     }
 
     @Test
