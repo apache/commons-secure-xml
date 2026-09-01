@@ -182,7 +182,7 @@ public final class SecureDocumentBuilderFactory {
     private static final String DOM_FACTORY_ID = "javax.xml.parsers.DocumentBuilderFactory";
 
     /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
-    private static final String JDK_DOCUMENT_BUILDER_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl";
+    static final String JDK_DOCUMENT_BUILDER_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl";
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(DocumentBuilderFactory.class, "newDefaultInstance");
 

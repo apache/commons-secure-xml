@@ -24,6 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
+
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -34,6 +36,37 @@ import org.junit.jupiter.api.Test;
 @Tag("dom")
 class SecureDocumentBuilderFactoryTest {
 
+    /** System property naming the {@link DocumentBuilderFactory} implementation, the JVM's mechanism for reconfiguring the default parser. */
+    private static final String FACTORY_ID = "javax.xml.parsers.DocumentBuilderFactory";
+
+    /**
+     * Gets the implementation a secure factory delegates to, so the selection tests can observe which parser implementation a lookup picked.
+     *
+     * @param factory a secure factory returned by one of the {@code new*Instance} methods; never {@code null}.
+     * @return The wrapped factory.
+     */
+    private static DocumentBuilderFactory getDelegate(final DocumentBuilderFactory factory) throws ReflectiveOperationException {
+        final Field delegate = factory.getClass().getDeclaredField("delegate");
+        delegate.setAccessible(true);
+        return (DocumentBuilderFactory) delegate.get(factory);
+    }
+
+    /**
+     * Selects the implementation {@link DocumentBuilderFactory#newInstance()} returns by setting the {@value #FACTORY_ID} system property.
+     *
+     * @param factoryClassName the implementation class name to install, or {@code null} to clear the property and restore the platform lookup.
+     * @return The previous property value, {@code null} if it was not set; pass it back here to restore the original lookup.
+     */
+    private static String setFactoryIdProperty(final String factoryClassName) {
+        final String previous = System.getProperty(FACTORY_ID);
+        if (factoryClassName == null) {
+            System.clearProperty(FACTORY_ID);
+        } else {
+            System.setProperty(FACTORY_ID, factoryClassName);
+        }
+        return previous;
+    }
+
     @Test
     void createsSecureBuildersFromEveryStaticEntryPoint() throws Exception {
         Assumptions.assumeTrue(AttackTestSupport.DOM_RESOLVES_INTERNAL_ENTITIES, "the platform DOM is left unwrapped: it does not resolve user-defined entities");
@@ -41,6 +74,15 @@ class SecureDocumentBuilderFactoryTest {
         assertInstanceOf(SecureDocumentBuilder.class, SecureDocumentBuilderFactory.newDefaultInstance().newDocumentBuilder());
         assertInstanceOf(SecureDocumentBuilder.class, SecureDocumentBuilderFactory.newNSInstance().newDocumentBuilder());
         assertInstanceOf(SecureDocumentBuilder.class, SecureDocumentBuilderFactory.newDefaultNSInstance().newDocumentBuilder());
+    }
+
+    @Test
+    void explicitFactoryClassSelectsThatImplementation() throws Exception {
+        Assumptions.assumeFalse(AttackTestSupport.IS_ANDROID, "Skipped on Android: the platform factory is used unwrapped");
+        final Class<?> discovered = DocumentBuilderFactory.newInstance().getClass();
+        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newNSInstance(discovered.getName(), null);
+        assertEquals(discovered, getDelegate(factory).getClass());
+        assertTrue(factory.isNamespaceAware());
     }
 
     @Test
@@ -71,21 +113,20 @@ class SecureDocumentBuilderFactoryTest {
     }
 
     @Test
-    void honorsExplicitFactoryClassAndDefaultParserOverrides() throws Exception {
-        final String className = DocumentBuilderFactory.newInstance().getClass().getName();
-        assertTrue(SecureDocumentBuilderFactory.newNSInstance(className, null).isNamespaceAware());
-        assertTrue(SecureDocumentBuilderFactory.newNSInstance(true).isNamespaceAware());
-        final String property = "javax.xml.parsers.DocumentBuilderFactory";
-        final String previous = System.getProperty(property);
+    void newNSInstanceFollowsParserSelection() throws Exception {
+        Assumptions.assumeFalse(AttackTestSupport.IS_ANDROID, "Skipped on Android: the platform factory is used unwrapped");
+        final Class<?> discovered = DocumentBuilderFactory.newInstance().getClass();
+        // no property: the JDK built-in default, unless an override is requested
+        assertEquals(SecureDocumentBuilderFactory.JDK_DOCUMENT_BUILDER_FACTORY,
+                getDelegate(SecureDocumentBuilderFactory.newNSInstance(false)).getClass().getName());
+        assertEquals(discovered, getDelegate(SecureDocumentBuilderFactory.newNSInstance(true)).getClass());
+        // the factory id property is the JDK's own default reconfiguration; both selections honor it
+        final String previous = setFactoryIdProperty(discovered.getName());
         try {
-            System.setProperty(property, className);
-            assertTrue(SecureDocumentBuilderFactory.newNSInstance(false).isNamespaceAware());
+            assertEquals(discovered, getDelegate(SecureDocumentBuilderFactory.newNSInstance(false)).getClass());
+            assertEquals(discovered, getDelegate(SecureDocumentBuilderFactory.newNSInstance(true)).getClass());
         } finally {
-            if (previous == null) {
-                System.clearProperty(property);
-            } else {
-                System.setProperty(property, previous);
-            }
+            setFactoryIdProperty(previous);
         }
     }
 }
