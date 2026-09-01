@@ -113,7 +113,7 @@ but a report demonstrated only on Android is [out of scope](#what-is-out-of-scop
 
 **Honored JAXP contracts**
 
-The in-scope requirement that an implementation respect the contract of the settings a recipe uses
+The in-scope requirement that an implementation respects the contract of the settings a recipe uses
 (see [What is in scope](#what-is-in-scope))
 extends to the JAXP API contracts themselves.
 In particular:
@@ -149,7 +149,7 @@ but no part of the API says which resolver — if any — a processor consults f
 
 The XInclude guarantee is therefore restricted to implementations that follow the Xerces convention
 of routing an `xi:include` fetch through the `EntityResolver`.
-An implementation whose XInclude processor resolves an href without consulting the entity resolver
+An implementation whose XInclude processor resolves a reference without consulting the entity resolver
 fetches outside the securing,
 and a report demonstrated only there is [out of scope](#what-is-out-of-scope).
 
@@ -174,8 +174,8 @@ JDK version and the standard `jdk.xml.*` limit properties the JDK itself reads:
   default `2500` on JDK 25 and `64000` on JDK 8 through 21). These are trusted deployment configuration: an operator may
   set one to tighten (or loosen) a limit globally, but loosening through one is reconfiguration, treated like loosening
   any other reserved setting (see [What is out of scope](#what-is-out-of-scope)).
-- The bundled parsers apply their own hardcoded secure defaults instead (for example external Xerces and Woodstox cap the
-  number of entity expansions at `100000`) and do not read `jdk.xml.*`.
+- The bundled parsers apply their own hardcoded secure defaults instead
+  (for example, external Xerces and Woodstox cap the number of entity expansions at `100000`) and do not read `jdk.xml.*`.
 
 On the supported runtimes (see **Supported runtimes** above),
 every one of these defaults bounds the number of expansions,
