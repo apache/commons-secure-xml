@@ -174,12 +174,16 @@ JDK version and the standard `jdk.xml.*` limit properties the JDK itself reads:
   default `2500` on JDK 25 and `64000` on JDK 8 through 21). These are trusted deployment configuration: an operator may
   set one to tighten (or loosen) a limit globally, but loosening through one is reconfiguration, treated like loosening
   any other reserved setting (see [What is out of scope](#what-is-out-of-scope)).
-- The bundled parsers apply their own hardcoded secure defaults instead (for example external Xerces and Woodstox cap
-  entity expansion at `100000`) and do not read `jdk.xml.*`.
+- The bundled parsers apply their own hardcoded secure defaults instead (for example external Xerces and Woodstox cap the
+  number of entity expansions at `100000`) and do not read `jdk.xml.*`.
 
 On the supported runtimes (see **Supported runtimes** above),
-every one of these defaults still bounds entity expansion tightly enough to reject entity-expansion denial of service
-such as Billion Laughs.
+every one of these defaults bounds the number of expansions,
+which is what rejects an exponential payload such as Billion Laughs.
+The volume those expansions produce is a separate limit,
+and implementations differ on whether they set one by default.
+Sizing it, or provisioning for the load it allows instead,
+is the operator's decision, like the other processing limits above.
 
 **Reserved Settings (must not be loosened)**
 
@@ -346,6 +350,10 @@ are **not** vulnerabilities under this model:
 - XXE, external-entity, SSRF-through-external-reference, or entity-expansion (Billion Laughs) reports against
   a factory used as delivered. Blocking these is exactly what the securing does. A working proof against an
   unmodified instance is a `VALID` finding (see below); a scanner that pattern-matches on parser type is not.
+- A report that a recognized implementation bounds the number of entity expansions but not the volume they produce.
+  The library pins no processing limits at all; each is the implementation's, and a deployment that needs a volume bound
+  sets that implementation's own limit
+  (see **System properties that modify behavior** under [Assumptions about the environment](#assumptions-about-the-environment)).
 - A report demonstrated only on Android,
   where the securing is best-effort and no guarantee is defined
   (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)).
