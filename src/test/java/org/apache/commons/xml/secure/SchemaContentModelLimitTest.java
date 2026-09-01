@@ -42,7 +42,7 @@ import org.junit.jupiter.api.Test;
 class SchemaContentModelLimitTest {
 
     /** Above both recognized implementations' limits (3,000 nodes on Xerces, 5,000 on the stock JDK); an unbounded run still finishes in seconds. */
-    private static final int MAX_OCCURS = 10_000;
+    private static final int MAX_OCCURS = 5_001;
 
     /** Compiles the payload through {@code factory} and validates a matching instance, the step that forces the expansion. */
     private static void compileAndValidate(final SchemaFactory factory) throws Exception {
