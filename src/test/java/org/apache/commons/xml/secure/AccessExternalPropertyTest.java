@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.xml.sax.XMLReader;
 
 /**
- * Checks that loosening a JAXP 1.5 {@code accessExternal*} property to {@code all} on a secured factory does not reopen an external fetch.
+ * Tests that loosening a JAXP 1.5 {@code accessExternal*} property to {@code all} on a secured factory does not reopen an external fetch.
  *
  * <p>The threat model lists these properties under "Settings you may modify": the securing is independent of them, because a resource supplied by a resolver
  * bypasses their checks and the resolver floor covers every external reference. The whole suite already runs with the {@code javax.xml.accessExternal*} system

@@ -55,7 +55,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 /**
- * Checks that a caller-supplied resolver cannot remove the secure ignore-all floor on any factory.
+ * Tests that a caller-supplied resolver cannot remove the secure ignore-all floor on any factory.
  *
  * <p>The observable contract on every secure factory is the same: a resource the caller resolves (returns a non-null value) is allowed, but anything the
  * caller does not resolve is resolved to empty content instead of fetched, so a resolver that resolves nothing leaves the block in place. Most

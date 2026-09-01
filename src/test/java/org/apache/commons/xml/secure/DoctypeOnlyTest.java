@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
- * Checks that a document carrying a {@code <!DOCTYPE root SYSTEM "...">} declaration but no body references parses successfully through the secure
+ * Tests that a document carrying a {@code <!DOCTYPE root SYSTEM "...">} declaration but no body references parses successfully through the secure
  * factories.
  *
  * <p>The SYSTEM identifier points at a deliberately bogus URL ({@code http://invalid.example.invalid/...}) under the IANA-reserved {@code .invalid} TLD: any

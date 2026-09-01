@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
- * Checks whether Saxon's XPath 3.1 URI-fetching functions can pull external resources into the result.
+ * Tests whether Saxon's XPath 3.1 URI-fetching functions can pull external resources into the result.
  *
  * <p>Saxon ships several XPath 3.1 functions that open arbitrary URIs during evaluation. None require a context node; each is triggered purely by the string
  * URI it receives. They are <em>not</em> classified as extension functions in Saxon's vocabulary, so disabling {@code ALLOW_EXTERNAL_FUNCTIONS} is not enough

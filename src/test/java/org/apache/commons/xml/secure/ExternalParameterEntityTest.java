@@ -35,7 +35,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * Checks whether parsers can pull in an external DTD via a parameter-entity reference inside the internal subset.
+ * Tests whether parsers can pull in an external DTD via a parameter-entity reference inside the internal subset.
  *
  * <p>The wrapper declares a parameter entity {@code %xxe;} pointing at {@code src/test/resources/leaked/referenced.dtd} and immediately references it in the
  * internal subset; once expanded, the entity declarations from {@code referenced.dtd} (in particular {@code <!ENTITY leaked "...">}) become part of the

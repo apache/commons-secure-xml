@@ -36,7 +36,7 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * Checks that a secure {@link DocumentBuilderFactory} performing JAXP 1.2 XSD validation does not fetch an external schema named by an
+ * Tests that a secure {@link DocumentBuilderFactory} performing JAXP 1.2 XSD validation does not fetch an external schema named by an
  * {@code xsi:noNamespaceSchemaLocation} hint in the instance document.
  *
  * <p>The instance is empty {@code <root/>}; the referenced schema declares a default {@code leak} attribute carrying {@link AttackTestSupport#LEAKED_MARKER}. A

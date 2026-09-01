@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
- * Checks whether {@code xs:import namespace="..." schemaLocation="included.xsd"} of a sibling schema in a different target namespace is resolved at compile
+ * Tests whether {@code xs:import namespace="..." schemaLocation="included.xsd"} of a sibling schema in a different target namespace is resolved at compile
  * time. The wrapper references an element defined only in the imported schema, so compilation cannot succeed unless the schemaLocation is fetched.
  */
 @Tag("schema")

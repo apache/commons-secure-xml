@@ -151,7 +151,7 @@ public final class SecureSchemaFactory {
         }
 
         /**
-         * Checks whether parsers should be instantiated via {@code newInstance()} instead of {@code newDefaultInstance()}.
+         * Tests whether parsers should be instantiated via {@code newInstance()} instead of {@code newDefaultInstance()}.
          *
          * <p>The JDK implementation of {@link SchemaFactory} uses the JDK parsers while {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} is unset or
          * {@code false}.</p>

@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
- * Checks whether {@code xsl:include} of a sibling stylesheet is resolved at compile time. The wrapper includes a sibling that, if fetched, contributes a
+ * Tests whether {@code xsl:include} of a sibling stylesheet is resolved at compile time. The wrapper includes a sibling that, if fetched, contributes a
  * template emitting the leaked marker into the transform output.
  */
 @Tag("trax")

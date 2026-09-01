@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
- * Checks whether {@code xs:redefine schemaLocation="included.xsd"} that extends a complex type from a sibling schema is resolved at compile time. The wrapper
+ * Tests whether {@code xs:redefine schemaLocation="included.xsd"} that extends a complex type from a sibling schema is resolved at compile time. The wrapper
  * cannot compile unless the redefined type is fetched from the sibling schema.
  */
 @Tag("schema")

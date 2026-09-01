@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
- * Checks whether parsers can pull in an external general entity declared inline in the internal subset.
+ * Tests whether parsers can pull in an external general entity declared inline in the internal subset.
  *
  * <p>The wrapper declares {@code <!ENTITY xxe SYSTEM "file:.../referenced.txt">} and uses {@code &xxe;} in the body. The general entity expands to the
  * content of {@code src/test/resources/leaked/referenced.txt} when the external reference is resolved. A secure parser keeps the entity declared but

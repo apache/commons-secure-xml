@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
- * Checks that Saxon's alternate public {@code TransformerFactory} entry point routes to the same locked-down {@code Configuration} as the registered one.
+ * Tests that Saxon's alternate public {@code TransformerFactory} entry point routes to the same locked-down {@code Configuration} as the registered one.
  *
  * <p>Saxon ships {@code net.sf.saxon.BasicTransformerFactory}, a public subclass of the registered {@code net.sf.saxon.TransformerFactoryImpl}, selectable
  * through the standard TrAX system property. Recognition by package prefix sends it through {@code SaxonProvider}; a name-based recognition would let it fall

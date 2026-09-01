@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
- * Checks whether parsers can pull in an external DTD declared via {@code <!DOCTYPE root SYSTEM "...">}.
+ * Tests whether parsers can pull in an external DTD declared via {@code <!DOCTYPE root SYSTEM "...">}.
  *
  * <p>The wrapper points at {@code src/test/resources/leaked/referenced.dtd}, which declares a {@code leaked} entity. Each wrapper body references
  * {@code &leaked;}, so the entity can only resolve if the DTD is actually fetched: a secure parser resolves the external subset to empty, leaving

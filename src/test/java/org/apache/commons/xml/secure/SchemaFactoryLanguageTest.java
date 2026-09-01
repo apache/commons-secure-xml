@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
- * Checks that {@link SecureSchemaFactory#newInstance(String)} passes the schema language through to {@link SchemaFactory#newInstance}.
+ * Tests that {@link SecureSchemaFactory#newInstance(String)} passes the schema language through to {@link SchemaFactory#newInstance}.
  *
  * <p>The working W3C XML Schema path is exercised by the whole schema suite; this test covers only the language-selection contract.</p>
  */

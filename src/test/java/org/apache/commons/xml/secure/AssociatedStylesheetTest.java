@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 
 /**
- * Checks the two untrusted inputs {@code getAssociatedStylesheet} handles: the document it scans, and the href the {@code xml-stylesheet} PI names.
+ * Tests the two untrusted inputs {@code getAssociatedStylesheet} handles: the document it scans, and the href the {@code xml-stylesheet} PI names.
  *
  * <p>The scan parses the prolog, where a {@code DOCTYPE} with an external subset is processed before the root element. Apache Xalan runs it on a reader the
  * engine provisions itself, ignoring one passed in a {@link SAXSource} (XALANJ-2849), and the JDK's XSLTC did the same before 8u162; the wrapper hands those a

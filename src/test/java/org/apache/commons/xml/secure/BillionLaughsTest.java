@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
- * Checks whether parsers reject a Billion Laughs payload (nested entity expansion in the internal DTD subset).
+ * Tests whether parsers reject a Billion Laughs payload (nested entity expansion in the internal DTD subset).
  *
  * <p>Each {@code secure*} test asserts the library blocks the payload;
  * its {@code unconfigured*} positive control asserts the same payload parses once the limit is disabled,

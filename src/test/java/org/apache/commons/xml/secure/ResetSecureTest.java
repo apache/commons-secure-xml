@@ -37,7 +37,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
 /**
- * Checks that the JAXP {@code reset()} lifecycle methods do not strip the secure floors.
+ * Tests that the JAXP {@code reset()} lifecycle methods do not strip the secure floors.
  *
  * <p>The JAXP reset contract returns an object to its just-created state, and the stock JDK / Xerces implementations take that literally: they re-install
  * their initial (null) resolvers, silently removing any floor the secure wrappers installed after creation. Each test resets a secure object and asserts

@@ -35,7 +35,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * Checks that a secure {@link SAXParserFactory} performing JAXP 1.2 XSD validation does not fetch an external schema named by an
+ * Tests that a secure {@link SAXParserFactory} performing JAXP 1.2 XSD validation does not fetch an external schema named by an
  * {@code xsi:noNamespaceSchemaLocation} hint in the instance document.
  *
  * <p>This is the SAX counterpart of {@link SchemaLocationDomTest}. The instance is empty {@code <root/>}; the referenced schema declares a default {@code leak}
