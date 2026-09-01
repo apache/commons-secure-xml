@@ -133,6 +133,18 @@ but the substitution itself is a contract violation in that implementation,
 not a vulnerability here:
 a report built on one is triaged `OUT-OF-SCOPE: foreign implementation`.
 
+**XInclude resolution**
+
+XInclude is the converse case: JAXP specifies no contract at all.
+`setXIncludeAware` turns the processor on,
+but no part of the API says which resolver — if any — a processor consults for an `xi:include` href.
+
+The XInclude guarantee is therefore restricted to implementations that follow the Xerces convention
+of routing an `xi:include` fetch through the `EntityResolver`.
+An implementation whose XInclude processor resolves an href without consulting the entity resolver
+fetches outside the securing,
+and a report demonstrated only there is [out of scope](#what-is-out-of-scope).
+
 **System properties that modify behavior**
 
 The library reads a single system property of its own,
@@ -289,6 +301,10 @@ and reports against a factory reconfigured in any of the ways below are out of s
 - The behavior of a JAXP implementation that does not respect the contract of the settings a securing recipe requires
   (the factory method throws rather than returning an unsecured factory),
   and any defect in the underlying JAXP implementation itself.
+- **XInclude outside the Xerces convention.**
+  JAXP does not specify which resolver an XInclude processor consults,
+  so the guarantee is restricted to implementations that route an `xi:include` fetch through the entity resolver
+  (see **XInclude resolution** under [Assumptions about the environment](#assumptions-about-the-environment)).
 - **Android, on any API level.**
   No version of Android supports `FEATURE_SECURE_PROCESSING`,
   so the securing there is best-effort and no guarantee is defined
