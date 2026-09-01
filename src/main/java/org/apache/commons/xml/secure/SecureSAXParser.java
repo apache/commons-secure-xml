@@ -104,10 +104,13 @@ final class SecureSAXParser extends SAXParser {
     @Override
     public void reset() {
         delegate.reset();
-        // The JAXP reset contract reverts the delegate to its just-created state, which strips the post-creation reader securing.
-        // We reset the cached readers, so securing can be applied again.
-        secureXMLReader = null;
-        secureParser = null;
+        // The JAXP reset contract reverts the delegate to its just-created state, which strips the securing from the one reader it hands out for its lifetime.
+        if (secureXMLReader instanceof SecureXMLReader) {
+            ((SecureXMLReader) secureXMLReader).restoreFloor();
+        } else {
+            secureXMLReader = null;
+            secureParser = null;
+        }
     }
 
     @Override

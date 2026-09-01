@@ -47,11 +47,6 @@ import org.xml.sax.ext.EntityResolver2;
  * resolver; anything they leave unresolved (a {@code null} return, or no caller resolver at all) goes to {@link #onUnresolved}, which returns empty content by
  * default.
  * </p>
- * <p>
- * It extends {@link DefaultHandler2} so it is also usable as a {@link org.xml.sax.ext.LexicalHandler}; {@link #getExternalSubset} therefore inherits the
- * {@code DefaultHandler2} "no synthetic subset" default. Only {@link #resolveEntity(String, String, String, String) resolveEntity} (the actual external fetch)
- * reaches the ignore fallback.
- * </p>
  */
 class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
 
@@ -97,6 +92,12 @@ class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
      */
     final EntityResolver getDelegate() {
         return delegate;
+    }
+
+    @Override
+    public final InputSource getExternalSubset(final String name, final String baseURI) throws SAXException, IOException {
+        // A null return means "no synthetic subset", not "unresolved", nothing is fetched.
+        return delegate instanceof EntityResolver2 ? ((EntityResolver2) delegate).getExternalSubset(name, baseURI) : null;
     }
 
     /**

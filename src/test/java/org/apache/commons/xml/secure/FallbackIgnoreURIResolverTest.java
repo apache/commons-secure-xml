@@ -17,6 +17,8 @@
 
 package org.apache.commons.xml.secure;
 
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -33,6 +35,7 @@ import javax.xml.transform.dom.DOMSource;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledInNativeImage;
+import org.w3c.dom.Document;
 
 class FallbackIgnoreURIResolverTest {
 
@@ -40,14 +43,14 @@ class FallbackIgnoreURIResolverTest {
     // Mockito generates the mock class and its plugin proxies at run time — impossible in a closed-world native image,
     // so the stubbed factory this error path needs cannot be built there.
     @DisabledInNativeImage
-    void newEmptyDocumentThrowsExceptionInInitializerError() throws Exception {
+    void newEmptyDocumentWrapsConfigurationFailure() throws Exception {
         final DocumentBuilderFactory factory = mock(DocumentBuilderFactory.class);
         final ParserConfigurationException failure = new ParserConfigurationException("test");
         when(factory.newDocumentBuilder()).thenThrow(failure);
         final Method method = FallbackIgnoreURIResolver.class.getDeclaredMethod("newEmptyDocument", DocumentBuilderFactory.class);
         method.setAccessible(true);
         final InvocationTargetException exception = assertThrows(InvocationTargetException.class, () -> method.invoke(null, factory));
-        final ExceptionInInitializerError error = (ExceptionInInitializerError) exception.getCause();
+        final IllegalStateException error = (IllegalStateException) exception.getCause();
         assertSame(failure, error.getCause());
     }
 
@@ -68,5 +71,16 @@ class FallbackIgnoreURIResolverTest {
         } finally {
             System.clearProperty(SecureException.THROW_ON_UNRESOLVED);
         }
+    }
+
+    @Test
+    void resolvesFreshEmptyDocumentPerResolution() throws Exception {
+        final FallbackIgnoreURIResolver resolver = new FallbackIgnoreURIResolver(null, null, () -> false);
+        final Document first = (Document) ((DOMSource) resolver.resolve("href", "base")).getNode();
+        assertNull(first.getDocumentElement());
+        first.appendChild(first.createElement("planted"));
+        final Document second = (Document) ((DOMSource) resolver.resolve("href", "base")).getNode();
+        assertNotSame(first, second);
+        assertNull(second.getDocumentElement());
     }
 }

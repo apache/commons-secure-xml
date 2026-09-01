@@ -73,6 +73,14 @@ The library secures what it creates;
 it does not re-harden what you built,
 because your reader's settings are indistinguishable from configuration you chose deliberately.
 
+It also holds for the objects a produced instance returns:
+exploiting the exposure the SpotBugs patterns
+[*May expose internal representation by incorporating reference to mutable object*](https://spotbugs.readthedocs.io/en/stable/bugDescriptions.html#ei2-may-expose-internal-representation-by-incorporating-reference-to-mutable-object-ei-expose-rep2)
+and [*… by returning reference to mutable object*](https://spotbugs.readthedocs.io/en/stable/bugDescriptions.html#ei-may-expose-internal-representation-by-returning-reference-to-mutable-object-ei-expose-rep)
+warn about presumes an adversary already running in the process,
+a capability the adversary of this model does not have.
+Modifying a shared mutable object is a bug, not a vulnerability.
+
 ### What is in Scope
 
 - The securing recipes applied by `org.apache.commons.xml.secure`.
@@ -255,6 +263,13 @@ and reports against a factory reconfigured in any of the ways below are out of s
 - **Caller-supplied top-level URIs.** A URI passed directly to a parse call (`DocumentBuilder.parse(String)`,
   `StreamSource(systemId)`, a `SAXSource` built from a system id) is fetched as-is by the JAXP implementation without
   consulting the securing layer. Restrict it yourself if the URI is untrusted.
+- **Mutating returned objects.**
+  Modifying an object a produced instance returned —
+  the `Document` of a parse or of an empty resolution,
+  a `Source` handed back by a resolver or by `getAssociatedStylesheet` —
+  is same-process capability, like reconfiguring the factory
+  (see [Adversary model and trust boundary](#adversary-model-and-trust-boundary)).
+  A report premised on a same-process component mutating a JAXP method's result is out of scope.
 - **Caller-supplied parser instances.**
   A parser built outside `org.apache.commons.xml.secure` and handed to a produced instance is used as configured:
   a `SAXSource` carrying its own `XMLReader`,
@@ -327,7 +342,7 @@ A report judged against this model receives exactly one of:
 | Disposition | Meaning |
 | --- | --- |
 | `VALID` | A factory or instance used as delivered fails to provide a guarantee its Javadoc states (for example, a secured parser still resolves an external entity, or a documented processing limit is not applied). |
-| `OUT-OF-SCOPE: reconfigured` | A reserved setting was loosened, or a resolver was installed, on the factory or a produced instance before the reported behavior (see [What is out of scope](#what-is-out-of-scope)). |
+| `OUT-OF-SCOPE: reconfigured` | A reserved setting was loosened, a resolver was installed, or a returned object was mutated, on the factory or a produced instance before the reported behavior (see [What is out of scope](#what-is-out-of-scope)). |
 | `OUT-OF-SCOPE: caller input` | The behavior follows from a top-level URI, a parser instance the caller constructed outside the library, or other input the caller passed directly to a parse call. |
 | `OUT-OF-SCOPE: foreign implementation` | The behavior is in a JAXP implementation that does not respect the contract of the settings a securing recipe requires, or is a defect in the underlying JAXP implementation itself. |
 | `OUT-OF-SCOPE: unsupported runtime` | The behavior is demonstrated only on a runtime the guarantees are not defined on, such as Android on any API level (see **Supported runtimes** under [Assumptions about the environment](#assumptions-about-the-environment)). |

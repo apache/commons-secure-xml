@@ -20,6 +20,7 @@ package org.apache.commons.xml.secure;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -492,14 +493,14 @@ class SecureXMLInputFactoryTest {
     void setXMLResolverRoutesCallerBehindInstalledFloor() {
         final RecordingXMLInputFactory fake = new RecordingXMLInputFactory();
         final XMLInputFactory secure = SecureXMLInputFactory.secure(fake);
-        final FallbackIgnoreXMLResolver floor = (FallbackIgnoreXMLResolver) fake.resolverHook;
         final XMLResolver caller = (publicID, systemID, baseURI, namespace) -> null;
         secure.setXMLResolver(caller);
-        assertSame(caller, floor.getDelegate(), "the caller's resolver must become the delegate of the installed floor");
+        // The hook keeps a floor with the caller behind it; whether that is the floor already there or a fresh one is the subject of
+        // settingAResolverInstallsAFreshFloorInsteadOfMutatingTheInstalledOne.
+        assertTrue(fake.resolverHook instanceof FallbackIgnoreXMLResolver, "a caller resolver must land behind a floor, not replace it on the delegate's hook");
+        assertSame(caller, ((FallbackIgnoreXMLResolver) fake.resolverHook).getDelegate(), "the caller's resolver must be the floor's delegate");
         assertSame(caller, secure.getXMLResolver(), "getXMLResolver must report the caller's resolver unwrapped");
         assertSame(caller, secure.getProperty(XMLInputFactory.RESOLVER), "getProperty must report the caller's resolver unwrapped");
-        assertFalse(fake.calls.stream().anyMatch(c -> c.startsWith("setProperty(" + XMLInputFactory.RESOLVER)),
-                "a caller resolver must not replace the floor on the delegate's hook");
     }
 
     @Test
@@ -607,6 +608,34 @@ class SecureXMLInputFactoryTest {
                 "the exact event filter must be forwarded");
         assertTrue(fake.calls.contains(RecordingXMLInputFactory.call("createFilteredReader", streamSentinel, streamFilter)),
                 "the exact stream filter must be forwarded");
+    }
+
+    @Test
+    void settingAResolverInstallsAFreshFloorInsteadOfMutatingTheInstalledOne() {
+        // The implementations copy the floor reference into every reader they create, so mutating the installed floor would change the resolution policy of
+        // readers created before the call, including ones already parsing. Replacing it leaves what those readers captured alone.
+        final RecordingXMLInputFactory fake = new RecordingXMLInputFactory();
+        final XMLInputFactory secure = SecureXMLInputFactory.secure(fake);
+        final Object captured = fake.resolverHook;
+        secure.setXMLResolver((publicID, systemID, baseURI, namespace) -> null);
+        assertNotSame(captured, fake.resolverHook, "setting a resolver must install a fresh floor, not re-delegate the one already on the hook");
+        assertNull(((FallbackIgnoreXMLResolver) captured).getDelegate(), "the floor an existing reader captured must keep resolving to empty");
+    }
+
+    @Test
+    void woodstoxResolverHooksStayIndependent() {
+        // Woodstox routes setXMLResolver to both its DTD-subset and entity hooks, so one floor object sits on several of them. Setting one hook must not
+        // answer the others, which it would if the shared floor were mutated in place.
+        final XMLInputFactory secure = SecureXMLInputFactory.newInstance();
+        final XMLResolver dtd = (publicID, systemID, baseURI, namespace) -> null;
+        try {
+            secure.setProperty(SecureXMLInputFactory.WSTX_DTD_RESOLVER, dtd);
+        } catch (final IllegalArgumentException notWoodstox) {
+            Assumptions.abort("the implementation does not support " + SecureXMLInputFactory.WSTX_DTD_RESOLVER);
+            return;
+        }
+        assertSame(dtd, secure.getProperty(SecureXMLInputFactory.WSTX_DTD_RESOLVER), "the hook the caller named must report their resolver");
+        assertNull(secure.getProperty(SecureXMLInputFactory.WSTX_ENTITY_RESOLVER), "a resolver set on the DTD hook must not answer the entity hook");
     }
 
     @Test

@@ -31,6 +31,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.URIResolver;
@@ -61,6 +62,12 @@ import org.xml.sax.XMLReader;
  * ({@link TransformerFactory#newTemplates(javax.xml.transform.Source) newTemplates(Source)},
  * {@link TransformerFactory#newTransformer(javax.xml.transform.Source) newTransformer(Source)}) and source-document reading at
  * {@code Transformer.transform(Source, Result)} time.
+ * </p>
+ * <p>
+ * The {@code href} an {@code xml-stylesheet} processing instruction names is content of the document being scanned, so
+ * {@link TransformerFactory#getAssociatedStylesheet(Source, String, String, String) getAssociatedStylesheet} treats it as any other content-named reference:
+ * install a {@link URIResolver} resolving that href to compile the stylesheet it points at. Without one the returned {@link Source} carries empty content
+ * rather than naming the URI, so compiling it cannot fetch a stylesheet the parsed document chose.
  * </p>
  * <p>
  * The {@link javax.xml.transform.sax.SAXTransformerFactory} extension methods ({@code newTransformerHandler(..)}, {@code newTemplatesHandler()},
@@ -101,7 +108,8 @@ public final class SecureTransformerFactory {
      * <ul>
      *   <li>A {@link SAXSource} that carries its own {@link XMLReader} is trusted as-is: the caller is expected to supply a secure reader (via
      *       {@link SecureSAXParserFactory#newInstance()}) in that case. The same applies to the SAX events a caller feeds into a handler, and to a parent reader a
-     *       caller sets on a returned {@link XMLFilter}.</li>
+     *       caller sets on a returned {@link XMLFilter}. The exception is {@code getAssociatedStylesheet} on an engine that drops the reader (Apache Xalan, and
+     *       the JDK's XSLTC on Java 8): there the document is pre-parsed into a DOM instead, since the reader would otherwise be replaced by the engine's own.</li>
      * </ul>
      *
      * @see org.apache.commons.xml.secure
@@ -188,9 +196,35 @@ public final class SecureTransformerFactory {
         @Override
         public Source getAssociatedStylesheet(final Source source, final String media, final String title, final String charset)
                 throws TransformerConfigurationException {
-            // Xalan's getAssociatedStylesheet drops a SAXSource's reader and self-provisions its own to scan for xml-stylesheet PIs (XALANJ-2849).
-            final Source secure = isXalan(delegate) ? secureSourceToDom(source) : SecureSAXParserFactory.secure(source, overrideDefaultParser());
-            return delegate.getAssociatedStylesheet(secure, media, title, charset);
+            // Xalan's getAssociatedStylesheet drops a SAXSource's reader and self-provisions its own to scan for xml-stylesheet PIs (XALANJ-2849), and the
+            // JDK's XSLTC did the same before 8u162; hand those a DOM so no parser but ours ever sees the document.
+            final Source secure = isXalan(delegate) || JAVA_8 ? secureSourceToDom(source) : SecureSAXParserFactory.secure(source, overrideDefaultParser());
+            return floorAssociated(delegate.getAssociatedStylesheet(secure, media, title, charset), secure.getSystemId());
+        }
+
+        /**
+         * Routes the href an {@code xml-stylesheet} PI yielded through the floor, so a URI distilled from untrusted content is opted in by the caller's
+         * resolver or resolved to empty like any other content-named reference.
+         *
+         * <p>XSLTC-lineage engines resolve the href during the scan, before they install the factory's {@link URIResolver}, and hand back a live
+         * {@link SAXSource} naming the absolutized URI; compiling it, the one documented use of this method, would then fetch it. Saxon already floors the href
+         * itself and returns an empty source, so flooring here is also what makes the engines agree.</p>
+         *
+         * @param associated The delegate's result; {@code null} when no PI matched.
+         * @param base       The system id of the scanned document, the base the href was resolved against.
+         * @return The caller resolver's source for an opted-in href, an empty source otherwise, or {@code null} when no PI matched.
+         * @throws TransformerConfigurationException if the floor rejects the href, which it does when {@value SecureException#THROW_ON_UNRESOLVED} is set.
+         */
+        private Source floorAssociated(final Source associated, final String base) throws TransformerConfigurationException {
+            if (associated == null || associated.getSystemId() == null) {
+                // No PI matched, or the engine already floored the href to a source that names no URI.
+                return associated;
+            }
+            try {
+                return floor.resolve(associated.getSystemId(), base);
+            } catch (final TransformerException e) {
+                throw new TransformerConfigurationException("Failed to resolve the associated stylesheet " + associated.getSystemId(), e);
+            }
         }
 
         @Override
@@ -311,19 +345,22 @@ public final class SecureTransformerFactory {
         }
 
         /**
-         * Parses a reader-less source into a DOM through a secure, namespace-aware {@link javax.xml.parsers.DocumentBuilder} and returns a {@link DOMSource}
+         * Parses a stream or SAX source into a DOM through a secure, namespace-aware {@link javax.xml.parsers.DocumentBuilder} and returns a {@link DOMSource}
          * carrying its system id, so the consumer walks the tree instead of provisioning its own reader. Any other source is left to
          * {@link SecureSAXParserFactory#secure(Source, boolean)}.
          *
+         * <p>A {@link SAXSource} carrying the caller's own reader is pre-parsed here too, unlike everywhere else in this class: an engine that reaches this
+         * method drops that reader anyway, so honoring it is not among the options — the choice is only between this parse and the engine's unsecured one.</p>
+         *
          * @param source The source to scan for an associated stylesheet.
-         * @return A {@link DOMSource} for a reader-less source, otherwise the result of {@link SecureSAXParserFactory#secure(Source, boolean)}.
+         * @return A {@link DOMSource} for a stream or SAX source, otherwise the result of {@link SecureSAXParserFactory#secure(Source, boolean)}.
          * @throws TransformerConfigurationException if the source cannot be parsed.
          * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
          *                                   configuration error} or if the implementation is not available or cannot be instantiated.
          * @throws SecureException Thrown if a (non-Android) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
          */
         private Source secureSourceToDom(final Source source) throws TransformerConfigurationException {
-            if (source instanceof StreamSource || source instanceof SAXSource && ((SAXSource) source).getXMLReader() == null) {
+            if (source instanceof StreamSource || source instanceof SAXSource) {
                 final InputSource inputSource = SAXSource.sourceToInputSource(source);
                 if (inputSource != null) {
                     try {
@@ -364,6 +401,15 @@ public final class SecureTransformerFactory {
     private static final String JDK_TRANSFORMER_FACTORY = "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl";
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(TransformerFactory.class, "newDefaultInstance");
+
+    /**
+     * {@code true} on Java 8, detected by the absence of {@code TransformerFactory.newDefaultInstance()}, which arrived in Java 9.
+     *
+     * <p>The JDK's XSLTC only began honoring the {@link XMLReader} carried by a {@link SAXSource} in {@code getAssociatedStylesheet} in 8u162; through 8u152 it
+     * provisions its own parser, exactly as Apache Xalan does. Java 8 as a whole is used as the boundary rather than the patch level: the two are
+     * indistinguishable through any API, and a runtime that old has already chosen correctness of configuration over the cost of a DOM pre-parse.</p>
+     */
+    private static final boolean JAVA_8 = MH_newDefaultInstance == null;
 
     /**
      * Returns a new, secure {@link TransformerFactory} of the system-default implementation.
