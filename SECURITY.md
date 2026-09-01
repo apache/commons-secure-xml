@@ -16,6 +16,34 @@
 -->
 # Apache Commons Secure XML Security Policy
 
-Read the [Apache Commons Security Page](https://commons.apache.org/security.html).
+## Supported Versions
 
-Read the [Apache Commons Secure XML Threat Model](https://github.com/apache/commons-secure-xml/blob/main/src/site/markdown/threat_model.md).
+Security fixes are applied to the **1.x** release line.
+
+## Reporting Findings
+
+Report security findings privately, following the process on the
+[Apache Commons Security Page](https://commons.apache.org/security.html).
+Please do not open a public issue or pull request for a security finding.
+
+## Library Threat Model
+
+Findings against the library are triaged against the
+[Apache Commons Secure XML Threat Model](https://github.com/apache/commons-secure-xml/blob/main/src/site/markdown/threat_model.md).
+It defines what the securing guarantees, what is out of scope, and the disposition a report receives.
+
+## Supply-Chain Risks
+
+The workflows in this repository rest on the following trust assumptions:
+
+- **`apache/commons-*` repositories are fully trusted.**
+  They are maintained by the same Apache Commons project
+  under the same governance and access controls as this repository.
+- **The risk of trusting `actions/*` and `github/*` is judged acceptable.**
+  These are owned by GitHub,
+  the organisation that already runs the workflows and holds our secrets,
+  so trusting its actions adds no party that could not compromise the workflows anyway.
+
+A workflow reference into any of these, by branch or tag instead of a pinned commit,
+stays inside the accepted boundary.
+Reports about such unpinned references are out of scope.
