@@ -87,6 +87,23 @@ class ResetSecureTest {
     }
 
     @Test
+    @Tag("sax")
+    void saxParserResetKeepsFloorOnReaderVendedBeforeReset() throws Exception {
+        final SAXParser parser = SecureSAXParserFactory.newInstance().newSAXParser();
+        // The handle a caller keeps across the reset. A JAXP parser hands out one reader for its lifetime, so re-fetching it after the reset (as the test
+        // above does) hides the case pooling code actually hits: reset the parser, keep parsing through the reader you already hold.
+        final XMLReader reader = parser.getXMLReader();
+        AttackTestSupport.assumeDoesNotThrow(parser::reset);
+        final String text;
+        try {
+            text = AttackTestSupport.captureCharacters(reader, entityPayload(UNLISTED));
+        } catch (final SAXException blocked) {
+            return; // Acceptable: rejected at parse rather than resolved to empty.
+        }
+        assertFalse(text.contains(AttackTestSupport.LEAKED_MARKER), "external entity leaked through a reader obtained before reset:\n" + text);
+    }
+
+    @Test
     @Tag("trax")
     void transformerResetKeepsUriResolverFloor() throws Exception {
         // with-document.xsl copies document('referenced.xml') into the output at transform time, so a transformer whose floor was stripped leaks the marker.
