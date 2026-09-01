@@ -76,7 +76,7 @@ jobs:
             java-version: 21
             distribution: semeru
           - os: ubuntu-latest
-            java-version: 8.0.152
+            java-version: 8.0.152 # Not the latest, see comment above.
             distribution: zulu
           # native-image resolves the JAXP providers at build time under the closed-world assumption, a different
           # code path from the JVM's run-time ServiceLoader lookup. 25 is the latest GraalVM release.
