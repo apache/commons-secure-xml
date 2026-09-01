@@ -216,7 +216,7 @@ public final class SecureSchemaFactory {
     /**
      * Returns a new, secure {@link SchemaFactory} of the system-default implementation, supporting W3C XML Schema 1.0.
      * <p>
-     * Obtained as by {@code SchemaFactory.newDefaultInstance()} where the platform provides it (Java 9 or later), by instantiating the JDK's built-in
+     * Obtained from {@code SchemaFactory.newDefaultInstance()} where the platform provides it (Java 9 or later), by instantiating the JDK's built-in
      * implementation directly on Java 8, and by the standard {@link #newInstance(String)} lookup where the platform provides neither (for example Android,
      * whose lookup falls back to exactly the Xerces implementation this library recognizes).
      * </p>

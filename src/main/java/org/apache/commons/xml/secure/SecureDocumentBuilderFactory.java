@@ -200,7 +200,7 @@ public final class SecureDocumentBuilderFactory {
     /**
      * Returns a new, secure {@link DocumentBuilderFactory} of the system-default implementation.
      * <p>
-     * Obtained as by {@code DocumentBuilderFactory.newDefaultInstance()} where the platform provides it (Java 9 or later),
+     * Obtained from {@code DocumentBuilderFactory.newDefaultInstance()} where the platform provides it (Java 9 or later),
      * by instantiating the JDK's built-in implementation directly on Java 8,
      * and by the standard {@link #newInstance()} lookup where the platform provides neither
      * (for example, Android, whose lookup is itself pinned to the platform implementation).

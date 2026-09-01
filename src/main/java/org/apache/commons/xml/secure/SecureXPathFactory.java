@@ -169,7 +169,7 @@ public final class SecureXPathFactory {
     /**
      * Returns a new, secure {@link XPathFactory} of the system-default implementation, supporting the default XPath object model.
      * <p>
-     * Obtained as by {@code XPathFactory.newDefaultInstance()} where the platform provides it (Java 9 or later), and by instantiating the JDK's built-in
+     * Obtained from {@code XPathFactory.newDefaultInstance()} where the platform provides it (Java 9 or later), and by instantiating the JDK's built-in
      * implementation directly on Java 8.
      * </p>
      *

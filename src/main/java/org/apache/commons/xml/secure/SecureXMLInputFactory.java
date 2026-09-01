@@ -261,7 +261,7 @@ public final class SecureXMLInputFactory {
     /**
      * Returns a new, secure {@link XMLInputFactory} of the system-default implementation.
      * <p>
-     * Obtained as by {@code XMLInputFactory.newDefaultFactory()} where the platform provides it (Java 9 or later), and by instantiating the JDK's built-in
+     * Obtained from {@code XMLInputFactory.newDefaultFactory()} where the platform provides it (Java 9 or later), and by instantiating the JDK's built-in
      * implementation directly on Java 8.
      * </p>
      *
