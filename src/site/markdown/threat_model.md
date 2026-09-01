@@ -124,12 +124,20 @@ In particular:
   as the [`StAXSource` contract](https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/stax/StAXSource.html) implies:
   the reader must arrive positioned on `START_DOCUMENT` or `START_ELEMENT`,
   and the source is consumed during processing.
+- A `SchemaFactory`, `Validator` or `ValidatorHandler` locates the external resources it needs through the resolver installed on it,
+  as the [`setResourceResolver` contract](https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/validation/SchemaFactory.html#setResourceResolver(org.w3c.dom.ls.LSResourceResolver)) requires
+  ("uses a `LSResourceResolver` when it needs to locate external resources"),
+  leaving each schema language to define what counts as one.
+  The same contract states that a factory's resolver is *not* inherited by the `Schema`, `Validator` and `ValidatorHandler` objects it creates,
+  which is why the securing installs the floor on each of them rather than on the factory alone.
 
-The securing injects hardened readers this way,
-so an implementation that ignores the supplied reader and parses with an internal parser of its own
-parses outside the securing.
+The securing injects hardened readers and installs these resolver floors,
+so an implementation that ignores what it was handed —
+parsing with an internal parser of its own,
+or reaching an external resource without consulting the resolver —
+works outside the securing.
 Guarding against such an implementation would be a valid *hardening* of this library,
-but the substitution itself is a contract violation in that implementation,
+but the deviation itself is a contract violation in that implementation,
 not a vulnerability here:
 a report built on one is triaged `OUT-OF-SCOPE: foreign implementation`.
 
