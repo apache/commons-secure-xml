@@ -40,8 +40,11 @@ import org.xml.sax.SAXNotSupportedException;
  * Beyond the three universal guarantees on {@link org.apache.commons.xml.secure}:
  * </p>
  * <ul>
- * <li>{@code xs:import}, {@code xs:include} and {@code xs:redefine} schemaLocation URIs are not resolved during schema compilation, and</li>
- * <li>{@code xsi:schemaLocation} / {@code xsi:noNamespaceSchemaLocation} hints in instance documents are not resolved during validation.</li>
+ * <li>{@code xs:import}, {@code xs:include} and {@code xs:redefine} schemaLocation URIs are not resolved during schema compilation,</li>
+ * <li>{@code xsi:schemaLocation} / {@code xsi:noNamespaceSchemaLocation} hints in instance documents are not resolved during validation, and</li>
+ * <li>the content model a schema expands into is bounded, on every implementation offering a limit for it. A loader expands a repeated particle while building
+ * the DFA, so a compact schema carrying a large {@code maxOccurs} would otherwise exhaust memory or CPU (see Xerces'
+ * <a href="https://xerces.apache.org/xerces2-j/properties.html#security-manager">security manager</a>, which caps that expansion at 3,000 nodes).</li>
  * </ul>
  * <p>
  * The same guarantees apply to {@link javax.xml.validation.Validator} and {@link javax.xml.validation.ValidatorHandler} instances produced from the
@@ -58,8 +61,8 @@ public final class SecureSchemaFactory {
 
     /**
      * Capability-driven secure wrapper for any {@link SchemaFactory} on the classpath, the same recipe for every implementation. It is the entry point reached
-     * by {@link SecureSchemaFactory#newInstance(String)}; there is no per-implementation branching, no {@code FEATURE_SECURE_PROCESSING} and no limit configuration on the
-     * factory itself.
+     * by {@link SecureSchemaFactory#newInstance(String)}; there is no per-implementation branching and no limit configuration on the factory itself beyond
+     * {@code FEATURE_SECURE_PROCESSING}.
      *
      * <p>Three layers cooperate:</p>
      * <ol>
@@ -73,9 +76,12 @@ public final class SecureSchemaFactory {
      *
      * <p>
      * The secure reader supplied by {@link SecureSAXParserFactory#secure(Source, boolean)} already carries {@code FEATURE_SECURE_PROCESSING} and the processing limits, so a
-     * DOCTYPE, external entity or Billion Laughs payload in the schema or instance document is bounded there rather than on this factory. The JAXP 1.5
-     * {@code ACCESS_EXTERNAL_*} properties are deliberately not set: the resolver floor already blocks the same fetches on every implementation, and the JDK 8
-     * {@code SchemaFactory} has a bug whereby those properties keep blocking even when a caller's own resolver would grant the access. The floor is a non-removable
+     * DOCTYPE, external entity or Billion Laughs payload in the schema or instance document is bounded there rather than on this factory. One limit it cannot
+     * supply is content-model expansion: a large {@code maxOccurs} is expanded by the schema loader when it builds the DFA, after parsing and without the
+     * reader, so {@code FEATURE_SECURE_PROCESSING} is set on the factory as well, which is what installs that bound on external Xerces (the stock JDK applies
+     * it unconditionally). The JAXP 1.5 {@code ACCESS_EXTERNAL_*} properties are still not set explicitly: the resolver floor already blocks the same fetches on
+     * every implementation, and the JDK 8 {@code SchemaFactory} has a bug whereby those properties keep blocking even when a caller's own resolver would grant
+     * the access. The floor is a non-removable
      * lower bound: a caller-set {@link LSResourceResolver} is routed through it (opting a specific lookup in by returning a non-{@code null} result) rather than
      * replacing it, so secure cannot be dropped by swapping the resolver.
      * </p>
@@ -97,6 +103,8 @@ public final class SecureSchemaFactory {
          */
         private Wrapper(final SchemaFactory delegate) {
             this.delegate = Objects.requireNonNull(delegate, "delegate");
+            // Content-model expansion happens in the schema loader, after parsing, so the injected reader's limits cannot reach it.
+            SecureSchemaFactory.setFeature(delegate, XMLConstants.FEATURE_SECURE_PROCESSING, true);
             // Compile-time block for xs:import/include/redefine; the wrappers carry the rest (per-product resolver, source rewriting, limits via the reader).
             delegate.setResourceResolver(floor);
         }
@@ -261,16 +269,32 @@ public final class SecureSchemaFactory {
     /**
      * Secures a {@link SchemaFactory}.
      *
-     * <p>Unlike the other factory types there is no per-implementation branching and no feature or limit configuration on the factory itself: schema compilation
-     * and validation reach external resources only through the resolver hook, so wrapping the factory with a non-removable ignore-all resolver floor is enough on
-     * every implementation. The reader used to parse schema and instance documents is secure separately, through
-     * {@link SecureSAXParserFactory#secure(javax.xml.transform.Source, boolean)}.</p>
+     * <p>Unlike the other factory types there is no per-implementation branching: schema compilation and validation reach external resources only through the
+     * resolver hook, so wrapping the factory with a non-removable ignore-all resolver floor is enough on every implementation. The reader used to parse schema
+     * and instance documents is secure separately, through {@link SecureSAXParserFactory#secure(javax.xml.transform.Source, boolean)}; the factory carries
+     * {@code FEATURE_SECURE_PROCESSING} for the one limit that reader cannot supply, the loader's content-model expansion.</p>
      *
      * @param factory the factory to secure; never {@code null}.
      * @return a secure factory.
      */
     static SchemaFactory secure(final SchemaFactory factory) {
         return new Wrapper(factory);
+    }
+
+    /**
+     * Sets a feature on the delegate, failing closed: an implementation that cannot accept it yields no factory rather than an unsecured one.
+     *
+     * @param factory the factory to configure; never {@code null}.
+     * @param feature the feature name.
+     * @param value   the value to set.
+     * @throws SecureException if the implementation rejects the feature.
+     */
+    private static void setFeature(final SchemaFactory factory, final String feature, final boolean value) {
+        try {
+            factory.setFeature(feature, value);
+        } catch (final Exception e) {
+            throw SecureException.featureFailed(feature, factory, e);
+        }
     }
 
     private SecureSchemaFactory() {
