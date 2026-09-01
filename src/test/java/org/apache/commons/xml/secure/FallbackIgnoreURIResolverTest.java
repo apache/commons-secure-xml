@@ -32,10 +32,14 @@ import javax.xml.transform.URIResolver;
 import javax.xml.transform.dom.DOMSource;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledInNativeImage;
 
 class FallbackIgnoreURIResolverTest {
 
     @Test
+    // Mockito generates the mock class and its plugin proxies at run time — impossible in a closed-world native image,
+    // so the stubbed factory this error path needs cannot be built there.
+    @DisabledInNativeImage
     void newEmptyDocumentThrowsExceptionInInitializerError() throws Exception {
         final DocumentBuilderFactory factory = mock(DocumentBuilderFactory.class);
         final ParserConfigurationException failure = new ParserConfigurationException("test");

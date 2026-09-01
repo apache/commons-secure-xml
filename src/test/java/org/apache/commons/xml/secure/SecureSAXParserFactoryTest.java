@@ -43,6 +43,7 @@ import javax.xml.transform.stream.StreamSource;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
@@ -186,6 +187,9 @@ public class SecureSAXParserFactoryTest {
     }
 
     @Test
+    // Mockito generates the mock classes and its plugin proxies at run time — impossible in a closed-world native image,
+    // so the stubbed factories these error paths need cannot be built there.
+    @DisabledInNativeImage
     void newXmlReaderWrapsDeclaredExceptions() throws Exception {
         Assumptions.assumeFalse(AttackTestSupport.IS_ANDROID, "Skipped on Android: parser selection is pinned to the platform implementation");
         final String previous = setFactoryIdProperty(MockSAXParserFactory.class.getName());
