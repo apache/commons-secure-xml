@@ -296,7 +296,7 @@ and reports against a factory reconfigured in any of the ways below are out of s
   or a `DOMSource` holding a document parsed elsewhere.
   Its settings are yours, including permissive ones.
   To parse with your own reader under the securing guarantees,
-  obtain it from `HardeningSAXParserFactory.newInstance()`
+  obtain it from `SecureSAXParserFactory.newInstance()`
   before wrapping it in a `SAXSource`.
 - The behavior of a JAXP implementation that does not respect the contract of the settings a securing recipe requires
   (the factory method throws rather than returning an unsecured factory),
