@@ -372,7 +372,7 @@ import org.xml.sax.InputSource;
 import org.apache.commons.xml.secure.SecureDocumentBuilderFactory;
 
 DocumentBuilder builder = SecureDocumentBuilderFactory.newInstance().newDocumentBuilder();
-builder.setEntityResolver((publicId, systemId) -> ALLOWED.contains(systemId) ? new InputSource(systemId) : null);
+builder.setEntityResolver((publicId, systemId) -&gt; ALLOWED.contains(systemId) ? new InputSource(systemId) : null);
       </code>
     </pre>
       </div>
@@ -404,7 +404,7 @@ import org.apache.commons.xml.secure.SecureSchemaFactory;
 DOMImplementationLS domImplementationLS = (DOMImplementationLS) DOMImplementationRegistry.newInstance().getDOMImplementation("LS");
 
 SchemaFactory factory = SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-factory.setResourceResolver((type, namespaceURI, publicId, systemId, baseURI) -> {
+factory.setResourceResolver((type, namespaceURI, publicId, systemId, baseURI) -&gt; {
     String resolved = baseURI == null ? systemId : URI.create(baseURI).resolve(systemId).toString();
     if (!ALLOWED.contains(resolved)) {
         return null;
@@ -442,7 +442,7 @@ import javax.xml.transform.stream.StreamSource;
 import org.apache.commons.xml.secure.SecureTransformerFactory;
 
 TransformerFactory factory = SecureTransformerFactory.newInstance();
-factory.setURIResolver((href, base) -> {
+factory.setURIResolver((href, base) -&gt; {
     String resolved = base == null ? href : URI.create(base).resolve(href).toString();
     return ALLOWED.contains(resolved) ? new StreamSource(resolved) : null;
 });
@@ -470,7 +470,7 @@ factory.setURIResolver((href, base) -> {
 import org.apache.commons.xml.secure.SecureXMLInputFactory;
 
 XMLInputFactory factory = SecureXMLInputFactory.newInstance();
-factory.setXMLResolver((publicID, systemID, baseURI, namespace) -> {
+factory.setXMLResolver((publicID, systemID, baseURI, namespace) -&gt; {
     String resolved = baseURI == null ? systemID : URI.create(baseURI).resolve(systemID).toString();
     return ALLOWED.contains(resolved) ? URI.create(resolved).toURL().openStream() : null;
 });
