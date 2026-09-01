@@ -33,7 +33,7 @@ If you have encountered an unlisted security vulnerability or other unexpected b
 
 ## Threat Model
 
-This is the threat model for the **0.1.x** release line.
+This is the threat model for the **1.0.x** release line.
 It is versioned with the library: a report against a released version is triaged against the model as it stood at that version, not at `HEAD`.
 A finding that breaks something listed under [What is in scope](#what-is-in-scope) should be reported through the channel above;
 a finding that falls under [What is out of scope](#what-is-out-of-scope) will be closed citing this section.
@@ -110,6 +110,28 @@ The library still secures Android's parsers as best-effort,
 tested as complete starting with API level 33
 (see [Supported runtimes](index.html) on the main page),
 but a report demonstrated only on Android is [out of scope](#what-is-out-of-scope) on any API level.
+
+**Honored JAXP contracts**
+
+The in-scope requirement that an implementation respect the contract of the settings a recipe uses
+(see [What is in scope](#what-is-in-scope))
+extends to the JAXP API contracts themselves.
+In particular:
+
+- A method handed a `SAXSource` carrying an `XMLReader` parses with that reader,
+  as the [`SAXSource` contract](https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/sax/SAXSource.html#%3Cinit%3E(org.xml.sax.XMLReader,org.xml.sax.InputSource)) requires.
+- A method handed a `StAXSource` reads from the stream or event reader it carries,
+  as the [`StAXSource` contract](https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/stax/StAXSource.html) implies:
+  the reader must arrive positioned on `START_DOCUMENT` or `START_ELEMENT`,
+  and the source is consumed during processing.
+
+The securing injects hardened readers this way,
+so an implementation that ignores the supplied reader and parses with an internal parser of its own
+parses outside the securing.
+Guarding against such an implementation would be a valid *hardening* of this library,
+but the substitution itself is a contract violation in that implementation,
+not a vulnerability here:
+a report built on one is triaged `OUT-OF-SCOPE: foreign implementation`.
 
 **System properties that modify behavior**
 
