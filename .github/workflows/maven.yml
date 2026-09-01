@@ -42,8 +42,9 @@ jobs:
     # - Distribution variance, one job each:
     #     * Semeru 8 and 21     OpenJ9's class library is the most divergent runtime setup-java offers,
     #                           and the most plausible source of surprises in factory lookup and class loading.
-    #     * Zulu                Pinned to an old 8 patch level.
-    #                           Verifies the securing degrades gracefully on a runtime predating the later jdk.xml.* backports.
+    #     * Zulu                Pinned to 8u152, the last release before XSLTC's getAssociatedStylesheet started honoring the XMLReader
+    #                           carried by a SAXSource (it self-provisioned one through 8u152, and honors it from 8u162 on).
+    #                           Also predates the later jdk.xml.* backports, so it covers the oldest behavior the securing has to degrade against.
     #     * GraalVM             Runs the suite as a native image via the `native-xalan` profile:
     #                           the JAXP providers resolve at build time under the closed-world assumption, a different code path from
     #                           the JVM's run-time ServiceLoader lookup. 25 is the latest GraalVM release.
@@ -75,7 +76,7 @@ jobs:
             java-version: 21
             distribution: semeru
           - os: ubuntu-latest
-            java-version: 8.0.201
+            java-version: 8.0.152
             distribution: zulu
           # native-image resolves the JAXP providers at build time under the closed-world assumption, a different
           # code path from the JVM's run-time ServiceLoader lookup. 25 is the latest GraalVM release.

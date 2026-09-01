@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.StringWriter;
 
@@ -54,6 +55,23 @@ class OverrideDefaultParserTest {
     /** Package prefix of the JDK's built-in parsers, the family a {@code false} feature value pins. */
     private static final String JDK_INTERNAL_PREFIX = "com.sun.org.apache.xerces.internal.";
 
+    /** {@code true} where the runtime's factories know {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER}; JDK 8 gained it in 8u162. */
+    private static final boolean SUPPORTS_FEATURE = probeFeature();
+
+    private static boolean probeFeature() {
+        try {
+            TransformerFactory.newInstance().setFeature(FEATURE, true);
+            return true;
+        } catch (final Exception e) {
+            return false;
+        }
+    }
+
+    /** Skips a test on a runtime whose factories do not recognize the feature, where there is no selection to observe. */
+    private static void assumeFeatureSupported() {
+        assumeTrue(SUPPORTS_FEATURE, "runtime does not recognize " + FEATURE);
+    }
+
     private static String transform(final TransformerFactory factory, final String text) throws Exception {
         final Transformer transformer = factory.newTransformer(AttackTestSupport.streamSource(AttackTestSupport.xsltBody(text)));
         final StringWriter out = new StringWriter();
@@ -73,6 +91,7 @@ class OverrideDefaultParserTest {
     @Test
     void schemaFactoryReadsFeatureAtCreation() throws Exception {
         assumeFalse(AttackTestSupport.IS_ANDROID);
+        assumeFeatureSupported();
         final SchemaFactory factory = SecureSchemaFactory.newDefaultInstance();
         assertFalse(factory.getFeature(FEATURE));
         assertFalse(((SecureSchema) factory.newSchema(AttackTestSupport.streamSource(AttackTestSupport.BENIGN_SCHEMA))).overrideDefaultParser);
@@ -97,6 +116,7 @@ class OverrideDefaultParserTest {
     @Test
     void transformerFactoryReadsFeatureAtCreation() throws Exception {
         assumeFalse(AttackTestSupport.IS_ANDROID);
+        assumeFeatureSupported();
         final TransformerFactory factory = SecureTransformerFactory.newDefaultInstance();
         assertFalse(factory.getFeature(FEATURE));
         assertFalse(((SecureTemplates) factory.newTemplates(AttackTestSupport.streamSource(AttackTestSupport.xsltBody("probe")))).overrideDefaultParser);
@@ -110,6 +130,7 @@ class OverrideDefaultParserTest {
     @DisabledInNativeImage
     void transformSucceedsUnderBothParserFamilies() throws Exception {
         assumeFalse(AttackTestSupport.IS_ANDROID);
+        assumeFeatureSupported();
         final TransformerFactory factory = SecureTransformerFactory.newDefaultInstance();
         // Feature false (the JDK's default): stylesheet and source parse through the pinned platform parser.
         assertTrue(transform(factory, "pinned").contains("pinned"));
@@ -121,6 +142,7 @@ class OverrideDefaultParserTest {
     @Test
     void xPathFactoryReadsFeatureAtCreation() throws Exception {
         assumeFalse(AttackTestSupport.IS_ANDROID);
+        assumeFeatureSupported();
         final XPathFactory factory = SecureXPathFactory.newDefaultInstance();
         assertFalse(factory.getFeature(FEATURE));
         assertFalse(((SecureXPath) factory.newXPath()).overrideDefaultParser);
