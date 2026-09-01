@@ -453,6 +453,39 @@ limitations under the License.
           </rulesets>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+        <reportSets>
+          <!-- The `report` and `failsafe-report` goals fork the test phase, running the suite a second time; the `*-only` goals read what the build already produced. -->
+          <reportSet>
+            <id>surefire</id>
+            <reports>
+              <report>report-only</report>
+            </reports>
+            <configuration>
+              <!-- The suite runs once per JAXP combination, each execution into its own directory. -->
+              <reportsDirectories>
+                <reportsDirectory>${project.build.directory}/surefire-reports/jdk-xerces</reportsDirectory>
+                <reportsDirectory>${project.build.directory}/surefire-reports/saxon</reportsDirectory>
+                <reportsDirectory>${project.build.directory}/surefire-reports/saxon-xerces</reportsDirectory>
+                <reportsDirectory>${project.build.directory}/surefire-reports/stockjdk</reportsDirectory>
+                <reportsDirectory>${project.build.directory}/surefire-reports/woodstox</reportsDirectory>
+                <reportsDirectory>${project.build.directory}/surefire-reports/xalan</reportsDirectory>
+                <reportsDirectory>${project.build.directory}/surefire-reports/xalan-xerces</reportsDirectory>
+                <reportsDirectory>${project.build.directory}/surefire-reports/xerces</reportsDirectory>
+              </reportsDirectories>
+            </configuration>
+          </reportSet>
+          <reportSet>
+            <id>failsafe</id>
+            <!-- The integration tests keep the plugin's own default, ${project.build.directory}/failsafe-reports. -->
+            <reports>
+              <report>failsafe-report-only</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
     </plugins>
   </reporting>
   <profiles>
