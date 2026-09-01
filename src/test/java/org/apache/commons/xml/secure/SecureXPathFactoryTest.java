@@ -17,11 +17,15 @@
 
 package org.apache.commons.xml.secure;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
@@ -29,6 +33,7 @@ import javax.xml.xpath.XPathFactoryConfigurationException;
 import javax.xml.xpath.XPathFunctionResolver;
 import javax.xml.xpath.XPathVariableResolver;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -121,5 +126,43 @@ class SecureXPathFactoryTest {
             }
         };
         assertThrows(SecureException.class, () -> SecureXPathFactory.secure(rejectingFactory));
+    }
+
+    /** A processing limit the JDK's XPath implementation recognizes through the Java 18 property API. */
+    private static final String XPATH_GROUP_LIMIT = "jdk.xml.xpathExprGrpLimit";
+
+    /**
+     * The Java 18 {@code XPathFactory} property method of the given name, or an aborted test where the platform predates it.
+     *
+     * <p>Reached reflectively because this suite compiles against the Java 8 API, the same reason the wrapper delegates the pair through method handles: the
+     * call has to resolve at run time, which is also exactly how a Java 18 caller reaches it.</p>
+     */
+    private static Method propertyMethod(final String name, final Class<?>... parameterTypes) {
+        try {
+            return XPathFactory.class.getMethod(name, parameterTypes);
+        } catch (final NoSuchMethodException e) {
+            Assumptions.abort("XPathFactory." + name + " requires Java 18 or later");
+            throw new AssertionError("unreachable");
+        }
+    }
+
+    @Test
+    void delegatesTheJava18PropertyApi() throws Exception {
+        // The wrapper is compiled against the Java 8 API, so without an explicit delegation the inherited default answers for it and every property the
+        // implementation supports, including its own limits, becomes unreachable through a secured factory.
+        final Method setProperty = propertyMethod("setProperty", String.class, String.class);
+        final Method getProperty = propertyMethod("getProperty", String.class);
+        final XPathFactory factory = SecureXPathFactory.newDefaultInstance();
+        setProperty.invoke(factory, XPATH_GROUP_LIMIT, "5");
+        assertEquals("5", getProperty.invoke(factory, XPATH_GROUP_LIMIT), "a property set on the secured factory must be read back from the delegate");
+    }
+
+    @Test
+    void reportsAnUnknownPropertyLikeTheDelegate() {
+        final Method getProperty = propertyMethod("getProperty", String.class);
+        final XPathFactory factory = SecureXPathFactory.newDefaultInstance();
+        final InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+                () -> getProperty.invoke(factory, "jdk.xml.noSuchProperty"));
+        assertInstanceOf(IllegalArgumentException.class, thrown.getCause(), "an unrecognized property must surface the delegate's own rejection");
     }
 }
