@@ -77,7 +77,7 @@ class AssociatedStylesheetTest {
     @Test
     void secureGetAssociatedStylesheetOptsInThroughResolver() throws TransformerConfigurationException {
         // A caller resolver is consulted for the href exactly as for any other reference. What comes back names the opted-in stylesheet rather than nothing,
-        // which is what separates an opt-in from the floored default; the floor still re-parses it through a secure reader, so the shape is its own.
+        // which is what separates an opt-in from the floored default; the floor still reparses it through a secure reader, so the shape is its own.
         final StreamSource opted = new StreamSource(AttackTestSupport.resourceUrl("included.xsl").toString());
         final TransformerFactory factory = secureFactory();
         factory.setURIResolver((href, base) -> href != null && href.endsWith("included.xsl") ? opted : null);

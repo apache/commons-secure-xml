@@ -81,8 +81,8 @@ limitations under the License.
       real work, and duplicating it across projects means every project owns the maintenance burden on its own.</p>
     <p>
       Defaults are also uneven. The stock JDK SAX and DOM parsers already prevent external entity resolution through
-      <code>FEATURE_SECURE_PROCESSING</code>
-      , and JAXP 1.5 conformant implementations ship reasonable defaults for most attacks. Others, such as standalone Xerces, Woodstox, or Saxon’s TrAX, need
+      <code>FEATURE_SECURE_PROCESSING</code>,
+      and JAXP 1.5 conformant implementations ship reasonable defaults for most attacks. Others, such as standalone Xerces, Woodstox, or Saxon’s TrAX, need
       further configuration before they reach the same baseline. A library author has no control over which implementation is on the classpath at runtime, so
       the effective security posture of their code depends on a deployment decision made elsewhere.
     </p>
@@ -132,8 +132,7 @@ limitations under the License.
       </p>
       <p>
         <strong>DOM Parsing</strong> via
-        <code>DocumentBuilderFactory</code>
-        :
+        <code>DocumentBuilderFactory</code>;
       </p>
       <div class="sourceCode" id="cb1">
         <pre class="sourceCode java">
@@ -147,8 +146,7 @@ Document doc = SecureDocumentBuilderFactory.newInstance().newDocumentBuilder().p
       </div>
       <p>
         <strong>SAX Parsing</strong> via
-        <code>SAXParserFactory</code>
-        :
+        <code>SAXParserFactory</code>;
       </p>
       <div class="sourceCode" id="cb2">
         <pre class="sourceCode java">
@@ -161,8 +159,7 @@ SecureSAXParserFactory.newInstance().newSAXParser().parse(inputStream, myDefault
       </div>
       <p>
         <strong>Streaming (StAX) Parsing</strong> via
-        <code>XMLInputFactory</code>
-        :
+        <code>XMLInputFactory</code>:
       </p>
       <div class="sourceCode" id="cb3">
         <pre class="sourceCode java">
@@ -176,8 +173,7 @@ XMLStreamReader reader = SecureXMLInputFactory.newInstance().createXMLStreamRead
       </div>
       <p>
         <strong>XSLT Transforms</strong> via
-        <code>TransformerFactory</code>
-        :
+        <code>TransformerFactory</code>:
       </p>
       <div class="sourceCode" id="cb4">
         <pre class="sourceCode java">
@@ -194,8 +190,7 @@ SecureTransformerFactory.newInstance()
       </div>
       <p>
         <strong>XPath Queries</strong> via
-        <code>XPathFactory</code>
-        :
+        <code>XPathFactory</code>:
       </p>
       <div class="sourceCode" id="cb5">
         <pre class="sourceCode java">
@@ -212,8 +207,7 @@ NodeList hits = (NodeList) SecureXPathFactory.newInstance()
       </div>
       <p>
         <strong>W3C XML Schema Validation</strong> via
-        <code>SchemaFactory</code>
-        :
+        <code>SchemaFactory</code>:
       </p>
       <div class="sourceCode" id="cb6">
         <pre class="sourceCode java">
@@ -290,8 +284,8 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         or
         <code>SAXSource</code>
         . A stylesheet also chooses where the transform writes (
-        <code>xsl:result-document</code>
-        ): the securing governs reads only, so restrict output destinations yourself when running an untrusted stylesheet (see the <a href="threat_model.html">Threat
+        <code>xsl:result-document</code>):
+        the securing governs reads only, so restrict output destinations yourself when running an untrusted stylesheet (see the <a href="threat_model.html">Threat
           Model</a>).
       </p>
     </section>
@@ -301,14 +295,13 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         The
         <code>SAXTransformerFactory</code>
         extension methods,
-        <code>newTransformerHandler(...)</code>
-        ,
+        <code>newTransformerHandler(...)</code>,
         <code>newTemplatesHandler()</code>
         and
-        <code>newXMLFilter(...)</code>
-        , if reachable by casting the factory from
-        <code>SecureTransformerFactory.newInstance()</code>
-        , produce handlers, filters and
+        <code>newXMLFilter(...)</code>,
+        if reachable by casting the factory from
+        <code>SecureTransformerFactory.newInstance()</code>,
+        produce handlers, filters and
         <code>Templates</code>
         carrying the same securing as the standard entry points: runtime
         <code>document()</code>
@@ -321,8 +314,8 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
       <h2>Caching and Thread-Safety</h2>
       <p>
         There is no caching or pooling inside
-        <code>org.apache.commons.xml.secure</code>
-        ; callers on a hot path are responsible for their own caching. The returned factories inherit the thread-safety properties of the underlying JAXP
+        <code>org.apache.commons.xml.secure</code>;
+        callers on a hot path are responsible for their own caching. The returned factories inherit the thread-safety properties of the underlying JAXP
         implementation, which in practice means they are not thread-safe. Create a new factory per thread or synchronize externally.
       </p>
     </section>
@@ -351,8 +344,8 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
       As a temporary debugging measure, set the system property
       <code>org.apache.commons.xml.secure.throwOnUnresolved</code>
       to
-      <code>true</code>
-      : every unresolved external reference is then rejected with the resolution hook’s exception, and the message names the denied resource. The property is
+      <code>true</code>:
+      every unresolved external reference is then rejected with the resolution hook’s exception, and the message names the denied resource. The property is
       read at resolution time, so it can be toggled on a running application; treat it as a diagnostic switch, not as an application configuration.
     </p>
   </section>
