@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.invoke.MethodHandle;
@@ -54,9 +55,20 @@ class MethodHandleFactoryTest {
 
     @Test
     void invokeExactRethrowsDeclaredException() {
-        assertThrows(FactoryConfigurationError.class, () -> MethodHandleFactory.invokeExact(() -> {
-            throw new FactoryConfigurationError("boom");
+        final FactoryConfigurationError declared = new FactoryConfigurationError("boom");
+        final FactoryConfigurationError thrown = assertThrows(FactoryConfigurationError.class, () -> MethodHandleFactory.invokeExact(() -> {
+            throw declared;
         }, FactoryConfigurationError.class), "an exception of the declared type must be rethrown");
+        assertSame(declared, thrown, "the declared exception must propagate unchanged");
+    }
+
+    @Test
+    void invokeExactRethrowsUndeclaredError() {
+        final OutOfMemoryError error = new OutOfMemoryError("boom");
+        final OutOfMemoryError thrown = assertThrows(OutOfMemoryError.class, () -> MethodHandleFactory.invokeExact(() -> {
+            throw error;
+        }, FactoryConfigurationError.class), "a JVM error must keep its type");
+        assertSame(error, thrown, "the error must propagate unchanged");
     }
 
     @Test
