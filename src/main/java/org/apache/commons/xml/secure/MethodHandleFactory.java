@@ -56,7 +56,11 @@ final class MethodHandleFactory {
             if (rethrow.isInstance(e)) {
                 throw rethrow.cast(e);
             }
-            // Unreachable: the looked-up method declares no other exceptions.
+            if (e instanceof Error) {
+                // A JVM error (OutOfMemoryError, ...) must keep its type; only exceptions are wrapped.
+                throw (Error) e;
+            }
+            // The looked-up method declares no checked exceptions besides rethrow's type, so this wraps runtime exceptions only.
             throw new IllegalStateException(e);
         }
     }
