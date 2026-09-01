@@ -99,7 +99,7 @@ limitations under the License.
       <img src="org/apache/commons/xml/secure/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">Usage
     </h1>
     <p>
-      To add the library to your build, see <a href="dependency-info.html">Maven Coordinates</a>. (Maven Coordinates)[dependency-info.html]
+      To add the library to your build, see <a href="../dependency-info.html">Maven Coordinates</a>.
     </p>
     <p>
       Every factory method in
@@ -112,7 +112,7 @@ limitations under the License.
       <h2>Supported Runtimes</h2>
       <p>The library requires OpenJDK 8 or later (or a JDK distribution built from it), or Android API level 26 or later.</p>
       <p>
-        The security guarantees are defined only on the OpenJDK family (see the <a href="threat_model.html">Threat Model</a>). No version of Android supports
+        The security guarantees are defined only on the OpenJDK family (see the <a href="../threat_model.html">Threat Model</a>). No version of Android supports
         <code>FEATURE_SECURE_PROCESSING</code>
         (so states <a href="https://developer.android.com/reference/javax/xml/parsers/DocumentBuilderFactory#setFeature%28java.lang.String,%20boolean%29">Android’s
           own documentation</a>), so the library secures the platform’s parsers as best-effort. Android’s
@@ -285,7 +285,7 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/sax/SAXSource.html"><code>SAXSource</code></a>
         . A stylesheet also chooses where the transform writes (
         <code>xsl:result-document</code>):
-        the securing governs reads only, so restrict output destinations yourself when running an untrusted stylesheet (see the <a href="threat_model.html">Threat
+        the securing governs reads only, so restrict output destinations yourself when running an untrusted stylesheet (see the <a href="../threat_model.html">Threat
           Model</a>).
       </p>
     </section>
@@ -306,7 +306,7 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         carrying the same securing as the standard entry points: runtime
         <code>document()</code>
         resolves to empty content, and a filter with no caller-set parent parses its input through a secured reader. The SAX events you feed into a handler, and
-        a parent reader you set on a filter, are your own configuration, like any caller-supplied parser. See the <a href="threat_model.html">Threat Model</a>
+        a parent reader you set on a filter, are your own configuration, like any caller-supplied parser. See the <a href="../threat_model.html">Threat Model</a>
         for the exact scope.
       </p>
     </section>
@@ -523,7 +523,7 @@ factory.setXMLResolver((publicID, systemID, baseURI, namespace) -&gt; {
       A resolver floor has neither problem:
       it covers every channel on every supported implementation,
       and it yields to a caller’s resolver without consulting the properties.
-      The <a href="threat_model.html">Threat Model</a> documents the resulting contract.
+      The <a href="../threat_model.html">Threat Model</a> documents the resulting contract.
     </p>
   </section>
 </body>
