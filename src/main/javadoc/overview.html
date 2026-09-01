@@ -132,7 +132,7 @@ limitations under the License.
       </p>
       <p>
         <strong>DOM Parsing</strong> via
-        <code>DocumentBuilderFactory</code>;
+        <code>{@link org.apache.commons.xml.secure.SecureDocumentBuilderFactory}</code>;
       </p>
       <div class="sourceCode" id="cb1">
         <pre class="sourceCode java">
@@ -146,7 +146,7 @@ Document doc = SecureDocumentBuilderFactory.newInstance().newDocumentBuilder().p
       </div>
       <p>
         <strong>SAX Parsing</strong> via
-        <code>SAXParserFactory</code>;
+        <code>{@link org.apache.commons.xml.secure.SecureSAXParserFactory}</code>;
       </p>
       <div class="sourceCode" id="cb2">
         <pre class="sourceCode java">
@@ -159,7 +159,7 @@ SecureSAXParserFactory.newInstance().newSAXParser().parse(inputStream, myDefault
       </div>
       <p>
         <strong>Streaming (StAX) Parsing</strong> via
-        <code>XMLInputFactory</code>:
+        <code>{@link org.apache.commons.xml.secure.SecureXMLInputFactory}</code>:
       </p>
       <div class="sourceCode" id="cb3">
         <pre class="sourceCode java">
@@ -173,7 +173,7 @@ XMLStreamReader reader = SecureXMLInputFactory.newInstance().createXMLStreamRead
       </div>
       <p>
         <strong>XSLT Transforms</strong> via
-        <code>TransformerFactory</code>:
+        <code>{@link org.apache.commons.xml.secure.SecureTransformerFactory}</code>:
       </p>
       <div class="sourceCode" id="cb4">
         <pre class="sourceCode java">
@@ -190,7 +190,7 @@ SecureTransformerFactory.newInstance()
       </div>
       <p>
         <strong>XPath Queries</strong> via
-        <code>XPathFactory</code>:
+        <code>{@link org.apache.commons.xml.secure.SecureXPathFactory}</code>:
       </p>
       <div class="sourceCode" id="cb5">
         <pre class="sourceCode java">
@@ -207,7 +207,7 @@ NodeList hits = (NodeList) SecureXPathFactory.newInstance()
       </div>
       <p>
         <strong>W3C XML Schema Validation</strong> via
-        <code>SchemaFactory</code>:
+        <code>{@link org.apache.commons.xml.secure.SecureSchemaFactory}</code>:
       </p>
       <div class="sourceCode" id="cb6">
         <pre class="sourceCode java">
