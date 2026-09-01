@@ -43,27 +43,27 @@ limitations under the License.
         <th>with Commons Secure XML</th>
       </tr>
       <tr>
-        <td><code>javax.xml.parsers.DocumentBuilderFactory</code></td>
+        <td><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/parsers/DocumentBuilderFactory.html"><code>javax.xml.parsers.DocumentBuilderFactory</code></a></td>
         <td><code>org.apache.commons.xml.secure.SecureDocumentBuilderFactory</code></td>
       </tr>
       <tr>
-        <td><code>javax.xml.parsers.SAXParserFactory</code></td>
+        <td><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/parsers/SAXParserFactory.html"><code>javax.xml.parsers.SAXParserFactory</code></a></td>
         <td><code>org.apache.commons.xml.secure.SecureSAXParserFactory</code></td>
       </tr>
       <tr>
-        <td><code>javax.xml.validation.SchemaFactory</code></td>
+        <td><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/validation/SchemaFactory.html"><code>javax.xml.validation.SchemaFactory</code></a></td>
         <td><code>org.apache.commons.xml.secure.SecureSchemaFactory</code></td>
       </tr>
       <tr>
-        <td><code>javax.xml.transform.TransformerFactory</code></td>
+        <td><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/TransformerFactory.html"><code>javax.xml.transform.TransformerFactory</code></a></td>
         <td><code>org.apache.commons.xml.secure.SecureTransformerFactory</code></td>
       </tr>
       <tr>
-        <td><code>javax.xml.stream.XMLInputFactory</code></td>
+        <td><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/stream/XMLInputFactory.html"><code>javax.xml.stream.XMLInputFactory</code></a></td>
         <td><code>org.apache.commons.xml.secure.SecureXMLInputFactory</code></td>
       </tr>
       <tr>
-        <td><code>javax.xml.xpath.XPathFactory</code></td>
+        <td><a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/xpath/XPathFactory.html"><code>javax.xml.xpath.XPathFactory</code></a></td>
         <td><code>org.apache.commons.xml.secure.SecureXPathFactory</code></td>
       </tr>
     </table>
@@ -81,7 +81,7 @@ limitations under the License.
       real work, and duplicating it across projects means every project owns the maintenance burden on its own.</p>
     <p>
       Defaults are also uneven. The stock JDK SAX and DOM parsers already prevent external entity resolution through
-      <code>FEATURE_SECURE_PROCESSING</code>,
+      <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/XMLConstants.html#FEATURE_SECURE_PROCESSING"><code>FEATURE_SECURE_PROCESSING</code></a>,
       and JAXP 1.5 conformant implementations ship reasonable defaults for most attacks. Others, such as standalone Xerces, Woodstox, or Saxon’s TrAX, need
       further configuration before they reach the same baseline. A library author has no control over which implementation is on the classpath at runtime, so
       the effective security posture of their code depends on a deployment decision made elsewhere.
@@ -233,7 +233,7 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         the library respects it:</p>
       <ul>
         <li>Stock JDK factories use the JDK parsers by default, and expose the <code>jdk.xml.overrideDefaultParser</code> feature (and Java system property
-          of the same name) to switch to parsers instantiated through <code>ServiceLoader</code>.
+          of the same name) to switch to parsers instantiated through <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ServiceLoader.html"><code>ServiceLoader</code></a>.
         </li>
         <li>Saxon selects its parsers through its own configuration.</li>
       </ul>
@@ -280,9 +280,9 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         stylesheets and schemas as trusted input, or pre-parse them through a secured
         <code>org.apache.commons.xml.secure</code>
         parser and pass the result as a
-        <code>DOMSource</code>
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/dom/DOMSource.html"><code>DOMSource</code></a>
         or
-        <code>SAXSource</code>
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/sax/SAXSource.html"><code>SAXSource</code></a>
         . A stylesheet also chooses where the transform writes (
         <code>xsl:result-document</code>):
         the securing governs reads only, so restrict output destinations yourself when running an untrusted stylesheet (see the <a href="threat_model.html">Threat
@@ -293,7 +293,7 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
       <h2>Transformer Handlers and Filters</h2>
       <p>
         The
-        <code>SAXTransformerFactory</code>
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/sax/SAXTransformerFactory.html"><code>SAXTransformerFactory</code></a>
         extension methods,
         <code>newTransformerHandler(...)</code>,
         <code>newTemplatesHandler()</code>
@@ -302,7 +302,7 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         if reachable by casting the factory from
         <code>SecureTransformerFactory.newInstance()</code>,
         produce handlers, filters and
-        <code>Templates</code>
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/Templates.html"><code>Templates</code></a>
         carrying the same securing as the standard entry points: runtime
         <code>document()</code>
         resolves to empty content, and a filter with no caller-set parent parses its input through a secured reader. The SAX events you feed into a handler, and
@@ -336,10 +336,148 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
       <li>Set a stricter feature on the factory, for example <code>http://apache.org/xml/features/disallow-doctype-decl</code> to reject every document
         carrying a DOCTYPE, on implementations that support the feature.
       </li>
-      <li>Install a resolver that throws. A caller-supplied <code>EntityResolver</code>, <code>XMLResolver</code>, <code>LSResourceResolver</code> or <code>URIResolver</code>
+      <li>Install a resolver that throws. A caller-supplied <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/org/xml/sax/EntityResolver.html"><code>EntityResolver</code></a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/stream/XMLResolver.html"><code>XMLResolver</code></a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/org/w3c/dom/ls/LSResourceResolver.html"><code>LSResourceResolver</code></a> or <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/URIResolver.html"><code>URIResolver</code></a>
         is consulted before the securing floor, so an allow-list and a deny-all are both one resolver away.
       </li>
     </ul>
+    <section id="resolvers">
+      <h2>Resolvers</h2>
+      <p>
+        A resolver here serves the opposite purpose it does on a stock JAXP factory.
+        There, returning <code>null</code> hands the reference back to the parser, which fetches it;
+        on a secured factory, returning <code>null</code> leaves the reference unresolved,
+        and the securing floor answers it with empty content.
+        Whatever your resolver leaves unresolved is never fetched.
+      </p>
+      <p>
+        A resolver is therefore the way to opt a resource back in,
+        and returning a non-null result is how you say “this one is allowed”.
+        Your resolver is consulted before the floor and is never replaced by it,
+        and what it returns is honored even where the JAXP 1.5 external-access properties would deny the fetch,
+        because those properties do not apply to a resolved result.
+      </p>
+      <p>
+        <strong>DTDs, external entities, and <code>xi:include</code> targets</strong> on
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/parsers/DocumentBuilder.html"><code>DocumentBuilder</code></a>
+        and
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/org/xml/sax/XMLReader.html"><code>XMLReader</code></a>,
+        via
+        <code>EntityResolver</code>.
+        An <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/org/xml/sax/InputSource.html"><code>InputSource</code></a> carrying only the system identifier is the shortest way to allow one: the parser opens it itself.
+      </p>
+      <div class="sourceCode" id="cb7">
+        <pre class="sourceCode java">
+      <code class="sourceCode java">
+import org.xml.sax.InputSource;
+import org.apache.commons.xml.secure.SecureDocumentBuilderFactory;
+
+DocumentBuilder builder = SecureDocumentBuilderFactory.newInstance().newDocumentBuilder();
+builder.setEntityResolver((publicId, systemId) -> ALLOWED.contains(systemId) ? new InputSource(systemId) : null);
+      </code>
+    </pre>
+      </div>
+      <p>
+        <strong>Every fetch on the schema path</strong> on
+        <code>SchemaFactory</code>,
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/validation/Schema.html"><code>Schema</code></a>,
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/validation/Validator.html"><code>Validator</code></a>
+        and
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/validation/ValidatorHandler.html"><code>ValidatorHandler</code></a>,
+        via
+        <code>LSResourceResolver</code>.
+        This one resolver answers for the schema documents a schema pulls in
+        (<code>xs:include</code>, <code>xs:import</code>, and <code>xsi:schemaLocation</code> hints)
+        and for the DTD and the external entities of the instance document being validated.
+        The <code>type</code> argument tells them apart, as DOM Level 3 Load and Save prescribes:
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/XMLConstants.html#W3C_XML_SCHEMA_NS_URI"><code>XMLConstants.W3C_XML_SCHEMA_NS_URI</code></a> for a schema document,
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/XMLConstants.html#XML_DTD_NS_URI"><code>XMLConstants.XML_DTD_NS_URI</code></a> for a DTD or an entity.
+        A schema references its neighbors relatively, so resolve the system identifier against the base URI before matching it.
+      </p>
+      <div class="sourceCode" id="cb8">
+        <pre class="sourceCode java">
+      <code class="sourceCode java">
+import org.w3c.dom.bootstrap.DOMImplementationRegistry;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSInput;
+import org.apache.commons.xml.secure.SecureSchemaFactory;
+
+DOMImplementationLS domImplementationLS = (DOMImplementationLS) DOMImplementationRegistry.newInstance().getDOMImplementation("LS");
+
+SchemaFactory factory = SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+factory.setResourceResolver((type, namespaceURI, publicId, systemId, baseURI) -> {
+    String resolved = baseURI == null ? systemId : URI.create(baseURI).resolve(systemId).toString();
+    if (!ALLOWED.contains(resolved)) {
+        return null;
+    }
+    LSInput input = domImplementationLS.createLSInput();
+    input.setSystemId(resolved);
+    return input;
+});
+      </code>
+    </pre>
+      </div>
+      <p>
+        <strong>Every fetch on the transform path</strong> on
+        <code>TransformerFactory</code>,
+        <code>Templates</code>
+        and
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/Transformer.html"><code>Transformer</code></a>,
+        via
+        <code>URIResolver</code>.
+        This one resolver answers for the stylesheet modules pulled in at compile time
+        (<code>xsl:include</code> and <code>xsl:import</code>)
+        and for everything the transform fetches as it runs:
+        <code>document()</code>,
+        and on an XSLT 3.0 implementation the <code>unparsed-text()</code> family and <code>json-doc()</code> as well.
+        A <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/stream/StreamSource.html"><code>StreamSource</code></a> you return is re-parsed with a secured reader,
+        so the references inside the resource you allowed face the same floor again.
+        A function that cannot accept an empty document in place of what it asked for, <code>unparsed-text()</code> among them,
+        reports an error when the resolver declines rather than returning empty content;
+        either way the resource is not fetched.
+      </p>
+      <div class="sourceCode" id="cb9">
+        <pre class="sourceCode java">
+      <code class="sourceCode java">
+import javax.xml.transform.stream.StreamSource;
+import org.apache.commons.xml.secure.SecureTransformerFactory;
+
+TransformerFactory factory = SecureTransformerFactory.newInstance();
+factory.setURIResolver((href, base) -> {
+    String resolved = base == null ? href : URI.create(base).resolve(href).toString();
+    return ALLOWED.contains(resolved) ? new StreamSource(resolved) : null;
+});
+      </code>
+    </pre>
+      </div>
+      <p>
+        <strong>Entities on the streaming path</strong> on
+        <code>XMLInputFactory</code>,
+        via
+        <code>XMLResolver</code>.
+        This is the one resolver that has to open the resource itself:
+        it must return an
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/InputStream.html"><code>InputStream</code></a>,
+        an
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/stream/XMLStreamReader.html"><code>XMLStreamReader</code></a>
+        or an
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/stream/XMLEventReader.html"><code>XMLEventReader</code></a>,
+        and any other type is silently ignored
+        (the stock JDK then falls back to fetching the identifier the document declared, not the one you returned).
+      </p>
+      <div class="sourceCode" id="cb10">
+        <pre class="sourceCode java">
+      <code class="sourceCode java">
+import org.apache.commons.xml.secure.SecureXMLInputFactory;
+
+XMLInputFactory factory = SecureXMLInputFactory.newInstance();
+factory.setXMLResolver((publicID, systemID, baseURI, namespace) -> {
+    String resolved = baseURI == null ? systemID : URI.create(baseURI).resolve(systemID).toString();
+    return ALLOWED.contains(resolved) ? URI.create(resolved).toURL().openStream() : null;
+});
+      </code>
+    </pre>
+      </div>
+    </section>
     <p>
       As a temporary debugging measure, set the system property
       <code>org.apache.commons.xml.secure.throwOnUnresolved</code>
