@@ -48,7 +48,7 @@ import org.xml.sax.ext.EntityResolver2;
  * default.
  * </p>
  */
-class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
+final class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
 
     private static final byte[] EMPTY = {};
 
@@ -90,12 +90,12 @@ class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
      *
      * @return The delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}.
      */
-    final EntityResolver getDelegate() {
+    EntityResolver getDelegate() {
         return delegate;
     }
 
     @Override
-    public final InputSource getExternalSubset(final String name, final String baseURI) throws SAXException, IOException {
+    public InputSource getExternalSubset(final String name, final String baseURI) throws SAXException, IOException {
         // A null return means "no synthetic subset", not "unresolved", nothing is fetched.
         return delegate instanceof EntityResolver2 ? ((EntityResolver2) delegate).getExternalSubset(name, baseURI) : null;
     }
@@ -124,12 +124,12 @@ class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
     }
 
     @Override
-    public final InputSource resolveEntity(final String publicId, final String systemId) throws SAXException, IOException {
+    public InputSource resolveEntity(final String publicId, final String systemId) throws SAXException, IOException {
         return resolveEntity(null, publicId, null, systemId);
     }
 
     @Override
-    public final InputSource resolveEntity(final String name, final String publicId, final String baseURI, final String systemId)
+    public InputSource resolveEntity(final String name, final String publicId, final String baseURI, final String systemId)
             throws SAXException, IOException {
         final InputSource resolved = resolveWithDelegate(name, publicId, baseURI, systemId);
         return resolved != null ? resolved : onUnresolved(name, publicId, baseURI, systemId);
@@ -150,7 +150,7 @@ class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
      *
      * @param delegate The caller-supplied resolver, or {@code null} for a pure ignore-all floor.
      */
-    final void setDelegate(final EntityResolver delegate) {
+    void setDelegate(final EntityResolver delegate) {
         this.delegate = delegate;
     }
 }
