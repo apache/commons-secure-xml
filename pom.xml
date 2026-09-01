@@ -490,6 +490,46 @@ limitations under the License.
   </reporting>
   <profiles>
     <!--
+      Fold the Android instrumented run into the coverage data.
+    -->
+    <profile>
+      <id>jacoco</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>merge-android</id>
+                <phase>pre-site</phase>
+                <goals>
+                  <goal>merge</goal>
+                </goals>
+                <configuration>
+                  <fileSets>
+                    <fileSet>
+                      <directory>${project.build.directory}</directory>
+                      <includes>
+                        <include>jacoco.exec</include>
+                      </includes>
+                    </fileSet>
+                    <fileSet>
+                      <directory>${project.basedir}/android-tests/build/outputs/code_coverage</directory>
+                      <includes>
+                        <include>**/*.ec</include>
+                      </includes>
+                    </fileSet>
+                  </fileSets>
+                  <destFile>${project.build.directory}/jacoco.exec</destFile>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <!--
       Regression guard for the generated OSGi and JPMS descriptors.
       The JPMS test requires JDK 9+
     -->

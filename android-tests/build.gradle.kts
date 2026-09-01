@@ -42,6 +42,17 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
+    // Match the JaCoCo the Maven build reports with, so the on-device agent understands the same execution data format.
+    testCoverage {
+        jacocoVersion = "0.8.15"
+    }
+
+    buildTypes {
+        getByName("debug") {
+            enableAndroidTestCoverage = true
+        }
+    }
+
     sourceSets {
         getByName("androidTest") {
             java.srcDirs("../src/test/java")
