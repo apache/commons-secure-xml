@@ -19,6 +19,7 @@ package org.apache.commons.xml.secure;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -30,6 +31,23 @@ import org.xml.sax.ext.DefaultHandler2;
 import org.xml.sax.ext.EntityResolver2;
 
 class FallbackIgnoreEntityResolver2Test {
+
+    @Test
+    void forwardsGetExternalSubsetOnlyToExtendedDelegates() throws Exception {
+        final FallbackIgnoreEntityResolver2 floor = new FallbackIgnoreEntityResolver2(null);
+        assertNull(floor.getExternalSubset("name", "https://example.test/base/"));
+        floor.setDelegate((publicId, systemId) -> new InputSource());
+        assertNull(floor.getExternalSubset("name", "https://example.test/base/"));
+        final InputSource expected = new InputSource();
+        floor.setDelegate(new DefaultHandler2() {
+
+            @Override
+            public InputSource getExternalSubset(final String name, final String baseURI) {
+                return expected;
+            }
+        });
+        assertSame(expected, floor.getExternalSubset("name", "https://example.test/base/"));
+    }
 
     @Test
     void resolvesDelegatesAndAllFallbackPaths() throws Exception {
