@@ -660,7 +660,7 @@ limitations under the License.
   </profiles>
   <developers>
     <developer>
-      <id>ppkarwasz</id>
+      <id>pkarwasz</id>
       <name>Piotr P. Karwasz</name>
       <email>pkarwasz-pom@apache.org</email>
     </developer>

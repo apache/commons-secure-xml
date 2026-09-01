@@ -35,29 +35,29 @@ The <action> type attribute can be add, update, fix, or remove.
       <!-- SPECIAL -->
       <action type="add" dev="ggregory" due-to="Piotr P. Karwasz, Gary Gregory">This is the first release of Apache Commons Secure XML.</action>      
       <!-- ADD -->
-      <action type="add" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Add secure-by-default JAXP factory creation via org.apache.commons.xml.secure, donated from the copernik-xml-factory project (https://github.com/copernik-eu/copernik-xml-factory) and covering the stock JDK, Android, Apache Xalan, Apache Xerces, Woodstox, and Saxon-HE.</action>
-      <action type="add" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-9">Install a non-removable resolver floor on every resolver channel (EntityResolver, LSResourceResolver, URIResolver, and XMLResolver), routing caller-supplied resolvers through it as allow-lists.</action>
-      <action type="add" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Secure the SAXTransformerFactory extension surface (TransformerHandler, TemplatesHandler, and XMLFilter) and TransformerFactory.getAssociatedStylesheet.</action>
-      <action type="add" dev="ppkarwasz" due-to="Piotr P. Karwasz, Jarek Potiuk, Gary Gregory">Document the threat model on the project site, including the denied-fetch contract and the supported runtime floor (OpenJDK 8 and Android API 33 or later).</action>
-      <action type="add" dev="ppkarwasz" due-to="Gary Gregory, Piotr P. Karwasz" issue="COMMONSXML-11">Add GitHub CI builds for Java 26 and 27-EA.</action>
-      <action type="add" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Mirror on each factory class every JAXP static factory method, including the Java 9 newDefaultInstance and Java 13 newNSInstance families, all usable on Java 8.</action>
+      <action type="add" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Add secure-by-default JAXP factory creation via org.apache.commons.xml.secure, donated from the copernik-xml-factory project (https://github.com/copernik-eu/copernik-xml-factory) and covering the stock JDK, Android, Apache Xalan, Apache Xerces, Woodstox, and Saxon-HE.</action>
+      <action type="add" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-9">Install a non-removable resolver floor on every resolver channel (EntityResolver, LSResourceResolver, URIResolver, and XMLResolver), routing caller-supplied resolvers through it as allow-lists.</action>
+      <action type="add" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Secure the SAXTransformerFactory extension surface (TransformerHandler, TemplatesHandler, and XMLFilter) and TransformerFactory.getAssociatedStylesheet.</action>
+      <action type="add" dev="pkarwasz" due-to="Piotr P. Karwasz, Jarek Potiuk, Gary Gregory">Document the threat model on the project site, including the denied-fetch contract and the supported runtime floor (OpenJDK 8 and Android API 33 or later).</action>
+      <action type="add" dev="pkarwasz" due-to="Gary Gregory, Piotr P. Karwasz" issue="COMMONSXML-11">Add GitHub CI builds for Java 26 and 27-EA.</action>
+      <action type="add" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Mirror on each factory class every JAXP static factory method, including the Java 9 newDefaultInstance and Java 13 newNSInstance families, all usable on Java 8.</action>
       <!-- FIX -->
-      <action type="fix" dev="ppkarwasz" due-to="Ta Duc Thien, Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-10">Block XInclude (xi:include) href resolution by default, since the JAXP external-access properties do not govern it.</action>
-      <action type="fix" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Honor jdk.xml.overrideDefaultParser on TrAX, XPath and schema factories that recognize it.</action>
-      <action type="fix" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Restore the secure configuration when a factory or parser is reset() instead of reverting to the implementation defaults.</action>
-      <action type="fix" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Parse a Source opted in by a caller-supplied URIResolver using a secure parser.</action>
-      <action type="fix" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Secure the document parse behind the InputSource-taking XPath evaluation entry points.</action>
-      <action type="fix" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Fall back to the standard factory lookup in the DOM, SAX and schema newDefaultInstance methods on Android.</action>
-      <action type="fix" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Delegate the XPathFactory setProperty and getProperty methods introduced in Java 18, so the implementation's properties stay reachable on a secure factory.</action>
-      <action type="fix" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Bound the content model a schema expands into, so a compact schema with a large maxOccurs cannot exhaust memory or CPU during validation.</action>
+      <action type="fix" dev="pkarwasz" due-to="Ta Duc Thien, Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-10">Block XInclude (xi:include) href resolution by default, since the JAXP external-access properties do not govern it.</action>
+      <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Honor jdk.xml.overrideDefaultParser on TrAX, XPath and schema factories that recognize it.</action>
+      <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Restore the secure configuration when a factory or parser is reset() instead of reverting to the implementation defaults.</action>
+      <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Parse a Source opted in by a caller-supplied URIResolver using a secure parser.</action>
+      <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Secure the document parse behind the InputSource-taking XPath evaluation entry points.</action>
+      <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Fall back to the standard factory lookup in the DOM, SAX and schema newDefaultInstance methods on Android.</action>
+      <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Delegate the XPathFactory setProperty and getProperty methods introduced in Java 18, so the implementation's properties stay reachable on a secure factory.</action>
+      <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Bound the content model a schema expands into, so a compact schema with a large maxOccurs cannot exhaust memory or CPU during validation.</action>
       <!-- UPDATE -->
-      <action type="update" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-1,COMMONSXML-5,COMMONSXML-6,COMMONSXML-7,COMMONSXML-8">Recognize XML implementations by the JAXP features and properties they support instead of by their implementation class name, extending the securing to any compliant implementation.</action>
-      <action type="update" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-4">Define a consistent contract for denied external fetches: unresolved external references resolve to empty content on every implementation, unless the org.apache.commons.xml.secure.throwOnUnresolved system property requests rejection.</action>
-      <action type="update" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-3">Reduce the shaded footprint by splitting the secure classes and resolver floors into independent entry points.</action>
-      <action type="update" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Allow the JAXP 1.5 accessExternal properties to be modified on secured factories.</action>
-      <action type="update" dev="ppkarwasz" due-to="Elliotte Rusty Harold, Piotr P. Karwasz">Clean up the code and documentation after a review.</action>
+      <action type="update" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-1,COMMONSXML-5,COMMONSXML-6,COMMONSXML-7,COMMONSXML-8">Recognize XML implementations by the JAXP features and properties they support instead of by their implementation class name, extending the securing to any compliant implementation.</action>
+      <action type="update" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-4">Define a consistent contract for denied external fetches: unresolved external references resolve to empty content on every implementation, unless the org.apache.commons.xml.secure.throwOnUnresolved system property requests rejection.</action>
+      <action type="update" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-3">Reduce the shaded footprint by splitting the secure classes and resolver floors into independent entry points.</action>
+      <action type="update" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Allow the JAXP 1.5 accessExternal properties to be modified on secured factories.</action>
+      <action type="update" dev="pkarwasz" due-to="Elliotte Rusty Harold, Piotr P. Karwasz">Clean up the code and documentation after a review.</action>
       <!-- REMOVE -->
-      <action type="remove" dev="ppkarwasz" due-to="Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-2">Remove the Limits class that applied uniform processing limits across implementations.</action>
+      <action type="remove" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-2">Remove the Limits class that applied uniform processing limits across implementations.</action>
     </release>
   </body>
 </document>
