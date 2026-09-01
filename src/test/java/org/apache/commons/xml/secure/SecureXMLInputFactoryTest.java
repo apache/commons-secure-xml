@@ -19,6 +19,7 @@ package org.apache.commons.xml.secure;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -454,7 +455,8 @@ class SecureXMLInputFactoryTest {
         for (final Object foreign : new Object[] { null, (XMLResolver) (publicID, systemID, baseURI, namespace) -> "foreign" }) {
             fake.setProperty(XMLInputFactory.RESOLVER, foreign);
             secure.setProperty(XMLInputFactory.RESOLVER, caller);
-            assertTrue(fake.resolverHook instanceof FallbackIgnoreXMLResolver, "a caller resolver must land behind a floor");
+            assertInstanceOf(FallbackIgnoreXMLResolver.class, fake.resolverHook,
+              "a caller resolver must land behind a floor");
             assertSame(caller, ((FallbackIgnoreXMLResolver) fake.resolverHook).getDelegate(), "the floor must delegate to the caller's resolver");
             assertSame(caller, secure.getXMLResolver(), "getXMLResolver must report the caller's resolver unwrapped");
         }
@@ -509,7 +511,8 @@ class SecureXMLInputFactoryTest {
         secure.setXMLResolver(caller);
         // The hook keeps a floor with the caller behind it; whether that is the floor already there or a fresh one is the subject of
         // settingAResolverInstallsAFreshFloorInsteadOfMutatingTheInstalledOne.
-        assertTrue(fake.resolverHook instanceof FallbackIgnoreXMLResolver, "a caller resolver must land behind a floor, not replace it on the delegate's hook");
+        assertInstanceOf(FallbackIgnoreXMLResolver.class, fake.resolverHook,
+          "a caller resolver must land behind a floor, not replace it on the delegate's hook");
         assertSame(caller, ((FallbackIgnoreXMLResolver) fake.resolverHook).getDelegate(), "the caller's resolver must be the floor's delegate");
         assertSame(caller, secure.getXMLResolver(), "getXMLResolver must report the caller's resolver unwrapped");
         assertSame(caller, secure.getProperty(XMLInputFactory.RESOLVER), "getProperty must report the caller's resolver unwrapped");
@@ -645,7 +648,8 @@ class SecureXMLInputFactoryTest {
         assertNotNull(secure);
         assertTrue(fake.calls.contains(RecordingXMLInputFactory.call("setXMLResolver", fake.resolverHook)),
                 "the floor must be installed through the delegate's setXMLResolver");
-        assertTrue(fake.resolverHook instanceof FallbackIgnoreXMLResolver, "the constructor must install the ignore-all floor on the delegate's resolver hook");
+        assertInstanceOf(FallbackIgnoreXMLResolver.class, fake.resolverHook,
+          "the constructor must install the ignore-all floor on the delegate's resolver hook");
         assertNull(((FallbackIgnoreXMLResolver) fake.resolverHook).getDelegate(), "the installed floor must have no caller delegate");
     }
 }

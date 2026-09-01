@@ -18,6 +18,7 @@
 package org.apache.commons.xml.secure;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -270,7 +271,8 @@ class SecureValidatorHandlerTest {
         final SecureValidatorHandler handler = new SecureValidatorHandler(delegate);
         // The constructor must install the ignore-all floor on the delegate
         assertNotNull(delegate.getResourceResolver(), "delegate resource resolver must be set to the floor");
-        assertTrue(delegate.getResourceResolver() instanceof FallbackIgnoreLSResourceResolver, "delegate resolver must be a FallbackIgnoreLSResourceResolver");
+        assertInstanceOf(FallbackIgnoreLSResourceResolver.class, delegate.getResourceResolver(),
+          "delegate resolver must be a FallbackIgnoreLSResourceResolver");
         // getResourceResolver on the wrapper returns the floor's delegate, which is null initially
         assertNull(handler.getResourceResolver());
     }
