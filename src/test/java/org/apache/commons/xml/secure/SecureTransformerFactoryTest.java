@@ -157,7 +157,7 @@ class SecureTransformerFactoryTest {
         }
     }
 
-    private static void associatedStylesheet(final SAXTransformerFactory factory, final Source source) throws Exception {
+    private static void associatedStylesheet(final SAXTransformerFactory factory, final Source source) {
         try {
             factory.getAssociatedStylesheet(source, null, null, null);
         } catch (final TransformerConfigurationException | NullPointerException expected) {
