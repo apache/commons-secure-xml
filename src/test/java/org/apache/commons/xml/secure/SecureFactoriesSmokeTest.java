@@ -332,7 +332,7 @@ class SecureFactoriesSmokeTest {
     }
 
     /**
-     * The public classes must not extend their JAXP factory type: extending it would inherit the JAXP static factory methods, letting a caller obtain a
+     * The public classes must not extend their JAXP factory type: extending it would inherit the JAXP static factory methods, letting a caller obtain an
      * unsecured factory through an inherited method such as {@code newInstance(String, ClassLoader)} or {@code newDefaultInstance()}.
      */
     @Test
