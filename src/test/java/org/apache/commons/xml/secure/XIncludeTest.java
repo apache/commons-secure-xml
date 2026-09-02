@@ -56,7 +56,7 @@ class XIncludeTest {
     /**
      * Allow-lists the two fixture URLs, returning the appropriate in-memory content for each: {@link #RESOLVED_MARKER}
      * wrapped as XML for {@link #REFERENCED_XML}, and as plain text for {@link #REFERENCED_TEXT}. Anything else returns
-     * {@code null} so the securing's ignore-all floor empties it. Mirrors a caller allow-listing trusted resources.
+     * {@code null} so the securing's ignore-all floor resolves it to empty. Mirrors a caller allow-listing trusted resources.
      */
     private static final class AllowListResolver implements EntityResolver {
 

@@ -352,7 +352,7 @@ public final class SecureSAXParserFactory {
      * Rewrites a {@link Source} so that any SAX parsing it triggers runs through a secure {@link XMLReader}.
      * <p>
      * Only a {@link StreamSource} or a {@link SAXSource} without a reader is enriched with a secure, namespace-aware reader; other source kinds are returned
-     * as-is. Used by the TrAX and schema wrappers to route every source they parse through the SAX secure path.
+     * as-is. Used by the TrAX and schema wrappers to route every source they parse through the secure SAX path.
      * </p>
      *
      * @param source           the source to secure; never {@code null}.

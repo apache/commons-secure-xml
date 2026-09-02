@@ -49,12 +49,11 @@ public final class SecureXPathFactory {
 
     /**
      * {@link XPathFactory} wrapper that returns a {@link SecureXPath} from {@link #newXPath()}.
-     *
-     * <p>Required because {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING} on the factory governs only the XPath engine: the stock JDK and Apache Xalan
-     * implement the {@link org.xml.sax.InputSource}-taking {@code evaluate} entry points by provisioning an internal document parser the feature does not reach.
-     * The wrapper performs that document build itself through a secure parser instead; see {@link SecureXPath}.</p>
-     *
-     * @see org.apache.commons.xml.secure
+     * <p>
+     * Required because {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING} on the factory governs only the XPath engine: the stock JDK and Apache Xalan
+     * implement the {@link org.xml.sax.InputSource}-taking {@code evaluate} entry points by provisioning an internal document parser the feature does not
+     * reach. The wrapper performs that document build itself through a secure parser instead; see {@link SecureXPath}.
+     * </p>
      */
     private static final class Wrapper extends XPathFactory {
 
@@ -77,10 +76,11 @@ public final class SecureXPathFactory {
 
         /**
          * Reports a property of the delegate, the Java 18 {@code XPathFactory.getProperty(String)}.
-         *
-         * <p>Not marked {@code @Override}: this library compiles against the Java 8 API, where {@link XPathFactory} declares no such method, so the annotation
+         * <p>
+         * Not marked {@code @Override}: this library compiles against the Java 8 API, where {@link XPathFactory} declares no such method, so the annotation
          * would not compile. At run time on Java 18 or later it overrides the inherited method, which would otherwise answer for the wrapper and hide the
-         * delegate's own limits ({@code jdk.xml.xpath*}) behind an {@code UnsupportedOperationException}.</p>
+         * delegate's own limits ({@code jdk.xml.xpath*}) behind an {@code UnsupportedOperationException}.
+         * </p>
          *
          * @param name the property name.
          * @return the delegate's value for the property.
@@ -106,9 +106,10 @@ public final class SecureXPathFactory {
 
         /**
          * Tests whether parsers should be instantiated via {@code newInstance()} instead of {@code newDefaultInstance()}.
-         *
-         * <p>The JDK implementation of {@link XPathFactory} uses the JDK parsers while {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} is unset or
-         * {@code false}.</p>
+         * <p>
+         * The JDK implementation of {@link XPathFactory} uses the JDK parsers while {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} is unset or
+         * {@code false}.
+         * </p>
          *
          * @return {@code true} if parsers should be created via {@code newInstance()}.
          */
@@ -159,10 +160,10 @@ public final class SecureXPathFactory {
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(XPathFactory.class, "newDefaultInstance");
 
-    /** {@code XPathFactory.getProperty(String)}, added in Java 18; {@code null} on earlier releases, where the method does not exist to be called. */
+    /** {@code XPathFactory.getProperty(String)}, added in Java 18; {@code null} on earlier releases, where the method does not exist. */
     private static final MethodHandle MH_getProperty = MethodHandleFactory.findVirtual(XPathFactory.class, "getProperty", String.class, String.class);
 
-    /** {@code XPathFactory.setProperty(String, String)}, added in Java 18; {@code null} on earlier releases, where the method does not exist to be called. */
+    /** {@code XPathFactory.setProperty(String, String)}, added in Java 18; {@code null} on earlier releases, where the method does not exist. */
     private static final MethodHandle MH_setProperty =
             MethodHandleFactory.findVirtual(XPathFactory.class, "setProperty", void.class, String.class, String.class);
 
@@ -254,7 +255,7 @@ public final class SecureXPathFactory {
      * </ul>
      *
      * @param factory The factory to secure.
-     * @return A new secure factory or the original factory, secure, if it is a known Saxon factory.
+     * @return A new secure factory or the original factory, as-is, if it is a known Saxon factory.
      * @throws SecureException Thrown if this {@link XPathFactory} or the {@code XPath}s it creates cannot support this feature.
      */
     static XPathFactory secure(final XPathFactory factory) {

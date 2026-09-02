@@ -88,11 +88,14 @@ public final class SecureTransformerFactory {
      * {@link TransformerFactory} wrapper that rewrites every Source-taking entry point through {@link SecureSAXParserFactory#secure(Source, boolean)} before
      * delegating.
      *
-     * <p>Used by providers whose underlying TrAX implementation pulls a new {@code SAXParserFactory.newInstance()} for any Source that is not already a
+     * <p>
+     * Used by providers whose underlying TrAX implementation pulls a new {@code SAXParserFactory.newInstance()} for any Source that is not already a
      * {@link SAXSource} carrying its own {@link XMLReader}, and only sets {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING FSP} on the resulting reader.
-     * Wrapping the factory and rewriting the Source upstream guarantees the parse runs through an {@link org.apache.commons.xml.secure}-secured reader instead.</p>
-     *
-     * <p>Three layers cooperate:</p>
+     * Wrapping the factory and rewriting the Source upstream guarantees the parse runs through an {@link org.apache.commons.xml.secure}-secured reader instead.
+     * </p>
+     * <p>
+     * Three layers cooperate:
+     * </p>
      * <ol>
      *   <li>{@link SecureTransformerFactory} rewrites the Source on every entry point that compiles a stylesheet or transforms a one-shot input.</li>
      *   <li>{@link SecureTemplates} returns a {@link SecureTransformer} from {@link Templates#newTransformer()} so runtime source parsing is also covered, and
@@ -100,11 +103,12 @@ public final class SecureTransformerFactory {
      *       {@code Templates}).</li>
      *   <li>{@link SecureTransformer} rewrites the Source on every {@link Transformer#transform(Source, javax.xml.transform.Result)} call.</li>
      * </ol>
-     *
-     * <p>The {@link SAXTransformerFactory} extension products ride the same wrappers: {@code newTransformerHandler}/{@code newTemplatesHandler} products are
+     * <p>
+     * The {@link SAXTransformerFactory} extension products ride the same wrappers: {@code newTransformerHandler}/{@code newTemplatesHandler} products are
      * wrapped ({@link SecureTransformerHandler}, {@link SecureTemplatesHandler}) so the {@link Transformer}/{@link Templates} they expose carry the resolver
      * floor, and {@code newXMLFilter} returns a {@link SecureXMLFilter} composed from these wrappers instead of the implementation's filter, which would
-     * self-provision an unsecured input reader.</p>
+     * self-provision an unsecured input reader.
+     * </p>
      *
      * <h2>Caveats</h2>
      * <ul>
@@ -113,8 +117,6 @@ public final class SecureTransformerFactory {
      *       caller sets on a returned {@link XMLFilter}. The exception is {@code getAssociatedStylesheet} on an engine that drops the reader (Apache Xalan, and
      *       the JDK's XSLTC on Java 8): there the document is pre-parsed into a DOM instead, since the reader would otherwise be replaced by the engine's own.</li>
      * </ul>
-     *
-     * @see org.apache.commons.xml.secure
      */
     private static final class Wrapper extends SAXTransformerFactory {
 
@@ -406,10 +408,11 @@ public final class SecureTransformerFactory {
 
     /**
      * {@code true} on Java 8, detected by the absence of {@code TransformerFactory.newDefaultInstance()}, which arrived in Java 9.
-     *
-     * <p>The JDK's XSLTC only began honoring the {@link XMLReader} carried by a {@link SAXSource} in {@code getAssociatedStylesheet} in 8u162; through 8u152 it
+     * <p>
+     * The JDK's XSLTC only began honoring the {@link XMLReader} carried by a {@link SAXSource} in {@code getAssociatedStylesheet} in 8u162; through 8u152 it
      * provisions its own parser, exactly as Apache Xalan does. Java 8 as a whole is used as the boundary rather than the patch level: the two are
-     * indistinguishable through any API, and a runtime that old has already chosen correctness of configuration over the cost of a DOM pre-parse.</p>
+     * indistinguishable through any API, and such an old runtime has already chosen correctness of configuration over the cost of a DOM pre-parse.
+     * </p>
      */
     private static final boolean JAVA_8 = MH_newDefaultInstance == null;
 
@@ -460,7 +463,9 @@ public final class SecureTransformerFactory {
     /**
      * Capability-driven secure for any {@link TransformerFactory} on the classpath.
      *
-     * <p>Rather than branching on the implementation class, this method probes what the factory supports and adapts:</p>
+     * <p>
+     * Rather than branching on the implementation class, this method probes what the factory supports and adapts:
+     * </p>
      * <ul>
      *     <li><strong>Saxon</strong> ({@code net.sf.saxon}): recognized by package prefix and handed to {@link SaxonProvider#configure(TransformerFactory)} for the
      *         channels the standard JAXP knobs cannot close (reflection-based extension functions, the collection finder, the internal SAX parser). It is then

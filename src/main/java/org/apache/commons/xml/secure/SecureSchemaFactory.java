@@ -82,12 +82,9 @@ public final class SecureSchemaFactory {
      * reader, so {@code FEATURE_SECURE_PROCESSING} is set on the factory as well, which is what installs that bound on external Xerces (the stock JDK applies
      * it unconditionally). The JAXP 1.5 {@code ACCESS_EXTERNAL_*} properties are still not set explicitly: the resolver floor already blocks the same fetches on
      * every implementation, and the JDK 8 {@code SchemaFactory} has a bug whereby those properties keep blocking even when a caller's own resolver would grant
-     * the access. The floor is a non-removable
-     * lower bound: a caller-set {@link LSResourceResolver} is routed through it (opting a specific lookup in by returning a non-{@code null} result) rather than
-     * replacing it, so the securing (or the floor) cannot be dropped by swapping the resolver.
+     * access. The floor is a non-removable lower bound: a caller-set {@link LSResourceResolver} is routed through it (opting a specific lookup in by returning a
+     * non-{@code null} result) rather than replacing it, so the securing (or the floor) cannot be dropped by swapping the resolver.
      * </p>
-     *
-     * @see org.apache.commons.xml.secure
      */
     private static final class Wrapper extends SchemaFactory {
 
@@ -272,7 +269,7 @@ public final class SecureSchemaFactory {
      *
      * <p>Unlike the other factory types there is no per-implementation branching: schema compilation and validation reach external resources only through the
      * resolver hook, so wrapping the factory with a non-removable ignore-all resolver floor is enough on every implementation. The reader used to parse schema
-     * and instance documents is secure separately, through {@link SecureSAXParserFactory#secure(javax.xml.transform.Source, boolean)}; the factory carries
+     * and instance documents is secured separately, through {@link SecureSAXParserFactory#secure(javax.xml.transform.Source, boolean)}; the factory carries
      * {@code FEATURE_SECURE_PROCESSING} for the one limit that reader cannot supply, the loader's content-model expansion.</p>
      *
      * @param factory the factory to secure; never {@code null}.

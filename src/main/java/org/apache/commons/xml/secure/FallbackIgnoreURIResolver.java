@@ -52,14 +52,14 @@ final class FallbackIgnoreURIResolver implements URIResolver {
 
     /**
      * Creates the empty document backing the default ignore outcome.
-     *
-     * <p>Consumers parse the resolved {@link Source},
-     * and an empty character stream is not a well-formed XML document
-     * (XSLTC rejects it for {@code document()} and for an ignored {@code xsl:include}/{@code xsl:import}),
-     * so the default supplier answers with a well-formed empty document that evaluates to no content.</p>
-     *
-     * <p>The document escapes to the consumer with the resolved {@link Source}, so each resolution gets its own: whatever a consumer does to a document it
-     * received cannot surface in another resolution.</p>
+     * <p>
+     * Consumers parse the resolved {@link Source}, and an empty character stream is not a well-formed XML document (XSLTC rejects it for {@code document()} and
+     * for an ignored {@code xsl:include}/{@code xsl:import}), so the default supplier answers with a well-formed empty document that evaluates to no content.
+     * </p>
+     * <p>
+     * The document is exposed to the consumer with the resolved {@link Source}, so each resolution gets its own: whatever a consumer does to a document it
+     * received cannot surface in another resolution.
+     * </p>
      *
      * @param factory the factory to create the document builder with.
      * @return a new empty document.

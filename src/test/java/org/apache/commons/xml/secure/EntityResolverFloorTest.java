@@ -78,7 +78,7 @@ class EntityResolverFloorTest {
     /**
      * Allow-all resolver: it denies nothing, resolving whatever {@code systemId} it is handed by opening it as a URL. It nonetheless cannot resolve a bare
      * relative reference such as {@code referenced.xml}, because a plain {@link EntityResolver} (unlike {@link org.xml.sax.ext.EntityResolver2}) is given no
-     * base URI and the SAX2 contract promises it an already-absolutized {@code systemId}. So the resolution fails not from any deny decision but because the
+     * base URI and the SAX 2 contract promises it an already-absolutized {@code systemId}. So the resolution fails not from any deny decision but because the
      * resolver was never handed the whole URL: it succeeds only if the floor absolutizes the XInclude href against the base before consulting the caller.
      */
     private static final EntityResolver RESOLVE_ALL = (publicId, systemId) -> {

@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
  *
  * <p>Each {@code secure*} test asserts the library blocks the payload;
  * its {@code unconfigured*} positive control asserts the same payload parses once the limit is disabled,
- * so a block reflects the secure rather than a broken wrapper.
+ * so a block reflects the securing rather than a broken wrapper.
  * The library pins no custom entity-expansion limit; each parser keeps its own secure-processing default, which varies by implementation:
  * {@code 2,500} (stock JDK),
  * {@code 64,000} (external Xerces under {@code FEATURE_SECURE_PROCESSING}),

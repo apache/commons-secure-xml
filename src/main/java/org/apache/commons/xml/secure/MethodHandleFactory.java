@@ -35,11 +35,11 @@ final class MethodHandleFactory {
     /**
      * Finds a static method handle for the given class, method name, where the class is also the return type.
      *
-     * @param refcAndReturnType the class to search for the method and the return type.
-     * @param name the name of the method.
-     * @return the method handle, or {@code null} if not found.
-     * @throws SecurityException    if a security manager is present and it <a href="MethodHandles.Lookup.html#secmgr">refuses access</a>.
-     * @throws NullPointerException if any argument is null.
+     * @param refcAndReturnType The class to search for the method and the return type.
+     * @param name              The name of the method.
+     * @return The method handle, or {@code null} if not found.
+     * @throws SecurityException    Thrown if a security manager is present and it <a href="MethodHandles.Lookup.html#secmgr">refuses access</a>.
+     * @throws NullPointerException Thrown if any argument is null.
      */
     static MethodHandle findStatic(final Class<?> refcAndReturnType, final String name) {
         try {
@@ -51,17 +51,18 @@ final class MethodHandleFactory {
 
     /**
      * Finds an instance method handle for the given class, method name and signature.
+     * <p>
+     * Used to reach a method a later Java release added to a class this library compiles against an earlier one; the handle is {@code null} where the
+     * running platform does not have it.
+     * </p>
      *
-     * <p>Used to reach a method a later Java release added to a class this library compiles against at an earlier one; the handle is {@code null} where the
-     * running platform does not have it.</p>
-     *
-     * @param refc           the class to search for the method.
-     * @param name           the name of the method.
-     * @param returnType     the method's return type.
-     * @param parameterTypes the method's parameter types.
-     * @return the method handle, or {@code null} if not found.
-     * @throws SecurityException    if a security manager is present and it <a href="MethodHandles.Lookup.html#secmgr">refuses access</a>.
-     * @throws NullPointerException if any argument is null.
+     * @param refc           The class to search for the method.
+     * @param name           The name of the method.
+     * @param returnType     The method's return type.
+     * @param parameterTypes The method's parameter types.
+     * @return The method handle, or {@code null} if not found.
+     * @throws SecurityException    Thrown if a security manager is present and it <a href="MethodHandles.Lookup.html#secmgr">refuses access</a>.
+     * @throws NullPointerException Thrown if any argument is null.
      */
     static MethodHandle findVirtual(final Class<?> refc, final String name, final Class<?> returnType, final Class<?>... parameterTypes) {
         try {

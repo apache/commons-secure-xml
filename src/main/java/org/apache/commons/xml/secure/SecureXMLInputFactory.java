@@ -49,29 +49,30 @@ import javax.xml.transform.Source;
 public final class SecureXMLInputFactory {
 
     /**
-     * {@link XMLInputFactory} wrapper that installs a non-removable {@link FallbackIgnoreXMLResolver} floor on the delegate's entity-resolution hook and keeps it
-     * non-removable by the caller.
-     *
-     * <p>The constructor installs the floor through {@code setXMLResolver}, which every implementation routes external resolution through (Woodstox fans it out to
-     * both its DTD-subset and entity resolvers). Woodstox keeps one hook outside that fan-out, {@value SecureXMLInputFactory#WSTX_UNDECLARED_ENTITY_RESOLVER}, which is
-     * deliberately left empty: emptying the external subset leaves any entity it declared undeclared, and Woodstox then rejects the reference. The rejection is
-     * implementation-prescribed and keeps the resource just as unfetched as the empty resolution the other implementations produce; a caller who wants those
-     * references resolved can still set the property, and their resolver lands behind a floor like on every other resolver hook.</p>
-     *
-     * <p>Every resolver-valued entry point ({@link #setXMLResolver(XMLResolver)}, {@code setProperty(XMLInputFactory.RESOLVER, ...)} and the Woodstox
+     * {@link XMLInputFactory} wrapper that installs a non-removable {@link FallbackIgnoreXMLResolver} floor on the delegate's entity-resolution hook so the
+     * caller cannot remove it.
+     * <p>
+     * The constructor installs the floor through {@code setXMLResolver}, which every implementation routes external resolution through (Woodstox fans it out to
+     * both its DTD-subset and entity resolvers). Woodstox keeps one hook outside that fan-out, {@value SecureXMLInputFactory#WSTX_UNDECLARED_ENTITY_RESOLVER},
+     * which is deliberately left empty: emptying the external subset leaves any entity it declared undeclared, and Woodstox then rejects the reference. The
+     * rejection is implementation-prescribed and keeps the resource unfetched, like the empty resolution the other implementations produce; a caller who wants
+     * those references resolved can still set the property, and their resolver lands behind a floor like on every other resolver hook.
+     * </p>
+     * <p>
+     * Every resolver-valued entry point ({@link #setXMLResolver(XMLResolver)}, {@code setProperty(XMLInputFactory.RESOLVER, ...)} and the Woodstox
      * {@code com.ctc.wstx.*Resolver} keys) is routed uniformly: a caller who supplies their own {@link FallbackIgnoreXMLResolver} takes control and it is
-     * passed straight to the delegate; otherwise the caller's resolver is wrapped in a new floor installed on that hook, so the caller's opt-in cannot be removed 
-     * by dropping the resolver. This matters because Woodstox does not chain resolvers: when a resolver returns {@code null}, {@code DefaultInputResolver} falls
-     * through to fetching the systemId URL itself, so a caller-set resolver that returns {@code null} must still land behind the floor. {@link #getXMLResolver()} and
-     * {@code getProperty} report the caller's resolver unwrapped.</p>
-     *
-     * <p>The floor on a hook is replaced rather than mutated, which is what keeps each hook and each reader independent. Woodstox routes
-     * {@code setXMLResolver} to both its DTD-subset and entity hooks, so one floor object sits on several of them, and it copies that reference into every
-     * reader it creates; setting a delegate on the object in place would therefore also answer hooks the caller never named, and would change the resolution
-     * policy of readers already created, including ones parsing on another thread. Installing a new floor leaves both untouched: a hook keeps whatever floor it
-     * was given, and a reader keeps the one it captured when it was created.</p>
-     *
-     * @see org.apache.commons.xml.secure
+     * passed straight to the delegate; otherwise the caller's resolver is wrapped in a new floor installed on that hook, so the caller's opt-in cannot be
+     * removed by dropping the resolver. This matters because Woodstox does not chain resolvers: when a resolver returns {@code null},
+     * {@code DefaultInputResolver} falls through to fetching the systemId URL itself, so a caller-set resolver that returns {@code null} must still land behind
+     * the floor. {@link #getXMLResolver()} and {@code getProperty} report the caller's resolver unwrapped.
+     * </p>
+     * <p>
+     * The floor on a hook is replaced rather than mutated, which is what keeps each hook and each reader independent. Woodstox routes {@code setXMLResolver} to
+     * both its DTD-subset and entity hooks, so one floor object sits on several of them, and it copies that reference into every reader it creates; setting a
+     * delegate on the object in place would therefore also answer hooks the caller never named, and would change the resolution policy of readers already
+     * created, including ones parsing on another thread. Installing a new floor leaves both untouched: a hook keeps whatever floor it was given, and a reader
+     * keeps the one it captured when it was created.
+     * </p>
      */
     private static final class Wrapper extends XMLInputFactory {
 
@@ -284,7 +285,7 @@ public final class SecureXMLInputFactory {
     }
 
     /**
-     * Returns a new, secure {@link XMLInputFactory}, as by {@link XMLInputFactory#newFactory()}.
+     * Returns a new, secure {@link XMLInputFactory}, like {@link XMLInputFactory#newFactory()}.
      *
      * @return A secure factory.
      * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.

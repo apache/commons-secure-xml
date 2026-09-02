@@ -44,7 +44,7 @@ final class SecureTransformerHandler implements TransformerHandler {
     private final TransformerHandler delegate;
 
     /**
-     * Wraps the handler's LIVE transformer; constructing it installs the resolver floor that the handler's own transform then runs under.
+     * Wraps the handler's live transformer; constructing it installs the resolver floor that the handler's own transform then runs under.
      */
     private final SecureTransformer transformer;
 

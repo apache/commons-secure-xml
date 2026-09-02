@@ -95,7 +95,7 @@ final class SecureXMLFilter extends XMLFilterImpl implements ErrorListener {
 
     /**
      * Forwards a fatal transformation error to the caller-set {@link org.xml.sax.ErrorHandler}, then fails the parse like a SAX parser does after
-     * {@code fatalError}: some implementations' lenient default listeners would otherwise only print and truncate the parse silently.
+     * {@code fatalError}: some implementations' lenient default listeners would otherwise only print and abort the parse silently.
      */
     @Override
     public void fatalError(final TransformerException e) throws TransformerException {

@@ -33,7 +33,7 @@ import javax.xml.transform.URIResolver;
  * <p>
  * Both Apache Xalan 2.7 and stock-JDK XSLTC fail to propagate the factory's URIResolver through {@code Templates.newTransformer()}: the produced runtime
  * Transformer has a null URIResolver unless the caller sets one, leaving runtime {@code document()} calls unguarded. Snapshotting the resolver at compile time
- * and restoring it onto the runtime Transformer matches the JAXP-conformant intuition that the factory's resolver is the default for any Transformer the
+ * and restoring it onto the runtime Transformer matches the JAXP-conformant expectation that the factory's resolver is the default for any Transformer the
  * factory ultimately produces.
  * </p>
  */

@@ -78,7 +78,7 @@ import org.xml.sax.helpers.XMLFilterImpl;
  * <p>The permissive-side positive controls mirror the secure-side verbs with an {@code assertPermissive*} prefix: {@code assertPermissive*Parses} for direct
  * parsing, {@code assertPermissive*Compiles} for {@link SchemaFactory} / {@link TransformerFactory} compilation, {@code assertPermissiveTransformerTransforms}
  * for {@code Transformer.transform}, {@code assertPermissiveValidatorValidates} for {@code Validator.validate}. Both sides perform the same operation; the
- * prefix marks which factory secure level the assertion is set against.</p>
+ * prefix marks which secure factory level the assertion is set against.</p>
  *
  * <p>Schema and Templates assertions take a {@link Source} so the same helper covers both inline-string payloads and resource-backed wrappers; build the
  * source via {@link #streamSource(String)} for a string payload or {@link #resourceSource(String)} for a file under {@code src/test/resources/leaked/}. The
