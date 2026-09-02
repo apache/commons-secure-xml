@@ -350,7 +350,7 @@ public final class SecureDocumentBuilderFactory {
      * @param factory The factory to secure.
      * @param feature The feature to set.
      * @param value   The value to set.
-     * @throws SecureException   Thrown if this factory or the {@code XPath}s it creates cannot support this feature.
+     * @throws SecureException   Thrown if this factory cannot support this feature.
      * @throws NullPointerException Thrown if the {@code feature} parameter is null.
      */
     private static void setFeature(final DocumentBuilderFactory factory, final String feature, final boolean value) {
