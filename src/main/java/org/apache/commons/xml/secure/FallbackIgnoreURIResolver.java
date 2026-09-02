@@ -61,7 +61,7 @@ final class FallbackIgnoreURIResolver implements URIResolver {
      * received cannot surface in another resolution.
      * </p>
      *
-     * @param factory the factory to create the document builder with.
+     * @param factory The factory to create the document builder with.
      * @return a new empty document.
      * @throws IllegalStateException Thrown if the factory cannot supply a {@link javax.xml.parsers.DocumentBuilder} satisfying its configuration.
      */
@@ -89,8 +89,8 @@ final class FallbackIgnoreURIResolver implements URIResolver {
     /**
      * Constructs a new resolver.
      *
-     * @param delegate         the resolver to delegate resolution to; may be {@code null}.
-     * @param emptySource      the empty-{@link Source} supplier for the ignore outcome, or {@code null} for the default empty DOM document.
+     * @param delegate         The resolver to delegate resolution to; may be {@code null}.
+     * @param emptySource      The empty-{@link Source} supplier for the ignore outcome, or {@code null} for the default empty DOM document.
      * @param overrideDefaultParser whether the opted-in rewrite should use the pluggable parser lookup instead of the platform's built-in parser, read at each resolution.
      */
     FallbackIgnoreURIResolver(final URIResolver delegate, final Supplier<Source> emptySource, final BooleanSupplier overrideDefaultParser) {

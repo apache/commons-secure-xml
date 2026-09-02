@@ -94,7 +94,7 @@ public final class SecureSAXParserFactory {
         /**
          * Constructs a new instance.
          *
-         * @param delegate the delegate to wrap; must not be {@code null}.
+         * @param delegate The delegate to wrap; must not be {@code null}.
          * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
          */
         private Wrapper(final SAXParserFactory delegate) {
@@ -179,7 +179,7 @@ public final class SecureSAXParserFactory {
     /**
      * Enables namespace awareness on the given factory; the {@code NSInstance} counterpart of each factory method routes its result through here.
      *
-     * @param factory the factory to configure; never {@code null}.
+     * @param factory The factory to configure; never {@code null}.
      * @return The given factory, namespace-aware.
      */
     private static SAXParserFactory makeNSAware(final SAXParserFactory factory) {
@@ -336,7 +336,7 @@ public final class SecureSAXParserFactory {
      *         chain its own resolver onto the floor to allow-list resources, but cannot remove it.</li>
      * </ul>
      *
-     * @param factory the factory to secure; never {@code null}.
+     * @param factory The factory to secure; never {@code null}.
      * @return a secure factory.
      */
     static SAXParserFactory secure(final SAXParserFactory factory) {
@@ -355,7 +355,7 @@ public final class SecureSAXParserFactory {
      * as-is. Used by the TrAX and schema wrappers to route every source they parse through the secure SAX path.
      * </p>
      *
-     * @param source           the source to secure; never {@code null}.
+     * @param source           The source to secure; never {@code null}.
      * @param overrideDefaultParser whether {@value #OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
      * @return a secure source.
      * @throws IllegalStateException     Thrown if the underlying implementation cannot provide a secure reader.

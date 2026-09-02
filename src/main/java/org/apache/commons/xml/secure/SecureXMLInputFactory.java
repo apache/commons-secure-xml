@@ -93,7 +93,7 @@ public final class SecureXMLInputFactory {
         /**
          * Constructs a new instance.
          *
-         * @param delegate the delegate to wrap; must not be {@code null}.
+         * @param delegate The delegate to wrap; must not be {@code null}.
          * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
          */
         private Wrapper(final XMLInputFactory delegate) {
@@ -328,7 +328,7 @@ public final class SecureXMLInputFactory {
      * every entity-resolution hook, leaving the standard {@code SUPPORT_DTD} / {@code IS_SUPPORTING_EXTERNAL_ENTITIES} defaults untouched; see the wrapper's
      * Javadoc for the per-implementation hook routing.</p>
      *
-     * @param factory the factory to secure; never {@code null}.
+     * @param factory The factory to secure; never {@code null}.
      * @return a secure factory.
      */
     static XMLInputFactory secure(final XMLInputFactory factory) {

@@ -54,7 +54,7 @@ class SecureDocumentBuilderFactoryTest {
     /**
      * Selects the implementation {@link DocumentBuilderFactory#newInstance()} returns by setting the {@value #FACTORY_ID} system property.
      *
-     * @param factoryClassName the implementation class name to install, or {@code null} to clear the property and restore the platform lookup.
+     * @param factoryClassName The implementation class name to install, or {@code null} to clear the property and restore the platform lookup.
      * @return The previous property value, {@code null} if it was not set; pass it back here to restore the original lookup.
      */
     private static String setFactoryIdProperty(final String factoryClassName) {

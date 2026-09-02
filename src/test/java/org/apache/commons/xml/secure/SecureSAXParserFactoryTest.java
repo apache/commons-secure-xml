@@ -80,8 +80,8 @@ public class SecureSAXParserFactoryTest {
     /**
      * Asserts {@link SecureSAXParserFactory#newXMLReader(boolean)} on the given delegate throws {@link IllegalStateException} with the given cause.
      *
-     * @param cause    the checked exception the delegate is stubbed to throw.
-     * @param delegate the stubbed factory to route {@link MockSAXParserFactory} to.
+     * @param cause    The checked exception the delegate is stubbed to throw.
+     * @param delegate The stubbed factory to route {@link MockSAXParserFactory} to.
      */
     private static void assertNewXmlReaderWraps(final Exception cause, final SAXParserFactory delegate) {
         MockSAXParserFactory.delegate = delegate;
@@ -104,7 +104,7 @@ public class SecureSAXParserFactoryTest {
     /**
      * Selects the implementation {@link SAXParserFactory#newInstance()} returns by setting the {@value #FACTORY_ID} system property.
      *
-     * @param factoryClassName the implementation class name to install, or {@code null} to clear the property and restore the platform lookup.
+     * @param factoryClassName The implementation class name to install, or {@code null} to clear the property and restore the platform lookup.
      * @return The previous property value, {@code null} if it was not set; pass it back here to restore the original lookup.
      */
     private static String setFactoryIdProperty(final String factoryClassName) {

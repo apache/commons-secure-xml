@@ -59,9 +59,9 @@ final class SecureTransformer extends Transformer {
     /**
      * Constructs a new instance.
      *
-     * @param delegate         the delegate to wrap; must not be {@code null}.
-     * @param uriResolver      the compile-time URIResolver snapshot to seed the floor with; may be {@code null}.
-     * @param emptySource      the empty-{@link Source} supplier for the produced Transformers; {@code null} for the default empty DOM document.
+     * @param delegate         The delegate to wrap; must not be {@code null}.
+     * @param uriResolver      The compile-time URIResolver snapshot to seed the floor with; may be {@code null}.
+     * @param emptySource      The empty-{@link Source} supplier for the produced Transformers; {@code null} for the default empty DOM document.
      * @param overrideDefaultParser whether the source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
      * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */

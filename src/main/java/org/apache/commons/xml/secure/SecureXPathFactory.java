@@ -62,7 +62,7 @@ public final class SecureXPathFactory {
         /**
          * Constructs a new instance.
          *
-         * @param delegate the delegate to wrap; must not be {@code null}.
+         * @param delegate The delegate to wrap; must not be {@code null}.
          * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
          */
         private Wrapper(final XPathFactory delegate) {
@@ -82,7 +82,7 @@ public final class SecureXPathFactory {
          * delegate's own limits ({@code jdk.xml.xpath*}) behind an {@code UnsupportedOperationException}.
          * </p>
          *
-         * @param name the property name.
+         * @param name The property name.
          * @return the delegate's value for the property.
          */
         public String getProperty(final String name) {
@@ -131,8 +131,8 @@ public final class SecureXPathFactory {
          * {@code @Override}. The {@code jdk.xml.xpath*} limits reached this way are processing limits like any other: an operator may tighten them, and
          * loosening one is reconfiguration.
          *
-         * @param name  the property name.
-         * @param value the value to set.
+         * @param name  The property name.
+         * @param value The value to set.
          */
         public void setProperty(final String name, final String value) {
             if (MH_setProperty == null) {

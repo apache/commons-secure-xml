@@ -46,7 +46,7 @@ final class SecureValidatorHandler extends ValidatorHandler {
     /**
      * Constructs a new instance.
      *
-     * @param delegate the delegate to wrap; must not be {@code null}.
+     * @param delegate The delegate to wrap; must not be {@code null}.
      * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
     SecureValidatorHandler(final ValidatorHandler delegate) {

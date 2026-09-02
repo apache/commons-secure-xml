@@ -52,7 +52,7 @@ final class SecureXMLFilter extends XMLFilterImpl implements ErrorListener {
     /**
      * Bridges a TrAX report to the SAX callback shape.
      *
-     * @param e the reported exception.
+     * @param e The reported exception.
      * @return The original {@link SAXParseException} where one is the cause, otherwise a synthetic one carrying the locator.
      */
     private static SAXParseException toSAXParseException(final TransformerException e) {
@@ -73,7 +73,7 @@ final class SecureXMLFilter extends XMLFilterImpl implements ErrorListener {
     /**
      * Constructs a new instance.
      *
-     * @param templates the templates to wrap; must not be {@code null}.
+     * @param templates The templates to wrap; must not be {@code null}.
      * @throws NullPointerException Thrown if {@code templates} is {@code null}.
      */
     SecureXMLFilter(final SecureTemplates templates) {

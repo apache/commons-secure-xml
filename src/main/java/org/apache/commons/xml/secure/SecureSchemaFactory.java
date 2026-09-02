@@ -96,7 +96,7 @@ public final class SecureSchemaFactory {
         /**
          * Constructs a new instance.
          *
-         * @param delegate the delegate to wrap; must not be {@code null}.
+         * @param delegate The delegate to wrap; must not be {@code null}.
          * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
          */
         private Wrapper(final SchemaFactory delegate) {
@@ -167,7 +167,7 @@ public final class SecureSchemaFactory {
         /**
          * Secures every schema source through {@link SecureSAXParserFactory#secure(Source, boolean)}.
          *
-         * @param schemas the schema sources to secure; must not be {@code null}.
+         * @param schemas The schema sources to secure; must not be {@code null}.
          * @return a new array of secure sources.
          * @throws IllegalStateException     Thrown if the underlying implementation cannot provide a secure reader.
          * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
@@ -272,7 +272,7 @@ public final class SecureSchemaFactory {
      * and instance documents is secured separately, through {@link SecureSAXParserFactory#secure(javax.xml.transform.Source, boolean)}; the factory carries
      * {@code FEATURE_SECURE_PROCESSING} for the one limit that reader cannot supply, the loader's content-model expansion.</p>
      *
-     * @param factory the factory to secure; never {@code null}.
+     * @param factory The factory to secure; never {@code null}.
      * @return a secure factory.
      */
     static SchemaFactory secure(final SchemaFactory factory) {
@@ -282,9 +282,9 @@ public final class SecureSchemaFactory {
     /**
      * Sets a feature on the delegate, failing closed: an implementation that cannot accept it yields no factory rather than an unsecured one.
      *
-     * @param factory the factory to configure; never {@code null}.
-     * @param feature the feature name.
-     * @param value   the value to set.
+     * @param factory The factory to configure; never {@code null}.
+     * @param feature The feature name.
+     * @param value   The value to set.
      * @throws SecureException Thrown if the implementation rejects the feature.
      */
     private static void setFeature(final SchemaFactory factory, final String feature, final boolean value) {

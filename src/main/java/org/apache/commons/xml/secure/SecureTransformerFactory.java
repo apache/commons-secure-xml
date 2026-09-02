@@ -167,7 +167,7 @@ public final class SecureTransformerFactory {
         /**
          * Constructs a new instance.
          *
-         * @param delegate the delegate to wrap; must not be {@code null}.
+         * @param delegate The delegate to wrap; must not be {@code null}.
          * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
          */
         private Wrapper(final SAXTransformerFactory delegate) {
@@ -177,8 +177,8 @@ public final class SecureTransformerFactory {
         /**
          * Constructs a new instance.
          *
-         * @param delegate    the delegate to wrap; must not be {@code null}.
-         * @param emptySource the empty-{@link Source} supplier for the resolver floor, threaded onto every produced Templates/Transformer; {@code null} means the
+         * @param delegate    The delegate to wrap; must not be {@code null}.
+         * @param emptySource The empty-{@link Source} supplier for the resolver floor, threaded onto every produced Templates/Transformer; {@code null} means the
          *                    default empty DOM.
          * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
          */
@@ -482,7 +482,7 @@ public final class SecureTransformerFactory {
      *         {@link org.apache.commons.xml.secure}-secured reader instead.</li>
      * </ul>
      *
-     * @param factory the factory to secure; never {@code null}.
+     * @param factory The factory to secure; never {@code null}.
      * @return a secure factory.
      */
     static TransformerFactory secure(final TransformerFactory factory) {

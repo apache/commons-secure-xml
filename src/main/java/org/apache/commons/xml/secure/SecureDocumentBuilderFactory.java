@@ -61,7 +61,7 @@ public final class SecureDocumentBuilderFactory {
         /**
          * Constructs a new instance.
          *
-         * @param delegate the delegate to wrap; must not be {@code null}.
+         * @param delegate The delegate to wrap; must not be {@code null}.
          * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
          */
         private Wrapper(final DocumentBuilderFactory delegate) {
@@ -186,7 +186,7 @@ public final class SecureDocumentBuilderFactory {
     /**
      * Enables namespace awareness on the given factory; the {@code NSInstance} counterpart of each factory method routes its result through here.
      *
-     * @param factory the factory to configure; never {@code null}.
+     * @param factory The factory to configure; never {@code null}.
      * @return The given factory, namespace-aware.
      */
     private static DocumentBuilderFactory makeNSAware(final DocumentBuilderFactory factory) {

@@ -46,7 +46,7 @@ final class SecureDocumentBuilder extends DocumentBuilder {
     /**
      * Constructs a new instance.
      *
-     * @param delegate the delegate to wrap; must not be {@code null}.
+     * @param delegate The delegate to wrap; must not be {@code null}.
      * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
     SecureDocumentBuilder(final DocumentBuilder delegate) {
