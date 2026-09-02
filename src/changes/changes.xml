@@ -31,7 +31,7 @@ The <action> type attribute can be add, update, fix, or remove.
     <title>Apache Commons Secure XML Changes</title>
   </properties>
   <body>
-    <release version="1.0.0" date="2026-08-31" description="First release, requires Java 8 or above.">
+    <release version="1.0.0" date="2026-09-02" description="First release, requires Java 8 or above.">
       <!-- SPECIAL -->
       <action type="add" dev="ggregory" due-to="Piotr P. Karwasz, Gary Gregory">This is the first release of Apache Commons Secure XML.</action>      
       <!-- ADD -->

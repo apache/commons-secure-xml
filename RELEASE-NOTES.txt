@@ -46,6 +46,8 @@ Fixed Bugs
 *                  Parse a Source opted in by a caller-supplied URIResolver using a secure parser. Thanks to Piotr P. Karwasz, Gary Gregory.
 *                  Secure the document parse behind the InputSource-taking XPath evaluation entry points. Thanks to Piotr P. Karwasz, Gary Gregory.
 *                  Fall back to the standard factory lookup in the DOM, SAX and schema newDefaultInstance methods on Android. Thanks to Piotr P. Karwasz, Gary Gregory.
+*                  Delegate the XPathFactory setProperty and getProperty methods introduced in Java 18, so the implementation's properties stay reachable on a secure factory. Thanks to Piotr P. Karwasz, Gary Gregory.
+*                  Bound the content model a schema expands into, so a compact schema with a large maxOccurs cannot exhaust memory or CPU during validation. Thanks to Piotr P. Karwasz, Gary Gregory.
 
 Changes
 -------
@@ -54,6 +56,7 @@ Changes
 * COMMONSXML-4:    Define a consistent contract for denied external fetches: unresolved external references resolve to empty content on every implementation, unless the org.apache.commons.xml.secure.throwOnUnresolved system property requests rejection. Thanks to Piotr P. Karwasz, Gary Gregory.
 * COMMONSXML-3:    Reduce the shaded footprint by splitting the secure classes and resolver floors into independent entry points. Thanks to Piotr P. Karwasz, Gary Gregory.
 *                  Allow the JAXP 1.5 accessExternal properties to be modified on secured factories. Thanks to Piotr P. Karwasz, Gary Gregory.
+*                  Clean up the code and documentation after a review. Thanks to Elliotte Rusty Harold, Piotr P. Karwasz.
 
 Removed
 -------
