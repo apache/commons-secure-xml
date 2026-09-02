@@ -319,7 +319,7 @@ public final class SecureSAXParserFactory {
     /**
      * Capability-driven securing for any {@link SAXParserFactory} on the classpath.
      *
-     * <p>Rather than branching on the implementation class, this method probes what the parser supports and adapts. Because
+     * <p>Rather than branching on the implementation class, this method probes what the factory supports and adapts. Because
      * {@link SAXParserFactory} exposes only a feature API and no property API, the per-parse configuration runs on each {@link XMLReader} the factory produces,
      * funneled through the nested wrapper into {@link #secure(XMLReader)}:</p>
      * <ul>

@@ -74,7 +74,7 @@ final class SecureXMLFilter extends XMLFilterImpl implements ErrorListener {
      * Constructs a new instance.
      *
      * @param templates the templates to wrap; must not be {@code null}.
-     * @throws NullPointerException if {@code delegate} is {@code null}.
+     * @throws NullPointerException Thrown if {@code templates} is {@code null}.
      */
     SecureXMLFilter(final SecureTemplates templates) {
         this.templates = Objects.requireNonNull(templates, "templates");

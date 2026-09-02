@@ -287,7 +287,7 @@ public final class SecureTransformerFactory {
          */
         @Override
         public Transformer newTransformer(final Source source) throws TransformerConfigurationException {
-            // newTemplatesHandler() should never return null for a specification-compliant factory.
+            // newTransformer() should never return null for a specification-compliant factory.
             final Transformer transformer = delegate.newTransformer(SecureSAXParserFactory.secure(source, overrideDefaultParser()));
             return transformer == null ? null : new SecureTransformer(transformer, getURIResolver(), emptySource, overrideDefaultParser());
         }

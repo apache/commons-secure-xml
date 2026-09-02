@@ -61,8 +61,8 @@ public final class SecureXMLInputFactory {
      * <p>
      * Every resolver-valued entry point ({@link #setXMLResolver(XMLResolver)}, {@code setProperty(XMLInputFactory.RESOLVER, ...)} and the Woodstox
      * {@code com.ctc.wstx.*Resolver} keys) is routed uniformly: a caller who supplies their own {@link FallbackIgnoreXMLResolver} takes control and it is
-     * passed straight to the delegate; otherwise the caller's resolver is wrapped in a new floor installed on that hook, so the caller's opt-in cannot be
-     * removed by dropping the resolver. This matters because Woodstox does not chain resolvers: when a resolver returns {@code null},
+     * passed straight to the delegate; otherwise the caller's resolver is wrapped in a new floor installed on that hook, so the floor cannot be removed by dropping
+     * the resolver. This matters because Woodstox does not chain resolvers: when a resolver returns {@code null},
      * {@code DefaultInputResolver} falls through to fetching the systemId URL itself, so a caller-set resolver that returns {@code null} must still land behind
      * the floor. {@link #getXMLResolver()} and {@code getProperty} report the caller's resolver unwrapped.
      * </p>

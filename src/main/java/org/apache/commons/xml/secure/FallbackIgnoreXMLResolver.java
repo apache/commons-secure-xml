@@ -75,7 +75,7 @@ final class FallbackIgnoreXMLResolver implements XMLResolver {
     /**
      * Sets the delegate to consult first, replacing any previous delegate.
      * <p>
-     * A null value removes the delegate and leaves a pure ignore-all floor.
+     * A {@code null} value removes the delegate and leaves a pure ignore-all floor.
      * </p>
      *
      * @param delegate The delegate to consult first, replacing any previous delegate.
