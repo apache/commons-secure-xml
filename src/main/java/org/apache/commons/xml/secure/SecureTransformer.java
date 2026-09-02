@@ -63,7 +63,7 @@ final class SecureTransformer extends Transformer {
      * @param uriResolver      the compile-time URIResolver snapshot to seed the floor with; may be {@code null}.
      * @param emptySource      the empty-{@link Source} supplier for the produced Transformers; {@code null} for the default empty DOM document.
      * @param overrideDefaultParser whether the source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
-     * @throws NullPointerException if {@code delegate} is {@code null}.
+     * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
     SecureTransformer(final Transformer delegate, final URIResolver uriResolver, final Supplier<Source> emptySource, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");

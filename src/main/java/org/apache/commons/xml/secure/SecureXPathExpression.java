@@ -48,7 +48,7 @@ final class SecureXPathExpression implements XPathExpression {
      *
      * @param delegate         the delegate to wrap; must not be {@code null}.
      * @param overrideDefaultParser whether the {@link InputSource} document builds should use the pluggable parser lookup instead of the platform's built-in parser.
-     * @throws NullPointerException if {@code delegate} is {@code null}.
+     * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
     SecureXPathExpression(final XPathExpression delegate, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");

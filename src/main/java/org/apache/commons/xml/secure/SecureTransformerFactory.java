@@ -168,7 +168,7 @@ public final class SecureTransformerFactory {
          * Constructs a new instance.
          *
          * @param delegate the delegate to wrap; must not be {@code null}.
-         * @throws NullPointerException if {@code delegate} is {@code null}.
+         * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
          */
         private Wrapper(final SAXTransformerFactory delegate) {
             this(delegate, null);
@@ -180,7 +180,7 @@ public final class SecureTransformerFactory {
          * @param delegate    the delegate to wrap; must not be {@code null}.
          * @param emptySource the empty-{@link Source} supplier for the resolver floor, threaded onto every produced Templates/Transformer; {@code null} means the
          *                    default empty DOM.
-         * @throws NullPointerException if {@code delegate} is {@code null}.
+         * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
          */
         private Wrapper(final SAXTransformerFactory delegate, final Supplier<Source> emptySource) {
             this.delegate = Objects.requireNonNull(delegate, "delegate");
@@ -202,7 +202,7 @@ public final class SecureTransformerFactory {
          * @param associated The delegate's result; {@code null} when no PI matched.
          * @param base       The system id of the scanned document, the base the href was resolved against.
          * @return The caller resolver's source for an opted-in href, an empty source otherwise, or {@code null} when no PI matched.
-         * @throws TransformerConfigurationException if the floor rejects the href, which it does when {@value SecureException#THROW_ON_UNRESOLVED} is set.
+         * @throws TransformerConfigurationException Thrown if the floor rejects the href, which it does when {@value SecureException#THROW_ON_UNRESOLVED} is set.
          */
         private Source floorAssociated(final Source associated, final String base) throws TransformerConfigurationException {
             if (associated == null || associated.getSystemId() == null) {
@@ -358,7 +358,7 @@ public final class SecureTransformerFactory {
          *
          * @param source The source to scan for an associated stylesheet.
          * @return A {@link DOMSource} for a stream or SAX source, otherwise the result of {@link SecureSAXParserFactory#secure(Source, boolean)}.
-         * @throws TransformerConfigurationException if the source cannot be parsed.
+         * @throws TransformerConfigurationException Thrown if the source cannot be parsed.
          * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
          *                                   configuration error} or if the implementation is not available or cannot be instantiated.
          * @throws SecureException Thrown if a (non-Android) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
@@ -441,7 +441,7 @@ public final class SecureTransformerFactory {
      * Returns a new, secure {@link TransformerFactory}.
      *
      * @return A secure factory.
-     * @throws IllegalStateException if a required secure setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException Thrown if a required secure setting cannot be applied to the underlying implementation.
      */
     public static TransformerFactory newInstance() {
         return secure(TransformerFactory.newInstance());

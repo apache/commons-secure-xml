@@ -57,8 +57,8 @@ final class SecureXPath implements XPath {
      * @param source           The document to evaluate against.
      * @param overrideDefaultParser Whether the document build should use the pluggable parser lookup instead of the platform's built-in parser.
      * @return The parsed document.
-     * @throws NullPointerException     if {@code source} is {@code null}, per the {@link XPath} contract.
-     * @throws XPathExpressionException if the source cannot be parsed.
+     * @throws NullPointerException     Thrown if {@code source} is {@code null}, per the {@link XPath} contract.
+     * @throws XPathExpressionException Thrown if the source cannot be parsed.
      * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
      *                                   configuration error} or if the implementation is not available or cannot be instantiated.
      * @throws SecureException Thrown if a (non-Android) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
@@ -84,7 +84,7 @@ final class SecureXPath implements XPath {
      *
      * @param delegate         the delegate to wrap; must not be {@code null}.
      * @param overrideDefaultParser whether the {@link InputSource} document builds should use the pluggable parser lookup instead of the platform's built-in parser.
-     * @throws NullPointerException if {@code delegate} is {@code null}.
+     * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
     SecureXPath(final XPath delegate, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");

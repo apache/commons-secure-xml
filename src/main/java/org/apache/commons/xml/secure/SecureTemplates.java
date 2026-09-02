@@ -64,7 +64,7 @@ final class SecureTemplates implements Templates {
      * @param uriResolver      the compile-time URIResolver snapshot to restore onto Transformers produced from the compiled Templates; may be {@code null}.
      * @param emptySource      the empty-{@link Source} supplier for the produced Transformers.
      * @param overrideDefaultParser whether the produced Transformers' source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
-     * @throws NullPointerException if {@code delegate} is {@code null}.
+     * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
     SecureTemplates(final Templates delegate, final URIResolver uriResolver, final Supplier<Source> emptySource, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");

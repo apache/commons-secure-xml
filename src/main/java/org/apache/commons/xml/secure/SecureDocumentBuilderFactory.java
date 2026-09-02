@@ -62,7 +62,7 @@ public final class SecureDocumentBuilderFactory {
          * Constructs a new instance.
          *
          * @param delegate the delegate to wrap; must not be {@code null}.
-         * @throws NullPointerException if {@code delegate} is {@code null}.
+         * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
          */
         private Wrapper(final DocumentBuilderFactory delegate) {
             this.delegate = Objects.requireNonNull(delegate, "delegate");

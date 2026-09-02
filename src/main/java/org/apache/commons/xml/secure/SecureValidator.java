@@ -53,7 +53,7 @@ final class SecureValidator extends Validator {
      *
      * @param delegate         the delegate to wrap; must not be {@code null}.
      * @param overrideDefaultParser whether the source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
-     * @throws NullPointerException if {@code delegate} is {@code null}.
+     * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
     SecureValidator(final Validator delegate, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");

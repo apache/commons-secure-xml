@@ -50,7 +50,7 @@ class SecureXMLReader implements XMLReader {
      * Constructs a new instance.
      *
      * @param delegate the delegate to wrap; must not be {@code null}.
-     * @throws NullPointerException if {@code delegate} is {@code null}.
+     * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
     SecureXMLReader(final XMLReader delegate) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");

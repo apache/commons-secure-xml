@@ -43,7 +43,7 @@ final class SecureSchema extends Schema {
      *
      * @param delegate         the delegate to wrap; must not be {@code null}.
      * @param overrideDefaultParser whether the produced Validators' source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
-     * @throws NullPointerException if {@code delegate} is {@code null}.
+     * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
     SecureSchema(final Schema delegate, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");

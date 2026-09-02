@@ -63,7 +63,7 @@ final class SecureTemplatesHandler implements TemplatesHandler {
      * @param uriResolver the compile-time URIResolver snapshot to restore onto Transformers produced from the compiled Templates; may be {@code null}.
      * @param emptySource the empty-{@link Source} supplier for the produced Templates; may be {@code null} for the default empty DOM document.
      * @param overrideDefaultParser whether the produced Templates' source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
-     * @throws NullPointerException if {@code delegate} is {@code null}.
+     * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
     SecureTemplatesHandler(final TemplatesHandler delegate, final URIResolver uriResolver, final Supplier<Source> emptySource,
             final boolean overrideDefaultParser) {

@@ -51,7 +51,7 @@ final class SecureSAXParser extends SAXParser {
      * Constructs a new instance.
      *
      * @param delegate the delegate to wrap; must not be {@code null}.
-     * @throws NullPointerException if {@code delegate} is {@code null}.
+     * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
     SecureSAXParser(final SAXParser delegate) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");

@@ -97,7 +97,7 @@ public final class SecureSchemaFactory {
          * Constructs a new instance.
          *
          * @param delegate the delegate to wrap; must not be {@code null}.
-         * @throws NullPointerException if {@code delegate} is {@code null}.
+         * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
          */
         private Wrapper(final SchemaFactory delegate) {
             this.delegate = Objects.requireNonNull(delegate, "delegate");
@@ -285,7 +285,7 @@ public final class SecureSchemaFactory {
      * @param factory the factory to configure; never {@code null}.
      * @param feature the feature name.
      * @param value   the value to set.
-     * @throws SecureException if the implementation rejects the feature.
+     * @throws SecureException Thrown if the implementation rejects the feature.
      */
     private static void setFeature(final SchemaFactory factory, final String feature, final boolean value) {
         try {

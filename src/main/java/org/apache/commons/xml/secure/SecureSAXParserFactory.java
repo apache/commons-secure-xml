@@ -95,7 +95,7 @@ public final class SecureSAXParserFactory {
          * Constructs a new instance.
          *
          * @param delegate the delegate to wrap; must not be {@code null}.
-         * @throws NullPointerException if {@code delegate} is {@code null}.
+         * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
          */
         private Wrapper(final SAXParserFactory delegate) {
             this.delegate = Objects.requireNonNull(delegate, "delegate");
@@ -375,7 +375,7 @@ public final class SecureSAXParserFactory {
      *
      * @param reader The reader to secure; never {@code null}.
      * @return A secure reader.
-     * @throws IllegalStateException if a required secure setting cannot be applied to the underlying implementation.
+     * @throws IllegalStateException Thrown if a required secure setting cannot be applied to the underlying implementation.
      */
     static XMLReader secure(final XMLReader reader) {
         if (reader instanceof SecureXMLReader) {
