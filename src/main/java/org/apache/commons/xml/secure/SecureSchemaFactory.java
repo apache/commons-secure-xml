@@ -84,7 +84,7 @@ public final class SecureSchemaFactory {
      * every implementation, and the JDK 8 {@code SchemaFactory} has a bug whereby those properties keep blocking even when a caller's own resolver would grant
      * the access. The floor is a non-removable
      * lower bound: a caller-set {@link LSResourceResolver} is routed through it (opting a specific lookup in by returning a non-{@code null} result) rather than
-     * replacing it, so secure cannot be dropped by swapping the resolver.
+     * replacing it, so the securing (or the floor) cannot be dropped by swapping the resolver.
      * </p>
      *
      * @see org.apache.commons.xml.secure

@@ -24,7 +24,7 @@
  * <p>
  * A returned factory is not necessarily an instance of the underlying implementation. It might be (and usually is) a wrapper around it, so it cannot be cast to
  * the implementation's own class. Everything else about the implementation's behavior is preserved: features, properties, and attributes delegate to it, and
- * only the security behavior is secure.
+ * only the security behavior differs.
  * </p>
  * <p>
  * Preserved behavior includes the choice of internal parsers. Each TrAX, XPath, or schema implementation has its own way of instantiating them, and the library
