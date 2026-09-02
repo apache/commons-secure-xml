@@ -73,7 +73,7 @@ final class SecureXMLFilter extends XMLFilterImpl implements ErrorListener {
     /**
      * Constructs a new instance.
      *
-     * @param templates the delegate to wrap; must not be {@code null}.
+     * @param templates the templates to wrap; must not be {@code null}.
      * @throws NullPointerException if {@code delegate} is {@code null}.
      */
     SecureXMLFilter(final SecureTemplates templates) {
