@@ -321,7 +321,7 @@ public final class SecureSAXParserFactory {
      *
      * <p>Rather than branching on the implementation class, this method probes what the parser supports and adapts. Because
      * {@link SAXParserFactory} exposes only a feature API and no property API, the per-parse configuration runs on each {@link XMLReader} the factory produces,
-     * funnelled through the nested wrapper into {@link #secure(XMLReader)}:</p>
+     * funneled through the nested wrapper into {@link #secure(XMLReader)}:</p>
      * <ul>
      *     <li><strong>Android</strong> (Harmony / Expat): {@link XMLConstants#FEATURE_SECURE_PROCESSING FSP} and the JAXP 1.5 {@code ACCESS_EXTERNAL_*} properties
      *         are not recognized, and libexpat enforces its own Billion Laughs check, so neither is applied. Two fixups are still needed: an ignore-all resolver
