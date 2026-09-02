@@ -49,8 +49,8 @@ class SecureXMLReader implements XMLReader {
     /**
      * Constructs a new instance.
      *
-     * @param delegate the delegate to wrap; must not be {@code null}.
-     * @throws NullPointerException if {@code delegate} is {@code null}.
+     * @param delegate the delegate to wrap; must not be {@code null}
+     * @throws NullPointerException if {@code delegate} is {@code null}
      */
     SecureXMLReader(final XMLReader delegate) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
@@ -66,7 +66,7 @@ class SecureXMLReader implements XMLReader {
     /**
      * Gets the wrapped reader, so tests can observe which parser implementation a rewrite picked.
      *
-     * @return The wrapped reader.
+     * @return the wrapped reader
      */
     XMLReader getDelegate() {
         return delegate;

@@ -52,7 +52,7 @@ final class FallbackIgnoreLSResourceResolver implements LSResourceResolver {
     /**
      * Constructs a new resolver that consults the given delegate and ignores whatever it does not resolve.
      *
-     * @param delegate optional caller-supplied resolver to consult first; may be {@code null}.
+     * @param delegate optional caller-supplied resolver to consult first; may be {@code null}
      */
     FallbackIgnoreLSResourceResolver(final LSResourceResolver delegate) {
         this.delegate = delegate;
@@ -61,7 +61,7 @@ final class FallbackIgnoreLSResourceResolver implements LSResourceResolver {
     /**
      * Gets the delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}.
      *
-     * @return The delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}.
+     * @return the delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}
      */
     LSResourceResolver getDelegate() {
         return delegate;
@@ -91,7 +91,7 @@ final class FallbackIgnoreLSResourceResolver implements LSResourceResolver {
     /**
      * Sets the delegate to consult first, replacing any previous delegate. A {@code null} value removes the delegate and leaves a pure ignore-all floor.
      *
-     * @param delegate The delegate to consult first, or {@code null} for a pure ignore-all floor.
+     * @param delegate the delegate to consult first, or {@code null} for a pure ignore-all floor
      */
     void setDelegate(final LSResourceResolver delegate) {
         this.delegate = delegate;

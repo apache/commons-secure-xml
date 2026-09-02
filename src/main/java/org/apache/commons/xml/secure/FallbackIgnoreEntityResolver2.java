@@ -55,9 +55,9 @@ final class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
     /**
      * Resolves {@code systemId} against {@code baseURI}.
      *
-     * @param baseURI  The absolute base URI to resolve against, or {@code null} if none is available.
-     * @param systemId The system identifier, possibly relative to {@code baseURI}.
-     * @return The absolutized system identifier, or {@code systemId} unchanged when it cannot or need not be resolved.
+     * @param baseURI  the absolute base URI to resolve against, or {@code null} if none is available
+     * @param systemId the system identifier, possibly relative to {@code baseURI}
+     * @return the absolutized system identifier, or {@code systemId} unchanged when it cannot or need not be resolved
      */
     private static String absolutize(final String baseURI, final String systemId) {
         if (systemId == null || baseURI == null) {
@@ -79,7 +79,7 @@ final class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
     /**
      * Constructs a new ignore-all floor with an optional caller-supplied resolver.
      *
-     * @param delegate The caller-supplied resolver, or {@code null} for a pure ignore-all floor.
+     * @param delegate the caller-supplied resolver, or {@code null} for a pure ignore-all floor
      */
     FallbackIgnoreEntityResolver2(final EntityResolver delegate) {
         this.delegate = delegate;
@@ -88,7 +88,7 @@ final class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
     /**
      * Gets the delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}.
      *
-     * @return The delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}.
+     * @return the delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}
      */
     EntityResolver getDelegate() {
         return delegate;
@@ -105,13 +105,13 @@ final class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
      * fetched nor leaked and the parse continues with no replacement text. The returned source echoes the requested identifiers (with {@code systemId}
      * absolutized): the parser reads the empty byte stream, but Xerces still derives the entity's base URI from the system id and fails on a {@code null} one.
      *
-     * @param name     The entity name, or {@code null} on the 2-arg resolution path.
-     * @param publicId The public identifier, or {@code null} if none.
-     * @param baseURI  The base URI for relative resolution, or {@code null}.
-     * @param systemId The system identifier of the unresolved entity.
-     * @return an empty {@link InputSource} carrying the requested identifiers.
-     * @throws SAXException when {@value SecureException#THROW_ON_UNRESOLVED} is set: unresolved references are rejected instead of resolved to empty.
-     * @throws IOException  never by the default implementation.
+     * @param name     the entity name, or {@code null} on the 2-arg resolution path
+     * @param publicId the public identifier, or {@code null} if none
+     * @param baseURI  the base URI for relative resolution, or {@code null}
+     * @param systemId the system identifier of the unresolved entity
+     * @return an empty {@link InputSource} carrying the requested identifiers
+     * @throws IOException  never by the default implementation
+     * @throws SAXException when {@value SecureException#THROW_ON_UNRESOLVED} is set: unresolved references are rejected instead of resolved to empty
      */
     private InputSource onUnresolved(final String name, final String publicId, final String baseURI, final String systemId) throws SAXException {
         if (SecureException.throwOnUnresolved()) {
@@ -148,7 +148,7 @@ final class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
     /**
      * Replaces the caller resolver consulted ahead of the floor; lets a single floor instance back successive {@code setEntityResolver} calls.
      *
-     * @param delegate The caller-supplied resolver, or {@code null} for a pure ignore-all floor.
+     * @param delegate the caller-supplied resolver, or {@code null} for a pure ignore-all floor
      */
     void setDelegate(final EntityResolver delegate) {
         this.delegate = delegate;

@@ -93,8 +93,8 @@ public final class SecureXMLInputFactory {
         /**
          * Constructs a new instance.
          *
-         * @param delegate the delegate to wrap; must not be {@code null}.
-         * @throws NullPointerException if {@code delegate} is {@code null}.
+         * @param delegate the delegate to wrap; must not be {@code null}
+         * @throws NullPointerException if {@code delegate} is {@code null}
          */
         private Wrapper(final XMLInputFactory delegate) {
             this.delegate = Objects.requireNonNull(delegate, "delegate");
@@ -223,8 +223,8 @@ public final class SecureXMLInputFactory {
         /**
          * Routes a caller-set resolver for the property {@code name} behind the floor currently installed on that hook.
          *
-         * @param name     The resolver-valued property being set.
-         * @param resolver The caller's resolver, or their own {@link FallbackIgnoreXMLResolver} to take control.
+         * @param name     the resolver-valued property being set
+         * @param resolver the caller's resolver, or their own {@link FallbackIgnoreXMLResolver} to take control
          */
         private void setResolverProperty(final String name, final XMLResolver resolver) {
             if (resolver instanceof FallbackIgnoreXMLResolver) {
@@ -254,7 +254,9 @@ public final class SecureXMLInputFactory {
     /** Woodstox property: resolver consulted for undeclared entity references. */
     static final String WSTX_UNDECLARED_ENTITY_RESOLVER = "com.ctc.wstx.undeclaredEntityResolver";
 
-    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultFactory()}. */
+    /**
+     * Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultFactory()}.
+     */
     private static final String JDK_XML_INPUT_FACTORY = "com.sun.xml.internal.stream.XMLInputFactoryImpl";
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(XMLInputFactory.class, "newDefaultFactory");
@@ -266,10 +268,10 @@ public final class SecureXMLInputFactory {
      * implementation directly on Java 8.
      * </p>
      *
-     * @return A secure factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultFactory()} nor the JDK's built-in implementation
-     *                                   (for example Android).
+     * @return a secure factory
+     * @throws FactoryConfigurationError thrown if the running platform provides neither {@code newDefaultFactory()} nor the JDK's built-in implementation
+     *                                   (for example Android)
+     * @throws IllegalStateException     thrown if a required secure setting cannot be applied to the underlying implementation
      */
     public static XMLInputFactory newDefaultFactory() {
         if (MH_newDefaultInstance != null) {
@@ -287,9 +289,9 @@ public final class SecureXMLInputFactory {
     /**
      * Returns a new, secure {@link XMLInputFactory}, like {@link XMLInputFactory#newFactory()}.
      *
-     * @return A secure factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown if an instance of this factory cannot be loaded.
+     * @return a secure factory
+     * @throws FactoryConfigurationError thrown if an instance of this factory cannot be loaded
+     * @throws IllegalStateException     thrown if a required secure setting cannot be applied to the underlying implementation
      */
     public static XMLInputFactory newFactory() {
         // XMLInputFactory.newInstance, not newFactory: the same specified lookup, but Android's StAX API predates newFactory.
@@ -299,12 +301,12 @@ public final class SecureXMLInputFactory {
     /**
      * Returns a new, secure {@link XMLInputFactory} resolved from the given factory id.
      *
-     * @param factoryId   The name of the factory to find; a system property or service id to look up, not the class name of the implementation.
-     * @param classLoader The class loader used in the lookup; {@code null} means the current thread's context class loader.
-     * @return A secure factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown in case of a service configuration error or if the implementation is not available or cannot be instantiated.
-     * @throws NullPointerException      Thrown if {@code factoryId} is {@code null}.
+     * @param factoryId   the name of the factory to find; a system property or service id to look up, not the class name of the implementation
+     * @param classLoader the class loader used in the lookup; {@code null} means the current thread's context class loader
+     * @return a secure factory
+     * @throws FactoryConfigurationError thrown in case of a service configuration error or if the implementation is not available or cannot be instantiated
+     * @throws IllegalStateException     thrown if a required secure setting cannot be applied to the underlying implementation
+     * @throws NullPointerException      thrown if {@code factoryId} is {@code null}
      */
     public static XMLInputFactory newFactory(final String factoryId, final ClassLoader classLoader) {
         return secure(XMLInputFactory.newFactory(factoryId, classLoader));
@@ -313,9 +315,9 @@ public final class SecureXMLInputFactory {
     /**
      * Returns a new, secure {@link XMLInputFactory}.
      *
-     * @return A secure factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown if an instance of this factory cannot be loaded.
+     * @return a secure factory
+     * @throws FactoryConfigurationError thrown if an instance of this factory cannot be loaded
+     * @throws IllegalStateException     thrown if a required secure setting cannot be applied to the underlying implementation
      */
     public static XMLInputFactory newInstance() {
         return secure(XMLInputFactory.newInstance());
@@ -328,8 +330,8 @@ public final class SecureXMLInputFactory {
      * every entity-resolution hook, leaving the standard {@code SUPPORT_DTD} / {@code IS_SUPPORTING_EXTERNAL_ENTITIES} defaults untouched; see the wrapper's
      * Javadoc for the per-implementation hook routing.</p>
      *
-     * @param factory the factory to secure; never {@code null}.
-     * @return a secure factory.
+     * @param factory the factory to secure; never {@code null}
+     * @return a secure factory
      */
     static XMLInputFactory secure(final XMLInputFactory factory) {
         // The wrapper installs the non-removable ignore-all resolver floor that resolves every external DTD and entity to empty content.

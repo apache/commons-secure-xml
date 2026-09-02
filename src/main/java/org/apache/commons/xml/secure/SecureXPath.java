@@ -54,14 +54,14 @@ final class SecureXPath implements XPath {
      * Parses the source through a secure, namespace-aware {@link javax.xml.parsers.DocumentBuilder}, mirroring the namespace awareness of the parser the
      * engine would have provisioned.
      *
-     * @param source           The document to evaluate against.
-     * @param overrideDefaultParser Whether the document build should use the pluggable parser lookup instead of the platform's built-in parser.
-     * @return The parsed document.
-     * @throws NullPointerException     if {@code source} is {@code null}, per the {@link XPath} contract.
-     * @throws XPathExpressionException if the source cannot be parsed.
-     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
-     * @throws SecureException Thrown if a (non-Android) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
+     * @param source           the document to evaluate against
+     * @param overrideDefaultParser whether the document build should use the pluggable parser lookup instead of the platform's built-in parser
+     * @return the parsed document
+     * @throws FactoryConfigurationError thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated
+     * @throws NullPointerException     if {@code source} is {@code null}, per the {@link XPath} contract
+     * @throws SecureException thrown if a (non-Android) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}
+     * @throws XPathExpressionException if the source cannot be parsed
      */
     static Document parse(final InputSource source, final boolean overrideDefaultParser) throws XPathExpressionException {
         Objects.requireNonNull(source, "source");
@@ -82,9 +82,9 @@ final class SecureXPath implements XPath {
     /**
      * Constructs a new instance.
      *
-     * @param delegate         the delegate to wrap; must not be {@code null}.
-     * @param overrideDefaultParser whether the {@link InputSource} document builds should use the pluggable parser lookup instead of the platform's built-in parser.
-     * @throws NullPointerException if {@code delegate} is {@code null}.
+     * @param delegate         the delegate to wrap; must not be {@code null}
+     * @param overrideDefaultParser whether the {@link InputSource} document builds should use the pluggable parser lookup instead of the platform's built-in parser
+     * @throws NullPointerException if {@code delegate} is {@code null}
      */
     SecureXPath(final XPath delegate, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
@@ -100,8 +100,8 @@ final class SecureXPath implements XPath {
     /**
      * {@inheritDoc}
      *
-     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     * @throws FactoryConfigurationError thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated
      */
     @Override
     public String evaluate(final String expression, final InputSource source) throws XPathExpressionException {
@@ -111,8 +111,8 @@ final class SecureXPath implements XPath {
     /**
      * {@inheritDoc}
      *
-     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     * @throws FactoryConfigurationError thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated
      */
     @Override
     public Object evaluate(final String expression, final InputSource source, final QName returnType) throws XPathExpressionException {

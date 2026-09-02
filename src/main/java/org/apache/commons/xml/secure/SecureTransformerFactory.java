@@ -123,8 +123,8 @@ public final class SecureTransformerFactory {
         /**
          * Whether the delegate is Apache Xalan (either its interpretive or its XSLTC factory), whose {@code getAssociatedStylesheet} ignores a SAXSource reader.
          *
-         * @param factory The delegate factory.
-         * @return Whether the delegate is an {@code org.apache.xalan.} implementation.
+         * @param factory the delegate factory
+         * @return whether the delegate is an {@code org.apache.xalan.} implementation
          */
         private static boolean isXalan(final SAXTransformerFactory factory) {
             return factory.getClass().getName().startsWith("org.apache.xalan.");
@@ -135,8 +135,8 @@ public final class SecureTransformerFactory {
          * {@code TransformerFactory.getFeature} cannot signal an unrecognized name (it returns {@code false}), while every implementation rejects a
          * {@code setFeature} for a name it does not support (Xalan with {@link TransformerConfigurationException}, Saxon with its own unchecked exception).
          *
-         * @param factory The delegate factory.
-         * @return Whether the delegate recognizes the feature.
+         * @param factory the delegate factory
+         * @return whether the delegate recognizes the feature
          */
         private static boolean probeOverrideDefaultParser(final SAXTransformerFactory factory) {
             try {
@@ -161,14 +161,16 @@ public final class SecureTransformerFactory {
 
         private final FallbackIgnoreURIResolver floor;
 
-        /** Whether the delegate recognizes {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER}; its value is read per created product, like the JDK. */
+        /**
+         * Whether the delegate recognizes {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER}; its value is read per created product, like the JDK.
+         */
         private final boolean supportsOverrideDefaultParser;
 
         /**
          * Constructs a new instance.
          *
-         * @param delegate the delegate to wrap; must not be {@code null}.
-         * @throws NullPointerException if {@code delegate} is {@code null}.
+         * @param delegate the delegate to wrap; must not be {@code null}
+         * @throws NullPointerException if {@code delegate} is {@code null}
          */
         private Wrapper(final SAXTransformerFactory delegate) {
             this(delegate, null);
@@ -177,10 +179,10 @@ public final class SecureTransformerFactory {
         /**
          * Constructs a new instance.
          *
-         * @param delegate    the delegate to wrap; must not be {@code null}.
+         * @param delegate    the delegate to wrap; must not be {@code null}
          * @param emptySource the empty-{@link Source} supplier for the resolver floor, threaded onto every produced Templates/Transformer; {@code null} means the
-         *                    default empty DOM.
-         * @throws NullPointerException if {@code delegate} is {@code null}.
+         *                    default empty DOM
+         * @throws NullPointerException if {@code delegate} is {@code null}
          */
         private Wrapper(final SAXTransformerFactory delegate, final Supplier<Source> emptySource) {
             this.delegate = Objects.requireNonNull(delegate, "delegate");
@@ -199,10 +201,10 @@ public final class SecureTransformerFactory {
          * {@link SAXSource} naming the absolutized URI; compiling it, the one documented use of this method, would then fetch it. Saxon already floors the href
          * itself and returns an empty source, so flooring here is also what makes the engines agree.</p>
          *
-         * @param associated The delegate's result; {@code null} when no PI matched.
-         * @param base       The system id of the scanned document, the base the href was resolved against.
-         * @return The caller resolver's source for an opted-in href, an empty source otherwise, or {@code null} when no PI matched.
-         * @throws TransformerConfigurationException if the floor rejects the href, which it does when {@value SecureException#THROW_ON_UNRESOLVED} is set.
+         * @param associated the delegate's result; {@code null} when no PI matched
+         * @param base       the system id of the scanned document, the base the href was resolved against
+         * @return the caller resolver's source for an opted-in href, an empty source otherwise, or {@code null} when no PI matched
+         * @throws TransformerConfigurationException if the floor rejects the href, which it does when {@value SecureException#THROW_ON_UNRESOLVED} is set
          */
         private Source floorAssociated(final Source associated, final String base) throws TransformerConfigurationException {
             if (associated == null || associated.getSystemId() == null) {
@@ -219,8 +221,8 @@ public final class SecureTransformerFactory {
         /**
          * {@inheritDoc}
          *
-         * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-         *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+         * @throws FactoryConfigurationError thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+         *                                   configuration error} or if the implementation is not available or cannot be instantiated
          */
         @Override
         public Source getAssociatedStylesheet(final Source source, final String media, final String title, final String charset)
@@ -254,8 +256,8 @@ public final class SecureTransformerFactory {
         /**
          * {@inheritDoc}
          *
-         * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-         *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+         * @throws FactoryConfigurationError thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+         *                                   configuration error} or if the implementation is not available or cannot be instantiated
          */
         @Override
         public Templates newTemplates(final Source source) throws TransformerConfigurationException {
@@ -282,8 +284,8 @@ public final class SecureTransformerFactory {
         /**
          * {@inheritDoc}
          *
-         * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-         *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+         * @throws FactoryConfigurationError thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+         *                                   configuration error} or if the implementation is not available or cannot be instantiated
          */
         @Override
         public Transformer newTransformer(final Source source) throws TransformerConfigurationException {
@@ -300,8 +302,8 @@ public final class SecureTransformerFactory {
         /**
          * {@inheritDoc}
          *
-         * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-         *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+         * @throws FactoryConfigurationError thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+         *                                   configuration error} or if the implementation is not available or cannot be instantiated
          */
         @Override
         public TransformerHandler newTransformerHandler(final Source source) throws TransformerConfigurationException {
@@ -317,8 +319,8 @@ public final class SecureTransformerFactory {
         /**
          * {@inheritDoc}
          *
-         * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-         *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+         * @throws FactoryConfigurationError thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+         *                                   configuration error} or if the implementation is not available or cannot be instantiated
          */
         @Override
         public XMLFilter newXMLFilter(final Source source) throws TransformerConfigurationException {
@@ -338,7 +340,7 @@ public final class SecureTransformerFactory {
          * <p>The JDK implementation of {@link TransformerFactory} uses the JDK parsers while {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} is unset
          * or {@code false}.</p>
          *
-         * @return {@code true} if parsers should be created via {@code newInstance()}.
+         * @return {@code true} if parsers should be created via {@code newInstance()}
          */
         private boolean overrideDefaultParser() {
             return !supportsOverrideDefaultParser || delegate.getFeature(SecureSAXParserFactory.OVERRIDE_DEFAULT_PARSER);
@@ -356,12 +358,12 @@ public final class SecureTransformerFactory {
          * <p>A {@link SAXSource} carrying the caller's own reader is pre-parsed here too, unlike everywhere else in this class: an engine that reaches this
          * method drops that reader anyway, so honoring it is not among the options — the choice is only between this parse and the engine's unsecured one.</p>
          *
-         * @param source The source to scan for an associated stylesheet.
-         * @return A {@link DOMSource} for a stream or SAX source, otherwise the result of {@link SecureSAXParserFactory#secure(Source, boolean)}.
-         * @throws TransformerConfigurationException if the source cannot be parsed.
-         * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-         *                                   configuration error} or if the implementation is not available or cannot be instantiated.
-         * @throws SecureException Thrown if a (non-Android) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
+         * @param source the source to scan for an associated stylesheet
+         * @return a {@link DOMSource} for a stream or SAX source, otherwise the result of {@link SecureSAXParserFactory#secure(Source, boolean)}
+         * @throws FactoryConfigurationError thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+         *                                   configuration error} or if the implementation is not available or cannot be instantiated
+         * @throws SecureException thrown if a (non-Android) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}
+         * @throws TransformerConfigurationException if the source cannot be parsed
          */
         private Source secureSourceToDom(final Source source) throws TransformerConfigurationException {
             if (source instanceof StreamSource || source instanceof SAXSource) {
@@ -401,7 +403,9 @@ public final class SecureTransformerFactory {
         }
     }
 
-    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
+    /**
+     * Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}.
+     */
     private static final String JDK_TRANSFORMER_FACTORY = "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl";
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(TransformerFactory.class, "newDefaultInstance");
@@ -423,10 +427,10 @@ public final class SecureTransformerFactory {
      * implementation directly on Java 8.
      * </p>
      *
-     * @return A secure factory.
-     * @throws IllegalStateException                Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws TransformerFactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in
-     *                                                implementation (for example Android).
+     * @return a secure factory
+     * @throws IllegalStateException                thrown if a required secure setting cannot be applied to the underlying implementation
+     * @throws TransformerFactoryConfigurationError thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in
+     *                                                implementation (for example Android)
      */
     public static TransformerFactory newDefaultInstance() {
         if (MH_newDefaultInstance != null) {
@@ -440,8 +444,8 @@ public final class SecureTransformerFactory {
     /**
      * Returns a new, secure {@link TransformerFactory}.
      *
-     * @return A secure factory.
-     * @throws IllegalStateException if a required secure setting cannot be applied to the underlying implementation.
+     * @return a secure factory
+     * @throws IllegalStateException if a required secure setting cannot be applied to the underlying implementation
      */
     public static TransformerFactory newInstance() {
         return secure(TransformerFactory.newInstance());
@@ -450,11 +454,11 @@ public final class SecureTransformerFactory {
     /**
      * Returns a new, secure {@link TransformerFactory} of the given implementation class.
      *
-     * @param factoryClassName The fully qualified class name of the {@link TransformerFactory} implementation.
-     * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
-     * @return A secure factory.
-     * @throws IllegalStateException                Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws TransformerFactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
+     * @param factoryClassName the fully qualified class name of the {@link TransformerFactory} implementation
+     * @param classLoader      the class loader used to load the factory class; {@code null} means the current thread's context class loader
+     * @return a secure factory
+     * @throws IllegalStateException                thrown if a required secure setting cannot be applied to the underlying implementation
+     * @throws TransformerFactoryConfigurationError thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated
      */
     public static TransformerFactory newInstance(final String factoryClassName, final ClassLoader classLoader) {
         return secure(TransformerFactory.newInstance(factoryClassName, classLoader));
@@ -482,8 +486,8 @@ public final class SecureTransformerFactory {
      *         {@link org.apache.commons.xml.secure}-secured reader instead.</li>
      * </ul>
      *
-     * @param factory the factory to secure; never {@code null}.
-     * @return a secure factory.
+     * @param factory the factory to secure; never {@code null}
+     * @return a secure factory
      */
     static TransformerFactory secure(final TransformerFactory factory) {
         // Required: enables secure processing (XSLTC runtime limits; Xalan's extension-function block).

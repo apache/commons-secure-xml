@@ -60,11 +60,11 @@ final class SecureTemplates implements Templates {
     /**
      * Constructs a new instance.
      *
-     * @param delegate         the delegate to wrap; must not be {@code null}.
-     * @param uriResolver      the compile-time URIResolver snapshot to restore onto Transformers produced from the compiled Templates; may be {@code null}.
-     * @param emptySource      the empty-{@link Source} supplier for the produced Transformers.
-     * @param overrideDefaultParser whether the produced Transformers' source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
-     * @throws NullPointerException if {@code delegate} is {@code null}.
+     * @param delegate         the delegate to wrap; must not be {@code null}
+     * @param uriResolver      the compile-time URIResolver snapshot to restore onto Transformers produced from the compiled Templates; may be {@code null}
+     * @param emptySource      the empty-{@link Source} supplier for the produced Transformers
+     * @param overrideDefaultParser whether the produced Transformers' source rewrites should use the pluggable parser lookup instead of the platform's built-in parser
+     * @throws NullPointerException if {@code delegate} is {@code null}
      */
     SecureTemplates(final Templates delegate, final URIResolver uriResolver, final Supplier<Source> emptySource, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
@@ -76,7 +76,7 @@ final class SecureTemplates implements Templates {
     /**
      * Gets the wrapped implementation Templates, for factory methods whose implementations cast {@code newTransformer()} to their own type.
      *
-     * @return the wrapped {@link Templates} implementation, never {@code null}.
+     * @return the wrapped {@link Templates} implementation, never {@code null}
      */
     Templates getDelegate() {
         return delegate;

@@ -52,8 +52,8 @@ final class SecureXMLFilter extends XMLFilterImpl implements ErrorListener {
     /**
      * Bridges a TrAX report to the SAX callback shape.
      *
-     * @param e the reported exception.
-     * @return The original {@link SAXParseException} where one is the cause, otherwise a synthetic one carrying the locator.
+     * @param e the reported exception
+     * @return the original {@link SAXParseException} where one is the cause, otherwise a synthetic one carrying the locator
      */
     private static SAXParseException toSAXParseException(final TransformerException e) {
         final Throwable cause = e.getCause();
@@ -73,8 +73,8 @@ final class SecureXMLFilter extends XMLFilterImpl implements ErrorListener {
     /**
      * Constructs a new instance.
      *
-     * @param templates the templates to wrap; must not be {@code null}.
-     * @throws NullPointerException if {@code delegate} is {@code null}.
+     * @param templates the templates to wrap; must not be {@code null}
+     * @throws NullPointerException if {@code delegate} is {@code null}
      */
     SecureXMLFilter(final SecureTemplates templates) {
         this.templates = Objects.requireNonNull(templates, "templates");
@@ -110,8 +110,8 @@ final class SecureXMLFilter extends XMLFilterImpl implements ErrorListener {
     /**
      * {@inheritDoc}
      *
-     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     * @throws FactoryConfigurationError thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated
      */
     @Override
     public void parse(final InputSource input) throws SAXException, IOException {
@@ -151,7 +151,9 @@ final class SecureXMLFilter extends XMLFilterImpl implements ErrorListener {
         }
     }
 
-    /** Forwards a transformation warning to the caller-set {@link org.xml.sax.ErrorHandler}; the transformation continues unless that handler throws. */
+    /**
+     * Forwards a transformation warning to the caller-set {@link org.xml.sax.ErrorHandler}; the transformation continues unless that handler throws.
+     */
     @Override
     public void warning(final TransformerException e) throws TransformerException {
         try {

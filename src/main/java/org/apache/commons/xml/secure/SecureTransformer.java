@@ -59,11 +59,11 @@ final class SecureTransformer extends Transformer {
     /**
      * Constructs a new instance.
      *
-     * @param delegate         the delegate to wrap; must not be {@code null}.
-     * @param uriResolver      the compile-time URIResolver snapshot to seed the floor with; may be {@code null}.
-     * @param emptySource      the empty-{@link Source} supplier for the produced Transformers; {@code null} for the default empty DOM document.
-     * @param overrideDefaultParser whether the source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
-     * @throws NullPointerException if {@code delegate} is {@code null}.
+     * @param delegate         the delegate to wrap; must not be {@code null}
+     * @param uriResolver      the compile-time URIResolver snapshot to seed the floor with; may be {@code null}
+     * @param emptySource      the empty-{@link Source} supplier for the produced Transformers; {@code null} for the default empty DOM document
+     * @param overrideDefaultParser whether the source rewrites should use the pluggable parser lookup instead of the platform's built-in parser
+     * @throws NullPointerException if {@code delegate} is {@code null}
      */
     SecureTransformer(final Transformer delegate, final URIResolver uriResolver, final Supplier<Source> emptySource, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
@@ -138,9 +138,9 @@ final class SecureTransformer extends Transformer {
     /**
      * {@inheritDoc}
      *
-     * @throws IllegalStateException     Thrown if the underlying implementation cannot provide a secure reader.
-     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or
-     *                                   if the implementation is not available or cannot be instantiated.
+     * @throws FactoryConfigurationError thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or
+     *                                   if the implementation is not available or cannot be instantiated
+     * @throws IllegalStateException     thrown if the underlying implementation cannot provide a secure reader
      */
     @Override
     public void transform(final Source xmlSource, final Result outputTarget) throws TransformerException {

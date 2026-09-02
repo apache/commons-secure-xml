@@ -91,7 +91,9 @@ final class SaxonProvider {
 
         private static final String JDK_DEFAULT_PARSER = "#DEFAULT";
 
-        /** Collection-level ignore: {@code fn:collection()} and {@code fn:uri-collection()} resolve to an empty collection instead of fetching. */
+        /**
+         * Collection-level ignore: {@code fn:collection()} and {@code fn:uri-collection()} resolve to an empty collection instead of fetching.
+         */
         private static final CollectionFinder EMPTY_COLLECTION_FINDER = (context, collectionURI) -> {
             if (SecureException.throwOnUnresolved()) {
                 throw new XPathException(SecureException.forbidden("collection", null, null, collectionURI, null));
@@ -144,7 +146,7 @@ final class SaxonProvider {
     /**
      * The empty-{@link Source} shape Saxon's consumers expect, for the {@link FallbackIgnoreURIResolver} floor the TrAX wrapper installs.
      *
-     * @return a supplier for Saxon's empty {@link Source}.
+     * @return a supplier for Saxon's empty {@link Source}
      */
     static Supplier<Source> emptySourceSupplier() {
         return SaxonProviderConfigurer.emptySourceSupplier();
@@ -154,8 +156,8 @@ final class SaxonProvider {
      * Tests whether the factory class is Saxon's, by package prefix, so public subclasses such as {@code net.sf.saxon.BasicTransformerFactory} route to the
      * same locked-down {@link Configuration} as the factory registered for JAXP lookup.
      *
-     * @param factoryClass The factory implementation class.
-     * @return Whether the class lives in Saxon's open-source or commercial packages.
+     * @param factoryClass the factory implementation class
+     * @return whether the class lives in Saxon's open-source or commercial packages
      */
     static boolean isSaxon(final Class<?> factoryClass) {
         final String name = factoryClass.getName();
