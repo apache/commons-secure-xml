@@ -86,8 +86,6 @@ public final class SecureSAXParserFactory {
      * has to run on each {@link XMLReader} the factory produces. This wrapper returns a {@link SecureSAXParser}, which applies that securing lazily to both the
      * SAX 2 {@link XMLReader} and the SAX 1 {@link org.xml.sax.Parser} it exposes.
      * </p>
-     *
-     * @see org.apache.commons.xml.secure
      */
     private static final class Wrapper extends SAXParserFactory {
 
