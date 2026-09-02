@@ -16,7 +16,7 @@
  */
 
 /**
- * <a href="https://commons.apache.org/xml">Apache Commons Secure XML</a> provides secure-by-default JAXP factory creation for Java. A single method call
+ * <a href="https://commons.apache.org/secure-xml">Apache Commons Secure XML</a> provides secure-by-default JAXP factory creation for Java. A single method call
  * returns a secure JAXP factory that can be used to <em>safely</em> parse XML files.
  * <p>
  * Every method returns <em>new, secure</em> factory instances. No caching or pooling is performed; callers on a hot path are responsible for their own caching.
