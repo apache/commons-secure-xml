@@ -61,9 +61,9 @@ final class FallbackIgnoreURIResolver implements URIResolver {
      * received cannot surface in another resolution.
      * </p>
      *
-     * @param factory the factory to create the document builder with.
-     * @return a new empty document.
-     * @throws IllegalStateException Thrown if the factory cannot supply a {@link javax.xml.parsers.DocumentBuilder} satisfying its configuration.
+     * @param factory the factory to create the document builder with
+     * @return a new empty document
+     * @throws IllegalStateException thrown if the factory cannot supply a {@link javax.xml.parsers.DocumentBuilder} satisfying its configuration
      */
     private static Document newEmptyDocument(final DocumentBuilderFactory factory) {
         try {
@@ -89,9 +89,9 @@ final class FallbackIgnoreURIResolver implements URIResolver {
     /**
      * Constructs a new resolver.
      *
-     * @param delegate         the resolver to delegate resolution to; may be {@code null}.
-     * @param emptySource      the empty-{@link Source} supplier for the ignore outcome, or {@code null} for the default empty DOM document.
-     * @param overrideDefaultParser whether the opted-in rewrite should use the pluggable parser lookup instead of the platform's built-in parser, read at each resolution.
+     * @param delegate         the resolver to delegate resolution to; may be {@code null}
+     * @param emptySource      the empty-{@link Source} supplier for the ignore outcome, or {@code null} for the default empty DOM document
+     * @param overrideDefaultParser whether the opted-in rewrite should use the pluggable parser lookup instead of the platform's built-in parser, read at each resolution
      */
     FallbackIgnoreURIResolver(final URIResolver delegate, final Supplier<Source> emptySource, final BooleanSupplier overrideDefaultParser) {
         this.delegate = delegate;
@@ -103,7 +103,7 @@ final class FallbackIgnoreURIResolver implements URIResolver {
     /**
      * Gets the delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}.
      *
-     * @return The delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}.
+     * @return the delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}
      */
     URIResolver getDelegate() {
         return delegate;
@@ -112,8 +112,8 @@ final class FallbackIgnoreURIResolver implements URIResolver {
     /**
      * {@inheritDoc}
      *
-     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     * @throws FactoryConfigurationError thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated
      */
     @Override
     public Source resolve(final String href, final String base) throws TransformerException {
@@ -131,7 +131,7 @@ final class FallbackIgnoreURIResolver implements URIResolver {
     /**
      * Sets the delegate to consult first, replacing any previous delegate. A {@code null} value removes the delegate and leaves a pure ignore-all floor.
      *
-     * @param delegate The delegate to consult first, or {@code null} for a pure ignore-all floor.
+     * @param delegate the delegate to consult first, or {@code null} for a pure ignore-all floor
      */
     void setDelegate(final URIResolver delegate) {
         this.delegate = delegate;

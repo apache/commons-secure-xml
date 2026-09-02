@@ -46,9 +46,9 @@ final class SecureXPathExpression implements XPathExpression {
     /**
      * Constructs a new instance.
      *
-     * @param delegate         the delegate to wrap; must not be {@code null}.
-     * @param overrideDefaultParser whether the {@link InputSource} document builds should use the pluggable parser lookup instead of the platform's built-in parser.
-     * @throws NullPointerException if {@code delegate} is {@code null}.
+     * @param delegate         the delegate to wrap; must not be {@code null}
+     * @param overrideDefaultParser whether the {@link InputSource} document builds should use the pluggable parser lookup instead of the platform's built-in parser
+     * @throws NullPointerException if {@code delegate} is {@code null}
      */
     SecureXPathExpression(final XPathExpression delegate, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
@@ -58,8 +58,8 @@ final class SecureXPathExpression implements XPathExpression {
     /**
      * {@inheritDoc}
      *
-     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     * @throws FactoryConfigurationError thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated
      */
     @Override
     public String evaluate(final InputSource source) throws XPathExpressionException {
@@ -69,8 +69,8 @@ final class SecureXPathExpression implements XPathExpression {
     /**
      * {@inheritDoc}
      *
-     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-     *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+     * @throws FactoryConfigurationError thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+     *                                   configuration error} or if the implementation is not available or cannot be instantiated
      */
     @Override
     public Object evaluate(final InputSource source, final QName returnType) throws XPathExpressionException {

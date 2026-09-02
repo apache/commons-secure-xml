@@ -46,8 +46,8 @@ final class SecureDocumentBuilder extends DocumentBuilder {
     /**
      * Constructs a new instance.
      *
-     * @param delegate the delegate to wrap; must not be {@code null}.
-     * @throws NullPointerException if {@code delegate} is {@code null}.
+     * @param delegate the delegate to wrap; must not be {@code null}
+     * @throws NullPointerException if {@code delegate} is {@code null}
      */
     SecureDocumentBuilder(final DocumentBuilder delegate) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");

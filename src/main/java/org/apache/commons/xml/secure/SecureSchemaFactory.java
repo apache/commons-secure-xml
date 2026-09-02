@@ -96,8 +96,8 @@ public final class SecureSchemaFactory {
         /**
          * Constructs a new instance.
          *
-         * @param delegate the delegate to wrap; must not be {@code null}.
-         * @throws NullPointerException if {@code delegate} is {@code null}.
+         * @param delegate the delegate to wrap; must not be {@code null}
+         * @throws NullPointerException if {@code delegate} is {@code null}
          */
         private Wrapper(final SchemaFactory delegate) {
             this.delegate = Objects.requireNonNull(delegate, "delegate");
@@ -140,8 +140,8 @@ public final class SecureSchemaFactory {
         /**
          * {@inheritDoc}
          *
-         * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-         *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+         * @throws FactoryConfigurationError thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+         *                                   configuration error} or if the implementation is not available or cannot be instantiated
          */
         @Override
         public Schema newSchema(final Source[] schemas) throws SAXException {
@@ -154,7 +154,7 @@ public final class SecureSchemaFactory {
          * <p>The JDK implementation of {@link SchemaFactory} uses the JDK parsers while {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} is unset or
          * {@code false}.</p>
          *
-         * @return {@code true} if parsers should be created via {@code newInstance()}.
+         * @return {@code true} if parsers should be created via {@code newInstance()}
          */
         private boolean overrideDefaultParser() {
             try {
@@ -167,11 +167,11 @@ public final class SecureSchemaFactory {
         /**
          * Secures every schema source through {@link SecureSAXParserFactory#secure(Source, boolean)}.
          *
-         * @param schemas the schema sources to secure; must not be {@code null}.
-         * @return a new array of secure sources.
-         * @throws IllegalStateException     Thrown if the underlying implementation cannot provide a secure reader.
-         * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
-         *                                   configuration error} or if the implementation is not available or cannot be instantiated.
+         * @param schemas the schema sources to secure; must not be {@code null}
+         * @return a new array of secure sources
+         * @throws FactoryConfigurationError thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
+         *                                   configuration error} or if the implementation is not available or cannot be instantiated
+         * @throws IllegalStateException     thrown if the underlying implementation cannot provide a secure reader
          */
         private Source[] secure(final Source[] schemas) {
             final Source[] secure = new Source[schemas.length];
@@ -205,7 +205,9 @@ public final class SecureSchemaFactory {
         }
     }
 
-    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
+    /**
+     * Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}.
+     */
     private static final String JDK_SCHEMA_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory";
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(SchemaFactory.class, "newDefaultInstance");
@@ -218,10 +220,10 @@ public final class SecureSchemaFactory {
      * whose lookup falls back to exactly the Xerces implementation this library recognizes).
      * </p>
      *
-     * @return A secure factory.
-     * @throws IllegalStateException    Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws IllegalArgumentException Thrown from the {@link #newInstance(String)} lookup this method falls back to on a platform that provides neither
-     *                                 {@code newDefaultInstance()} nor the JDK's built-in implementation (for example Android).
+     * @return a secure factory
+     * @throws IllegalArgumentException thrown from the {@link #newInstance(String)} lookup this method falls back to on a platform that provides neither
+     *                                 {@code newDefaultInstance()} nor the JDK's built-in implementation (for example Android)
+     * @throws IllegalStateException    thrown if a required secure setting cannot be applied to the underlying implementation
      */
     public static SchemaFactory newDefaultInstance() {
         if (MH_newDefaultInstance != null) {
@@ -239,11 +241,11 @@ public final class SecureSchemaFactory {
     /**
      * Returns a new, secure {@link SchemaFactory} for the given schema language.
      *
-     * @param schemaLanguage The schema language, as accepted by {@link SchemaFactory#newInstance(String)}.
-     * @return A secure factory.
-     * @throws IllegalArgumentException        Thrown if no implementation of the schema language is available.
-     * @throws NullPointerException            Thrown if {@code schemaLanguage} is {@code null}.
-     * @throws SchemaFactoryConfigurationError Thrown if a configuration error is encountered.
+     * @param schemaLanguage the schema language, as accepted by {@link SchemaFactory#newInstance(String)}
+     * @return a secure factory
+     * @throws IllegalArgumentException        thrown if no implementation of the schema language is available
+     * @throws NullPointerException            thrown if {@code schemaLanguage} is {@code null}
+     * @throws SchemaFactoryConfigurationError thrown if a configuration error is encountered
      */
     public static SchemaFactory newInstance(final String schemaLanguage) {
         return secure(SchemaFactory.newInstance(schemaLanguage));
@@ -252,13 +254,13 @@ public final class SecureSchemaFactory {
     /**
      * Returns a new, secure {@link SchemaFactory} of the given implementation class.
      *
-     * @param schemaLanguage   The schema language, as accepted by {@link SchemaFactory#newInstance(String)}.
-     * @param factoryClassName The fully qualified class name of the {@link SchemaFactory} implementation.
-     * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
-     * @return A secure factory.
-     * @throws IllegalArgumentException Thrown if {@code factoryClassName} is {@code null}, or if the factory class cannot be loaded or instantiated, or does
-     *                                  not support {@code schemaLanguage}.
-     * @throws NullPointerException     Thrown if {@code schemaLanguage} is {@code null}.
+     * @param schemaLanguage   the schema language, as accepted by {@link SchemaFactory#newInstance(String)}
+     * @param factoryClassName the fully qualified class name of the {@link SchemaFactory} implementation
+     * @param classLoader      the class loader used to load the factory class; {@code null} means the current thread's context class loader
+     * @return a secure factory
+     * @throws IllegalArgumentException thrown if {@code factoryClassName} is {@code null}, or if the factory class cannot be loaded or instantiated, or does
+     *                                  not support {@code schemaLanguage}
+     * @throws NullPointerException     thrown if {@code schemaLanguage} is {@code null}
      */
     public static SchemaFactory newInstance(final String schemaLanguage, final String factoryClassName, final ClassLoader classLoader) {
         return secure(SchemaFactory.newInstance(schemaLanguage, factoryClassName, classLoader));
@@ -272,8 +274,8 @@ public final class SecureSchemaFactory {
      * and instance documents is secured separately, through {@link SecureSAXParserFactory#secure(javax.xml.transform.Source, boolean)}; the factory carries
      * {@code FEATURE_SECURE_PROCESSING} for the one limit that reader cannot supply, the loader's content-model expansion.</p>
      *
-     * @param factory the factory to secure; never {@code null}.
-     * @return a secure factory.
+     * @param factory the factory to secure; never {@code null}
+     * @return a secure factory
      */
     static SchemaFactory secure(final SchemaFactory factory) {
         return new Wrapper(factory);
@@ -282,10 +284,10 @@ public final class SecureSchemaFactory {
     /**
      * Sets a feature on the delegate, failing closed: an implementation that cannot accept it yields no factory rather than an unsecured one.
      *
-     * @param factory the factory to configure; never {@code null}.
-     * @param feature the feature name.
-     * @param value   the value to set.
-     * @throws SecureException if the implementation rejects the feature.
+     * @param factory the factory to configure; never {@code null}
+     * @param feature the feature name
+     * @param value   the value to set
+     * @throws SecureException if the implementation rejects the feature
      */
     private static void setFeature(final SchemaFactory factory, final String feature, final boolean value) {
         try {

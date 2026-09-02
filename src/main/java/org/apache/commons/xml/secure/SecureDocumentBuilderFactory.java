@@ -61,8 +61,8 @@ public final class SecureDocumentBuilderFactory {
         /**
          * Constructs a new instance.
          *
-         * @param delegate the delegate to wrap; must not be {@code null}.
-         * @throws NullPointerException if {@code delegate} is {@code null}.
+         * @param delegate the delegate to wrap; must not be {@code null}
+         * @throws NullPointerException if {@code delegate} is {@code null}
          */
         private Wrapper(final DocumentBuilderFactory delegate) {
             this.delegate = Objects.requireNonNull(delegate, "delegate");
@@ -173,12 +173,18 @@ public final class SecureDocumentBuilderFactory {
             delegate.setXIncludeAware(state);
         }
     }
-    /** Class name of Android's Harmony-based {@link DocumentBuilderFactory}, which exposes no secure surface. */
+    /**
+     * Class name of Android's Harmony-based {@link DocumentBuilderFactory}, which exposes no secure surface.
+     */
     private static final String ANDROID_DOCUMENT_BUILDER_FACTORY = "org.apache.harmony.xml.parsers.DocumentBuilderFactoryImpl";
-    /** System property naming the {@link DocumentBuilderFactory} implementation, the JDK's own mechanism for reconfiguring the default parser. */
+    /**
+     * System property naming the {@link DocumentBuilderFactory} implementation, the JDK's own mechanism for reconfiguring the default parser.
+     */
     private static final String DOM_FACTORY_ID = "javax.xml.parsers.DocumentBuilderFactory";
 
-    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
+    /**
+     * Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}.
+     */
     static final String JDK_DOCUMENT_BUILDER_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl";
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(DocumentBuilderFactory.class, "newDefaultInstance");
@@ -186,8 +192,8 @@ public final class SecureDocumentBuilderFactory {
     /**
      * Enables namespace awareness on the given factory; the {@code NSInstance} counterpart of each factory method routes its result through here.
      *
-     * @param factory the factory to configure; never {@code null}.
-     * @return The given factory, namespace-aware.
+     * @param factory the factory to configure; never {@code null}
+     * @return the given factory, namespace-aware
      */
     private static DocumentBuilderFactory makeNSAware(final DocumentBuilderFactory factory) {
         factory.setNamespaceAware(true);
@@ -203,10 +209,10 @@ public final class SecureDocumentBuilderFactory {
      * (for example, Android, whose lookup is itself pinned to the platform implementation).
      * </p>
      *
-     * @return A secure factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown from the {@link #newInstance()} lookup this method falls back to on a platform that provides neither
-     *                                   {@code newDefaultInstance()} nor the JDK's built-in implementation (for example Android).
+     * @return a secure factory
+     * @throws FactoryConfigurationError thrown from the {@link #newInstance()} lookup this method falls back to on a platform that provides neither
+     *                                   {@code newDefaultInstance()} nor the JDK's built-in implementation (for example Android)
+     * @throws IllegalStateException     thrown if a required secure setting cannot be applied to the underlying implementation
      */
     public static DocumentBuilderFactory newDefaultInstance() {
         if (MH_newDefaultInstance != null) {
@@ -225,10 +231,10 @@ public final class SecureDocumentBuilderFactory {
      * Returns a new, secure, namespace-aware {@link DocumentBuilderFactory} of the system-default implementation, enabling namespace awareness on
      * {@link #newDefaultInstance()}, the behavior {@code DocumentBuilderFactory.newDefaultNSInstance()} (Java 13 or later) is specified to have.
      *
-     * @return A secure, namespace-aware factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown from the {@link #newInstance()} lookup {@link #newDefaultInstance()} falls back to on a platform that provides
-     *                                   neither {@code newDefaultInstance()} nor the JDK's built-in implementation (for example Android).
+     * @return a secure, namespace-aware factory
+     * @throws FactoryConfigurationError thrown from the {@link #newInstance()} lookup {@link #newDefaultInstance()} falls back to on a platform that provides
+     *                                   neither {@code newDefaultInstance()} nor the JDK's built-in implementation (for example Android)
+     * @throws IllegalStateException     thrown if a required secure setting cannot be applied to the underlying implementation
      */
     public static DocumentBuilderFactory newDefaultNSInstance() {
         return makeNSAware(newDefaultInstance());
@@ -237,12 +243,12 @@ public final class SecureDocumentBuilderFactory {
     /**
      * Returns a new, secure {@link DocumentBuilderFactory}.
      *
-     * @return A secure factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws IllegalStateException     Thrown if a (non-Android) factory cannot support the secure processing feature
-     *                                   {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
-     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
-     *                                   implementation is not available or cannot be instantiated.
+     * @return a secure factory
+     * @throws FactoryConfigurationError thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
+     *                                   implementation is not available or cannot be instantiated
+     * @throws IllegalStateException     thrown if a required secure setting cannot be applied to the underlying implementation
+     * @throws IllegalStateException     thrown if a (non-Android) factory cannot support the secure processing feature
+     *                                   {@link XMLConstants#FEATURE_SECURE_PROCESSING}
      */
     public static DocumentBuilderFactory newInstance() {
         return secure(DocumentBuilderFactory.newInstance());
@@ -251,13 +257,13 @@ public final class SecureDocumentBuilderFactory {
     /**
      * Returns a new, secure {@link DocumentBuilderFactory} of the given implementation class.
      *
-     * @param factoryClassName The fully qualified class name of the {@link DocumentBuilderFactory} implementation.
-     * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
-     * @return A secure factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws IllegalStateException     Thrown if a (non-Android) factory cannot support the secure processing feature
-     *                                   {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
-     * @throws FactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
+     * @param factoryClassName the fully qualified class name of the {@link DocumentBuilderFactory} implementation
+     * @param classLoader      the class loader used to load the factory class; {@code null} means the current thread's context class loader
+     * @return a secure factory
+     * @throws FactoryConfigurationError thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated
+     * @throws IllegalStateException     thrown if a required secure setting cannot be applied to the underlying implementation
+     * @throws IllegalStateException     thrown if a (non-Android) factory cannot support the secure processing feature
+     *                                   {@link XMLConstants#FEATURE_SECURE_PROCESSING}
      */
     public static DocumentBuilderFactory newInstance(final String factoryClassName, final ClassLoader classLoader) {
         return secure(DocumentBuilderFactory.newInstance(factoryClassName, classLoader));
@@ -267,10 +273,10 @@ public final class SecureDocumentBuilderFactory {
      * Returns a new, secure, namespace-aware {@link DocumentBuilderFactory}, enabling namespace awareness on {@link #newInstance()}, the behavior
      * {@code DocumentBuilderFactory.newNSInstance()} (Java 13 or later) is specified to have.
      *
-     * @return A secure, namespace-aware factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
-     *                                   implementation is not available or cannot be instantiated.
+     * @return a secure, namespace-aware factory
+     * @throws FactoryConfigurationError thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
+     *                                   implementation is not available or cannot be instantiated
+     * @throws IllegalStateException     thrown if a required secure setting cannot be applied to the underlying implementation
      */
     public static DocumentBuilderFactory newNSInstance() {
         return makeNSAware(newInstance());
@@ -284,11 +290,11 @@ public final class SecureDocumentBuilderFactory {
      * reconfiguring the default parser, so it is honored through the standard lookup rather than bypassed.
      * </p>
      *
-     * @param overrideDefaultParser whether {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
-     * @return A secure, namespace-aware factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
-     *                                   implementation is not available or cannot be instantiated.
+     * @param overrideDefaultParser whether {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser
+     * @return a secure, namespace-aware factory
+     * @throws FactoryConfigurationError thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
+     *                                   implementation is not available or cannot be instantiated
+     * @throws IllegalStateException     thrown if a required secure setting cannot be applied to the underlying implementation
      */
     static DocumentBuilderFactory newNSInstance(final boolean overrideDefaultParser) {
         return overrideDefaultParser || System.getProperty(DOM_FACTORY_ID) != null ? newNSInstance() : newDefaultNSInstance();
@@ -299,11 +305,11 @@ public final class SecureDocumentBuilderFactory {
      * {@link #newInstance(String, ClassLoader)}, the behavior {@code DocumentBuilderFactory.newNSInstance(String, ClassLoader)} (Java 13 or later) is specified
      * to have.
      *
-     * @param factoryClassName The fully qualified class name of the {@link DocumentBuilderFactory} implementation.
-     * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
-     * @return A secure, namespace-aware factory.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws FactoryConfigurationError Thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated.
+     * @param factoryClassName the fully qualified class name of the {@link DocumentBuilderFactory} implementation
+     * @param classLoader      the class loader used to load the factory class; {@code null} means the current thread's context class loader
+     * @return a secure, namespace-aware factory
+     * @throws FactoryConfigurationError thrown if {@code factoryClassName} is {@code null} or the factory class cannot be loaded or instantiated
+     * @throws IllegalStateException     thrown if a required secure setting cannot be applied to the underlying implementation
      */
     public static DocumentBuilderFactory newNSInstance(final String factoryClassName, final ClassLoader classLoader) {
         return makeNSAware(newInstance(factoryClassName, classLoader));
@@ -324,9 +330,9 @@ public final class SecureDocumentBuilderFactory {
      *         needed here. A caller can chain its own resolver onto the floor to allow-list resources, but cannot remove it.</li>
      * </ul>
      *
-     * @param factory The factory to secure.
-     * @return A new secure factory or the original factory, as-is, if it is a known Android factory.
-     * @throws SecureException Thrown if a (non-Android) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
+     * @param factory the factory to secure
+     * @return a new secure factory or the original factory, as-is, if it is a known Android factory
+     * @throws SecureException thrown if a (non-Android) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}
      */
     static DocumentBuilderFactory secure(final DocumentBuilderFactory factory) {
         // Android exposes no FSP, ACCESS_EXTERNAL_* or attribute API, and KXmlParser drops user-defined entities; nothing to apply.
@@ -344,11 +350,11 @@ public final class SecureDocumentBuilderFactory {
     /**
      * Sets a feature on the given factory, throwing a {@link SecureException} if the implementation does not recognize it.
      *
-     * @param factory The factory to secure.
-     * @param feature The feature to set.
-     * @param value   The value to set.
-     * @throws SecureException   Thrown if this factory cannot support this feature.
-     * @throws NullPointerException Thrown if the {@code feature} parameter is null.
+     * @param factory the factory to secure
+     * @param feature the feature to set
+     * @param value   the value to set
+     * @throws NullPointerException thrown if the {@code feature} parameter is null
+     * @throws SecureException   thrown if this factory cannot support this feature
      */
     private static void setFeature(final DocumentBuilderFactory factory, final String feature, final boolean value) {
         try {

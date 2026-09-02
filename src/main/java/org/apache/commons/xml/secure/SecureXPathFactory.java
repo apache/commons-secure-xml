@@ -62,8 +62,8 @@ public final class SecureXPathFactory {
         /**
          * Constructs a new instance.
          *
-         * @param delegate the delegate to wrap; must not be {@code null}.
-         * @throws NullPointerException if {@code delegate} is {@code null}.
+         * @param delegate the delegate to wrap; must not be {@code null}
+         * @throws NullPointerException if {@code delegate} is {@code null}
          */
         private Wrapper(final XPathFactory delegate) {
             this.delegate = Objects.requireNonNull(delegate, "delegate");
@@ -82,8 +82,8 @@ public final class SecureXPathFactory {
          * delegate's own limits ({@code jdk.xml.xpath*}) behind an {@code UnsupportedOperationException}.
          * </p>
          *
-         * @param name the property name.
-         * @return the delegate's value for the property.
+         * @param name the property name
+         * @return the delegate's value for the property
          */
         public String getProperty(final String name) {
             if (MH_getProperty == null) {
@@ -111,7 +111,7 @@ public final class SecureXPathFactory {
          * {@code false}.
          * </p>
          *
-         * @return {@code true} if parsers should be created via {@code newInstance()}.
+         * @return {@code true} if parsers should be created via {@code newInstance()}
          */
         private boolean overrideDefaultParser() {
             try {
@@ -131,8 +131,8 @@ public final class SecureXPathFactory {
          * {@code @Override}. The {@code jdk.xml.xpath*} limits reached this way are processing limits like any other: an operator may tighten them, and
          * loosening one is reconfiguration.
          *
-         * @param name  the property name.
-         * @param value the value to set.
+         * @param name  the property name
+         * @param value the value to set
          */
         public void setProperty(final String name, final String value) {
             if (MH_setProperty == null) {
@@ -155,15 +155,21 @@ public final class SecureXPathFactory {
         }
     }
 
-    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
+    /**
+     * Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}.
+     */
     private static final String JDK_XPATH_FACTORY = "com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl";
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(XPathFactory.class, "newDefaultInstance");
 
-    /** {@code XPathFactory.getProperty(String)}, added in Java 18; {@code null} on earlier releases, where the method does not exist. */
+    /**
+     * {@code XPathFactory.getProperty(String)}, added in Java 18; {@code null} on earlier releases, where the method does not exist.
+     */
     private static final MethodHandle MH_getProperty = MethodHandleFactory.findVirtual(XPathFactory.class, "getProperty", String.class, String.class);
 
-    /** {@code XPathFactory.setProperty(String, String)}, added in Java 18; {@code null} on earlier releases, where the method does not exist. */
+    /**
+     * {@code XPathFactory.setProperty(String, String)}, added in Java 18; {@code null} on earlier releases, where the method does not exist.
+     */
     private static final MethodHandle MH_setProperty =
             MethodHandleFactory.findVirtual(XPathFactory.class, "setProperty", void.class, String.class, String.class);
 
@@ -174,10 +180,10 @@ public final class SecureXPathFactory {
      * implementation directly on Java 8.
      * </p>
      *
-     * @return A secure factory.
-     * @throws IllegalStateException Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws RuntimeException      Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation (for
-     *                               example Android).
+     * @return a secure factory
+     * @throws IllegalStateException thrown if a required secure setting cannot be applied to the underlying implementation
+     * @throws RuntimeException      thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in implementation (for
+     *                               example Android)
      */
     public static XPathFactory newDefaultInstance() {
         if (MH_newDefaultInstance != null) {
@@ -195,9 +201,9 @@ public final class SecureXPathFactory {
     /**
      * Returns a new, secure {@link XPathFactory} for the default XPath object model.
      *
-     * @return A secure factory.
-     * @throws IllegalStateException Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws RuntimeException      Thrown if there is a failure in creating an {@link XPathFactory} for the default object model.
+     * @return a secure factory
+     * @throws IllegalStateException thrown if a required secure setting cannot be applied to the underlying implementation
+     * @throws RuntimeException      thrown if there is a failure in creating an {@link XPathFactory} for the default object model
      */
     public static XPathFactory newInstance() {
         return secure(XPathFactory.newInstance());
@@ -206,12 +212,12 @@ public final class SecureXPathFactory {
     /**
      * Returns a new, secure {@link XPathFactory} for the given object model.
      *
-     * @param uri The underlying object model identifier, as accepted by {@link XPathFactory#newInstance(String)}.
-     * @return A secure factory.
-     * @throws IllegalStateException              Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws XPathFactoryConfigurationException Thrown if no implementation of the object model is available.
-     * @throws NullPointerException               Thrown if {@code uri} is {@code null}.
-     * @throws IllegalArgumentException           Thrown if {@code uri} is empty.
+     * @param uri the underlying object model identifier, as accepted by {@link XPathFactory#newInstance(String)}
+     * @return a secure factory
+     * @throws IllegalArgumentException           thrown if {@code uri} is empty
+     * @throws IllegalStateException              thrown if a required secure setting cannot be applied to the underlying implementation
+     * @throws NullPointerException               thrown if {@code uri} is {@code null}
+     * @throws XPathFactoryConfigurationException thrown if no implementation of the object model is available
      */
     public static XPathFactory newInstance(final String uri) throws XPathFactoryConfigurationException {
         return secure(XPathFactory.newInstance(uri));
@@ -220,15 +226,15 @@ public final class SecureXPathFactory {
     /**
      * Returns a new, secure {@link XPathFactory} of the given implementation class.
      *
-     * @param uri              The underlying object model identifier, as accepted by {@link XPathFactory#newInstance(String)}.
-     * @param factoryClassName The fully qualified class name of the {@link XPathFactory} implementation.
-     * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
-     * @return A secure factory.
-     * @throws IllegalStateException              Thrown if a required secure setting cannot be applied to the underlying implementation.
-     * @throws XPathFactoryConfigurationException Thrown if {@code factoryClassName} is {@code null}, or if the factory class cannot be loaded or
-     *                                            instantiated, or does not support {@code uri}.
-     * @throws NullPointerException               Thrown if {@code uri} is {@code null}.
-     * @throws IllegalArgumentException           Thrown if {@code uri} is empty.
+     * @param uri              the underlying object model identifier, as accepted by {@link XPathFactory#newInstance(String)}
+     * @param factoryClassName the fully qualified class name of the {@link XPathFactory} implementation
+     * @param classLoader      the class loader used to load the factory class; {@code null} means the current thread's context class loader
+     * @return a secure factory
+     * @throws IllegalArgumentException           thrown if {@code uri} is empty
+     * @throws IllegalStateException              thrown if a required secure setting cannot be applied to the underlying implementation
+     * @throws NullPointerException               thrown if {@code uri} is {@code null}
+     * @throws XPathFactoryConfigurationException thrown if {@code factoryClassName} is {@code null}, or if the factory class cannot be loaded or
+     *                                            instantiated, or does not support {@code uri}
      */
     public static XPathFactory newInstance(final String uri, final String factoryClassName, final ClassLoader classLoader)
             throws XPathFactoryConfigurationException {
@@ -254,9 +260,9 @@ public final class SecureXPathFactory {
      *         the engine never parses.</li>
      * </ul>
      *
-     * @param factory The factory to secure.
-     * @return A new secure factory or the original factory, as-is, if it is a known Saxon factory.
-     * @throws SecureException Thrown if this {@link XPathFactory} or the {@code XPath}s it creates cannot support this feature.
+     * @param factory the factory to secure
+     * @return a new secure factory or the original factory, as-is, if it is a known Saxon factory
+     * @throws SecureException thrown if this {@link XPathFactory} or the {@code XPath}s it creates cannot support this feature
      */
     static XPathFactory secure(final XPathFactory factory) {
         if (SaxonProvider.isSaxon(factory.getClass())) {
@@ -272,11 +278,11 @@ public final class SecureXPathFactory {
     /**
      * Sets a feature on the given factory, throwing a {@link SecureException} if the implementation does not recognize it.
      *
-     * @param factory The factory to secure.
-     * @param feature The feature to set.
-     * @param value   The value to set.
-     * @throws SecureException Thrown if this {@link XPathFactory} or the {@code XPath}s it creates cannot support this feature or if {@code feature} is
-     *                            {@code null}.
+     * @param factory the factory to secure
+     * @param feature the feature to set
+     * @param value   the value to set
+     * @throws SecureException thrown if this {@link XPathFactory} or the {@code XPath}s it creates cannot support this feature or if {@code feature} is
+     *                            {@code null}
      */
     private static void setFeature(final XPathFactory factory, final String feature, final boolean value) {
         try {

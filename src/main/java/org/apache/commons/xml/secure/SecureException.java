@@ -47,11 +47,11 @@ final class SecureException extends IllegalStateException {
 
     /**
      * Builds the standard exception for a rejected secure setting.
-     * @param name   the name of the feature, attribute or property that could not be set.
-     * @param target the factory, parser, validator or reader that rejected the setting; its concrete class names the offending implementation.
-     * @param cause  the original checked or unchecked exception from the JAXP implementation.
      *
-     * @return the exception to throw.
+     * @param name   the name of the feature, attribute or property that could not be set
+     * @param target the factory, parser, validator or reader that rejected the setting; its concrete class names the offending implementation
+     * @param cause  the original checked or unchecked exception from the JAXP implementation
+     * @return the exception to throw
      */
     static SecureException featureFailed(final String name, final Object target, final Throwable cause) {
         return new SecureException("Failed to set feature '" + name + "' on " + target.getClass().getName(), cause);
@@ -60,12 +60,12 @@ final class SecureException extends IllegalStateException {
     /**
      * Builds the standard "forbidden" message shared by every resolver floor when {@link #throwOnUnresolved()} rejects an unresolved reference.
      *
-     * @param type      the resource kind, or {@code null} if not applicable.
-     * @param namespace the namespace (or, for Woodstox, the entity name), or {@code null}.
-     * @param publicId  the public identifier, or {@code null} if none.
-     * @param systemId  the system identifier of the denied resource.
-     * @param baseURI   the base URI for relative resolution, or {@code null}.
-     * @return the message naming the denied lookup and the enabling property.
+     * @param type      the resource kind, or {@code null} if not applicable
+     * @param namespace the namespace (or, for Woodstox, the entity name), or {@code null}
+     * @param publicId  the public identifier, or {@code null} if none
+     * @param systemId  the system identifier of the denied resource
+     * @param baseURI   the base URI for relative resolution, or {@code null}
+     * @return the message naming the denied lookup and the enabling property
      */
     static String forbidden(final String type, final String namespace, final String publicId, final String systemId, final String baseURI) {
         return String.format("External resource fetch forbidden by %s: type=%s, namespace=%s, publicId=%s, systemId=%s, baseURI=%s",
@@ -78,8 +78,8 @@ final class SecureException extends IllegalStateException {
      * <p>Every supported implementation provides a reader as a routine capability, so the wrapped {@code ParserConfigurationException} or
      * {@code SAXException} signals a broken environment, not a per-parse condition — hence unchecked.</p>
      *
-     * @param cause the original checked exception from the JAXP implementation.
-     * @return the exception to throw.
+     * @param cause the original checked exception from the JAXP implementation
+     * @return the exception to throw
      */
     static SecureException readerFailed(final Throwable cause) {
         return new SecureException("Failed to create a secure XMLReader", cause);
@@ -90,7 +90,7 @@ final class SecureException extends IllegalStateException {
      *
      * <p>Read per resolution, so the {@value SecureException#THROW_ON_UNRESOLVED} system property also toggles factories that already exist.</p>
      *
-     * @return {@code true} when the {@value SecureException#THROW_ON_UNRESOLVED} system property is set.
+     * @return {@code true} when the {@value SecureException#THROW_ON_UNRESOLVED} system property is set
      */
     static boolean throwOnUnresolved() {
         return Boolean.getBoolean(SecureException.THROW_ON_UNRESOLVED);
