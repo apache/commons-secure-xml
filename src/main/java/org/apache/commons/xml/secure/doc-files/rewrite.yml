@@ -16,8 +16,12 @@
 type: specs.openrewrite.org/v1beta/recipe
 name: org.apache.commons.xml.secure.UseSecureXmlFactories
 displayName: Use Apache Commons Secure XML factories
-description: Replaces JAXP static factory method calls with their Apache Commons Secure XML equivalents.
+description: Replaces JAXP static factory method calls with their Apache Commons Secure XML equivalents and adds the Maven dependency.
 recipeList:
+  - org.openrewrite.maven.AddDependency:
+      groupId: org.apache.commons
+      artifactId: commons-secure-xml
+      version: 1.0.0
   - org.openrewrite.java.ChangeMethodTargetToStatic:
       methodPattern: javax.xml.parsers.DocumentBuilderFactory newDefaultInstance()
       fullyQualifiedTargetTypeName: org.apache.commons.xml.secure.SecureDocumentBuilderFactory
