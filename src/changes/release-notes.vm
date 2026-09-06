@@ -132,7 +132,7 @@ patches, or suggestions for improvement, see the ${project.name} website:
 
 ${project.url}
 
-Download page: ${project.url}/download_text.cgi
+Download page: ${project.url}/download_secure-xml.cgi
 
 Have fun!
 -Apache Commons Team

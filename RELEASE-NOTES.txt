@@ -70,7 +70,7 @@ patches, or suggestions for improvement, see the Apache Commons Secure XML websi
 
 https://commons.apache.org/proper/commons-secure-xml/
 
-Download page: https://commons.apache.org/proper/commons-secure-xml//download_text.cgi
+Download page: https://commons.apache.org/proper/commons-secure-xml/download_secure-xml.cgi
 
 Have fun!
 -Apache Commons Team
