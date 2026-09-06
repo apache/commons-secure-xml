@@ -16,23 +16,56 @@
 type: specs.openrewrite.org/v1beta/recipe
 name: org.apache.commons.xml.secure.UseSecureXmlFactories
 displayName: Use Apache Commons Secure XML factories
-description: Replaces JAXP factory types with their Apache Commons Secure XML equivalents.
+description: Replaces JAXP static factory method calls with their Apache Commons Secure XML equivalents.
 recipeList:
-  - org.openrewrite.java.ChangeType:
-      oldFullyQualifiedTypeName: javax.xml.parsers.DocumentBuilderFactory
-      newFullyQualifiedTypeName: org.apache.commons.xml.secure.SecureDocumentBuilderFactory
-  - org.openrewrite.java.ChangeType:
-      oldFullyQualifiedTypeName: javax.xml.parsers.SAXParserFactory
-      newFullyQualifiedTypeName: org.apache.commons.xml.secure.SecureSAXParserFactory
-  - org.openrewrite.java.ChangeType:
-      oldFullyQualifiedTypeName: javax.xml.validation.SchemaFactory
-      newFullyQualifiedTypeName: org.apache.commons.xml.secure.SecureSchemaFactory
-  - org.openrewrite.java.ChangeType:
-      oldFullyQualifiedTypeName: javax.xml.transform.TransformerFactory
-      newFullyQualifiedTypeName: org.apache.commons.xml.secure.SecureTransformerFactory
-  - org.openrewrite.java.ChangeType:
-      oldFullyQualifiedTypeName: javax.xml.stream.XMLInputFactory
-      newFullyQualifiedTypeName: org.apache.commons.xml.secure.SecureXMLInputFactory
-  - org.openrewrite.java.ChangeType:
-      oldFullyQualifiedTypeName: javax.xml.xpath.XPathFactory
-      newFullyQualifiedTypeName: org.apache.commons.xml.secure.SecureXPathFactory
+  - org.openrewrite.java.ChangeMethodTargetToStatic:
+      methodPattern: javax.xml.parsers.DocumentBuilderFactory newDefaultInstance()
+      fullyQualifiedTargetTypeName: org.apache.commons.xml.secure.SecureDocumentBuilderFactory
+  - org.openrewrite.java.ChangeMethodTargetToStatic:
+      methodPattern: javax.xml.parsers.DocumentBuilderFactory newDefaultNSInstance()
+      fullyQualifiedTargetTypeName: org.apache.commons.xml.secure.SecureDocumentBuilderFactory
+  - org.openrewrite.java.ChangeMethodTargetToStatic:
+      methodPattern: javax.xml.parsers.DocumentBuilderFactory newInstance(..)
+      fullyQualifiedTargetTypeName: org.apache.commons.xml.secure.SecureDocumentBuilderFactory
+  - org.openrewrite.java.ChangeMethodTargetToStatic:
+      methodPattern: javax.xml.parsers.DocumentBuilderFactory newNSInstance(..)
+      fullyQualifiedTargetTypeName: org.apache.commons.xml.secure.SecureDocumentBuilderFactory
+  - org.openrewrite.java.ChangeMethodTargetToStatic:
+      methodPattern: javax.xml.parsers.SAXParserFactory newDefaultInstance()
+      fullyQualifiedTargetTypeName: org.apache.commons.xml.secure.SecureSAXParserFactory
+  - org.openrewrite.java.ChangeMethodTargetToStatic:
+      methodPattern: javax.xml.parsers.SAXParserFactory newDefaultNSInstance()
+      fullyQualifiedTargetTypeName: org.apache.commons.xml.secure.SecureSAXParserFactory
+  - org.openrewrite.java.ChangeMethodTargetToStatic:
+      methodPattern: javax.xml.parsers.SAXParserFactory newInstance(..)
+      fullyQualifiedTargetTypeName: org.apache.commons.xml.secure.SecureSAXParserFactory
+  - org.openrewrite.java.ChangeMethodTargetToStatic:
+      methodPattern: javax.xml.parsers.SAXParserFactory newNSInstance(..)
+      fullyQualifiedTargetTypeName: org.apache.commons.xml.secure.SecureSAXParserFactory
+  - org.openrewrite.java.ChangeMethodTargetToStatic:
+      methodPattern: javax.xml.validation.SchemaFactory newDefaultInstance()
+      fullyQualifiedTargetTypeName: org.apache.commons.xml.secure.SecureSchemaFactory
+  - org.openrewrite.java.ChangeMethodTargetToStatic:
+      methodPattern: javax.xml.validation.SchemaFactory newInstance(..)
+      fullyQualifiedTargetTypeName: org.apache.commons.xml.secure.SecureSchemaFactory
+  - org.openrewrite.java.ChangeMethodTargetToStatic:
+      methodPattern: javax.xml.transform.TransformerFactory newDefaultInstance()
+      fullyQualifiedTargetTypeName: org.apache.commons.xml.secure.SecureTransformerFactory
+  - org.openrewrite.java.ChangeMethodTargetToStatic:
+      methodPattern: javax.xml.transform.TransformerFactory newInstance(..)
+      fullyQualifiedTargetTypeName: org.apache.commons.xml.secure.SecureTransformerFactory
+  - org.openrewrite.java.ChangeMethodTargetToStatic:
+      methodPattern: javax.xml.stream.XMLInputFactory newDefaultFactory()
+      fullyQualifiedTargetTypeName: org.apache.commons.xml.secure.SecureXMLInputFactory
+  - org.openrewrite.java.ChangeMethodTargetToStatic:
+      methodPattern: javax.xml.stream.XMLInputFactory newFactory(..)
+      fullyQualifiedTargetTypeName: org.apache.commons.xml.secure.SecureXMLInputFactory
+  - org.openrewrite.java.ChangeMethodTargetToStatic:
+      methodPattern: javax.xml.stream.XMLInputFactory newInstance()
+      fullyQualifiedTargetTypeName: org.apache.commons.xml.secure.SecureXMLInputFactory
+  - org.openrewrite.java.ChangeMethodTargetToStatic:
+      methodPattern: javax.xml.xpath.XPathFactory newDefaultInstance()
+      fullyQualifiedTargetTypeName: org.apache.commons.xml.secure.SecureXPathFactory
+  - org.openrewrite.java.ChangeMethodTargetToStatic:
+      methodPattern: javax.xml.xpath.XPathFactory newInstance(..)
+      fullyQualifiedTargetTypeName: org.apache.commons.xml.secure.SecureXPathFactory
