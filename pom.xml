@@ -40,13 +40,11 @@ limitations under the License.
   <properties>
     <!-- Release-related properties -->
     <commons.main.branch>main</commons.main.branch>
-    <commons.release.version>1.0.0</commons.release.version>
+    <commons.release.version>1.0.1</commons.release.version>
     <commons.release.desc>(Java 8+)</commons.release.desc>
-    <commons.rc.version>RC2</commons.rc.version>
-    <!-- japicmp baseline: disable for first release
-    <commons.bc.version>1.0.0</commons.bc.version> -->
-    <japicmp.skip>true</japicmp.skip>
-    <commons.release.next>1.0.1</commons.release.next>
+    <commons.rc.version>RC1</commons.rc.version>
+    <commons.bc.version>1.0.0</commons.bc.version>
+    <commons.release.next>1.0.2</commons.release.next>
     <commons.componentid>secure-xml</commons.componentid>
     <commons.packageId>secure-xml</commons.packageId>
     <commons.module.name>org.apache.commons.xml.secure</commons.module.name>
