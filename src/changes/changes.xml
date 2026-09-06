@@ -34,6 +34,7 @@ The <action> type attribute can be add, update, fix, or remove.
     <release version="1.0.1" date="YYYY-MM-DD" description="Second release, requires Java 8 or above.">
       <!-- FIX -->
       <action type="fix" dev="ggregory" due-to="Gary Gregory">Fix the OpenRewrite migration recipe to target static method calls instead of class references.</action>
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">Fix the OpenRewrite migration recipe to add a dependency on org.apache.commons:commons-secure-xml:1.0.0.</action>
       <!-- ADD -->
       <!-- UPDATE -->
     </release>
