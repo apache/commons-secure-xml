@@ -37,6 +37,7 @@ The <action> type attribute can be add, update, fix, or remove.
       <action type="fix" dev="ggregory" due-to="Gary Gregory">Fix the OpenRewrite migration recipe to add a dependency on org.apache.commons:commons-secure-xml:1.0.0.</action>
       <!-- ADD -->
       <!-- UPDATE -->
+      <action dev="ggregory" type="update" due-to="Gary Gregory">Bump org.apache.commons:commons-parent from 104 to 105.</action>
     </release>
     <release version="1.0.0" date="2026-09-02" description="First release, requires Java 8 or above.">
       <!-- SPECIAL -->

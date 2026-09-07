@@ -21,7 +21,7 @@ limitations under the License.
   <parent>
     <groupId>org.apache.commons</groupId>
     <artifactId>commons-parent</artifactId>
-    <version>104</version>
+    <version>105</version>
   </parent>
   <artifactId>commons-secure-xml</artifactId>
   <version>1.0.1-SNAPSHOT</version>
