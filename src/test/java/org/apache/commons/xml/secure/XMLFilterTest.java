@@ -60,6 +60,66 @@ import org.xml.sax.helpers.XMLFilterImpl;
 @Tag("trax")
 class XMLFilterTest {
 
+    /**
+     * Parent reader that drives itself, the shape a caller hands the filter when the source document does not come from an {@code InputSource}.
+     *
+     * <p>Records the callbacks the filter wires onto it, and the {@code InputSource} it is driven with.</p>
+     */
+    private static final class SelfDrivenParent extends XMLFilterImpl {
+
+        final List<InputSource> parsed = new ArrayList<>();
+
+        final List<Object> wired = new ArrayList<>();
+
+        @Override
+        public boolean getFeature(final String name) {
+            // Accept the namespace probes implementations make on a SAXSource reader; there is no parent to delegate to.
+            return "http://xml.org/sax/features/namespaces".equals(name);
+        }
+
+        @Override
+        public Object getProperty(final String name) {
+            return null;
+        }
+
+        @Override
+        public void parse(final InputSource input) throws SAXException {
+            parsed.add(input);
+            // Minimal well-formed document for the transformation to consume; no real parser behind this parent.
+            final ContentHandler handler = getContentHandler();
+            handler.startDocument();
+            handler.startElement("", "root", "root", new AttributesImpl());
+            handler.endElement("", "root", "root");
+            handler.endDocument();
+        }
+
+        @Override
+        public void setDTDHandler(final DTDHandler handler) {
+            wired.add(handler);
+            super.setDTDHandler(handler);
+        }
+
+        @Override
+        public void setEntityResolver(final EntityResolver resolver) {
+            wired.add(resolver);
+            super.setEntityResolver(resolver);
+        }
+
+        @Override
+        public void setErrorHandler(final ErrorHandler handler) {
+            wired.add(handler);
+            super.setErrorHandler(handler);
+        }
+
+        @Override
+        public void setFeature(final String name, final boolean value) {
+        }
+
+        @Override
+        public void setProperty(final String name, final Object value) {
+        }
+    }
+
     /** Copies the input through unchanged, so external-entity content in the input would surface in the filter's output. */
     private static final String IDENTITY_XSLT = "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
             + "  <xsl:template match=\"/\"><xsl:copy-of select=\".\"/></xsl:template>\n"
@@ -161,6 +221,20 @@ class XMLFilterTest {
     }
 
     @Test
+    void secureFilterParsesWithoutAnInputSource() throws Exception {
+        // A SAXSource carrying only the filter unmarshals as parse((InputSource) null): the input comes from the parent, and implementations that dereference
+        // the InputSource the filter passes on must still get one.
+        final XMLFilter filter = SaxSurfaceTestSupport.secureFactory().newXMLFilter(AttackTestSupport.streamSource(IDENTITY_XSLT));
+        final SelfDrivenParent parent = new SelfDrivenParent();
+        filter.setParent(parent);
+        filter.setContentHandler(new DefaultHandler());
+        filter.parse((InputSource) null);
+        final InputSource substituted = parent.parsed.get(0);
+        assertNotNull(substituted, "the parent must be handed an InputSource, not the caller's null");
+        assertEquals(SecureXMLFilter.NO_INPUT_SYSTEM_ID, substituted.getSystemId(), "the substituted InputSource must carry the placeholder system id");
+    }
+
+    @Test
     void secureFilterRethrowsHandlerSAXException() throws Exception {
         final XMLFilter filter = SaxSurfaceTestSupport.secureFactory().newXMLFilter(AttackTestSupport.streamSource(IDENTITY_XSLT));
         final SAXException handlerFailure = new SAXException("handler failure");
@@ -197,60 +271,11 @@ class XMLFilterTest {
         // parse must perform the XMLFilterImpl.setupParse wiring on the parent for the resolver, DTD and error callbacks (the ContentHandler is owned by the
         // transformer). The wiring calls are asserted directly on a recording parent: which of them the implementation later consults or overwrites varies.
         final XMLFilter filter = SaxSurfaceTestSupport.secureFactory().newXMLFilter(AttackTestSupport.streamSource(IDENTITY_XSLT));
-        final List<Object> wired = new ArrayList<>();
-        final XMLFilterImpl parent = new XMLFilterImpl() {
-
-            @Override
-            public boolean getFeature(final String name) {
-                // Accept the namespace probes implementations make on a SAXSource reader; there is no parent to delegate to.
-                return "http://xml.org/sax/features/namespaces".equals(name);
-            }
-
-            @Override
-            public Object getProperty(final String name) {
-                return null;
-            }
-
-            @Override
-            public void parse(final InputSource input) throws SAXException {
-                // Minimal well-formed document for the transformation to consume; no real parser behind this parent.
-                final ContentHandler handler = getContentHandler();
-                handler.startDocument();
-                handler.startElement("", "root", "root", new AttributesImpl());
-                handler.endElement("", "root", "root");
-                handler.endDocument();
-            }
-
-            @Override
-            public void setDTDHandler(final DTDHandler handler) {
-                wired.add(handler);
-                super.setDTDHandler(handler);
-            }
-
-            @Override
-            public void setEntityResolver(final EntityResolver resolver) {
-                wired.add(resolver);
-                super.setEntityResolver(resolver);
-            }
-
-            @Override
-            public void setErrorHandler(final ErrorHandler handler) {
-                wired.add(handler);
-                super.setErrorHandler(handler);
-            }
-
-            @Override
-            public void setFeature(final String name, final boolean value) {
-            }
-
-            @Override
-            public void setProperty(final String name, final Object value) {
-            }
-        };
+        final SelfDrivenParent parent = new SelfDrivenParent();
         filter.setParent(parent);
         assertEquals("", filterAndCapture(filter, "<ignored/>"));
-        assertEquals(3, wired.stream().filter(callback -> callback == filter).count(),
-                "parse should wire the filter as the parent's EntityResolver, DTDHandler and ErrorHandler: " + wired);
+        assertEquals(3, parent.wired.stream().filter(callback -> callback == filter).count(),
+                "parse should wire the filter as the parent's EntityResolver, DTDHandler and ErrorHandler: " + parent.wired);
     }
 
     @Test

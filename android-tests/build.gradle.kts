@@ -32,7 +32,7 @@ buildscript {
 
 plugins {
     id("com.android.library") version "8.6.1"
-    id("de.mannodermaus.android-junit5") version "1.14.0.0"
+    id("de.mannodermaus.android-junit5") version "2.0.1"
 }
 
 /** Returns the `version` of the Maven project itself: the direct child of the root element, never the `parent` block's. */
@@ -141,8 +141,8 @@ dependencies {
     androidTestImplementation("xerces:xercesImpl:2.12.2")
 
     androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
-    androidTestImplementation("de.mannodermaus.junit5:android-test-core:1.4.0")
-    androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:1.4.0")
+    androidTestImplementation("de.mannodermaus.junit5:android-test-core:2.0.1")
+    androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:2.0.1")
     androidTestRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
     androidTestImplementation("androidx.test:runner:1.5.2")
     androidTestImplementation("org.mockito:mockito-android:4.11.0")
