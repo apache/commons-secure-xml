@@ -50,6 +50,9 @@ import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLFilter;
 
+/**
+ * Tests {@link SecureTransformerFactory}.
+ */
 @Tag("trax")
 class SecureTransformerFactoryTest {
 
