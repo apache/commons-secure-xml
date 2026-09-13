@@ -52,15 +52,15 @@ final class SecureTransformerHandler implements TransformerHandler {
      * Constructs a new instance.
      *
      * @param delegate The delegate to wrap; must not be {@code null}.
-     * @param uriResolver The compile-time URIResolver snapshot to restore onto the live transformer; may be {@code null}.
+     * @param factoryUriResolver The factory's compile-time URIResolver snapshot to restore onto the live transformer; may be {@code null}.
      * @param emptySource The empty-{@link Source} supplier for the produced Transformer's floor; {@code null} means the default empty DOM.
      * @param overrideDefaultParser whether the live transformer's source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
      * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
-    SecureTransformerHandler(final TransformerHandler delegate, final URIResolver uriResolver, final Supplier<Source> emptySource,
+    SecureTransformerHandler(final TransformerHandler delegate, final URIResolver factoryUriResolver, final Supplier<Source> emptySource,
             final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
-        this.transformer = new SecureTransformer(delegate.getTransformer(), uriResolver, emptySource, overrideDefaultParser);
+        this.transformer = new SecureTransformer(delegate.getTransformer(), factoryUriResolver, emptySource, overrideDefaultParser);
     }
 
     @Override

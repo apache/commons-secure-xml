@@ -19,11 +19,14 @@ package org.apache.commons.xml.secure;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.io.StringWriter;
 
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.URIResolver;
 import javax.xml.transform.sax.SAXTransformerFactory;
+import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
 
 import org.junit.jupiter.api.Tag;
@@ -33,6 +36,17 @@ import org.xml.sax.helpers.LocatorImpl;
 
 @Tag("trax")
 class SecureTransformerHandlerTest {
+
+    @Test
+    void adoptsAResolverTheHandlersTransformerCarries() throws Exception {
+        final SAXTransformerFactory factory = (SAXTransformerFactory) TransformerFactory.newInstance();
+        final TransformerHandler delegate = factory.newTransformerHandler();
+        // An implementation may seed the handler's transformer from the Templates it was built with; that resolver must survive the wrapping.
+        final URIResolver carried = (href, base) -> null;
+        delegate.getTransformer().setURIResolver(carried);
+        final SecureTransformerHandler handler = new SecureTransformerHandler(delegate, null, null, false);
+        assertSame(carried, handler.getTransformer().getURIResolver(), "the resolver the handler's transformer carried must survive the wrapping");
+    }
 
     @Test
     void forwardsEveryTransformerHandlerMethod() throws Exception {

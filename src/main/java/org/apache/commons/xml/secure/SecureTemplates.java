@@ -44,7 +44,7 @@ final class SecureTemplates implements Templates {
     /**
      * Compile-time URIResolver snapshot; the underlying implementation does not propagate the factory's resolver onto Transformers obtained from Templates.
      */
-    private final URIResolver uriResolver;
+    private final URIResolver factoryUriResolver;
 
     /**
      * Empty-{@link Source} supplier for the produced Transformer's floor; {@code null} means the default empty DOM.
@@ -61,14 +61,14 @@ final class SecureTemplates implements Templates {
      * Constructs a new instance.
      *
      * @param delegate         The delegate to wrap; must not be {@code null}.
-     * @param uriResolver      The compile-time URIResolver snapshot to restore onto Transformers produced from the compiled Templates; may be {@code null}.
+     * @param factoryUriResolver The factory's compile-time URIResolver snapshot to restore onto Transformers produced from the compiled Templates; may be {@code null}.
      * @param emptySource      The empty-{@link Source} supplier for the produced Transformers.
      * @param overrideDefaultParser whether the produced Transformers' source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
      * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
-    SecureTemplates(final Templates delegate, final URIResolver uriResolver, final Supplier<Source> emptySource, final boolean overrideDefaultParser) {
+    SecureTemplates(final Templates delegate, final URIResolver factoryUriResolver, final Supplier<Source> emptySource, final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
-        this.uriResolver = uriResolver;
+        this.factoryUriResolver = factoryUriResolver;
         this.emptySource = emptySource;
         this.overrideDefaultParser = overrideDefaultParser;
     }
@@ -92,6 +92,6 @@ final class SecureTemplates implements Templates {
         final Transformer transformer = delegate.newTransformer();
         // Some implementations return null rather than throw, so preserve the delegate's behavior instead of enforcing the contract.
         // For example, https://issues.apache.org/jira/browse/XALANJ-2410
-        return transformer != null ? new SecureTransformer(transformer, uriResolver, emptySource, overrideDefaultParser) : null;
+        return transformer != null ? new SecureTransformer(transformer, factoryUriResolver, emptySource, overrideDefaultParser) : null;
     }
 }

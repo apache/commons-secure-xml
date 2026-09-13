@@ -17,7 +17,10 @@
 
 package org.apache.commons.xml.secure;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -26,8 +29,10 @@ import java.util.Properties;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.URIResolver;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
@@ -37,6 +42,33 @@ import org.junit.jupiter.api.Test;
 
 @Tag("trax")
 class SecureTransformerTest {
+
+    /** A transformer a caller configured before this library saw it, the shape a caller's own Templates hands out. */
+    private static SecureTransformer wrap(final URIResolver carried) throws Exception {
+        final Transformer delegate = TransformerFactory.newInstance().newTransformer(AttackTestSupport.resourceSource("with-document.xsl"));
+        delegate.setURIResolver(carried);
+        return new SecureTransformer(delegate, null, null, false);
+    }
+
+    @Test
+    void adoptsAResolverTheDelegateAlreadyCarries() throws Exception {
+        final URIResolver carried = (href, base) -> new StreamSource(new StringReader("<opted-in/>"));
+        final SecureTransformer transformer = wrap(carried);
+        assertSame(carried, transformer.getURIResolver(), "the resolver the delegate carried must survive the wrapping");
+        final StringWriter output = new StringWriter();
+        transformer.transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(output));
+        assertTrue(output.toString().contains("opted-in"), "the carried resolver must answer document()");
+        assertFalse(output.toString().contains(AttackTestSupport.LEAKED_MARKER), "the real resource must not be fetched");
+    }
+
+    @Test
+    void keepsTheFloorUnderACarriedResolverThatDeclines() throws Exception {
+        // Adopting the caller's resolver must not make the floor reachable around: what the resolver declines stays unfetched.
+        final SecureTransformer transformer = wrap((href, base) -> null);
+        final StringWriter output = new StringWriter();
+        transformer.transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(output));
+        assertFalse(output.toString().contains(AttackTestSupport.LEAKED_MARKER), "document() the resolver declined must not be fetched");
+    }
 
     @Test
     void forwardsEveryTransformerMethod() throws Exception {
