@@ -71,6 +71,19 @@ class SecureTransformerTest {
     }
 
     @Test
+    void carriesTheAdoptedResolverThroughReset() throws Exception {
+        final URIResolver carried = (href, base) -> new StreamSource(new StringReader("<opted-in/>"));
+        final SecureTransformer transformer = wrap(carried);
+        // reset() re-seeds the floor, and the seed is the resolver the delegate carried, not the factory's.
+        transformer.reset();
+        assertSame(carried, transformer.getURIResolver(), "reset must restore the resolver the delegate carried");
+        final StringWriter output = new StringWriter();
+        transformer.transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(output));
+        assertTrue(output.toString().contains("opted-in"), "the carried resolver must still answer document() after a reset");
+        assertFalse(output.toString().contains(AttackTestSupport.LEAKED_MARKER), "the real resource must not be fetched");
+    }
+
+    @Test
     void forwardsEveryTransformerMethod() throws Exception {
         final TransformerFactory factory = TransformerFactory.newInstance();
         final SecureTransformer transformer = new SecureTransformer(factory
