@@ -44,7 +44,7 @@ final class SecureTemplatesHandler implements TemplatesHandler {
     /**
      * Compile-time URIResolver snapshot, restored onto Transformers produced from the compiled Templates.
      */
-    private final URIResolver uriResolver;
+    private final URIResolver factoryUriResolver;
 
     /**
      * Empty-{@link Source} supplier for the produced Templates' floor; {@code null} means the default empty DOM.
@@ -60,15 +60,15 @@ final class SecureTemplatesHandler implements TemplatesHandler {
      * Constructs a new instance.
      *
      * @param delegate The delegate to wrap; must not be {@code null}.
-     * @param uriResolver The compile-time URIResolver snapshot to restore onto Transformers produced from the compiled Templates; may be {@code null}.
+     * @param factoryUriResolver The factory's compile-time URIResolver snapshot to restore onto Transformers produced from the compiled Templates; may be {@code null}.
      * @param emptySource The empty-{@link Source} supplier for the produced Templates; may be {@code null} for the default empty DOM document.
      * @param overrideDefaultParser whether the produced Templates' source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
      * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
-    SecureTemplatesHandler(final TemplatesHandler delegate, final URIResolver uriResolver, final Supplier<Source> emptySource,
+    SecureTemplatesHandler(final TemplatesHandler delegate, final URIResolver factoryUriResolver, final Supplier<Source> emptySource,
             final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
-        this.uriResolver = uriResolver;
+        this.factoryUriResolver = factoryUriResolver;
         this.emptySource = emptySource;
         this.overrideDefaultParser = overrideDefaultParser;
     }
@@ -102,7 +102,7 @@ final class SecureTemplatesHandler implements TemplatesHandler {
     public Templates getTemplates() {
         // Null before the stylesheet's endDocument (and on a failed compile in some implementations).
         final Templates templates = delegate.getTemplates();
-        return templates == null ? null : new SecureTemplates(templates, uriResolver, emptySource, overrideDefaultParser);
+        return templates == null ? null : new SecureTemplates(templates, factoryUriResolver, emptySource, overrideDefaultParser);
     }
 
     @Override

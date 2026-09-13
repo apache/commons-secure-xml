@@ -26,12 +26,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.Templates;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXTransformerFactory;
+import javax.xml.transform.stream.StreamSource;
 
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
@@ -201,6 +205,29 @@ class XMLFilterTest {
         assertNotNull(templates, "stylesheet failed to compile");
         final XMLFilter filter = factory.newXMLFilter(templates);
         assertFalse(filterAndCapture(filter, "<root/>").contains(AttackTestSupport.LEAKED_MARKER), "document() through XMLFilter(Templates) leaked");
+    }
+
+    @Test
+    void secureFilterKeepsAResolverTheCallersTemplatesSet() throws Exception {
+        final Templates compiled = TransformerFactory.newInstance().newTemplates(AttackTestSupport.resourceSource("with-document.xsl"));
+        // A caller's own Templates that configures the Transformer it hands out, the shape Apache CXF's XSLTJaxbProvider builds.
+        final Templates callers = new Templates() {
+
+            @Override
+            public Properties getOutputProperties() {
+                return compiled.getOutputProperties();
+            }
+
+            @Override
+            public Transformer newTransformer() throws TransformerConfigurationException {
+                final Transformer transformer = compiled.newTransformer();
+                transformer.setURIResolver((href, base) -> new StreamSource(new StringReader("<opted-in>resolver-applied</opted-in>")));
+                return transformer;
+            }
+        };
+        final String output = filterAndCapture(SaxSurfaceTestSupport.secureFactory().newXMLFilter(callers), "<root/>");
+        assertTrue(output.contains("resolver-applied"), "the resolver the caller's Templates set must answer document()");
+        assertFalse(output.contains(AttackTestSupport.LEAKED_MARKER), "the real resource must not be fetched");
     }
 
     @Test

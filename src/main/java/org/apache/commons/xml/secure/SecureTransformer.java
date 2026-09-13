@@ -34,9 +34,9 @@ import javax.xml.transform.URIResolver;
  * {@link SecureSAXParserFactory#secure(Source, boolean)} before delegating, and keeps an ignore-all {@link URIResolver} floor so runtime {@code document()} calls a
  * caller does not resolve return empty rather than being fetched.
  * <p>
- * The floor is installed on the delegate transformer at construction, seeded with the factory's compile-time resolver; {@link #setURIResolver(URIResolver)}
- * routes a caller's resolver through it rather than replacing it, so the block cannot be dropped. {@link #reset()} re-establishes the floor, seeded again with
- * the factory's compile-time resolver, matching the just-constructed state.
+ * The floor is installed on the delegate transformer at construction, seeded with the resolver the delegate already carried, or with the factory's
+ * compile-time resolver where it carried none; {@link #setURIResolver(URIResolver)} routes a caller's resolver through it rather than replacing it, so the
+ * block cannot be dropped. {@link #reset()} re-establishes the floor with that same seed, matching the just-constructed state.
  * </p>
  */
 final class SecureTransformer extends Transformer {
@@ -44,9 +44,10 @@ final class SecureTransformer extends Transformer {
     private final Transformer delegate;
 
     /**
-     * Compile-time URIResolver snapshot the floor is seeded with, both at construction and again on {@link #reset()}.
+     * URIResolver the floor is seeded with, both at construction and again on {@link #reset()}: the one the delegate carried, else the factory's compile-time
+     * snapshot.
      */
-    private final URIResolver uriResolver;
+    private final URIResolver initialUriResolver;
 
     private final FallbackIgnoreURIResolver floor;
 
@@ -60,16 +61,20 @@ final class SecureTransformer extends Transformer {
      * Constructs a new instance.
      *
      * @param delegate         The delegate to wrap; must not be {@code null}.
-     * @param uriResolver      The compile-time URIResolver snapshot to seed the floor with; may be {@code null}.
+     * @param factoryUriResolver The factory's compile-time URIResolver snapshot, used where the delegate carries none of its own; may be {@code null}.
      * @param emptySource      The empty-{@link Source} supplier for the produced Transformers; {@code null} for the default empty DOM document.
      * @param overrideDefaultParser whether the source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
      * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
-    SecureTransformer(final Transformer delegate, final URIResolver uriResolver, final Supplier<Source> emptySource, final boolean overrideDefaultParser) {
+    SecureTransformer(final Transformer delegate, final URIResolver factoryUriResolver, final Supplier<Source> emptySource,
+            final boolean overrideDefaultParser) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
-        this.uriResolver = uriResolver;
         this.overrideDefaultParser = overrideDefaultParser;
-        this.floor = new FallbackIgnoreURIResolver(uriResolver, emptySource, () -> overrideDefaultParser);
+        // A caller may have configured the delegate before it reached us; chain the floor onto that resolver rather than dropping it. A floor already there
+        // came from this library, so it is the factory's resolver that seeds the new one.
+        final URIResolver carried = delegate.getURIResolver();
+        this.initialUriResolver = carried == null || carried instanceof FallbackIgnoreURIResolver ? factoryUriResolver : carried;
+        this.floor = new FallbackIgnoreURIResolver(initialUriResolver, emptySource, () -> overrideDefaultParser);
         delegate.setURIResolver(floor);
     }
 
@@ -106,7 +111,7 @@ final class SecureTransformer extends Transformer {
     @Override
     public void reset() {
         delegate.reset();
-        floor.setDelegate(uriResolver);
+        floor.setDelegate(initialUriResolver);
         delegate.setURIResolver(floor);
     }
 
