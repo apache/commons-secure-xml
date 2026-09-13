@@ -29,8 +29,8 @@ buildscript {
     }
 }
 
-// Blocked upstream: AGP 9 records JUnit 5 assumption aborts as failures, so the 87 platform-dependent skips this suite makes on Android turn red.
-// AGP 8.6.1 with the same tests and the same JUnit 5 plugin reports them as skipped.
+// AGP 9 records this suite's JUnit 5 assumption aborts as failures in its aggregated test XML, where AGP 8.6.1 reported them as skips.
+// The build passes either way; only the uploaded report misstates them.
 plugins {
     id("com.android.library") version "9.4.0"
     id("de.mannodermaus.android-junit5") version "2.0.1"
