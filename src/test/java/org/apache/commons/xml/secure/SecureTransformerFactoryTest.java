@@ -248,6 +248,23 @@ class SecureTransformerFactoryTest {
     }
 
     @Test
+    void wrapsClassCastExceptionFromNewTransformerHandler() throws Exception {
+        final ClassCastException cause = new ClassCastException("Unsupported Templates implementation");
+        final SAXTransformerFactory factory = (SAXTransformerFactory) SecureTransformerFactory.secure(new NullProductsFactory() {
+
+            @Override
+            public TransformerHandler newTransformerHandler(final Templates templates) {
+                throw cause;
+            }
+        });
+        final Templates templates = TransformerFactory.newInstance().newTemplates(stylesheet());
+        final TransformerConfigurationException exception = assertThrows(TransformerConfigurationException.class,
+                () -> factory.newTransformerHandler(templates));
+        assertSame(cause, exception.getCause());
+        assertTrue(exception.getMessage().contains(templates.getClass().getName()), exception.getMessage());
+    }
+
+    @Test
     void wrapsEveryStandardAndSaxFactoryProduct() throws Exception {
         final SAXTransformerFactory factory = (SAXTransformerFactory) SecureTransformerFactory.newInstance();
         final URIResolver resolver = (href, base) -> null;
