@@ -32,7 +32,7 @@ buildscript {
 
 plugins {
     id("com.android.library") version "8.6.1"
-    id("de.mannodermaus.android-junit5") version "1.14.0.0"
+    id("de.mannodermaus.android-junit5") version "2.0.1"
 }
 
 /** Returns the `version` of the Maven project itself: the direct child of the root element, never the `parent` block's. */
