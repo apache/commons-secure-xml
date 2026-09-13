@@ -316,8 +316,10 @@ public final class SecureTransformerFactory {
          */
         @Override
         public TransformerHandler newTransformerHandler(final Templates templates) throws TransformerConfigurationException {
-            // Implementations cast templates.newTransformer() to their own Transformer type, so hand them the wrapped implementation Templates, not the wrapper.
-            final Templates unwrapped = unwrap(templates);
+            // Implementations:
+            // - cast templates.newTransformer() to their own Transformer type, so hand them the wrapped implementation Templates, not the wrapper;
+            // - raise NullPointerException for a null argument, except Saxon; rejecting it here keeps that uniform, as on the other methods.
+            final Templates unwrapped = unwrap(Objects.requireNonNull(templates, "templates"));
             try {
                 return secure(delegate.newTransformerHandler(unwrapped));
             } catch (final ClassCastException e) {

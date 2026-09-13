@@ -195,6 +195,17 @@ class SecureTransformerFactoryTest {
     }
 
     @Test
+    void rejectsNullInputOnEveryFactoryMethod() {
+        final SAXTransformerFactory factory = (SAXTransformerFactory) SecureTransformerFactory.newInstance();
+        assertThrows(NullPointerException.class, () -> factory.newTemplates(null));
+        assertThrows(NullPointerException.class, () -> factory.newTransformer(null));
+        assertThrows(NullPointerException.class, () -> factory.newTransformerHandler((Source) null));
+        assertThrows(NullPointerException.class, () -> factory.newTransformerHandler((Templates) null));
+        assertThrows(NullPointerException.class, () -> factory.newXMLFilter((Source) null));
+        assertThrows(NullPointerException.class, () -> factory.newXMLFilter((Templates) null));
+    }
+
+    @Test
     void rejectsForeignTemplatesFromNewTransformerHandler() throws Exception {
         final SAXTransformerFactory factory = (SAXTransformerFactory) SecureTransformerFactory.newInstance();
         final Templates own = factory.newTemplates(stylesheet());
