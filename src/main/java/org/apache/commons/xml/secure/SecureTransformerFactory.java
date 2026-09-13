@@ -151,6 +151,7 @@ public final class SecureTransformerFactory {
         /**
          * Returns the value, or reports its absence in the TrAX shape.
          *
+         * @param <T>   The type of the product.
          * @param value The value an implementation produced.
          * @param what  Name of the missing product, for the message.
          * @return The value, never {@code null}.
