@@ -47,28 +47,14 @@ import org.junit.jupiter.api.Test;
 @Tag("trax")
 class TransformerHandlerTest {
 
-    private static String transformViaHandler(final TransformerHandler handler) throws Exception {
-        final StringWriter sink = new StringWriter();
-        handler.setResult(new StreamResult(sink));
-        SaxSurfaceTestSupport.feed(handler, SaxSurfaceTestSupport.rootInput());
-        return sink.toString();
-    }
-
-    @Test
-    void secureGetTransformerDoesNotLeakDocument() throws Exception {
-        // The f004 bypass: pull the inner Transformer out of the handler and transform directly; the floor must ride along.
-        final SAXTransformerFactory factory = SaxSurfaceTestSupport.secureFactory();
-        final TransformerHandler handler = factory.newTransformerHandler(AttackTestSupport.resourceSource("with-document.xsl"));
-        final StringWriter sink = new StringWriter();
-        handler.getTransformer().transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink));
-        assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "document() through getTransformer() leaked");
-    }
-
-    @Test
-    void secureTransformerHandlerDoesNotLeakDocument() throws Exception {
-        final SAXTransformerFactory factory = SaxSurfaceTestSupport.secureFactory();
-        final TransformerHandler handler = factory.newTransformerHandler(AttackTestSupport.resourceSource("with-document.xsl"));
-        assertFalse(transformViaHandler(handler).contains(AttackTestSupport.LEAKED_MARKER), "document() through TransformerHandler leaked");
+    /** Skips the test where the implementation refuses a Templates it did not compile itself, as Saxon does. */
+    private static TransformerHandler assumeAcceptsForeignImplementation(final Templates callers) {
+        try {
+            return ((SAXTransformerFactory) TransformerFactory.newInstance()).newTransformerHandler(callers);
+        } catch (final TransformerConfigurationException e) {
+            Assumptions.abort("the implementation does not accept a foreign Templates: " + e.getMessage());
+            return null;
+        }
     }
 
     /** A caller's own Templates that only configures the Transformer it hands out, the shape Apache CXF's XSLTJaxbProvider builds. */
@@ -89,14 +75,21 @@ class TransformerHandlerTest {
         };
     }
 
-    /** Skips the test where the implementation refuses a Templates it did not compile itself, as Saxon does. */
-    private static TransformerHandler assumeAcceptsForeignImplementation(final Templates callers) {
-        try {
-            return ((SAXTransformerFactory) TransformerFactory.newInstance()).newTransformerHandler(callers);
-        } catch (final TransformerConfigurationException e) {
-            Assumptions.abort("the implementation does not accept a foreign Templates: " + e.getMessage());
-            return null;
-        }
+    private static String transformViaHandler(final TransformerHandler handler) throws Exception {
+        final StringWriter sink = new StringWriter();
+        handler.setResult(new StreamResult(sink));
+        SaxSurfaceTestSupport.feed(handler, SaxSurfaceTestSupport.rootInput());
+        return sink.toString();
+    }
+
+    @Test
+    void secureGetTransformerDoesNotLeakDocument() throws Exception {
+        // The f004 bypass: pull the inner Transformer out of the handler and transform directly; the floor must ride along.
+        final SAXTransformerFactory factory = SaxSurfaceTestSupport.secureFactory();
+        final TransformerHandler handler = factory.newTransformerHandler(AttackTestSupport.resourceSource("with-document.xsl"));
+        final StringWriter sink = new StringWriter();
+        handler.getTransformer().transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(sink));
+        assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "document() through getTransformer() leaked");
     }
 
     @Test
@@ -112,6 +105,13 @@ class TransformerHandlerTest {
         final TransformerHandler handler = SaxSurfaceTestSupport.secureFactory().newTransformerHandler(callers);
         assertSame(carried, handler.getTransformer().getURIResolver(), "the securing must not lose a resolver the implementation kept");
         assertFalse(transformViaHandler(handler).contains(AttackTestSupport.LEAKED_MARKER), "what that resolver declined must not be fetched");
+    }
+
+    @Test
+    void secureTransformerHandlerDoesNotLeakDocument() throws Exception {
+        final SAXTransformerFactory factory = SaxSurfaceTestSupport.secureFactory();
+        final TransformerHandler handler = factory.newTransformerHandler(AttackTestSupport.resourceSource("with-document.xsl"));
+        assertFalse(transformViaHandler(handler).contains(AttackTestSupport.LEAKED_MARKER), "document() through TransformerHandler leaked");
     }
 
     @Test

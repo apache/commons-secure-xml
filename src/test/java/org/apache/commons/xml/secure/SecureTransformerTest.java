@@ -62,15 +62,6 @@ class SecureTransformerTest {
     }
 
     @Test
-    void keepsTheFloorUnderACarriedResolverThatDeclines() throws Exception {
-        // Adopting the caller's resolver must not make the floor reachable around: what the resolver declines stays unfetched.
-        final SecureTransformer transformer = wrap((href, base) -> null);
-        final StringWriter output = new StringWriter();
-        transformer.transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(output));
-        assertFalse(output.toString().contains(AttackTestSupport.LEAKED_MARKER), "document() the resolver declined must not be fetched");
-    }
-
-    @Test
     void carriesTheAdoptedResolverThroughReset() throws Exception {
         final URIResolver carried = (href, base) -> new StreamSource(new StringReader("<opted-in/>"));
         final SecureTransformer transformer = wrap(carried);
@@ -116,5 +107,14 @@ class SecureTransformerTest {
         assertNotNull(transformer.getURIResolver());
         transformer.transform(new DOMSource(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()), new StreamResult(new StringWriter()));
         transformer.reset();
+    }
+
+    @Test
+    void keepsTheFloorUnderACarriedResolverThatDeclines() throws Exception {
+        // Adopting the caller's resolver must not make the floor reachable around: what the resolver declines stays unfetched.
+        final SecureTransformer transformer = wrap((href, base) -> null);
+        final StringWriter output = new StringWriter();
+        transformer.transform(AttackTestSupport.streamSource("<root/>"), new StreamResult(output));
+        assertFalse(output.toString().contains(AttackTestSupport.LEAKED_MARKER), "document() the resolver declined must not be fetched");
     }
 }
