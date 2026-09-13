@@ -325,10 +325,24 @@ public final class SecureTransformerFactory {
             return secure(delegate.newTransformerHandler(SecureSAXParserFactory.secure(source, overrideDefaultParser())));
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>Most implementations reject a {@link Templates} they did not compile, some in the TrAX shape, others by casting it or its Transformer to their
+         * own type. Both reach the caller as a {@link TransformerConfigurationException}.</p>
+         */
         @Override
         public TransformerHandler newTransformerHandler(final Templates templates) throws TransformerConfigurationException {
-            // Implementations cast templates.newTransformer() to their own Transformer type, so hand them the wrapped implementation Templates, not the wrapper.
-            return secure(delegate.newTransformerHandler(unwrap(templates)));
+            // Implementations:
+            // - cast templates.newTransformer() to their own Transformer type, so hand them the wrapped implementation Templates, not the wrapper;
+            // - raise NullPointerException for a null argument, except Saxon; rejecting it here keeps that uniform, as on the other methods.
+            final Templates unwrapped = unwrap(Objects.requireNonNull(templates, "templates"));
+            try {
+                return secure(delegate.newTransformerHandler(unwrapped));
+            } catch (final ClassCastException e) {
+                throw new TransformerConfigurationException("Failed to create a TransformerHandler from a Templates of type "
+                        + unwrapped.getClass().getName(), e);
+            }
         }
 
         /**

@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.StringReader;
 import java.util.HashMap;
@@ -192,6 +193,43 @@ class SecureTransformerFactoryTest {
     @Test
     void rejectsDelegatesThatCannotEnableSecureProcessing() {
         assertThrows(SecureException.class, () -> SecureTransformerFactory.secure(new RejectingFeatureFactory()));
+    }
+
+    @Test
+    void rejectsNullInputOnEveryFactoryMethod() {
+        final SAXTransformerFactory factory = (SAXTransformerFactory) SecureTransformerFactory.newInstance();
+        assertThrows(NullPointerException.class, () -> factory.newTemplates(null));
+        assertThrows(NullPointerException.class, () -> factory.newTransformer(null));
+        assertThrows(NullPointerException.class, () -> factory.newTransformerHandler((Source) null));
+        assertThrows(NullPointerException.class, () -> factory.newTransformerHandler((Templates) null));
+        assertThrows(NullPointerException.class, () -> factory.newXMLFilter((Source) null));
+        assertThrows(NullPointerException.class, () -> factory.newXMLFilter((Templates) null));
+    }
+
+    @Test
+    void rejectsForeignTemplatesFromNewTransformerHandler() throws Exception {
+        final SAXTransformerFactory factory = (SAXTransformerFactory) SecureTransformerFactory.newInstance();
+        final Templates own = factory.newTemplates(stylesheet());
+        // A caller's own Templates wrapper, the shape a framework uses to carry parameters onto the Transformer it hands out.
+        final Templates foreign = new Templates() {
+
+            @Override
+            public Properties getOutputProperties() {
+                return own.getOutputProperties();
+            }
+
+            @Override
+            public Transformer newTransformer() throws TransformerConfigurationException {
+                return own.newTransformer();
+            }
+        };
+        // Xalan and XSLTC reject a Templates they did not compile with an undeclared ClassCastException, where Saxon uses the TrAX shape.
+        final TransformerConfigurationException exception = assertThrows(TransformerConfigurationException.class,
+                () -> factory.newTransformerHandler(foreign));
+        // Saxon reports it in its own words; where the ClassCastException escaped instead, it must arrive as the cause, under a message naming the Templates.
+        if (exception.getCause() instanceof ClassCastException) {
+            assertTrue(exception.getMessage().contains(foreign.getClass().getName()), exception.getMessage());
+        }
     }
 
     @Test
