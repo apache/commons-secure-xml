@@ -308,10 +308,21 @@ public final class SecureTransformerFactory {
             return secure(delegate.newTransformerHandler(SecureSAXParserFactory.secure(source, overrideDefaultParser())));
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>Most implementations reject a {@link Templates} they did not compile, some in the TrAX shape, others by casting it or its Transformer to their
+         * own type. Both reach the caller as a {@link TransformerConfigurationException}.</p>
+         */
         @Override
         public TransformerHandler newTransformerHandler(final Templates templates) throws TransformerConfigurationException {
             // Implementations cast templates.newTransformer() to their own Transformer type, so hand them the wrapped implementation Templates, not the wrapper.
-            return secure(delegate.newTransformerHandler(unwrap(templates)));
+            final Templates unwrapped = unwrap(templates);
+            try {
+                return secure(delegate.newTransformerHandler(unwrapped));
+            } catch (final ClassCastException e) {
+                throw new TransformerConfigurationException("Underlying implementation does not accept foreign Templates: " + unwrapped.getClass().getName(), e);
+            }
         }
 
         /**

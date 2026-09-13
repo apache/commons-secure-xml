@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -190,6 +191,27 @@ class SecureTransformerFactoryTest {
     @Test
     void rejectsDelegatesThatCannotEnableSecureProcessing() {
         assertThrows(SecureException.class, () -> SecureTransformerFactory.secure(new RejectingFeatureFactory()));
+    }
+
+    @Test
+    void rejectsForeignTemplatesFromNewTransformerHandler() throws Exception {
+        final SAXTransformerFactory factory = (SAXTransformerFactory) SecureTransformerFactory.newInstance();
+        final Templates own = factory.newTemplates(stylesheet());
+        // A caller's own Templates wrapper, the shape a framework uses to carry parameters onto the Transformer it hands out.
+        final Templates foreign = new Templates() {
+
+            @Override
+            public Properties getOutputProperties() {
+                return own.getOutputProperties();
+            }
+
+            @Override
+            public Transformer newTransformer() throws TransformerConfigurationException {
+                return own.newTransformer();
+            }
+        };
+        // Xalan and XSLTC reject a Templates they did not compile with an undeclared ClassCastException, where Saxon uses the TrAX shape.
+        assertThrows(TransformerConfigurationException.class, () -> factory.newTransformerHandler(foreign));
     }
 
     @Test
