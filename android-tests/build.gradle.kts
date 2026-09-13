@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import com.android.build.api.dsl.ManagedVirtualDevice
 import org.apache.commons.xml.secure.SecureDocumentBuilderFactory
 import org.apache.commons.xml.secure.SecureXPathFactory
 import org.gradle.api.tasks.compile.JavaCompile
@@ -30,8 +29,10 @@ buildscript {
     }
 }
 
+// AGP 9 records this suite's JUnit 5 assumption aborts as failures in its aggregated test XML, where AGP 8.6.1 reported them as skips.
+// The build passes either way; only the uploaded report misstates them.
 plugins {
-    id("com.android.library") version "8.6.1"
+    id("com.android.library") version "9.4.0"
     id("de.mannodermaus.android-junit5") version "2.0.1"
 }
 
@@ -59,7 +60,7 @@ android {
     defaultConfig {
         // java.lang.invoke, used by the newDefault* and newNS* lookups, exists from API level 26.
         minSdk = 26
-        // androidx.test runner; Mannodermaus's android-junit5 plugin slots a JUnit 5 RunnerBuilder under it so AndroidJUnitRunner picks up Jupiter tests.
+        // androidx.test runner; what makes it run Jupiter tests is in the junitPlatform block below.
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -89,10 +90,10 @@ android {
     @Suppress("UnstableApiUsage")
     testOptions {
         managedDevices {
-            devices {
+            localDevices {
                 // API 33 is the first AOSP release shipping libexpat >= 2.4, which has the built-in billion-laughs check.
                 // Earlier images (e.g. API 31 with libexpat 2.3.0) carry no native amplification protection.
-                maybeCreate<ManagedVirtualDevice>("api33").apply {
+                create("api33") {
                     device = "Pixel 6a"
                     apiLevel = 33
                     systemImageSource = "aosp"
@@ -109,6 +110,15 @@ tasks.withType<JavaCompile>().configureEach {
 
 // Skip JAXP groups whose factories Android does not ship
 junitPlatform {
+    // The plugin slots a RunnerBuilder under AndroidJUnitRunner, which is how Jupiter tests are discovered on the device, and always passes a
+    // configurationParameters argument alongside it, empty unless this block fills it:
+    //
+    // am instrument ... -e configurationParameters  -e de.mannodermaus.junit.unsupported.behavior fail ...
+    //
+    // Left empty, the device-side activity manager takes the next -e for that value, so the key after it lands where the component belongs:
+    //
+    // No instrumentation found for: de.mannodermaus.junit.unsupported.behavior
+    configurationParameters(mapOf("junit.jupiter.execution.parallel.enabled" to "false"))
     filters {
         // Pass single tag expression
         includeTags("dom | sax | schema | trax")
