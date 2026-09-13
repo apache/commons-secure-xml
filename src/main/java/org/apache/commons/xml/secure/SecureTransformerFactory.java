@@ -321,7 +321,8 @@ public final class SecureTransformerFactory {
             try {
                 return secure(delegate.newTransformerHandler(unwrapped));
             } catch (final ClassCastException e) {
-                throw new TransformerConfigurationException("Underlying implementation does not accept foreign Templates: " + unwrapped.getClass().getName(), e);
+                throw new TransformerConfigurationException("Failed to create a TransformerHandler from a Templates of type "
+                        + unwrapped.getClass().getName(), e);
             }
         }
 
