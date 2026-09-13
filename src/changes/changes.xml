@@ -35,6 +35,7 @@ The <action> type attribute can be add, update, fix, or remove.
       <!-- FIX -->
       <action type="fix" dev="ggregory" due-to="Gary Gregory">Fix the OpenRewrite migration recipe to target static method calls instead of class references.</action>
       <action type="fix" dev="ggregory" due-to="Gary Gregory">Fix the OpenRewrite migration recipe to add a dependency on org.apache.commons:commons-secure-xml:1.0.0.</action>
+      <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Fix a NullPointerException when an XMLFilter with a self-driven parent reader is parsed with a null InputSource. #86</action>
       <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Create the Transformer of an XMLFilter eagerly and reuse it for every parse.</action>
       <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Report a stylesheet that produces no XMLFilter as a TransformerConfigurationException instead of returning null.</action>
       <!-- ADD -->

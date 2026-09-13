@@ -53,6 +53,9 @@ import org.xml.sax.helpers.XMLFilterImpl;
  */
 final class SecureXMLFilter extends XMLFilterImpl implements ErrorListener {
 
+    /** System id of the {@link InputSource} substituted for a caller's {@code null} one in {@link #parse(InputSource)}; a URN, so nothing can fetch it. */
+    static final String NO_INPUT_SYSTEM_ID = "urn:uuid:a47f732e-9111-42db-b648-5e24b7d663f3";
+
     /**
      * Bridges a TrAX report to the SAX callback shape.
      *
@@ -144,7 +147,9 @@ final class SecureXMLFilter extends XMLFilterImpl implements ErrorListener {
             setParent(SecureSAXParserFactory.newXMLReader(overrideDefaultParser));
         }
         try {
-            transformer.transform(new SAXSource(getParent(), input), result);
+            // A self-driven parent needs no InputSource, so a caller may pass null here; most TrAX implementations dereference the one they get unchecked.
+            // See: https://issues.apache.org/jira/browse/XALANJ-2851
+            transformer.transform(new SAXSource(getParent(), input != null ? input : new InputSource(NO_INPUT_SYSTEM_ID)), result);
         } catch (final TransformerException e) {
             // The parent reader's parse errors and the handler's own exceptions arrive wrapped; rethrow the original rather than nesting the hierarchies.
             final Throwable cause = e.getCause();
