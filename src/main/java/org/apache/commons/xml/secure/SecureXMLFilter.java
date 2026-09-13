@@ -141,6 +141,7 @@ final class SecureXMLFilter extends XMLFilterImpl implements ErrorListener {
             // The filter is the listener, so TrAX error reports reach the caller-set ErrorHandler like the parent reader's SAX reports do.
             transformer.setErrorListener(this);
             // A self-driven parent needs no InputSource, so a caller may pass null here; most TrAX implementations dereference the one they get unchecked.
+            // See: https://issues.apache.org/jira/browse/XALANJ-2851
             transformer.transform(new SAXSource(parent, input != null ? input : new InputSource(NO_INPUT_SYSTEM_ID)), result);
         } catch (final TransformerException e) {
             // The parent reader's parse errors and the handler's own exceptions arrive wrapped; rethrow the original rather than nesting the hierarchies.
