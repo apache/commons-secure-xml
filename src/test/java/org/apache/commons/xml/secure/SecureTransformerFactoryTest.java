@@ -186,7 +186,8 @@ class SecureTransformerFactoryTest {
         assertNull(factory.newTransformerHandler());
         assertNull(factory.newTransformerHandler(stylesheet()));
         assertNull(factory.newTransformerHandler(templates));
-        assertNull(factory.newXMLFilter(stylesheet()));
+        // A filter has no null to hand back: a null in this contract would mean the factory has no filters at all.
+        assertThrows(TransformerConfigurationException.class, () -> factory.newXMLFilter(stylesheet()));
         factory.setAttribute("test", "value");
         assertEquals("value", factory.getAttribute("test"));
         factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -232,6 +233,26 @@ class SecureTransformerFactoryTest {
         if (exception.getCause() instanceof ClassCastException) {
             assertTrue(exception.getMessage().contains(foreign.getClass().getName()), exception.getMessage());
         }
+    }
+
+    @Test
+    void rejectsTemplatesThatProduceNoTransformer() {
+        final Templates templates = new Templates() {
+
+            @Override
+            public Properties getOutputProperties() {
+                return new Properties();
+            }
+
+            @Override
+            public Transformer newTransformer() {
+                // Xalan hands back null instead of throwing when the stylesheet failed to compile: XALANJ-2410.
+                return null;
+            }
+        };
+        final SAXTransformerFactory factory = (SAXTransformerFactory) SecureTransformerFactory.newInstance();
+        // A filter has no null to hand back, so the null the wrappers preserve from Templates is reported in the TrAX shape instead.
+        assertThrows(TransformerConfigurationException.class, () -> factory.newXMLFilter(templates));
     }
 
     @Test

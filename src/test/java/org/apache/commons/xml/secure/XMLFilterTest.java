@@ -169,6 +169,14 @@ class XMLFilterTest {
     }
 
     @Test
+    void secureFilterDoesNotLeakDocumentOnRepeatedParse() throws Exception {
+        // One Transformer drives every parse of a filter, so the floor has to hold on the second parse as it did on the first.
+        final XMLFilter filter = SaxSurfaceTestSupport.secureFactory().newXMLFilter(AttackTestSupport.resourceSource("with-document.xsl"));
+        assertFalse(filterAndCapture(filter, "<root/>").contains(AttackTestSupport.LEAKED_MARKER), "document() leaked on the first parse");
+        assertFalse(filterAndCapture(filter, "<root/>").contains(AttackTestSupport.LEAKED_MARKER), "document() leaked on the second parse");
+    }
+
+    @Test
     void secureFilterDoesNotLeakExternalEntity() throws Exception {
         // The f003 vector: with no caller-set parent, the input must be parsed by a secure reader, not a self-provisioned permissive one.
         final XMLFilter filter = SaxSurfaceTestSupport.secureFactory().newXMLFilter(AttackTestSupport.streamSource(IDENTITY_XSLT));
@@ -182,6 +190,8 @@ class XMLFilterTest {
         filter.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
         final SAXException e = assertThrows(SAXException.class, () -> filter.parse(new InputSource(new StringReader("<root>"))));
         assertNotReWrapped(e);
+        // The parent is wired once, when it is set, so a repeated parse must still report to the caller's ErrorHandler.
+        assertNotReWrapped(assertThrows(SAXException.class, () -> filter.parse(new InputSource(new StringReader("<root>")))));
     }
 
     @Test
@@ -230,25 +240,29 @@ class XMLFilterTest {
 
     @Test
     void secureFilterRoutesEntityResolverToParent() throws Exception {
-        // parse must wire the caller-set EntityResolver to the parent reader, chaining it onto the floor so a caller can opt a specific entity in.
+        // setParent must wire the caller-set EntityResolver to the parent reader, chaining it onto the floor so a caller can opt a specific entity in.
         Assumptions.assumeFalse(AttackTestSupport.IS_ANDROID, "Android's Expat does not resolve the external general entity here");
         final XMLFilter filter = SaxSurfaceTestSupport.secureFactory().newXMLFilter(AttackTestSupport.streamSource(IDENTITY_XSLT));
         filter.setEntityResolver((publicId, systemId) -> new InputSource(new StringReader("resolved-by-caller")));
         final String output = filterAndCapture(filter, entityPayload());
         assertTrue(output.contains("resolved-by-caller"), "caller-set EntityResolver should opt the external entity in through the parent");
         assertFalse(output.contains(AttackTestSupport.LEAKED_MARKER), "the real external resource must not be fetched");
+        // The parent is wired once, when it is set, so a repeated parse must still reach the caller's resolver.
+        final String repeated = filterAndCapture(filter, entityPayload());
+        assertTrue(repeated.contains("resolved-by-caller"), "caller-set EntityResolver should still be reached on a repeated parse");
+        assertFalse(repeated.contains(AttackTestSupport.LEAKED_MARKER), "the real external resource must not be fetched on a repeated parse");
     }
 
     @Test
     void secureFilterWiresCallbacksToParent() throws Exception {
-        // parse must perform the XMLFilterImpl.setupParse wiring on the parent for the resolver, DTD and error callbacks (the ContentHandler is owned by the
-        // transformer). The wiring calls are asserted directly on a recording parent: which of them the implementation later consults or overwrites varies.
+        // setParent must perform the XMLFilterImpl.setupParse wiring on the parent for the resolver, DTD and error callbacks (the ContentHandler is owned by
+        // the transformer). The wiring calls are asserted directly on a recording parent: which of them the implementation later consults or overwrites varies.
         final XMLFilter filter = SaxSurfaceTestSupport.secureFactory().newXMLFilter(AttackTestSupport.streamSource(IDENTITY_XSLT));
         final SelfDrivenParent parent = new SelfDrivenParent();
         filter.setParent(parent);
         assertEquals("", filterAndCapture(filter, "<ignored/>"));
         assertEquals(3, parent.wired.stream().filter(callback -> callback == filter).count(),
-                "parse should wire the filter as the parent's EntityResolver, DTDHandler and ErrorHandler: " + parent.wired);
+                "setParent should wire the filter as the parent's EntityResolver, DTDHandler and ErrorHandler: " + parent.wired);
     }
 
     @Test
