@@ -54,7 +54,7 @@ final class SecureTransformer extends Transformer {
      * Snapshot of the factory's {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} outcome at creation, like the JDK copies the feature onto the
      * transformers it creates.
      */
-    private final boolean overrideDefaultParser;
+    final boolean overrideDefaultParser;
 
     /**
      * Constructs a new instance.

@@ -323,13 +323,19 @@ public final class SecureTransformerFactory {
         @Override
         public XMLFilter newXMLFilter(final Source source) throws TransformerConfigurationException {
             final Templates templates = newTemplates(source);
-            return templates == null ? null : new SecureXMLFilter((SecureTemplates) templates);
+            return templates == null ? null : newXMLFilter(templates);
         }
 
         @Override
         public XMLFilter newXMLFilter(final Templates templates) throws TransformerConfigurationException {
-            return new SecureXMLFilter(templates instanceof SecureTemplates ? (SecureTemplates) templates
-                    : new SecureTemplates(templates, getURIResolver(), emptySource, overrideDefaultParser()));
+            final Transformer transformer = templates.newTransformer();
+            // Xalan hands back null instead of throwing when the stylesheet failed to compile: XALANJ-2410.
+            if (transformer == null) {
+                throw new TransformerConfigurationException("Underlying implementation returned a null Transformer.");
+            }
+            return new SecureXMLFilter(transformer instanceof SecureTransformer
+                    ? (SecureTransformer) transformer
+                    : new SecureTransformer(transformer, getURIResolver(), emptySource, overrideDefaultParser()));
         }
 
         /**

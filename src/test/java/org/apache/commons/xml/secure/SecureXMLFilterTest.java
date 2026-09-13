@@ -18,6 +18,7 @@
 package org.apache.commons.xml.secure;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -53,7 +54,7 @@ class SecureXMLFilterTest {
     private static SecureXMLFilter filter() throws Exception {
         final Templates templates = TransformerFactory.newInstance().newTemplates(new StreamSource(new StringReader(
                 "<xsl:stylesheet version='1.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:template match='@*|node()'><xsl:copy><xsl:apply-templates select='@*|node()'/></xsl:copy></xsl:template></xsl:stylesheet>")));
-        return new SecureXMLFilter(new SecureTemplates(templates, null, null, false));
+        return new SecureXMLFilter(new SecureTransformer(templates.newTransformer(), null, null, false));
     }
 
     @Test
@@ -69,6 +70,14 @@ class SecureXMLFilterTest {
         });
         final SAXException exception = assertThrows(SAXException.class, () -> filter.parse(new InputSource(new StringReader("<root/>"))));
         assertEquals("handler", exception.getMessage());
+    }
+
+    @Test
+    void rejectsSaxEventsPushedIntoTheFilter() throws Exception {
+        final SecureXMLFilter filter = filter();
+        filter.setContentHandler(new DefaultHandler());
+        // The ContentHandler role is inherited from XMLFilterImpl; events pushed in that way would reach the handler untransformed.
+        assertThrows(SAXException.class, filter::startDocument);
     }
 
     @Test
@@ -188,10 +197,31 @@ class SecureXMLFilterTest {
                 };
             }
         };
-        final SecureXMLFilter filter = new SecureXMLFilter(new SecureTemplates(templates, null, null, false));
+        final SecureXMLFilter filter = new SecureXMLFilter(new SecureTransformer(templates.newTransformer(), null, null, false));
         filter.setContentHandler(new DefaultHandler());
         final IOException exception = assertThrows(IOException.class, () -> filter.parse(new InputSource(new StringReader("<root/>"))));
         assertEquals("transform", exception.getMessage());
+    }
+
+    @Test
+    void reusesOneTransformerAcrossParses() throws Exception {
+        final Templates templates = TransformerFactory.newInstance().newTemplates(new StreamSource(new StringReader(
+                "<xsl:stylesheet version='1.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform'><xsl:param name='p'/>"
+                        + "<xsl:template match='/'><out><xsl:value-of select='$p'/></out></xsl:template></xsl:stylesheet>")));
+        final SecureXMLFilter filter = new SecureXMLFilter(new SecureTransformer(templates.newTransformer(), null, null, false));
+        final Transformer transformer = filter.getTransformer();
+        assertInstanceOf(SecureTransformer.class, transformer, "the reused Transformer must carry the resolver floor");
+        transformer.setParameter("p", "carried");
+        final StringBuilder first = new StringBuilder();
+        filter.setContentHandler(AttackTestSupport.capturingHandler(first));
+        filter.parse(new InputSource(new StringReader("<root/>")));
+        assertEquals("carried", first.toString());
+        final StringBuilder second = new StringBuilder();
+        filter.setContentHandler(AttackTestSupport.capturingHandler(second));
+        filter.parse(new InputSource(new StringReader("<root/>")));
+        // The parameter survives the first parse only because the second runs on the same Transformer.
+        assertEquals("carried", second.toString());
+        assertSame(transformer, filter.getTransformer());
     }
 
     @Test

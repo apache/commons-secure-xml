@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -190,6 +191,26 @@ class SecureTransformerFactoryTest {
     @Test
     void rejectsDelegatesThatCannotEnableSecureProcessing() {
         assertThrows(SecureException.class, () -> SecureTransformerFactory.secure(new RejectingFeatureFactory()));
+    }
+
+    @Test
+    void rejectsTemplatesThatProduceNoTransformer() {
+        final Templates templates = new Templates() {
+
+            @Override
+            public Properties getOutputProperties() {
+                return new Properties();
+            }
+
+            @Override
+            public Transformer newTransformer() {
+                // Xalan hands back null instead of throwing when the stylesheet failed to compile: XALANJ-2410.
+                return null;
+            }
+        };
+        final SAXTransformerFactory factory = (SAXTransformerFactory) SecureTransformerFactory.newInstance();
+        // A filter has no null to hand back, so the null the wrappers preserve from Templates is reported in the TrAX shape instead.
+        assertThrows(TransformerConfigurationException.class, () -> factory.newXMLFilter(templates));
     }
 
     @Test

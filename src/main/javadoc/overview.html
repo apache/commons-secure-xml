@@ -315,8 +315,20 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
       <p>
         There is no caching or pooling inside
         <code>org.apache.commons.xml.secure</code>;
-        callers on a hot path are responsible for their own caching. The returned factories inherit the thread-safety properties of the underlying JAXP
-        implementation, which in practice means they are not thread-safe. Create a new factory per thread or synchronize externally.
+        callers on a hot path are responsible for their own caching.
+        The returned factories inherit the thread-safety properties of the underlying JAXP implementation,
+        which in practice means they are not thread-safe.
+        Create a new factory per thread or synchronize externally.
+      </p>
+      <p>
+        A filter from
+        <code>newXMLFilter(...)</code>
+        runs every parse on a single
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/Transformer.html"><code>Transformer</code></a>,
+        created with it,
+        and carries that object's reuse contract:
+        you may parse with it again once a parse has finished,
+        but not from two threads at once.
       </p>
     </section>
   </section>
