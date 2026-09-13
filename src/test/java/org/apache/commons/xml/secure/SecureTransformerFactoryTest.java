@@ -211,7 +211,9 @@ class SecureTransformerFactoryTest {
             }
         };
         // Xalan and XSLTC reject a Templates they did not compile with an undeclared ClassCastException, where Saxon uses the TrAX shape.
-        assertThrows(TransformerConfigurationException.class, () -> factory.newTransformerHandler(foreign));
+final TransformerConfigurationException exception = assertThrows(TransformerConfigurationException.class, () -> factory.newTransformerHandler(foreign));
+        assertEquals("Underlying implementation does not accept foreign Templates: " + foreign.getClass().getName(), exception.getMessage());
+        assertInstanceOf(ClassCastException.class, exception.getCause());
     }
 
     @Test
