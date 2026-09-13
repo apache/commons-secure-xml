@@ -31,7 +31,7 @@ buildscript {
 }
 
 plugins {
-    id("com.android.library") version "8.6.1"
+    id("com.android.library") version "9.4.0"
     id("de.mannodermaus.android-junit5") version "2.0.1"
 }
 
