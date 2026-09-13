@@ -182,7 +182,8 @@ class SecureTransformerFactoryTest {
         assertNull(factory.newTransformerHandler());
         assertNull(factory.newTransformerHandler(stylesheet()));
         assertNull(factory.newTransformerHandler(templates));
-        assertNull(factory.newXMLFilter(stylesheet()));
+        // A filter has no null to hand back: a null in this contract would mean the factory has no filters at all.
+        assertThrows(TransformerConfigurationException.class, () -> factory.newXMLFilter(stylesheet()));
         factory.setAttribute("test", "value");
         assertEquals("value", factory.getAttribute("test"));
         factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);

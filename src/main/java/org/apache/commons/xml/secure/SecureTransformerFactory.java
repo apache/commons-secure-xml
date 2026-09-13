@@ -148,6 +148,22 @@ public final class SecureTransformerFactory {
             }
         }
 
+        /**
+         * Returns the value, or reports its absence in the TrAX shape.
+         *
+         * @param value The value an implementation produced.
+         * @param what  Name of the missing product, for the message.
+         * @return The value, never {@code null}.
+         * @throws TransformerConfigurationException Thrown if {@code value} is {@code null}.
+         */
+        private static <T> T required(final T value, final String what) throws TransformerConfigurationException {
+            // Xalan hands back null instead of throwing when the stylesheet failed to compile: XALANJ-2410.
+            if (value == null) {
+                throw new TransformerConfigurationException("Underlying implementation returned a null " + what + ".");
+            }
+            return value;
+        }
+
         private static Templates unwrap(final Templates templates) {
             return templates instanceof SecureTemplates ? ((SecureTemplates) templates).getDelegate() : templates;
         }
@@ -322,17 +338,12 @@ public final class SecureTransformerFactory {
          */
         @Override
         public XMLFilter newXMLFilter(final Source source) throws TransformerConfigurationException {
-            final Templates templates = newTemplates(source);
-            return templates == null ? null : newXMLFilter(templates);
+            return newXMLFilter(required(newTemplates(source), "Templates"));
         }
 
         @Override
         public XMLFilter newXMLFilter(final Templates templates) throws TransformerConfigurationException {
-            final Transformer transformer = templates.newTransformer();
-            // Xalan hands back null instead of throwing when the stylesheet failed to compile: XALANJ-2410.
-            if (transformer == null) {
-                throw new TransformerConfigurationException("Underlying implementation returned a null Transformer.");
-            }
+            final Transformer transformer = required(templates.newTransformer(), "Transformer");
             return new SecureXMLFilter(transformer instanceof SecureTransformer
                     ? (SecureTransformer) transformer
                     : new SecureTransformer(transformer, getURIResolver(), emptySource, overrideDefaultParser()));
