@@ -16,14 +16,40 @@
  */
 
 import com.android.build.api.dsl.ManagedVirtualDevice
+import org.apache.commons.xml.secure.SecureDocumentBuilderFactory
+import org.apache.commons.xml.secure.SecureXPathFactory
 import org.gradle.api.tasks.compile.JavaCompile
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        // Dogfooding, not the artifact under test: this parses the POM below, while the tests run against the JAR in ../target.
+        classpath("org.apache.commons:commons-secure-xml:1.0.0")
+    }
+}
 
 plugins {
     id("com.android.library") version "8.6.1"
     id("de.mannodermaus.android-junit5") version "1.14.0.0"
 }
 
-val libraryVersion = "1.0.0-SNAPSHOT"
+/** Returns the `version` of the Maven project itself: the direct child of the root element, never the `parent` block's. */
+fun projectVersionOf(pom: File): String {
+    // newInstance, not newNSInstance: the path below is spelled plainly, and would select nothing if the POM namespace were honoured.
+    val documents = SecureDocumentBuilderFactory.newInstance()
+    val version = SecureXPathFactory.newInstance().newXPath()
+        .evaluate("/project/version", documents.newDocumentBuilder().parse(pom))
+        .trim()
+    if (version.isEmpty()) {
+        throw GradleException("No <version> element in ${pom}")
+    }
+    return version
+}
+
+// Taken from the Maven build instead of repeated here, so the JAR this module looks for follows a version bump.
+val libraryVersion = projectVersionOf(rootProject.file("../pom.xml"))
 val libraryJar = rootProject.file("../target/commons-secure-xml-${libraryVersion}.jar")
 
 android {
