@@ -50,6 +50,9 @@ import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLFilter;
 
+/**
+ * Tests {@link SecureTransformerFactory}.
+ */
 @Tag("trax")
 class SecureTransformerFactoryTest {
 
@@ -183,7 +186,8 @@ class SecureTransformerFactoryTest {
         assertNull(factory.newTransformerHandler());
         assertNull(factory.newTransformerHandler(stylesheet()));
         assertNull(factory.newTransformerHandler(templates));
-        assertNull(factory.newXMLFilter(stylesheet()));
+        // A filter has no null to hand back: a null in this contract would mean the factory has no filters at all.
+        assertThrows(TransformerConfigurationException.class, () -> factory.newXMLFilter(stylesheet()));
         factory.setAttribute("test", "value");
         assertEquals("value", factory.getAttribute("test"));
         factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -232,6 +236,26 @@ class SecureTransformerFactoryTest {
     }
 
     @Test
+    void rejectsTemplatesThatProduceNoTransformer() {
+        final Templates templates = new Templates() {
+
+            @Override
+            public Properties getOutputProperties() {
+                return new Properties();
+            }
+
+            @Override
+            public Transformer newTransformer() {
+                // Xalan hands back null instead of throwing when the stylesheet failed to compile: XALANJ-2410.
+                return null;
+            }
+        };
+        final SAXTransformerFactory factory = (SAXTransformerFactory) SecureTransformerFactory.newInstance();
+        // A filter has no null to hand back, so the null the wrappers preserve from Templates is reported in the TrAX shape instead.
+        assertThrows(TransformerConfigurationException.class, () -> factory.newXMLFilter(templates));
+    }
+
+    @Test
     void securesAssociatedStylesheetSourcesOfEverySupportedShape() throws Exception {
         final SAXTransformerFactory factory = (SAXTransformerFactory) SecureTransformerFactory.newInstance();
         associatedStylesheet(factory, new StreamSource(new StringReader("<root/>")));
@@ -242,6 +266,23 @@ class SecureTransformerFactoryTest {
                 new SAXSource(SecureSAXParserFactory.newXMLReader(false), new InputSource(new StringReader("<root/>"))));
         associatedStylesheet(factory,
                 new DOMSource(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()));
+    }
+
+    @Test
+    void wrapsClassCastExceptionFromNewTransformerHandler() throws Exception {
+        final ClassCastException cause = new ClassCastException("Unsupported Templates implementation");
+        final SAXTransformerFactory factory = (SAXTransformerFactory) SecureTransformerFactory.secure(new NullProductsFactory() {
+
+            @Override
+            public TransformerHandler newTransformerHandler(final Templates templates) {
+                throw cause;
+            }
+        });
+        final Templates templates = TransformerFactory.newInstance().newTemplates(stylesheet());
+        final TransformerConfigurationException exception = assertThrows(TransformerConfigurationException.class,
+                () -> factory.newTransformerHandler(templates));
+        assertSame(cause, exception.getCause());
+        assertTrue(exception.getMessage().contains(templates.getClass().getName()), exception.getMessage());
     }
 
     @Test
