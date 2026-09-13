@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-import com.android.build.api.dsl.ManagedVirtualDevice
 import org.apache.commons.xml.secure.SecureDocumentBuilderFactory
 import org.apache.commons.xml.secure.SecureXPathFactory
 import org.gradle.api.tasks.compile.JavaCompile
@@ -30,6 +29,8 @@ buildscript {
     }
 }
 
+// Blocked upstream: AGP 9 records JUnit 5 assumption aborts as failures, so the 87 platform-dependent skips this suite makes on Android turn red.
+// AGP 8.6.1 with the same tests and the same JUnit 5 plugin reports them as skipped.
 plugins {
     id("com.android.library") version "9.4.0"
     id("de.mannodermaus.android-junit5") version "2.0.1"
@@ -61,6 +62,8 @@ android {
         minSdk = 26
         // androidx.test runner; Mannodermaus's android-junit5 plugin slots a JUnit 5 RunnerBuilder under it so AndroidJUnitRunner picks up Jupiter tests.
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // The plugin passes an empty configurationParameters argument, which am instrument mis-parses; give it a value.
+        testInstrumentationRunnerArguments["configurationParameters"] = "junit.jupiter.execution.parallel.enabled=false"
     }
 
     compileOptions {
@@ -89,10 +92,10 @@ android {
     @Suppress("UnstableApiUsage")
     testOptions {
         managedDevices {
-            devices {
+            localDevices {
                 // API 33 is the first AOSP release shipping libexpat >= 2.4, which has the built-in billion-laughs check.
                 // Earlier images (e.g. API 31 with libexpat 2.3.0) carry no native amplification protection.
-                maybeCreate<ManagedVirtualDevice>("api33").apply {
+                create("api33") {
                     device = "Pixel 6a"
                     apiLevel = 33
                     systemImageSource = "aosp"
