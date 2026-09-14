@@ -111,7 +111,7 @@ class SecureXMLInputFactoryTest {
 
         /**
          * Builds an unbacked instance of the given interface whose boolean and int methods answer their neutral values and whose other methods answer
-         * {@code null}; the sentinel readers returned from the fake's creation methods.
+         * {@code null}. These instances serve as the sentinel readers returned from the fake's creation methods.
          */
         private static <T> T proxy(final Class<T> type) {
             return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[] { type }, (p, method, args) -> {
