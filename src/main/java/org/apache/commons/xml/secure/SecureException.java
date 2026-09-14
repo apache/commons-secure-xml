@@ -76,7 +76,7 @@ final class SecureException extends IllegalStateException {
      * Builds the standard exception for a failed internal reader provisioning.
      *
      * <p>Every supported implementation provides a reader as a routine capability, so the wrapped {@code ParserConfigurationException} or
-     * {@code SAXException} signals a broken environment, not a per-parse condition — hence unchecked.</p>
+     * {@code SAXException} signals a broken environment, not a per-parse condition, so the exception is unchecked.</p>
      *
      * @param cause The original checked exception from the JAXP implementation.
      * @return the exception to throw.
