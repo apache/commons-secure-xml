@@ -52,7 +52,7 @@ final class SecureTransformer extends Transformer {
     private final FallbackIgnoreURIResolver floor;
 
     /**
-     * Snapshot of the factory's {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} outcome at creation, like the JDK copies the feature onto the
+     * Snapshot of the factory's {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} outcome at creation, just as the JDK copies the feature onto the
      * transformers it creates.
      */
     final boolean overrideDefaultParser;
