@@ -67,7 +67,7 @@ import org.xml.sax.XMLReader;
  * <p>
  * The {@code href} an {@code xml-stylesheet} processing instruction names is content of the document being scanned, so
  * {@link TransformerFactory#getAssociatedStylesheet(Source, String, String, String) getAssociatedStylesheet} treats it as any other content-named reference:
- * install a {@link URIResolver} resolving that href to compile the stylesheet it points at. Without one the returned {@link Source} carries empty content
+ * install a {@link URIResolver} resolving that href to compile the stylesheet it points at. Without one, the returned {@link Source} carries empty content
  * rather than naming the URI, so compiling it cannot fetch a stylesheet the parsed document chose.
  * </p>
  * <p>
@@ -178,7 +178,9 @@ public final class SecureTransformerFactory {
 
         private final FallbackIgnoreURIResolver floor;
 
-        /** Whether the delegate recognizes {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER}; its value is read per created product, like the JDK. */
+        /**
+         * Whether the delegate recognizes {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER}; its value is read for each created product, as in the JDK.
+         */
         private final boolean supportsOverrideDefaultParser;
 
         /**
@@ -217,7 +219,7 @@ public final class SecureTransformerFactory {
          * itself and returns an empty source, so flooring here is also what makes the engines agree.</p>
          *
          * @param associated The delegate's result; {@code null} when no PI matched.
-         * @param base       The system id of the scanned document, the base the href was resolved against.
+         * @param base       The system ID of the scanned document, the base the href was resolved against.
          * @return The caller resolver's source for an opted-in href, an empty source otherwise, or {@code null} when no PI matched.
          * @throws TransformerConfigurationException Thrown if the floor rejects the href, which it does when {@value SecureException#THROW_ON_UNRESOLVED} is set.
          */
@@ -386,7 +388,7 @@ public final class SecureTransformerFactory {
          * {@link SecureSAXParserFactory#secure(Source, boolean)}.
          *
          * <p>A {@link SAXSource} carrying the caller's own reader is pre-parsed here too, unlike everywhere else in this class: an engine that reaches this
-         * method drops that reader anyway, so honoring it is not among the options — the choice is only between this parse and the engine's unsecured one.</p>
+         * method drops that reader anyway, so honoring it is not among the options; the choice is only between this parse and the engine's unsecured one.</p>
          *
          * @param source The source to scan for an associated stylesheet.
          * @return A {@link DOMSource} for a stream or SAX source, otherwise the result of {@link SecureSAXParserFactory#secure(Source, boolean)}.
@@ -458,7 +460,7 @@ public final class SecureTransformerFactory {
      * @return A secure factory.
      * @throws IllegalStateException                Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws TransformerFactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultInstance()} nor the JDK's built-in
-     *                                                implementation (for example Android).
+     *                                                implementation (for example, Android).
      */
     public static TransformerFactory newDefaultInstance() {
         if (MH_newDefaultInstance != null) {
@@ -493,7 +495,7 @@ public final class SecureTransformerFactory {
     }
 
     /**
-     * Capability-driven secure for any {@link TransformerFactory} on the classpath.
+     * Applies capability-driven secure settings to any {@link TransformerFactory} on the classpath.
      *
      * <p>
      * Rather than branching on the implementation class, this method probes what the factory supports and adapts:
