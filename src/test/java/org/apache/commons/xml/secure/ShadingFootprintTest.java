@@ -43,8 +43,8 @@ import org.vafer.jdependency.Clazzpath;
  *
  * <p>Using {@code jdependency}, the same library {@code maven-shade-plugin}'s {@code minimizeJar} uses, this test computes each entry point's transitive class
  * closure over the compiled {@code target/classes} and pins it to an expected set. It keeps each entry point from silently regaining a dependency on classes it
- * should not need (for example a sibling resolver floor or another factory class), so schema builds only on the shared SAX path, TrAX and XPath additionally on the
- * DOM path their Xalan getAssociatedStylesheet and InputSource rewrites parse through, while the six public entry points together pull the whole
+ * should not need (for example, a sibling resolver floor or another factory class), so schema builds only on the shared SAX path. TrAX and XPath additionally
+ * build on the DOM path used by their Xalan getAssociatedStylesheet and InputSource rewrites, while the six public entry points together pull in the whole
  * library. Update the expected sets deliberately: a change here is a change to what a downstream shade includes.</p>
  *
  * <p>The test reads the compiled {@code .class} files from the code-source location, which only exists on a regular JVM: a native image carries no bytecode (and
@@ -179,7 +179,7 @@ class ShadingFootprintTest {
     private static final int LIBRARY_CLASS_COUNT = 8;
 
     /**
-     * Entry points reported by the {@link #reportFootprint()} diagnostic, most-focused first, ending with the whole library.
+     * Entry points reported by the {@link #reportFootprint()} diagnostic, most focused first, ending with the whole library.
      */
     private static final String[] REPORTED = {"SecureDocumentBuilderFactory", "SecureSAXParserFactory", "SecureXMLInputFactory",
             "SecureTransformerFactory", "SecureXPathFactory", "SecureSchemaFactory"};
