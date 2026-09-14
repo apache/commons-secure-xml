@@ -75,10 +75,10 @@ public final class SecureXPathFactory {
         }
 
         /**
-         * Reports a property of the delegate, the Java 18 {@code XPathFactory.getProperty(String)}.
+         * Gets a property of the delegate through the Java 18 {@code XPathFactory.getProperty(String)} method.
          * <p>
          * Not marked {@code @Override}: this library compiles against the Java 8 API, where {@link XPathFactory} declares no such method, so the annotation
-         * would not compile. At run time on Java 18 or later it overrides the inherited method, which would otherwise answer for the wrapper and hide the
+         * would not compile. At run time on Java 18 or later, it overrides the inherited method, which would otherwise answer for the wrapper and hide the
          * delegate's own limits ({@code jdk.xml.xpath*}) behind an {@code UnsupportedOperationException}.
          * </p>
          *
@@ -127,9 +127,10 @@ public final class SecureXPathFactory {
         }
 
         /**
-         * Sets a property on the delegate, the Java 18 {@code XPathFactory.setProperty(String, String)}; see {@link #getProperty(String)} for why it carries no
-         * {@code @Override}. The {@code jdk.xml.xpath*} limits reached this way are processing limits like any other: an operator may tighten them, and
-         * loosening one is reconfiguration.
+         * Sets a property on the delegate through the Java 18 {@code XPathFactory.setProperty(String, String)} method.
+         *
+         * <p>See {@link #getProperty(String)} for why it carries no {@code @Override}. The {@code jdk.xml.xpath*} limits reached this way are processing limits
+         * like any other: an operator may tighten them, and loosening one is reconfiguration.</p>
          *
          * @param name  The property name.
          * @param value The value to set.
@@ -236,7 +237,7 @@ public final class SecureXPathFactory {
     }
 
     /**
-     * Capability-driven securing for any {@link XPathFactory} on the classpath.
+     * Applies capability-driven secure settings to any {@link XPathFactory} on the classpath.
      *
      * <p>The XPath object model mirrors TrAX: the stock JDK and Apache Xalan ship an XPath 1.0 engine with no URI-fetching functions, while Saxon adds the XPath 3.1
      * {@code fn:doc}, {@code fn:collection} and {@code fn:unparsed-text} functions that can reach external resources. Rather than branching on the implementation
