@@ -86,9 +86,9 @@ final class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
     }
 
     /**
-     * Gets the delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}.
+     * Gets the delegate provided by the constructor or set by {@link #setDelegate}, or {@code null}.
      *
-     * @return The delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}.
+     * @return The delegate provided by the constructor or set by {@link #setDelegate}, or {@code null}.
      */
     EntityResolver getDelegate() {
         return delegate;
@@ -103,7 +103,7 @@ final class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
     /**
      * Outcome when neither the caller delegate nor this resolver provides the entity. Resolves to empty content by default, so the external resource is neither
      * fetched nor leaked and the parse continues with no replacement text. The returned source echoes the requested identifiers (with {@code systemId}
-     * absolutized): the parser reads the empty byte stream, but Xerces still derives the entity's base URI from the system id and fails on a {@code null} one.
+     * absolutized): the parser reads the empty byte stream, but Xerces still derives the entity's base URI from the system ID and fails on a {@code null} one.
      *
      * @param name     The entity name, or {@code null} on the 2-arg resolution path.
      * @param publicId The public identifier, or {@code null} if none.
@@ -146,7 +146,9 @@ final class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
     }
 
     /**
-     * Replaces the caller resolver consulted ahead of the floor; lets a single floor instance back successive {@code setEntityResolver} calls.
+     * Sets the caller resolver consulted ahead of the floor.
+     *
+     * <p>A single floor instance can back successive {@code setEntityResolver} calls.</p>
      *
      * @param delegate The caller-supplied resolver, or {@code null} for a pure ignore-all floor.
      */
