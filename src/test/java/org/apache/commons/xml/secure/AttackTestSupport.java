@@ -82,7 +82,7 @@ import org.xml.sax.helpers.XMLFilterImpl;
  *
  * <p>Schema and Templates assertions take a {@link Source} so the same helper covers both inline-string payloads and resource-backed wrappers; build the
  * source via {@link #streamSource(String)} for a string payload or {@link #resourceSource(String)} for a file under {@code src/test/resources/leaked/}. The
- * resource form preserves the system id so relative {@code xs:include} / {@code xs:import} / {@code xs:redefine} / {@code xsl:include} / {@code xsl:import}
+ * resource form preserves the system ID so relative {@code xs:include} / {@code xs:import} / {@code xs:redefine} / {@code xsl:include} / {@code xsl:import}
  * URIs resolve normally.</p>
  *
  * <p>The two generic primitives {@link #assertParseFails} and {@link #assertParseSucceeds} are exposed for tests that need to compose a non-standard factory
@@ -183,15 +183,24 @@ final class AttackTestSupport {
      * <p>Android's {@code KXmlParser} currently fails this test.</p>
      */
     static final boolean DOM_RESOLVES_INTERNAL_ENTITIES = probeDomResolvesInternalEntities();
-    /** {@code true} when the platform's default DOM factory (and its builders) support parser-attached schemas; Android inherits the throwing JAXP base methods. */
+
+    /**
+     * {@code true} when the platform's default DOM factory (and its builders) supports parser-attached schemas; Android inherits the throwing JAXP base
+     * methods.
+     */
     static final boolean DOM_SUPPORTS_SCHEMA = supportsConfiguration(() -> DocumentBuilderFactory.newInstance().setSchema(null));
     /** {@code true} when the platform's default DOM factory accepts {@link XMLConstants#FEATURE_SECURE_PROCESSING}; Android's factory rejects it. */
     static final boolean DOM_SUPPORTS_SECURE_PROCESSING =
             supportsConfiguration(() -> DocumentBuilderFactory.newInstance().setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true));
-    /** {@code true} when the platform's default DOM factory (and its builders) support the XInclude switches; Android inherits the throwing JAXP base methods. */
+
+    /**
+     * {@code true} when the platform's default DOM factory (and its builders) supports the XInclude switches; Android inherits the throwing JAXP base methods.
+     */
     static final boolean DOM_SUPPORTS_XINCLUDE = supportsConfiguration(() -> DocumentBuilderFactory.newInstance().setXIncludeAware(false));
+
     /** {@code true} when running on Android (Dalvik / ART), {@code false} on any standard JVM. Probed once via {@code Class.forName} on {@code android.os.Build}. */
     static final boolean IS_ANDROID = probeAndroid();
+
     /**
      * URL form of the three JDK entity limits, every one of which a Billion Laughs payload could trip.
      */
@@ -208,12 +217,18 @@ final class AttackTestSupport {
     static final String LEAKED_MARKER = "All your base are belong to us";
     /** {@code true} when the platform's default SAX parser supports {@code reset()}; Android inherits the throwing JAXP base method. */
     static final boolean SAX_SUPPORTS_RESET = supportsConfiguration(() -> SAXParserFactory.newInstance().newSAXParser().reset());
-    /** {@code true} when the platform's default SAX factory (and its parsers) support parser-attached schemas; Android inherits the throwing JAXP base methods. */
+
+    /**
+     * {@code true} when the platform's default SAX factory (and its parsers) supports parser-attached schemas; Android inherits the throwing JAXP base methods.
+     */
     static final boolean SAX_SUPPORTS_SCHEMA = supportsConfiguration(() -> SAXParserFactory.newInstance().setSchema(null));
     /** {@code true} when the platform's default SAX factory accepts {@link XMLConstants#FEATURE_SECURE_PROCESSING}; Android's Expat rejects it. */
     static final boolean SAX_SUPPORTS_SECURE_PROCESSING =
             supportsConfiguration(() -> SAXParserFactory.newInstance().setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true));
-    /** {@code true} when the platform's default SAX factory (and its parsers) support the XInclude switches; Android inherits the throwing JAXP base methods. */
+
+    /**
+     * {@code true} when the platform's default SAX factory (and its parsers) supports the XInclude switches; Android inherits the throwing JAXP base methods.
+     */
     static final boolean SAX_SUPPORTS_XINCLUDE = supportsConfiguration(() -> SAXParserFactory.newInstance().setXIncludeAware(false));
     static final StrictReporter STRICT_REPORTER = new StrictReporter();
     /**
@@ -231,7 +246,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a secure DOM parse either blocks at parse or completes without leaked content.
+     * Asserts a secure DOM parse either blocks during parsing or completes without leaked content.
      *
      * <p>Used for an external-resource payload whose outcome differs across implementations: one that resolves the reference to empty (the ignore-all floor) does
      * not leak, while one that rejects the unresolvable systemId throws instead. Both are acceptable.</p>
@@ -269,13 +284,13 @@ final class AttackTestSupport {
     /**
      * Skeleton for every {@code assert*BlocksOrDoesNotLeak} helper.
      *
-     * <p>Treats a thrown exception of one of the {@code expected} types as "hardening blocked at parse" (acceptable); otherwise asserts the captured output
-     * omits {@link #LEAKED_MARKER}. A throw whose type does not match {@code expected} fails the test, so unrelated failures (for example, a {@link SecureException}
-     * because no recipe matched the JAXP implementation) cannot be silently accepted as a clean block.</p>
+     * <p>Treats a thrown exception of one of the {@code expected} types as "hardening blocked during parsing" (acceptable); otherwise asserts the captured
+     * output omits {@link #LEAKED_MARKER}. A throw whose type does not match {@code expected} fails the test, so unrelated failures (for example, a
+     * {@link SecureException} because no recipe matched the JAXP implementation) cannot be silently accepted as a clean block.</p>
      *
      * @param action      The parse to execute, returning the captured output text checked for {@link #LEAKED_MARKER}.
      * @param description short label naming the JAXP surface under test.
-     * @param expected    The exception types any of which the secure layer may surface as a clean rejection.
+     * @param expected    The exception types, any of which the secure layer may surface as a clean rejection.
      */
     @SafeVarargs
     private static void assertNoLeakOrThrows(final ThrowingSupplier<String> action, final String description, final Class<? extends Throwable>... expected) {
@@ -297,7 +312,7 @@ final class AttackTestSupport {
      *
      * <p>Runs the action, lets any thrown exception fail the assertion, and asserts that the captured output omits {@link #LEAKED_MARKER}. Use this when the
      * secure contract guarantees "parses successfully without resolving the external resource"; use {@link #assertNoLeakOrThrows} when the contract is
-     * "either blocks at parse or completes without leaked content".</p>
+     * "either blocks during parsing or completes without leaked content".</p>
      *
      * @param action      The parse to execute, returning the captured output text checked for {@link #LEAKED_MARKER}.
      * @param description short label naming the JAXP surface under test.
@@ -324,7 +339,7 @@ final class AttackTestSupport {
      *
      * @param action      The parse to execute.
      * @param description short label naming the JAXP surface under test.
-     * @param expected    The exception types any of which the secure layer may surface.
+     * @param expected    The exception types, any of which the secure layer may surface.
      */
     @SafeVarargs
     static void assertParseFails(final Executable action, final String description, final Class<? extends Throwable>... expected) {
@@ -475,7 +490,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a secure SAX parse either blocks at parse or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     * Asserts a secure SAX parse either blocks during parsing or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
      */
     static void assertSaxBlocksOrDoesNotLeak(final String payload) {
         assertNoLeakOrThrows(() -> captureCharacters(strictXMLReader(SecureSAXParserFactory.newInstance()), payload), "SAX", SAXException.class);
@@ -573,7 +588,8 @@ final class AttackTestSupport {
     }
 
     /**
-     * Asserts a secure StAX parse (stream and event) either blocks at parse or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     * Asserts a secure StAX parse (stream and event) either blocks during parsing or completes without leaked content. See
+     * {@link #assertDomBlocksOrDoesNotLeak(String)}.
      */
     static void assertStaxBlocksOrDoesNotLeak(final String payload) {
         assertNoLeakOrThrows(() -> captureStaxStreamText(SecureXMLInputFactory.newInstance(), payload), "StAX stream", XMLStreamException.class);
@@ -750,14 +766,15 @@ final class AttackTestSupport {
     /**
      * Asserts a secure-in-place XMLReader parse of the payload throws.
      *
-     * <p>{@link XMLReader#parse(InputSource)} on a raw reader secure via {@link SecureSAXParserFactory#secure(XMLReader)}; only a thrown exception passes.</p>
+     * <p>{@link XMLReader#parse(InputSource)} on a raw reader secured via {@link SecureSAXParserFactory#secure(XMLReader)}; only a thrown exception passes.</p>
      */
     static void assertXmlReaderBlocks(final String payload) {
         assertParseFails(() -> consumeXmlReader(rawSecureXMLReader(), payload), "XMLReader", SAXException.class);
     }
 
     /**
-     * Asserts a secure-in-place XMLReader parse either blocks at parse or completes without leaked content. See {@link #assertDomBlocksOrDoesNotLeak(String)}.
+     * Asserts a secure-in-place XMLReader parse either blocks during parsing or completes without leaked content. See
+     * {@link #assertDomBlocksOrDoesNotLeak(String)}.
      */
     static void assertXmlReaderBlocksOrDoesNotLeak(final String payload) {
         assertNoLeakOrThrows(() -> captureCharacters(rawSecureXMLReader(), payload), "XMLReader", SAXException.class);
@@ -766,7 +783,7 @@ final class AttackTestSupport {
     /**
      * Asserts a secure-in-place XMLReader parse completes without throwing and without leaked content.
      *
-     * <p>{@link XMLReader#parse(InputSource)} on a raw reader secure via {@link SecureSAXParserFactory#secure(XMLReader)}; use this when the secure contract
+     * <p>{@link XMLReader#parse(InputSource)} on a raw reader secured via {@link SecureSAXParserFactory#secure(XMLReader)}; use this when the secure contract
      * guarantees the parse succeeds but never resolves the external resource.</p>
      */
     static void assertXmlReaderDoesNotLeak(final String payload) {
@@ -776,7 +793,7 @@ final class AttackTestSupport {
     /**
      * Asserts a secure-in-place XMLReader parse succeeds.
      *
-     * <p>{@link XMLReader#parse(InputSource)} on a raw reader secure via {@link SecureSAXParserFactory#secure(XMLReader)}; positive control for DOCTYPE-only
+     * <p>{@link XMLReader#parse(InputSource)} on a raw reader secured via {@link SecureSAXParserFactory#secure(XMLReader)}; positive control for DOCTYPE-only
      * payloads.</p>
      */
     static void assertXmlReaderParses(final String payload) {
@@ -1028,7 +1045,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Compiles {@code xsds} into a {@link Schema} using {@code factory}, with {@link #STRICT_REPORTER} installed on the factory before compile.
+     * Compiles {@code xsds} into a {@link Schema} using {@code factory}, with {@link #STRICT_REPORTER} installed on the factory before compilation.
      */
     private static Schema strictSchema(final SchemaFactory factory, final Source... xsds) throws SAXException {
         factory.setErrorHandler(STRICT_REPORTER);
@@ -1036,7 +1053,7 @@ final class AttackTestSupport {
     }
 
     /**
-     * Compiles {@code xslt} into a {@link Templates} using {@code factory}, with {@link #STRICT_REPORTER} installed on the factory before compile.
+     * Compiles {@code xslt} into a {@link Templates} using {@code factory}, with {@link #STRICT_REPORTER} installed on the factory before compilation.
      */
     private static Templates strictTemplates(final TransformerFactory factory, final Source xslt) throws TransformerConfigurationException {
         factory.setErrorListener(STRICT_REPORTER);
@@ -1090,7 +1107,9 @@ final class AttackTestSupport {
         return reader;
     }
 
-    /** Probes a JAXP configuration call once at class load; {@code false} where the platform default implementation throws (for example Android). */
+    /**
+     * Probes a JAXP configuration call once at class load; {@code false} where the platform default implementation throws (for example, Android).
+     */
     private static boolean supportsConfiguration(final Executable action) {
         try {
             action.execute();
