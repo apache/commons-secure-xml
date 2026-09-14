@@ -40,7 +40,7 @@ import org.xml.sax.XMLReader;
 /**
  * Tests that {@code jdk.xml.overrideDefaultParser} selects which secure parser family performs the source rewrites on factories that recognize the feature.
  *
- * <p>The wrapped implementations' internal parsers are never used — the wrappers parse every source themselves — so instead of configuring the delegate the
+ * <p>The wrapped implementations' internal parsers are never used (the wrappers parse every source themselves), so instead of configuring the delegate, the
  * wrappers read the feature: {@code false} (the JDK's default) pins the platform's built-in parser, {@code true} (or a delegate that does not recognize the
  * feature) keeps the pluggable lookup. Both choices are secure, so the feature carries no security weight. The tests pin the JDK implementations through
  * {@code newDefaultInstance()}, so they discriminate in every JVM execution; under test-jdk-xerces the two parser families genuinely differ.</p>
