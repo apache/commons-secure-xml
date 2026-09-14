@@ -183,7 +183,7 @@ final class SecureXMLFilter extends XMLFilterImpl implements ErrorListener {
      *
      * <p>Wires the filter onto the new parent the way {@link XMLFilterImpl#setupParse()} would, minus the ContentHandler: the transformer owns the parent's
      * content events and delivers the transformed stream to the caller's handler through a {@link SAXResult} instead. Wiring the parent here rather than per
-     * parse is enough because it is the filter that is installed, not the caller's callbacks, so a callback the caller sets afterwards is still reached.</p>
+     * parse is enough because it is the filter that is installed, not the caller's callbacks, so a callback the caller sets afterward is still reached.</p>
      */
     @Override
     public void setParent(final XMLReader parent) {
