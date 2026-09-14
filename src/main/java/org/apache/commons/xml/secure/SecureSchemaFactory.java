@@ -214,14 +214,14 @@ public final class SecureSchemaFactory {
      * Returns a new, secure {@link SchemaFactory} of the system-default implementation, supporting W3C XML Schema 1.0.
      * <p>
      * Obtained from {@code SchemaFactory.newDefaultInstance()} where the platform provides it (Java 9 or later), by instantiating the JDK's built-in
-     * implementation directly on Java 8, and by the standard {@link #newInstance(String)} lookup where the platform provides neither (for example Android,
+     * implementation directly on Java 8, and by the standard {@link #newInstance(String)} lookup where the platform provides neither (for example, Android,
      * whose lookup falls back to exactly the Xerces implementation this library recognizes).
      * </p>
      *
      * @return A secure factory.
      * @throws IllegalStateException    Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws IllegalArgumentException Thrown from the {@link #newInstance(String)} lookup this method falls back to on a platform that provides neither
-     *                                 {@code newDefaultInstance()} nor the JDK's built-in implementation (for example Android).
+     *                                 {@code newDefaultInstance()} nor the JDK's built-in implementation (for example, Android).
      */
     public static SchemaFactory newDefaultInstance() {
         if (MH_newDefaultInstance != null) {
@@ -267,7 +267,7 @@ public final class SecureSchemaFactory {
     /**
      * Secures a {@link SchemaFactory}.
      *
-     * <p>Unlike the other factory types there is no per-implementation branching: schema compilation and validation reach external resources only through the
+     * <p>Unlike the other factory types, there is no per-implementation branching: schema compilation and validation reach external resources only through the
      * resolver hook, so wrapping the factory with a non-removable ignore-all resolver floor is enough on every implementation. The reader used to parse schema
      * and instance documents is secured separately, through {@link SecureSAXParserFactory#secure(javax.xml.transform.Source, boolean)}; the factory carries
      * {@code FEATURE_SECURE_PROCESSING} for the one limit that reader cannot supply, the loader's content-model expansion.</p>
