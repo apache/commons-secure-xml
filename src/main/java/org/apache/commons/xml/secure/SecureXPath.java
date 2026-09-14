@@ -75,7 +75,8 @@ final class SecureXPath implements XPath {
     private final XPath delegate;
 
     /**
-     * Snapshot of the factory's {@code jdk.xml.overrideDefaultParser} outcome at creation, like the JDK copies the feature onto the XPath objects it creates.
+     * Snapshot of the factory's {@code jdk.xml.overrideDefaultParser} outcome at creation, just as the JDK copies the feature onto the XPath objects it
+     * creates.
      */
     final boolean overrideDefaultParser;
 
