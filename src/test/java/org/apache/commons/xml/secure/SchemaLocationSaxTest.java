@@ -38,11 +38,11 @@ import org.xml.sax.helpers.DefaultHandler;
  * Tests that a secure {@link SAXParserFactory} performing JAXP 1.2 XSD validation does not fetch an external schema named by an
  * {@code xsi:noNamespaceSchemaLocation} hint in the instance document.
  *
- * <p>This is the SAX counterpart of {@link SchemaLocationDomTest}. The instance is empty {@code <root/>}; the referenced schema declares a default {@code leak}
- * attribute carrying {@link AttackTestSupport#LEAKED_MARKER}. A parser that fetches the schema augments the element's attributes with that default (the
- * permissive control observes it in {@link DefaultHandler#startElement}), while a secure parser resolves the schema reference to empty content instead. Either
- * the empty schema makes the validating parse fail, or the parse completes but the default is never augmented onto the element; either way the marker is never
- * observed.</p>
+ * <p>This is the SAX counterpart of {@link SchemaLocationDomTest}. The instance is an empty {@code <root/>} element; the referenced schema declares a default
+ * {@code leak} attribute carrying {@link AttackTestSupport#LEAKED_MARKER}. A parser that fetches the schema augments the element's attributes with that default
+ * (the permissive control observes it in {@link DefaultHandler#startElement}), while a secure parser resolves the schema reference to empty content instead.
+ * Either the empty schema makes the validating parse fail, or the parse completes but the default attribute is never added to the element; either way, the
+ * marker is never observed.</p>
  *
  * <p>The test runs only where the implementation supports JAXP 1.2 schema-language XSD validation (the stock JDK and external Xerces do; Android does not), so it
  * skips on parsers without it.</p>
