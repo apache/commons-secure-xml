@@ -33,9 +33,9 @@ final class MethodHandleFactory {
     }
 
     /**
-     * Finds a static method handle for the given class, method name, where the class is also the return type.
+     * Finds a static method handle for the given class and method name, where the class is also the return type.
      *
-     * @param refcAndReturnType The class to search for the method and the return type.
+     * @param refcAndReturnType The class in which to search for the method, also used as the return type.
      * @param name              The name of the method.
      * @return The method handle, or {@code null} if not found.
      * @throws SecurityException    Thrown if a security manager is present and it <a href="MethodHandles.Lookup.html#secmgr">refuses access</a>.
@@ -52,11 +52,11 @@ final class MethodHandleFactory {
     /**
      * Finds an instance method handle for the given class, method name and signature.
      * <p>
-     * Used to reach a method a later Java release added to a class this library compiles against an earlier one; the handle is {@code null} where the
-     * running platform does not have it.
+     * Used to access a method added in a later Java release while this library compiles against an earlier release. The handle is {@code null} when the
+     * running platform does not provide the method.
      * </p>
      *
-     * @param refc           The class to search for the method.
+     * @param refc           The class in which to search for the method.
      * @param name           The name of the method.
      * @param returnType     The method's return type.
      * @param parameterTypes The method's parameter types.
