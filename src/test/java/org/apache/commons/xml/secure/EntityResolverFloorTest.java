@@ -152,7 +152,7 @@ class EntityResolverFloorTest {
 
     /**
      * A secure {@link TransformerFactory} with a re-throwing error listener. XSLTC and Xalan enforce the block through the
-     * {@link FallbackIgnoreURIResolver} floor; Saxon enforces it through the ignore-all resolver floor on its {@code Configuration}. Either way a caller-set
+     * {@link FallbackIgnoreURIResolver} floor; Saxon enforces it through the ignore-all resolver floor on its {@code Configuration}. Either way, a caller-set
      * resolver that returns {@code null} cannot re-open the fetch. The strict listener turns any reported-and-recovered error into a test failure, so an
      * implementation cannot quietly recover from a floor resolution while the test asserts clean completion.
      */
