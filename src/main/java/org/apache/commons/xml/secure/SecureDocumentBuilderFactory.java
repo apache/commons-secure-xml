@@ -51,7 +51,7 @@ public final class SecureDocumentBuilderFactory {
      * {@link DocumentBuilderFactory} wrapper that keeps an ignore-all {@link EntityResolver} floor on every {@link DocumentBuilder} produced.
      * <p>
      * Wraps each produced builder in a {@link SecureDocumentBuilder}; required when the underlying factory carries no resolver of its own and does not honor
-     * JAXP 1.5 {@code ACCESS_EXTERNAL_*} (e.g. the external Xerces distribution). A caller-set resolver is routed through the floor rather than replacing it.
+     * JAXP 1.5 {@code ACCESS_EXTERNAL_*} (e.g., the external Xerces distribution). A caller-set resolver is routed through the floor rather than replacing it.
      * </p>
      */
     private static final class Wrapper extends DocumentBuilderFactory {
@@ -206,7 +206,7 @@ public final class SecureDocumentBuilderFactory {
      * @return A secure factory.
      * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown from the {@link #newInstance()} lookup this method falls back to on a platform that provides neither
-     *                                   {@code newDefaultInstance()} nor the JDK's built-in implementation (for example Android).
+     *                                   {@code newDefaultInstance()} nor the JDK's built-in implementation (for example, Android).
      */
     public static DocumentBuilderFactory newDefaultInstance() {
         if (MH_newDefaultInstance != null) {
@@ -228,7 +228,7 @@ public final class SecureDocumentBuilderFactory {
      * @return A secure, namespace-aware factory.
      * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown from the {@link #newInstance()} lookup {@link #newDefaultInstance()} falls back to on a platform that provides
-     *                                   neither {@code newDefaultInstance()} nor the JDK's built-in implementation (for example Android).
+     *                                   neither {@code newDefaultInstance()} nor the JDK's built-in implementation (for example, Android).
      */
     public static DocumentBuilderFactory newDefaultNSInstance() {
         return makeNSAware(newDefaultInstance());
@@ -279,8 +279,8 @@ public final class SecureDocumentBuilderFactory {
     /**
      * Returns the secure, namespace-aware factory the Source-rewriting wrappers parse with.
      * <p>
-     * While {@code overrideDefaultParser} is {@code false} the factory is the JDK's "default parser" factory, determined the way the JDK itself determines it: the built-in
-     * implementation, unless the {@value #DOM_FACTORY_ID} system property is set — that property is the JDK's own mechanism for
+     * While {@code overrideDefaultParser} is {@code false}, the factory is the JDK's "default parser" factory, determined the way the JDK itself determines it:
+     * the built-in implementation, unless the {@value #DOM_FACTORY_ID} system property is set. That property is the JDK's own mechanism for
      * reconfiguring the default parser, so it is honored through the standard lookup rather than bypassed.
      * </p>
      *
@@ -310,7 +310,7 @@ public final class SecureDocumentBuilderFactory {
     }
 
     /**
-     * Capability-driven secure for any {@link DocumentBuilderFactory} on the classpath.
+     * Applies capability-driven secure settings to any {@link DocumentBuilderFactory} on the classpath.
      *
      * <p>Rather than branching on the implementation class, this method probes what the factory supports and adapts:</p>
      * <ul>
