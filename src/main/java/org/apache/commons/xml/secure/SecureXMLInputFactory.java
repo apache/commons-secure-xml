@@ -56,7 +56,7 @@ public final class SecureXMLInputFactory {
      * both its DTD-subset and entity resolvers). Woodstox keeps one hook outside that fan-out, {@value SecureXMLInputFactory#WSTX_UNDECLARED_ENTITY_RESOLVER},
      * which is deliberately left empty: emptying the external subset leaves any entity it declared undeclared, and Woodstox then rejects the reference. The
      * rejection is implementation-prescribed and keeps the resource unfetched, like the empty resolution the other implementations produce; a caller who wants
-     * those references resolved can still set the property, and their resolver lands behind a floor like on every other resolver hook.
+     * those references resolved can still set the property, and their resolver lands behind a floor, as it does on every other resolver hook.
      * </p>
      * <p>
      * Every resolver-valued entry point ({@link #setXMLResolver(XMLResolver)}, {@code setProperty(XMLInputFactory.RESOLVER, ...)} and the Woodstox
@@ -269,7 +269,7 @@ public final class SecureXMLInputFactory {
      * @return A secure factory.
      * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown if the running platform provides neither {@code newDefaultFactory()} nor the JDK's built-in implementation
-     *                                   (for example Android).
+     *                                   (for example, Android).
      */
     public static XMLInputFactory newDefaultFactory() {
         if (MH_newDefaultInstance != null) {
@@ -297,9 +297,9 @@ public final class SecureXMLInputFactory {
     }
 
     /**
-     * Returns a new, secure {@link XMLInputFactory} resolved from the given factory id.
+     * Returns a new, secure {@link XMLInputFactory} resolved from the given factory ID.
      *
-     * @param factoryId   The name of the factory to find; a system property or service id to look up, not the class name of the implementation.
+     * @param factoryId   The name of the factory to find; a system property or service ID to look up, not the class name of the implementation.
      * @param classLoader The class loader used in the lookup; {@code null} means the current thread's context class loader.
      * @return A secure factory.
      * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
@@ -322,7 +322,7 @@ public final class SecureXMLInputFactory {
     }
 
     /**
-     * Capability-driven secure for any {@link XMLInputFactory} (StAX) on the classpath.
+     * Applies capability-driven secure settings to any {@link XMLInputFactory} (StAX) on the classpath.
      *
      * <p>One recipe covers both the JDK Zephyr and Woodstox: the wrapper installs a non-removable {@link FallbackIgnoreXMLResolver} floor on
      * every entity-resolution hook, leaving the standard {@code SUPPORT_DTD} / {@code IS_SUPPORTING_EXTERNAL_ENTITIES} defaults untouched; see the wrapper's
