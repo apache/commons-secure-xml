@@ -43,7 +43,7 @@ final class SecureValidator extends Validator {
     private final FallbackIgnoreLSResourceResolver floor = new FallbackIgnoreLSResourceResolver(null);
 
     /**
-     * Snapshot of the factory's {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} outcome at creation, like the JDK copies the feature onto its
+     * Snapshot of the factory's {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} outcome at creation, just as the JDK copies the feature onto its
      * validators.
      */
     private final boolean overrideDefaultParser;
