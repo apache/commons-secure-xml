@@ -82,9 +82,9 @@ public final class SecureSAXParserFactory {
     /**
      * Universal SAX factory wrapper that funnels every produced parser through {@link SecureSAXParserFactory#secure(XMLReader)}.
      * <p>
-     * {@link SAXParserFactory} exposes only a feature API and no property API, so the per-parse secure (limits, entity blocking, implementation-specific fixups)
-     * has to run on each {@link XMLReader} the factory produces. This wrapper returns a {@link SecureSAXParser}, which applies that securing lazily to both the
-     * SAX 2 {@link XMLReader} and the SAX 1 {@link org.xml.sax.Parser} it exposes.
+     * {@link SAXParserFactory} exposes only a feature API and no property API, so the per-parse secure configuration (limits, entity blocking,
+     * implementation-specific fixups) has to run on each {@link XMLReader} the factory produces. This wrapper returns a {@link SecureSAXParser}, which applies
+     * that securing lazily to both the SAX 2 {@link XMLReader} and the SAX 1 {@link org.xml.sax.Parser} it exposes.
      * </p>
      */
     private static final class Wrapper extends SAXParserFactory {
@@ -199,7 +199,7 @@ public final class SecureSAXParserFactory {
      * @return A secure factory.
      * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown from the {@link #newInstance()} lookup this method falls back to on a platform that provides neither
-     *                                   {@code newDefaultInstance()} nor the JDK's built-in implementation (for example Android).
+     *                                   {@code newDefaultInstance()} nor the JDK's built-in implementation (for example, Android).
      */
     public static SAXParserFactory newDefaultInstance() {
         if (MH_newDefaultInstance != null) {
@@ -221,7 +221,7 @@ public final class SecureSAXParserFactory {
      * @return A secure, namespace-aware factory.
      * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown from the {@link #newInstance()} lookup {@link #newDefaultInstance()} falls back to on a platform that provides
-     *                                   neither {@code newDefaultInstance()} nor the JDK's built-in implementation (for example Android).
+     *                                   neither {@code newDefaultInstance()} nor the JDK's built-in implementation (for example, Android).
      */
     public static SAXParserFactory newDefaultNSInstance() {
         return makeNSAware(newDefaultInstance());
@@ -268,8 +268,8 @@ public final class SecureSAXParserFactory {
     /**
      * Returns the secure, namespace-aware factory the Source-rewriting wrappers parse with.
      * <p>
-     * While {@code overrideDefaultParser} is {@code false} the factory is the JDK's "default parser" factory, determined the way the JDK itself determines it: the built-in parser,
-     * unless the {@value #SAX_FACTORY_ID} system property is set — that property is the JDK's own mechanism for reconfiguring the default
+     * While {@code overrideDefaultParser} is {@code false}, the factory is the JDK's "default parser" factory, determined the way the JDK itself determines it:
+     * the built-in parser, unless the {@value #SAX_FACTORY_ID} system property is set. That property is the JDK's own mechanism for reconfiguring the default
      * parser, so it is honored through the standard lookup rather than bypassed.
      * </p>
      *
@@ -317,7 +317,7 @@ public final class SecureSAXParserFactory {
     }
 
     /**
-     * Capability-driven securing for any {@link SAXParserFactory} on the classpath.
+     * Applies capability-driven secure settings to any {@link SAXParserFactory} on the classpath.
      *
      * <p>Rather than branching on the implementation class, this method probes what the factory supports and adapts. Because
      * {@link SAXParserFactory} exposes only a feature API and no property API, the per-parse configuration runs on each {@link XMLReader} the factory produces,
