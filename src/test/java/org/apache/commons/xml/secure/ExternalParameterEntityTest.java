@@ -42,7 +42,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * document's DTD. Each wrapper body then references {@code &leaked;}, and a secure parser resolves the parameter-entity expansion to empty, which leaves
  * {@code &leaked;} undeclared. This is the one payload in the suite with a genuinely undeclared entity, so the secure outcome is twofold: the parser either
  * skips the undefined reference (no leak) or rejects it (per XML 1.0 section 4.1 the reference is an unreported validity constraint here, but the JDK's parser
- * reports it as a well-formedness error and Woodstox rejects undeclared references unconditionally). Either way the external DTD is never fetched. An
+ * reports it as a well-formedness error and Woodstox rejects undeclared references unconditionally). Either way, the external DTD is never fetched. An
  * unconfigured parser fetches and resolves it, and the parse succeeds.</p>
  *
  * <p>Each parser type is exercised twice as a pair (unconfigured factory, expected to parse; secure factory, expected to block or complete without leaked
@@ -93,7 +93,7 @@ class ExternalParameterEntityTest {
 
     /**
      * Set to {@code true} when the platform's SAX parser invokes the entity resolver for an external parameter-entity reference. False on Android because
-     * libexpat's default leaves {@code XML_SetParamEntityParsing} disabled and the harmony native bridge does not enable it, so {@code %p;} is silently
+     * libexpat's default leaves {@code XML_SetParamEntityParsing} disabled and the Harmony native bridge does not enable it, so {@code %p;} is silently
      * skipped without consulting the resolver.
      */
     private static final boolean SAX_RESOLVES_PARAMETER_ENTITIES = probeSaxResolvesParameterEntities();
