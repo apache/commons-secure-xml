@@ -52,9 +52,9 @@ final class FallbackIgnoreXMLResolver implements XMLResolver {
     }
 
     /**
-     * Gets the delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}.
+     * Gets the delegate provided by the constructor or set by {@link #setDelegate}, or {@code null}.
      *
-     * @return The delegate provided by the constructor or set by {@link #setDelegate}, may be {@code null}.
+     * @return The delegate provided by the constructor or set by {@link #setDelegate}, or {@code null}.
      */
     XMLResolver getDelegate() {
         return delegate;
