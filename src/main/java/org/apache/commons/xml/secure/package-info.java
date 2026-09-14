@@ -52,8 +52,8 @@
  * </ul>
  * <p>
  * These guarantees are defined on OpenJDK 8 or later (and JDK distributions built from it). No version of Android supports
- * {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING}, so on Android (API level 26 or later) the securing is applied as best-effort without a guarantee,
- * tested as complete starting with API level 33; see the threat model's "Assumptions about the environment".
+ * {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING}, so on Android (API level 26 or later) the security settings are applied on a best-effort basis
+ * without a guarantee, tested as complete starting with API level 33; see the threat model's "Assumptions about the environment".
  * </p>
  * <p>
  * The guarantees hold whether or not the caller opts into DTD validation ({@link javax.xml.parsers.DocumentBuilderFactory#setValidating(boolean)
@@ -88,7 +88,7 @@
  * <h2>Caller-supplied URIs</h2>
  * <p>
  * A top-level URI passed directly by the caller is fetched as-is: {@code StreamSource(systemId)}, {@code DocumentBuilder.parse(String)}, or a {@code SAXSource}
- * built from a system id all cause the JAXP implementation to open that URI without consulting the secure layer. Use a {@link javax.xml.transform.URIResolver}
+ * built from a system ID all cause the JAXP implementation to open that URI without consulting the secure layer. Use a {@link javax.xml.transform.URIResolver}
  * or {@link org.xml.sax.EntityResolver} if you need to restrict the top-level fetch.
  * </p>
  * <h2>Thread safety</h2>
