@@ -38,7 +38,7 @@ plugins {
 
 /** Returns the `version` of the Maven project itself: the direct child of the root element, never the `parent` block's. */
 fun projectVersionOf(pom: File): String {
-    // newInstance, not newNSInstance: the path below is spelled plainly, and would select nothing if the POM namespace were honoured.
+    // newInstance, not newNSInstance: the path below is spelled plainly, and would select nothing if the POM namespace were honored.
     val documents = SecureDocumentBuilderFactory.newInstance()
     val version = SecureXPathFactory.newInstance().newXPath()
         .evaluate("/project/version", documents.newDocumentBuilder().parse(pom))
@@ -92,7 +92,7 @@ android {
         managedDevices {
             localDevices {
                 // API 33 is the first AOSP release shipping libexpat >= 2.4, which has the built-in billion-laughs check.
-                // Earlier images (e.g. API 31 with libexpat 2.3.0) carry no native amplification protection.
+                // Earlier images (e.g., API 31 with libexpat 2.3.0) carry no native amplification protection.
                 create("api33") {
                     device = "Pixel 6a"
                     apiLevel = 33
@@ -120,7 +120,7 @@ junitPlatform {
     // No instrumentation found for: de.mannodermaus.junit.unsupported.behavior
     configurationParameters(mapOf("junit.jupiter.execution.parallel.enabled" to "false"))
     filters {
-        // Pass single tag expression
+        // Pass a single tag expression
         includeTags("dom | sax | schema | trax")
     }
 }
