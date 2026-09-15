@@ -40,7 +40,9 @@ class TestConstants {
      */
     static final String ACCESS_EXTERNAL_STYLESHEET = "http://javax.xml.XMLConstants/property/accessExternalStylesheet";
 
-    /** JAXP 1.2 schema-language attribute, recognized by the JDK's internal and the standalone Xerces alike. */
+    /**
+     * JAXP 1.2 schema-language attribute, recognized by both the JDK's internal Xerces implementation and the standalone Xerces implementation.
+     */
     static final String JAXP_SCHEMA_LANGUAGE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
 
     /** Xerces external-schemaLocation property, recognized by the JDK's internal and the standalone Xerces schema loaders alike. */
