@@ -75,7 +75,7 @@ Modifying a shared mutable object is a bug, not a vulnerability.
   An implementation that cannot accept a required setting makes the factory method throw
   instead of returning an unsecured factory.
 
-  The recipes for Android's Expat/KXmlParser are applied as best-effort and carry no guarantee
+  The recipes for Android's Expat/KXmlParser are applied on a best-effort basis and carry no guarantee
   (see [Supported runtimes](#Supported_runtimes)).
 - A factory returned by `org.apache.commons.xml.secure`, used as delivered, that fails to provide a guarantee the Javadoc states it
   provides. The guarantee covers the documented entry points of each returned factory type,
@@ -100,7 +100,7 @@ Android, on every API level, carries no guarantee:
 no version of Android supports `FEATURE_SECURE_PROCESSING`
 (so states [Android's own documentation](https://developer.android.com/reference/javax/xml/parsers/DocumentBuilderFactory#setFeature%28java.lang.String,%20boolean%29)),
 the setting the guaranteed processing limits build on.
-The library still secures Android's parsers as best-effort,
+The library still secures Android's parsers on a best-effort basis,
 tested as complete starting with API level 33
 (see [Supported runtimes](apidocs/index.html#supported-runtimes) in the Javadoc overview),
 but a report demonstrated only on Android is [out of scope](#What_is_Out_of_Scope) on any API level.
@@ -126,9 +126,9 @@ In particular:
   which is why the securing installs the floor on each of them rather than on the factory alone.
 
 The securing injects hardened readers and installs these resolver floors,
-so an implementation that ignores what it was handed —
-parsing with an internal parser of its own,
-or reaching an external resource without consulting the resolver —
+so an implementation that ignores what it was handed
+(by parsing with an internal parser of its own
+or reaching an external resource without consulting the resolver)
 works outside the securing.
 Guarding against such an implementation would be a valid *hardening* of this library,
 but the deviation itself is a contract violation in that implementation,
@@ -139,7 +139,7 @@ a report built on one is triaged `OUT-OF-SCOPE: foreign implementation`.
 
 XInclude is the converse case: JAXP specifies no contract at all.
 `setXIncludeAware` turns the processor on,
-but no part of the API says which resolver — if any — a processor consults for an `xi:include` href.
+but no part of the API says which resolver, if any, a processor consults for an `xi:include` href.
 
 The XInclude guarantee is therefore restricted to implementations that follow the Xerces convention
 of routing an `xi:include` fetch through the `EntityResolver`.
@@ -154,7 +154,7 @@ The library reads a single system property of its own,
 when set to `true`,
 every secured factory rejects an unresolved external reference with an exception
 instead of resolving it to empty content.
-Either way the resource is not fetched,
+Either way, the resource is not fetched,
 so the property selects an error-reporting style,
 not a security posture.
 
@@ -164,7 +164,7 @@ and leaves the resulting processing limits (entity expansion, element depth, att
 at the implementation's own secure default. Those defaults differ by implementation, and on the stock JDK by
 JDK version and the standard `jdk.xml.*` limit properties the JDK itself reads:
 
-- On the stock JDK, secure processing honors the `jdk.xml.*` limit properties (for example `jdk.xml.entityExpansionLimit`,
+- On the stock JDK, secure processing honors the `jdk.xml.*` limit properties (for example, `jdk.xml.entityExpansionLimit`,
   default `2500` on JDK 25 and `64000` on JDK 8 through 21). These are trusted deployment configuration: an operator may
   set one to tighten (or loosen) a limit globally, but loosening through one is reconfiguration, treated like loosening
   any other reserved setting (see [What is out of scope](#What_is_Out_of_Scope)).
@@ -240,7 +240,7 @@ This covers the typed setters and the resolver properties:
     - `javax.xml.stream.resolver`.
 
 Your resolver is consulted first, but the floor denies or ignores whatever it leaves unresolved.
-It therefore *must* resolve every resource you need available: a `null` return blocks the lookup,
+It therefore *must* resolve every resource you need available: a `null` return blocks the lookup;
 it does not fall through to a fetch.
 
 An opted-in resource stays on the floor:
@@ -276,7 +276,7 @@ As in the previous case, you need to provide a secure resolver.
 
 ### External-access properties
 
-You may set the JAXP 1.5 external-access properties, to any value:
+You may set the JAXP 1.5 external-access properties to any value:
 
 - `http://javax.xml.XMLConstants/property/accessExternalDTD`,
 - `http://javax.xml.XMLConstants/property/accessExternalSchema`,
@@ -285,8 +285,8 @@ You may set the JAXP 1.5 external-access properties, to any value:
 The securing is independent of them:
 a resource supplied by a resolver bypasses these checks,
 and the securing floor resolves or ignores every external reference,
-so on a secured instance the properties never come into play —
-no value loosens the securing, and no value is needed to keep it
+so on a secured instance the properties never come into play.
+No value loosens the securing, and no value is needed to keep it
 (see [why the securing does not build on them](apidocs/index.html#external-access-properties) in the Javadoc overview).
 The same independence holds for their
 `javax.xml.accessExternalDTD`, `javax.xml.accessExternalSchema` and `javax.xml.accessExternalStylesheet`
@@ -323,16 +323,16 @@ Which resources it resolves is your policy to enforce.
 ### Caller-supplied top-level URIs
 
 A URI passed directly to a parse call
-(`DocumentBuilder.parse(String)`, `StreamSource(systemId)`, a `SAXSource` built from a system id)
+(`DocumentBuilder.parse(String)`, `StreamSource(systemId)`, a `SAXSource` built from a system ID)
 is fetched as-is by the JAXP implementation without consulting the securing layer.
 Restrict it yourself if the URI is untrusted.
 
 ### Mutating returned objects
 
-Modifying an object a produced instance returned —
-the `Document` of a parse or of an empty resolution,
-a `Source` handed back by a resolver or by `getAssociatedStylesheet` —
-is same-process capability, like reconfiguring the factory
+Modifying an object a produced instance returned
+(the `Document` of a parse or of an empty resolution,
+or a `Source` handed back by a resolver or by `getAssociatedStylesheet`)
+is a same-process capability, like reconfiguring the factory
 (see [Adversary model and trust boundary](#Adversary_Model_and_Trust_Boundary)).
 A report premised on a same-process component mutating a JAXP method's result is out of scope.
 
@@ -405,7 +405,7 @@ are **not** vulnerabilities under this model:
 - Reports against an instance after the caller installed a resolver (including the `DefaultHandler` passed to
   `SAXParser.parse(..., DefaultHandler)`) or loosened a reserved setting.
 - Reports demonstrated on a parser the reporter configured themselves:
-  for example enabling `external-general-entities` on a self-built `XMLReader`,
+  for example, enabling `external-general-entities` on a self-built `XMLReader`,
   wrapping it in a `SAXSource`,
   and showing that a produced `Transformer`, `Validator` or `SchemaFactory` resolves the entity.
   The permissive settings belong to the reporter's own reader,
@@ -417,11 +417,11 @@ are **not** vulnerabilities under this model:
   instruction of a stylesheet
   (see [Transform output destinations](#Transform_output_destinations)).
 - Reports in a JAXP implementation that does not respect the contract of the settings a securing recipe
-  requires: `org.apache.commons.xml.secure` factory method throws rather than returning an unsecured factory, so there is no instance to attack.
+  requires: an `org.apache.commons.xml.secure` factory method throws rather than returning an unsecured factory, so there is no instance to attack.
 
 ## Triage Dispositions
 
-A report judged against this model receives exactly one of:
+A report judged against this model receives exactly one of the following dispositions:
 
 | Disposition | Meaning |
 | --- | --- |
@@ -430,7 +430,7 @@ A report judged against this model receives exactly one of:
 | `OUT-OF-SCOPE: caller input` | The behavior follows from a top-level URI, a parser instance the caller constructed outside the library, or other input the caller passed directly to a parse call (see [Caller-supplied top-level URIs](#Caller-supplied_top-level_URIs) and [Caller-supplied parser instances](#Caller-supplied_parser_instances)). |
 | `OUT-OF-SCOPE: foreign implementation` | The behavior is in a JAXP implementation that does not respect the contract of the settings a securing recipe requires, or is a defect in the underlying JAXP implementation itself (see [Non-conforming JAXP implementations](#Non-conforming_JAXP_implementations)). |
 | `OUT-OF-SCOPE: unsupported runtime` | The behavior is demonstrated only on a runtime the guarantees are not defined on, such as Android on any API level (see [Supported runtimes](#Supported_runtimes)). |
-| `MODEL-GAP` | The report fits none of the above. The model is then incomplete: revise it rather than making an ad-hoc call. |
+| `MODEL-GAP` | The report fits none of the above. The model is then incomplete: revise it rather than making an ad hoc call. |
 
 ## Conditions That Would Change This Model
 
