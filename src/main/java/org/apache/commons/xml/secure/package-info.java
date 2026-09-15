@@ -52,7 +52,7 @@
  * </ul>
  * <p>
  * These guarantees are defined on OpenJDK 8 or later (and JDK distributions built from it). No version of Android supports
- * {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING}, so on Android (API level 26 or later) the security settings are applied on a best-effort basis
+ * {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING}, so on Android (API level 26 or later) the secure settings are applied on a best-effort basis
  * without a guarantee, tested as complete starting with API level 33; see the threat model's "Assumptions about the environment".
  * </p>
  * <p>
