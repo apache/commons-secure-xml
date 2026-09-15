@@ -31,7 +31,7 @@ The <action> type attribute can be add, update, fix, or remove.
     <title>Apache Commons Secure XML Changes</title>
   </properties>
   <body>
-    <release version="1.0.1" date="YYYY-MM-DD" description="Second release, requires Java 8 or above.">
+    <release version="1.0.1" date="YYYY-MM-DD" description="Second release. Requires Java 8 or later.">
       <!-- FIX -->
       <action type="fix" dev="ggregory" due-to="Gary Gregory">Fix the OpenRewrite migration recipe to target static method calls instead of class references.</action>
       <action type="fix" dev="ggregory" due-to="Gary Gregory">Fix the OpenRewrite migration recipe to add a dependency on org.apache.commons:commons-secure-xml:1.0.0.</action>
@@ -45,7 +45,7 @@ The <action> type attribute can be add, update, fix, or remove.
       <action dev="ggregory" type="update" due-to="Gary Gregory">Bump org.apache.commons:commons-parent from 104 to 105.</action>
       <action dev="pkarwasz" type="update" due-to="Piotr P. Karwasz, Gary Gregory">Bump com.android.library from 8.6.1 to 9.4.0 in /android-tests.</action>
     </release>
-    <release version="1.0.0" date="2026-09-02" description="First release, requires Java 8 or above.">
+    <release version="1.0.0" date="2026-09-02" description="First release. Requires Java 8 or later.">
       <!-- SPECIAL -->
       <action type="add" dev="ggregory" due-to="Piotr P. Karwasz, Gary Gregory">This is the first release of Apache Commons Secure XML.</action>      
       <!-- ADD -->
@@ -58,7 +58,7 @@ The <action> type attribute can be add, update, fix, or remove.
       <!-- FIX -->
       <action type="fix" dev="pkarwasz" due-to="Ta Duc Thien, Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-10">Block XInclude (xi:include) href resolution by default, since the JAXP external-access properties do not govern it.</action>
       <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Honor jdk.xml.overrideDefaultParser on TrAX, XPath and schema factories that recognize it.</action>
-      <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Restore the secure configuration when a factory or parser is reset() instead of reverting to the implementation defaults.</action>
+      <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Restore the secure configuration when reset() is called on a factory or parser instead of reverting to the implementation defaults.</action>
       <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Parse a Source opted in by a caller-supplied URIResolver using a secure parser.</action>
       <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Secure the document parse behind the InputSource-taking XPath evaluation entry points.</action>
       <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Fall back to the standard factory lookup in the DOM, SAX and schema newDefaultInstance methods on Android.</action>
