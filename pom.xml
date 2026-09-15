@@ -71,7 +71,7 @@ limitations under the License.
     <commons.woodstox.version>7.1.1</commons.woodstox.version>
     <commons.xalan.version>2.7.3</commons.xalan.version>
     <commons.xerces.version>2.12.2</commons.xerces.version>
-    <!-- Test-only: computes each secure class' shade closure, mirroring maven-shade minimizeJar, for ShadingFootprintTest. -->
+    <!-- Test-only: computes each secure class's shade closure, mirroring maven-shade minimizeJar, for ShadingFootprintTest. -->
     <commons.jdependency.version>2.16</commons.jdependency.version>
     <!--
       jacoco-maven-plugin: Should only get better.
@@ -109,7 +109,7 @@ limitations under the License.
       <artifactId>mockito-core</artifactId>
       <scope>test</scope>
     </dependency>
-    <!-- Reads the compiled classes to compute each secure class' transitive class closure (the same computation maven-shade minimizeJar performs). -->
+    <!-- Reads the compiled classes to compute each secure class's transitive class closure (the same computation maven-shade minimizeJar performs). -->
     <dependency>
       <groupId>org.vafer</groupId>
       <artifactId>jdependency</artifactId>
