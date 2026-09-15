@@ -24,9 +24,9 @@ under the License.
     <description>
         The default ruleset used by the Maven PMD Plugin, when no other ruleset is specified.
         It contains the rules of the old (pre PMD 6.0.0) rulesets java-basic, java-empty, java-imports,
-        java-unnecessary, java-unusedcode.
+        java-unnecessary, and java-unusedcode.
 
-        This ruleset might be used as a starting point for an own customized ruleset [0].
+        This ruleset might be used as a starting point for your own customized ruleset [0].
 
         [0] https://pmd.github.io/latest/pmd_userdocs_making_rulesets.html
     </description>
