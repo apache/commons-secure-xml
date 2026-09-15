@@ -18,8 +18,8 @@ limitations under the License.
 # Android instrumented tests
 
 Runs the attack-test suite from `../src/test/java` against the Android runtime, exercising
-the harmony based DOM and SAX factories that ship with Android. The Maven build does not include this
-module; it is a standalone Gradle build kept separate so the default `mvn` goal stays JVM only.
+the Harmony-based DOM and SAX factories that ship with Android. The Maven build does not include this
+module; it is a standalone Gradle build kept separate so the default `mvn` goal stays JVM-only.
 
 ## Prerequisites
 
@@ -84,7 +84,7 @@ The full round trip:
    the `jacoco` profile merges whatever this module produced into it in the site lifecycle,
    just before the report is written.
    The coverage check runs earlier, on the JVM data alone,
-   so its minimums mean the same thing whether a device run is lying around;
+   so its minimums mean the same thing whether or not a device run is available;
    the device data widens the report, not the bar.
 
 Repeat step 2 whenever the library changes.
