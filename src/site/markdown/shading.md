@@ -18,15 +18,15 @@ limitations under the License.
 # Shading
 
 Do you want to secure your XML parsers,
-but adding an external dependency is against your project policy,
-or you use only a small subset of the JAXP interfaces,
-which does not justify roughly 72 kB of additional disk space?
+but find that adding an external dependency is against your project policy
+or that your limited use of the JAXP interfaces
+does not justify roughly 72 kB of additional disk space?
 We hear you.
 
 The `Secure*` entry points have been designed with shading in mind.
 The transitive closure of each of the six factory classes pulls in only what is necessary.
 Shading with the Maven Shade Plugin's `<minimizeJar>` option
-therefore keeps only the classes your application reaches,
+therefore keeps only the classes your application reaches
 and produces compressed sizes like these:
 
 | Entry point                    | Classes | Shaded size |
@@ -144,6 +144,6 @@ A few notes on the configuration:
   keep the attribution from the library's `META-INF/LICENSE.txt` and `META-INF/NOTICE.txt`,
   as the Apache License requires.
 
-The securing behavior of a shaded copy is identical to the external dependency:
+The securing behavior of a shaded copy is identical to that of the external dependency:
 the guarantees of the [Threat Model](threat_model.html)
 apply to the release you shaded.
