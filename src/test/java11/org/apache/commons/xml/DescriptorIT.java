@@ -41,8 +41,8 @@ import org.junit.jupiter.api.Test;
  * out of the built jar and asserts the same invariant against each: the only mandatory dependency may be on the platform itself. Every other dependency, such
  * as Saxon HE or Xerces, must be optional, so a deployment that does not provide it still resolves.</p>
  *
- * <p>"Platform" means the packages an OSGi system bundle always exports, or the {@code java.*} modules the JDK always supplies. Those are the one set of
- * dependencies that does not need to be optional.</p>
+ * <p>"Platform" means the packages an OSGi system bundle always exports, or the {@code java.*} modules the JDK always supplies. These are the only
+ * dependencies that do not need to be optional.</p>
  *
  * <p>This test reads {@code module-info} through {@link ModuleDescriptor}, a Java 9 API the project's release-8 test sources cannot reference. It therefore
  * lives in {@code src/test/java11} and is compiled and run only under the {@code java11-tests} profile, which activates on JDK 11 or later.</p>
