@@ -40,6 +40,7 @@ The <action> type attribute can be add, update, fix, or remove.
       <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-17">Keep a URIResolver already set on a Transformer when it is wrapped, instead of replacing it with the resolver floor.</action>
       <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Create the Transformer of an XMLFilter eagerly and reuse it for every parse.</action>
       <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Report a stylesheet that produces no XMLFilter as a TransformerConfigurationException instead of returning null.</action>
+      <action type="fix" dev="ggregory" due-to="Gary Gregory">General Javadoc and site documentation improvements.</action>
       <!-- ADD -->
       <!-- UPDATE -->
       <action dev="ggregory" type="update" due-to="Gary Gregory">Bump org.apache.commons:commons-parent from 104 to 105.</action>
