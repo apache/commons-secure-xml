@@ -14,13 +14,13 @@ site-content
 .settings/
 /bin/
 
-# Visual Studio code files
+# Visual Studio Code files
 /.vscode/
 
 # IntelliJ IDEA files
 .idea/
 *.iml
 
-# NetBeans files files
+# NetBeans files
 nb-configuration.xml
 nbactions.xml

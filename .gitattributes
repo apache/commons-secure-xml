@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-# Auto detect text files and perform LF normalization
+# Automatically detect text files and perform LF normalization
 *        text=auto
 
 *.java   text diff=java
