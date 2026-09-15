@@ -23,7 +23,7 @@ Apache Commons Secure XML provides secure-by-default JAXP factory creation, abst
 implementation-specific XXE securing differences between the stock JDK and external JAXP implementations
 (Android, Apache Xalan, Apache Xerces, Woodstox, Saxon-HE).
 
-First release, requires Java 8 or above.
+First release. Requires Java 8 or later.
 
 
 New features
@@ -42,7 +42,7 @@ Fixed Bugs
 
 * COMMONSXML-10:   Block XInclude (xi:include) href resolution by default, since the JAXP external-access properties do not govern it. Thanks to Ta Duc Thien, Piotr P. Karwasz, Gary Gregory.
 *                  Honor jdk.xml.overrideDefaultParser on TrAX, XPath and schema factories that recognize it. Thanks to Piotr P. Karwasz, Gary Gregory.
-*                  Restore the secure configuration when a factory or parser is reset() instead of reverting to the implementation defaults. Thanks to Piotr P. Karwasz, Gary Gregory.
+*                  Restore the secure configuration when reset() is called on a factory or parser instead of reverting to the implementation defaults. Thanks to Piotr P. Karwasz, Gary Gregory.
 *                  Parse a Source opted in by a caller-supplied URIResolver using a secure parser. Thanks to Piotr P. Karwasz, Gary Gregory.
 *                  Secure the document parse behind the InputSource-taking XPath evaluation entry points. Thanks to Piotr P. Karwasz, Gary Gregory.
 *                  Fall back to the standard factory lookup in the DOM, SAX and schema newDefaultInstance methods on Android. Thanks to Piotr P. Karwasz, Gary Gregory.
