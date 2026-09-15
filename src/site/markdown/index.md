@@ -18,7 +18,7 @@ limitations under the License.
 # Apache Commons Secure XML
 
 Apache Commons Secure XML is part of the
-[Apache Commons](https://commons.apache.org/index.html) and provides secure-by-default JAXP factory creation,
+[Apache Commons](https://commons.apache.org/index.html) project and provides secure-by-default JAXP factory creation,
 abstracting over implementation-specific XXE securing differences between the
 stock JDK and external JAXP implementations.
 
