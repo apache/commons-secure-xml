@@ -91,7 +91,7 @@ class XIncludeTest {
     /**
      * Enables XInclude on the factory under test, skipping the test when the platform refuses.
      *
-     * <p>On Android{@code setXIncludeAware(true)} always throws {@link UnsupportedOperationException}.</p>
+     * <p>On Android, {@code setXIncludeAware(true)} always throws {@link UnsupportedOperationException}.</p>
      */
     private static void assumeXIncludeAware(final DocumentBuilderFactory factory) {
         try {
@@ -104,7 +104,7 @@ class XIncludeTest {
     /**
      * Enables XInclude on the factory under test, skipping the test when the platform refuses.
      *
-     * <p>On Android{@code setXIncludeAware(true)} always throws {@link UnsupportedOperationException}.</p>
+     * <p>On Android, {@code setXIncludeAware(true)} always throws {@link UnsupportedOperationException}.</p>
      */
     private static void assumeXIncludeAware(final SAXParserFactory factory) {
         try {
