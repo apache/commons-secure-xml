@@ -17,7 +17,7 @@ limitations under the License.
 
 # Android instrumented tests
 
-Runs the attack-test suite from `../src/test/java` against the Android runtime, exercising
+This module runs the attack-test suite from `../src/test/java` against the Android runtime, exercising
 the Harmony-based DOM and SAX factories that ship with Android. The Maven build does not include this
 module; it is a standalone Gradle build kept separate so the default `mvn` goal stays JVM-only.
 

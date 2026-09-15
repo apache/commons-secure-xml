@@ -42,13 +42,13 @@ Contributing to Apache Commons Secure XML
 ======================
 
 Have you found a bug, or do you have an idea for a cool new feature? Contributing code is a great way to give something back to the open-source community.
-Before you dig right into the code, we need contributors to follow a few guidelines to have a chance of keeping on top of things.
+Before you dig right into the code, please review these guidelines to help us manage contributions.
 
 Getting Started
 ---------------
 
 + Make sure you have a [JIRA account](https://issues.apache.org/jira/).
-+ Make sure you have a [GitHub account](https://github.com/signup/free). This is not essential, but makes providing patches much easier.
++ Make sure you have a [GitHub account](https://github.com/signup/free). This is not essential, but it makes providing patches much easier.
 + If you're planning to implement a new feature, it makes sense to discuss your changes on the [dev list](https://commons.apache.org/mail-lists.html) first. This way you can make sure you're not wasting your time on something that isn't considered to be in Apache Commons Secure XML's scope.
 + Submit a [Jira Ticket][jira] for your issue, assuming one does not already exist.
   + Clearly describe the issue, including steps to reproduce it if it is a bug.

@@ -22,7 +22,7 @@ under the License.
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.net/ruleset_2_0_0.xsd">
     <description>
-        The default ruleset used by the Maven PMD Plugin, when no other ruleset is specified.
+        The default ruleset used by the Maven PMD Plugin when no other ruleset is specified.
         It contains the rules of the old (pre PMD 6.0.0) rulesets java-basic, java-empty, java-imports,
         java-unnecessary, and java-unusedcode.
 

@@ -54,7 +54,7 @@ The same holds for parser objects the caller constructs outside the library and 
 an `XMLReader` wrapped in a `SAXSource`,
 a StAX reader inside a `StAXSource`,
 or a document parsed elsewhere and handed over as a `DOMSource`
-are **trusted** configuration, not untrusted input.
+is **trusted** configuration, not untrusted input.
 The library secures what it creates;
 it does not re-harden what you built,
 because your reader's settings are indistinguishable from configuration you chose deliberately.
@@ -94,7 +94,7 @@ Which securing recipe applies depends on the JAXP implementation present on the 
 
 The guarantees are defined on a single runtime family:
 OpenJDK 8 or later (and JDK distributions built from it).
-On these runtimes the recognized parsers apply the processing limits the guarantees rely on.
+On these runtimes, the recognized parsers apply the processing limits the guarantees rely on.
 
 Android, on every API level, carries no guarantee:
 no version of Android supports `FEATURE_SECURE_PROCESSING`
@@ -107,7 +107,7 @@ but a report demonstrated only on Android is [out of scope](#What_is_Out_of_Scop
 
 ### Honored JAXP contracts
 
-The in-scope requirement that an implementation respects the contract of the settings a recipe uses
+The in-scope requirement that an implementation respect the contract of the settings a recipe uses
 (see [What is in scope](#What_is_in_Scope))
 extends to the JAXP API contracts themselves.
 In particular:
@@ -176,8 +176,8 @@ every one of these defaults bounds the number of expansions,
 which is what rejects an exponential payload such as Billion Laughs.
 The volume those expansions produce is a separate limit,
 and implementations differ on whether they set one by default.
-Sizing it, or provisioning for the load it allows instead,
-is the operator's decision, like the other processing limits above.
+As with the other processing limits above,
+sizing this limit or provisioning for the load it allows is the operator's decision.
 
 ## Reserved Settings
 

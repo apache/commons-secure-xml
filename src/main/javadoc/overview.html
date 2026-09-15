@@ -132,7 +132,7 @@ limitations under the License.
       </p>
       <p>
         <strong>DOM Parsing</strong> via
-        <code>{@link org.apache.commons.xml.secure.SecureDocumentBuilderFactory}</code>;
+        <code>{@link org.apache.commons.xml.secure.SecureDocumentBuilderFactory}</code>:
       </p>
       <div class="sourceCode" id="cb1">
         <pre class="sourceCode java">
@@ -146,7 +146,7 @@ Document doc = SecureDocumentBuilderFactory.newInstance().newDocumentBuilder().p
       </div>
       <p>
         <strong>SAX Parsing</strong> via
-        <code>{@link org.apache.commons.xml.secure.SecureSAXParserFactory}</code>;
+        <code>{@link org.apache.commons.xml.secure.SecureSAXParserFactory}</code>:
       </p>
       <div class="sourceCode" id="cb2">
         <pre class="sourceCode java">
@@ -282,9 +282,8 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         parser and pass the result as a
         <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/dom/DOMSource.html"><code>DOMSource</code></a>
         or
-        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/sax/SAXSource.html"><code>SAXSource</code></a>
-        . A stylesheet also chooses where the transform writes (
-        <code>xsl:result-document</code>):
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/sax/SAXSource.html"><code>SAXSource</code></a>.
+        A stylesheet also chooses where the transform writes (<code>xsl:result-document</code>):
         the securing governs reads only, so restrict output destinations yourself when running an untrusted stylesheet (see the <a href="../threat_model.html">Threat
           Model</a>).
       </p>
@@ -311,7 +310,7 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
       </p>
     </section>
     <section id="caching-and-thread-safety">
-      <h2>Caching and Thread-Safety</h2>
+      <h2>Caching and Thread Safety</h2>
       <p>
         There is no caching or pooling inside
         <code>org.apache.commons.xml.secure</code>;
@@ -391,7 +390,7 @@ builder.setEntityResolver((publicId, systemId) -&gt; ALLOWED.contains(systemId) 
         The <code>type</code> argument tells them apart, as DOM Level 3 Load and Save prescribes:
         <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/XMLConstants.html#W3C_XML_SCHEMA_NS_URI"><code>XMLConstants.W3C_XML_SCHEMA_NS_URI</code></a> for a schema document,
         <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/XMLConstants.html#XML_DTD_NS_URI"><code>XMLConstants.XML_DTD_NS_URI</code></a> for a DTD or an entity.
-        A schema references its neighbors relatively, so resolve the system identifier against the base URI before matching it.
+        A schema references its neighbors using relative URIs, so resolve the system identifier against the base URI before matching it.
       </p>
       <div class="sourceCode" id="cb8">
         <pre class="sourceCode java">
@@ -428,10 +427,10 @@ factory.setResourceResolver((type, namespaceURI, publicId, systemId, baseURI) -&
         (<code>xsl:include</code> and <code>xsl:import</code>)
         and for everything the transform fetches as it runs:
         <code>document()</code>,
-        and on an XSLT 3.0 implementation the <code>unparsed-text()</code> family and <code>json-doc()</code> as well.
+        and on an XSLT 3.0 implementation, the <code>unparsed-text()</code> family and <code>json-doc()</code> as well.
         A <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/stream/StreamSource.html"><code>StreamSource</code></a> you return is re-parsed with a secured reader,
         so the references inside the resource you allowed face the same floor again.
-        A function that cannot accept an empty document in place of what it asked for, <code>unparsed-text()</code> among them,
+        A function that cannot accept an empty document in place of what it asked for, such as <code>unparsed-text()</code>,
         reports an error when the resolver declines rather than returning empty content;
         either way, the resource is not fetched.
       </p>
