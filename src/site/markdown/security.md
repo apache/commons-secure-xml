@@ -26,11 +26,11 @@ Please note that binary patches are never provided.
 If you need to apply a source code patch,
 use the building instructions for the component version that you are using.
 
-If you need help on building this component,
-or other help on following the instructions to mitigate the known vulnerabilities listed here,
+If you need help building this component,
+or other help following the instructions to mitigate the known vulnerabilities listed here,
 please send your questions to the public [user mailing list](mail-lists.html).
 
-If you have encountered an unlisted security vulnerability or other unexpected behavior that has security impact,
+If you have encountered an unlisted security vulnerability or other unexpected behavior that has a security impact,
 or if the descriptions here are incomplete,
 please report them privately to the Apache Security Team.
 Thank you.
