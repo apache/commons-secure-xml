@@ -45,7 +45,7 @@ The <action> type attribute can be add, update, fix, or remove.
       <!-- UPDATE -->
       <action dev="ggregory" type="update" due-to="Gary Gregory">Bump org.apache.commons:commons-parent from 104 to 105.</action>
       <action dev="pkarwasz" type="update" due-to="Piotr P. Karwasz, Gary Gregory">Bump com.android.library from 8.6.1 to 9.4.0 in /android-tests.</action>
-      <action dev="ggregory" type="update" due-to="Gary Gregory, Dependabot">Bump commons.graalvm.buildtools.version from 1.1.12 to 1.1.13 (#102).</action>
+      <action dev="ggregory" type="update" due-to="Gary Gregory, Dependabot">Bump commons.graalvm.buildtools.version from 1.1.12 to 1.1.14 (#102).</action>
     </release>
     <release version="1.0.0" date="2026-09-02" description="First release. Requires Java 8 or later.">
       <!-- SPECIAL -->
