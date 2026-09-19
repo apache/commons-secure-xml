@@ -39,15 +39,19 @@ import net.sf.saxon.xpath.XPathFactoryImpl;
 /**
  * Securing recipes for Saxon-HE ({@code net.sf.saxon:Saxon-HE}).
  *
- * <p>Saxon supplies {@link TransformerFactory} and {@link XPathFactory} implementations; it does not ship a DOM, SAX, StAX or Schema factory of its own.</p>
+ * <p>
+ * Saxon supplies {@link TransformerFactory} and {@link XPathFactory} implementations; it does not ship a DOM, SAX, StAX or Schema factory of its own.
+ * </p>
  */
 final class SaxonProvider {
 
     /**
      * Sole holder of Saxon symbolic references, so that the outer class verifies without Saxon on the classpath.
      *
-     * <p>{@link SaxonProvider#isSaxon} runs on every secure call, Saxon present or not, and the JVM verifier may load classes eagerly to prove class-typed
-     * assignability; keeping every Saxon reference in this nested class defers that loading until a Saxon factory has actually been recognized.</p>
+     * <p>
+     * {@link SaxonProvider#isSaxon} runs on every secure call, Saxon present or not, and the JVM verifier may load classes eagerly to prove class-typed
+     * assignability; keeping every Saxon reference in this nested class defers that loading until a Saxon factory has actually been recognized.
+     * </p>
      */
     private static final class SaxonProviderConfigurer {
 
@@ -73,15 +77,17 @@ final class SaxonProvider {
     /**
      * A Saxon {@link Configuration} carrying the vendor-specific restrictions that the standard JAXP knobs cannot express.
      *
-     * <p>The ignore-all {@link javax.xml.transform.URIResolver} floor is not one of them: it is installed from outside by the shared
+     * <p>
+     * The ignore-all {@link javax.xml.transform.URIResolver} floor is not one of them: it is installed from outside by the shared
      * {@link SecureTransformerFactory} wrapper (TrAX) or on the Configuration for the XPath path (see {@link SaxonProviderConfigurer#configure(XPathFactory)}),
-     * so both cases reuse {@link FallbackIgnoreURIResolver}. What remains here is Saxon-only:</p>
+     * so both cases reuse {@link FallbackIgnoreURIResolver}. What remains here is Saxon-only:
+     * </p>
      *
      * <ol>
      *   <li><b>SAX layer.</b> {@link #makeParser} hands every {@link XMLReader} Saxon would otherwise use through
      *   {@link SecureSAXParserFactory#secure(XMLReader)}, which routes it to the matching bundled secure recipe. External DTDs, entities and XInclude
      *   resolve to empty content at parse time.</li>
-     *   <li><b>Collection layer.</b> {@code fn:collection} bypasses the resource resolver and fetches directly, so an empty {@link CollectionFinder} supplies its
+     * <li><b>Collection layer.</b> {@code fn:collection} bypasses the resource resolver and fetches directly, so an empty {@link CollectionFinder} supplies its
      *   ignore outcome instead.</li>
      *   <li><b>Extension-function layer.</b> {@link Feature#ALLOW_EXTERNAL_FUNCTIONS} is disabled, so reflection-based extension calls cannot be used to
      *       sidestep the URI restrictions.</li>
@@ -91,7 +97,9 @@ final class SaxonProvider {
 
         private static final String JDK_DEFAULT_PARSER = "#DEFAULT";
 
-        /** Collection-level ignore: {@code fn:collection()} and {@code fn:uri-collection()} resolve to an empty collection instead of fetching. */
+        /**
+         * Collection-level ignore: {@code fn:collection()} and {@code fn:uri-collection()} resolve to an empty collection instead of fetching.
+         */
         private static final CollectionFinder EMPTY_COLLECTION_FINDER = (context, collectionURI) -> {
             if (SecureException.throwOnUnresolved()) {
                 throw new XPathException(SecureException.forbidden("collection", null, null, collectionURI, null));

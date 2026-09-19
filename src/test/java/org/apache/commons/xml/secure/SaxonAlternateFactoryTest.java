@@ -33,12 +33,14 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests that Saxon's alternate public {@code TransformerFactory} entry point routes to the same locked-down {@code Configuration} as the registered one.
  *
- * <p>Saxon ships {@code net.sf.saxon.BasicTransformerFactory}, a public subclass of the registered {@code net.sf.saxon.TransformerFactoryImpl}, selectable
+ * <p>
+ * Saxon ships {@code net.sf.saxon.BasicTransformerFactory}, a public subclass of the registered {@code net.sf.saxon.TransformerFactoryImpl}, selectable
  * through the standard TrAX system property. Recognition by package prefix sends it through {@code SaxonProvider}; a name-based recognition would let it fall
  * to the generic recipe. The probe uses {@code fn:collection}, which bypasses Saxon's resource-resolution chain and fetches directly: only the empty
  * {@code CollectionFinder} that {@code SaxonProvider} installs closes it, so the generic recipe (which leaves it open even after wrapping) does not. The
  * factory is instantiated reflectively and the tests skip when Saxon is not on the classpath, so under the surefire group filters the checks are effective on
- * the test-saxon and test-saxon-xerces executions.</p>
+ * the test-saxon and test-saxon-xerces executions.
+ * </p>
  */
 @Tag("trax")
 class SaxonAlternateFactoryTest {
@@ -56,7 +58,9 @@ class SaxonAlternateFactoryTest {
         Assumptions.assumeTrue(present, "Saxon is not on the classpath");
     }
 
-    /** Instantiates {@code BasicTransformerFactory} reflectively, so this test compiles and loads without Saxon on the classpath. */
+    /**
+     * Instantiates {@code BasicTransformerFactory} reflectively, so this test compiles and loads without Saxon on the classpath.
+     */
     private static TransformerFactory basicSaxonFactory() {
         try {
             return (TransformerFactory) Class.forName(BASIC_FACTORY_CLASS).getDeclaredConstructor().newInstance();
@@ -65,7 +69,9 @@ class SaxonAlternateFactoryTest {
         }
     }
 
-    /** A {@code collection()} over the test fixtures whose {@code referenced.xml} carries {@link AttackTestSupport#LEAKED_MARKER}. */
+    /**
+     * A {@code collection()} over the test fixtures whose {@code referenced.xml} carries {@link AttackTestSupport#LEAKED_MARKER}.
+     */
     private static String collectionStylesheet() {
         final String collection = AttackTestSupport.resourceUrl("referenced.xml").toString().replaceFirst("referenced\\.xml$", "?select=referenced.xml");
         return "<?xml version=\"1.0\"?>\n"

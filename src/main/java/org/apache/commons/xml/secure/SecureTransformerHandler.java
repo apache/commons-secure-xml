@@ -33,11 +33,13 @@ import org.xml.sax.SAXException;
 /**
  * {@link TransformerHandler} wrapper that keeps an ignore-all {@link URIResolver} floor on the live transformer the handler transforms with.
  *
- * <p>The handler's input is SAX events the caller drives, so it has no inner source-parsing path of its own. What needs the floor is its transformer: the
+ * <p>
+ * The handler's input is SAX events the caller drives, so it has no inner source-parsing path of its own. What needs the floor is its transformer: the
  * handler runs the transformation on the object {@link TransformerHandler#getTransformer()} exposes, and not every implementation seeds that transformer with
  * the factory's resolver (the stock JDK's {@code newTransformerHandler(Templates)} does not). Wrapping that transformer in a {@link SecureTransformer} at
  * construction installs the floor on the live instance, so runtime {@code document()} during the handler's transform is covered, and so is a caller who pulls
- * the transformer out through {@code getTransformer()}.</p>
+ * the transformer out through {@code getTransformer()}.
+ * </p>
  */
 final class SecureTransformerHandler implements TransformerHandler {
 
@@ -51,10 +53,11 @@ final class SecureTransformerHandler implements TransformerHandler {
     /**
      * Constructs a new instance.
      *
-     * @param delegate The delegate to wrap; must not be {@code null}.
-     * @param factoryUriResolver The factory's compile-time URIResolver snapshot to restore onto the live transformer; may be {@code null}.
-     * @param emptySource The empty-{@link Source} supplier for the produced Transformer's floor; {@code null} means the default empty DOM.
-     * @param overrideDefaultParser whether the live transformer's source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
+     * @param delegate              The delegate to wrap; must not be {@code null}.
+     * @param factoryUriResolver    The factory's compile-time URIResolver snapshot to restore onto the live transformer; may be {@code null}.
+     * @param emptySource           The empty-{@link Source} supplier for the produced Transformer's floor; {@code null} means the default empty DOM.
+     * @param overrideDefaultParser whether the live transformer's source rewrites should use the pluggable parser lookup instead of the platform's built-in
+     *                              parser.
      * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
     SecureTransformerHandler(final TransformerHandler delegate, final URIResolver factoryUriResolver, final Supplier<Source> emptySource,

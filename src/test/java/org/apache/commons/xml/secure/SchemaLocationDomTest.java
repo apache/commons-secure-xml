@@ -39,18 +39,24 @@ import org.xml.sax.helpers.DefaultHandler;
  * Tests that a secure {@link DocumentBuilderFactory} performing JAXP 1.2 XSD validation does not fetch an external schema named by an
  * {@code xsi:noNamespaceSchemaLocation} hint in the instance document.
  *
- * <p>The instance is an empty {@code <root/>} element; the referenced schema declares a default {@code leak} attribute carrying
+ * <p>
+ * The instance is an empty {@code <root/>} element; the referenced schema declares a default {@code leak} attribute carrying
  * {@link AttackTestSupport#LEAKED_MARKER}. A parser that fetches the schema inlines that default into the DOM (the permissive control), while a secure parser
  * resolves the schema reference to empty content instead. Either the empty schema makes the validating parse fail, or the parse completes but the default is
- * never inlined; either way, the marker never reaches the DOM.</p>
+ * never inlined; either way, the marker never reaches the DOM.
+ * </p>
  *
- * <p>The test runs only where the implementation supports JAXP 1.2 schema-language XSD validation (the stock JDK and external Xerces do; Android does not), so
- * it skips on parsers without it.</p>
+ * <p>
+ * The test runs only where the implementation supports JAXP 1.2 schema-language XSD validation (the stock JDK and external Xerces do; Android does not), so
+ * it skips on parsers without it.
+ * </p>
  */
 @Tag("dom")
 class SchemaLocationDomTest {
 
-    /** JAXP 1.2 property selecting the schema language used by {@link DocumentBuilderFactory#setValidating(boolean)}. */
+    /**
+     * JAXP 1.2 property selecting the schema language used by {@link DocumentBuilderFactory#setValidating(boolean)}.
+     */
     private static final String SCHEMA_LANGUAGE = "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
 
     private static final String INSTANCE = "schema-location-instance.xml";
@@ -65,6 +71,11 @@ class SchemaLocationDomTest {
     private static Document parse(final DocumentBuilderFactory factory) throws Exception {
         final DocumentBuilder builder = factory.newDocumentBuilder();
         builder.setErrorHandler(new DefaultHandler() {
+            /**
+             * Always throws {@link SAXException}.
+             *
+             * @throws SAXException Thrown on every invocation.
+             */
             @Override
             public void error(final SAXParseException exception) throws SAXException {
                 throw exception;

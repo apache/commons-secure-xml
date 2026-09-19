@@ -17,7 +17,9 @@
 
 package com.saxonica;
 
-/** Test-only marker for SaxonProvider's commercial-package recognition path. */
+/**
+ * Test-only marker for SaxonProvider's commercial-package recognition path.
+ */
 public final class ProviderMarker {
 
     private ProviderMarker() {

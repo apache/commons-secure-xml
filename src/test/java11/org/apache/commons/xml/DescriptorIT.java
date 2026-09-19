@@ -36,16 +36,22 @@ import org.junit.jupiter.api.Test;
 /**
  * Guards the generated OSGi and JPMS descriptors against a regression that makes any of the library's optional dependencies mandatory.
  *
- * <p>Both descriptors are generated from bytecode by tools whose output can shift across versions: bnd derives the {@code Import-Package} header, and jdeps
+ * <p>
+ * Both descriptors are generated from bytecode by tools whose output can shift across versions: bnd derives the {@code Import-Package} header, and jdeps
  * (via moditect) derives {@code module-info}. Rather than launch an OSGi framework or a separate module layer, this test reads the two descriptors straight
  * out of the built jar and asserts the same invariant against each: the only mandatory dependency may be on the platform itself. Every other dependency, such
- * as Saxon HE or Xerces, must be optional, so a deployment that does not provide it still resolves.</p>
+ * as Saxon HE or Xerces, must be optional, so a deployment that does not provide it still resolves.
+ * </p>
  *
- * <p>"Platform" means the packages an OSGi system bundle always exports, or the {@code java.*} modules the JDK always supplies. These are the only
- * dependencies that do not need to be optional.</p>
+ * <p>
+ * "Platform" means the packages an OSGi system bundle always exports, or the {@code java.*} modules the JDK always supplies. These are the only
+ * dependencies that do not need to be optional.
+ * </p>
  *
- * <p>This test reads {@code module-info} through {@link ModuleDescriptor}, a Java 9 API the project's release-8 test sources cannot reference. It therefore
- * lives in {@code src/test/java11} and is compiled and run only under the {@code java11-tests} profile, which activates on JDK 11 or later.</p>
+ * <p>
+ * This test reads {@code module-info} through {@link ModuleDescriptor}, a Java 9 API the project's release-8 test sources cannot reference. It therefore
+ * lives in {@code src/test/java11} and is compiled and run only under the {@code java11-tests} profile, which activates on JDK 11 or later.
+ * </p>
  */
 class DescriptorIT {
 
@@ -118,7 +124,7 @@ class DescriptorIT {
     }
 
     /**
-     * Returns whether {@code pkg} is exported by an OSGi system bundle, that is, it sits under one of {@link #PLATFORM_PACKAGE_PREFIXES}.
+     * Tests whether {@code pkg} is exported by an OSGi system bundle, that is, it sits under one of {@link #PLATFORM_PACKAGE_PREFIXES}.
      */
     private static boolean isPlatformPackage(final String pkg) {
         for (final String prefix : PLATFORM_PACKAGE_PREFIXES) {

@@ -63,7 +63,9 @@ class XMLFilterTest {
     /**
      * Parent reader that drives itself, the shape a caller hands the filter when the source document does not come from an {@code InputSource}.
      *
-     * <p>Records the callbacks the filter wires onto it, and the {@code InputSource} it is driven with.</p>
+     * <p>
+     * Records the callbacks the filter wires onto it, and the {@code InputSource} it is driven with.
+     * </p>
      */
     private static final class SelfDrivenParent extends XMLFilterImpl {
 
@@ -120,19 +122,25 @@ class XMLFilterTest {
         }
     }
 
-    /** Copies the input through unchanged, so external-entity content in the input would surface in the filter's output. */
+    /**
+     * Copies the input through unchanged, so external-entity content in the input would surface in the filter's output.
+     */
     private static final String IDENTITY_XSLT = "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
             + "  <xsl:template match=\"/\"><xsl:copy-of select=\".\"/></xsl:template>\n"
             + "</xsl:stylesheet>";
 
-    /** Asserts no SAXException is buried beneath the thrown one, proving {@code parse} rethrows originals instead of re-wrapping them. */
+    /**
+     * Asserts no SAXException is buried beneath the thrown one, proving {@code parse} rethrows originals instead of re-wrapping them.
+     */
     private static void assertNotReWrapped(final SAXException thrown) {
         for (Throwable cause = causeOf(thrown); cause != null; cause = causeOf(cause)) {
             assertFalse(cause instanceof SAXException, "original SAXException should be rethrown, not re-wrapped: " + thrown);
         }
     }
 
-    /** Follows {@link SAXException#getException()} where present: Android's SAXException does not link the embedded exception into {@code getCause()}. */
+    /**
+     * Follows {@link SAXException#getException()} where present: Android's SAXException does not link the embedded exception into {@code getCause()}.
+     */
     private static Throwable causeOf(final Throwable throwable) {
         if (throwable instanceof SAXException && ((SAXException) throwable).getException() != null) {
             return ((SAXException) throwable).getException();
@@ -156,9 +164,9 @@ class XMLFilterTest {
     }
 
     /**
-     * On Android, hand the unconfigured filter a permissive parent so Xalan's {@code TrAXFilter} uses it instead of self-provisioning an Expat reader on which
-     * it enables {@code namespace-prefixes}, a feature Android's libexpat accepts but fails on mid-parse. The parent stays permissive (no floor), so the leak
-     * these controls assert still occurs.
+     * Sets a permissive parent on the unconfigured filter on Android so Xalan's {@code TrAXFilter} uses it instead of self-provisioning an Expat reader on
+     * which it enables {@code namespace-prefixes}, a feature Android's libexpat accepts but fails on mid-parse. The parent stays permissive (no floor), so the
+     * leak these controls assert still occurs.
      */
     private static void setPermissiveParentOnAndroid(final XMLFilter filter) {
         if (AttackTestSupport.IS_ANDROID) {
@@ -249,6 +257,11 @@ class XMLFilterTest {
         final XMLFilter filter = SaxSurfaceTestSupport.secureFactory().newXMLFilter(AttackTestSupport.streamSource(IDENTITY_XSLT));
         final SAXException handlerFailure = new SAXException("handler failure");
         filter.setContentHandler(new DefaultHandler() {
+            /**
+             * Always throws {@link SAXException}.
+             *
+             * @throws SAXException Thrown on every invocation.
+             */
             @Override
             public void startDocument() throws SAXException {
                 throw handlerFailure;

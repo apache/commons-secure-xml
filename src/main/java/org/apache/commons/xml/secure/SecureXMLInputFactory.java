@@ -40,7 +40,7 @@ import javax.xml.transform.Source;
  * The three universal guarantees on {@link org.apache.commons.xml.secure} apply; StAX exposes no additional vectors beyond them.
  * </p>
  * <p>
- * This class is not itself a {@link XMLInputFactory}, so it inherits none of the static JAXP factory methods. A caller therefore cannot obtain an unsecured
+ * This class is not itself an {@link XMLInputFactory}, so it inherits none of the static JAXP factory methods. A caller therefore cannot obtain an unsecured
  * factory through this class by calling a method such as {@code newDefaultFactory()}. The secure factories are instances of a nested, non-public wrapper class.
  * </p>
  *
@@ -61,8 +61,8 @@ public final class SecureXMLInputFactory {
      * <p>
      * Every resolver-valued entry point ({@link #setXMLResolver(XMLResolver)}, {@code setProperty(XMLInputFactory.RESOLVER, ...)} and the Woodstox
      * {@code com.ctc.wstx.*Resolver} keys) is routed uniformly: a caller who supplies their own {@link FallbackIgnoreXMLResolver} takes control and it is
-     * passed straight to the delegate; otherwise the caller's resolver is wrapped in a new floor installed on that hook, so the floor cannot be removed by dropping
-     * the resolver. This matters because Woodstox does not chain resolvers: when a resolver returns {@code null},
+     * passed straight to the delegate; otherwise the caller's resolver is wrapped in a new floor installed on that hook, so the floor cannot be removed by
+     * dropping the resolver. This matters because Woodstox does not chain resolvers: when a resolver returns {@code null},
      * {@code DefaultInputResolver} falls through to fetching the systemId URL itself, so a caller-set resolver that returns {@code null} must still land behind
      * the floor. {@link #getXMLResolver()} and {@code getProperty} report the caller's resolver unwrapped.
      * </p>
@@ -221,7 +221,7 @@ public final class SecureXMLInputFactory {
         }
 
         /**
-         * Routes a caller-set resolver for the property {@code name} behind the floor currently installed on that hook.
+         * Sets the resolver for the property {@code name}, keeping the caller-supplied resolver behind an ignore-all floor.
          *
          * @param name     The resolver-valued property being set.
          * @param resolver The caller's resolver, or their own {@link FallbackIgnoreXMLResolver} to take control.
@@ -247,14 +247,22 @@ public final class SecureXMLInputFactory {
             setResolverProperty(XMLInputFactory.RESOLVER, resolver);
         }
     }
-    /** Woodstox property: resolver consulted for the external DTD subset. */
+    /**
+     * Woodstox property: resolver consulted for the external DTD subset.
+     */
     static final String WSTX_DTD_RESOLVER = "com.ctc.wstx.dtdResolver";
-    /** Woodstox property: resolver consulted for declared external general entities. */
+    /**
+     * Woodstox property: resolver consulted for declared external general entities.
+     */
     static final String WSTX_ENTITY_RESOLVER = "com.ctc.wstx.entityResolver";
-    /** Woodstox property: resolver consulted for undeclared entity references. */
+    /**
+     * Woodstox property: resolver consulted for undeclared entity references.
+     */
     static final String WSTX_UNDECLARED_ENTITY_RESOLVER = "com.ctc.wstx.undeclaredEntityResolver";
 
-    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultFactory()}. */
+    /**
+     * Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultFactory()}.
+     */
     private static final String JDK_XML_INPUT_FACTORY = "com.sun.xml.internal.stream.XMLInputFactoryImpl";
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(XMLInputFactory.class, "newDefaultFactory");
@@ -324,9 +332,11 @@ public final class SecureXMLInputFactory {
     /**
      * Applies capability-driven secure settings to any {@link XMLInputFactory} (StAX) on the classpath.
      *
-     * <p>One recipe covers both the JDK Zephyr and Woodstox: the wrapper installs a non-removable {@link FallbackIgnoreXMLResolver} floor on
+     * <p>
+     * One recipe covers both the JDK Zephyr and Woodstox: the wrapper installs a non-removable {@link FallbackIgnoreXMLResolver} floor on
      * every entity-resolution hook, leaving the standard {@code SUPPORT_DTD} / {@code IS_SUPPORTING_EXTERNAL_ENTITIES} defaults untouched; see the wrapper's
-     * Javadoc for the per-implementation hook routing.</p>
+     * Javadoc for the per-implementation hook routing.
+     * </p>
      *
      * @param factory The factory to secure; never {@code null}.
      * @return a secure factory.

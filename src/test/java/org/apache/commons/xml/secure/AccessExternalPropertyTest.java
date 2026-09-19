@@ -30,14 +30,18 @@ import org.xml.sax.XMLReader;
 /**
  * Tests that loosening a JAXP 1.5 {@code accessExternal*} property to {@code all} on a secured factory does not reopen an external fetch.
  *
- * <p>The threat model lists these properties under "Settings you may modify": the securing is independent of them, because a resource supplied by a resolver
+ * <p>
+ * The threat model lists these properties under "Settings you may modify": the securing is independent of them, because a resource supplied by a resolver
  * bypasses their checks and the resolver floor covers every external reference. The whole suite already runs with the {@code javax.xml.accessExternal*} system
  * properties set to {@code all} (see the surefire configuration), so this test guards the one route the system properties cannot: a future recipe that set a
- * property to the empty string and relied on it would be loosened by a caller's per-factory {@code all}, which no system-property-based run could detect.</p>
+ * property to the empty string and relied on it would be loosened by a caller's per-factory {@code all}, which no system-property-based run could detect.
+ * </p>
  *
- * <p>Payloads and expected outcomes mirror {@link ExternalDtdTest} (external DTD via {@code DOCTYPE SYSTEM}), {@link SchemaImportTest} ({@code xs:import}) and
+ * <p>
+ * Payloads and expected outcomes mirror {@link ExternalDtdTest} (external DTD via {@code DOCTYPE SYSTEM}), {@link SchemaImportTest} ({@code xs:import}) and
  * {@link TemplatesImportTest} ({@code xsl:import}). An implementation that rejects the property has no knob to loosen, so each set runs through
- * {@link AttackTestSupport#assumeDoesNotThrow} and the test skips there (Android, external Apache Xerces).</p>
+ * {@link AttackTestSupport#assumeDoesNotThrow} and the test skips there (Android, external Apache Xerces).
+ * </p>
  */
 class AccessExternalPropertyTest {
 

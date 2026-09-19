@@ -56,8 +56,8 @@ final class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
      * Resolves {@code systemId} against {@code baseURI}.
      *
      * @param baseURI  The absolute base URI to resolve against, or {@code null} if none is available.
-     * @param systemId The system identifier, possibly relative to {@code baseURI}.
-     * @return The absolutized system identifier, or {@code systemId} unchanged when it cannot or need not be resolved.
+     * @param systemId The system IDentifier, possibly relative to {@code baseURI}.
+     * @return The absolutized system IDentifier, or {@code systemId} unchanged when it cannot or need not be resolved.
      */
     private static String absolutize(final String baseURI, final String systemId) {
         if (systemId == null || baseURI == null) {
@@ -96,7 +96,7 @@ final class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
 
     @Override
     public InputSource getExternalSubset(final String name, final String baseURI) throws SAXException, IOException {
-        // A null return means "no synthetic subset", not "unresolved", nothing is fetched.
+        // A null return means "no synthetic subset", not "unresolved"; nothing is fetched.
         return delegate instanceof EntityResolver2 ? ((EntityResolver2) delegate).getExternalSubset(name, baseURI) : null;
     }
 
@@ -108,10 +108,10 @@ final class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
      * @param name     The entity name, or {@code null} on the 2-arg resolution path.
      * @param publicId The public identifier, or {@code null} if none.
      * @param baseURI  The base URI for relative resolution, or {@code null}.
-     * @param systemId The system identifier of the unresolved entity.
+     * @param systemId The system IDentifier of the unresolved entity.
      * @return an empty {@link InputSource} carrying the requested identifiers.
      * @throws SAXException Thrown when {@value SecureException#THROW_ON_UNRESOLVED} is set: unresolved references are rejected instead of resolved to empty.
-     * @throws IOException  Never thrown by the default implementation.
+     * @throws IOException  Thrown if an overriding implementation encounters an I/O error; never thrown by the default implementation.
      */
     private InputSource onUnresolved(final String name, final String publicId, final String baseURI, final String systemId) throws SAXException {
         if (SecureException.throwOnUnresolved()) {
@@ -148,7 +148,9 @@ final class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
     /**
      * Sets the caller resolver consulted ahead of the floor.
      *
-     * <p>A single floor instance can back successive {@code setEntityResolver} calls.</p>
+     * <p>
+     * A single floor instance can back successive {@code setEntityResolver} calls.
+     * </p>
      *
      * @param delegate The caller-supplied resolver, or {@code null} for a pure ignore-all floor.
      */

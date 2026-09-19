@@ -81,7 +81,8 @@ final class FallbackIgnoreURIResolver implements URIResolver {
     private final Supplier<Source> emptySource;
 
     /**
-     * Whether the opted-in rewrite should use the pluggable parser lookup instead of the platform's built-in parser; read per resolution so the factory-level floor tracks a later
+     * Whether the opted-in rewrite should use the pluggable parser lookup instead of the platform's built-in parser; read per resolution so the factory-level
+     * floor tracks a later
      * {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} toggle.
      */
     private final BooleanSupplier overrideDefaultParser;
@@ -91,7 +92,8 @@ final class FallbackIgnoreURIResolver implements URIResolver {
      *
      * @param delegate         The resolver to delegate resolution to; may be {@code null}.
      * @param emptySource      The empty-{@link Source} supplier for the ignore outcome, or {@code null} for the default empty DOM document.
-     * @param overrideDefaultParser whether the opted-in rewrite should use the pluggable parser lookup instead of the platform's built-in parser, read at each resolution.
+     * @param overrideDefaultParser whether the opted-in rewrite should use the pluggable parser lookup instead of the platform's built-in parser, read at each
+     * resolution.
      */
     FallbackIgnoreURIResolver(final URIResolver delegate, final Supplier<Source> emptySource, final BooleanSupplier overrideDefaultParser) {
         this.delegate = delegate;

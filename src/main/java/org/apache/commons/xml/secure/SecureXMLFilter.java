@@ -40,20 +40,26 @@ import org.xml.sax.helpers.XMLFilterImpl;
 /**
  * {@link XMLFilter} that transforms the parsed input through a {@link SecureTransformer} and emits the result as SAX events.
  *
- * <p>Composed from the library's own wrappers instead of delegating to the implementation's filter, because the implementation filters self-provision an
+ * <p>
+ * Composed from the library's own wrappers instead of delegating to the implementation's filter, because the implementation filters self-provision an
  * unsecured reader for the input (the stock JDK's does so as early as {@code setContentHandler}) and cast a supplied {@link javax.xml.transform.Templates} to
  * their own type, which a wrapped Templates is not. Here the input is parsed by the parent reader, a secure one installed on first {@code parse} when the
  * caller has not set a parent (a caller-set parent is trusted configuration, used as-is), and the transformation runs on a {@link SecureTransformer}, so
  * runtime {@code document()} sits on the resolver floor. The filter is also the transformer's {@link ErrorListener}, forwarding TrAX error reports to the
- * caller-set {@link org.xml.sax.ErrorHandler} the way the parent reader's SAX reports are.</p>
+ * caller-set {@link org.xml.sax.ErrorHandler} the way the parent reader's SAX reports are.
+ * </p>
  *
- * <p>Every parse runs on the one {@link SecureTransformer} the filter is constructed with, the way every stock TrAX filter is built from a single
+ * <p>
+ * Every parse runs on the one {@link SecureTransformer} the filter is constructed with, the way every stock TrAX filter is built from a single
  * Transformer. The filter is therefore reusable for successive parses and inherits that transformer's reuse contract: one parse at a time, not two threads at
- * once.</p>
+ * once.
+ * </p>
  */
 final class SecureXMLFilter extends XMLFilterImpl implements ErrorListener {
 
-    /** System id of the {@link InputSource} substituted for a caller's {@code null} one in {@link #parse(InputSource)}; a URN, so nothing can fetch it. */
+    /**
+     * System ID of the {@link InputSource} substituted for a caller's {@code null} one in {@link #parse(InputSource)}; a URN, so nothing can fetch it.
+     */
     static final String NO_INPUT_SYSTEM_ID = "urn:uuid:a47f732e-9111-42db-b648-5e24b7d663f3";
 
     /**
@@ -75,10 +81,14 @@ final class SecureXMLFilter extends XMLFilterImpl implements ErrorListener {
                 : new SAXParseException(e.getMessage(), locator.getPublicId(), locator.getSystemId(), locator.getLineNumber(), locator.getColumnNumber(), embedded);
     }
 
-    /** Snapshot of the transformer's {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} outcome, carried onto the self-provisioned parent reader. */
+    /**
+     * Snapshot of the transformer's {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} outcome, carried onto the self-provisioned parent reader.
+     */
     private final boolean overrideDefaultParser;
 
-    /** Where the transformation writes, rebuilt whenever the caller sets a ContentHandler; {@code null} until one is set. */
+    /**
+     * Where the transformation writes, rebuilt whenever the caller sets a ContentHandler; {@code null} until one is set.
+     */
     private SAXResult result;
 
     private final Transformer transformer;
@@ -164,10 +174,12 @@ final class SecureXMLFilter extends XMLFilterImpl implements ErrorListener {
     }
 
     /**
-     * {@inheritDoc}
+     * Sets the content handler that receives the transformation result.
      *
-     * <p>Builds the destination the transformation writes to, so a parse only has to run it. A handler that is also a {@link LexicalHandler} receives the
-     * result's comments and CDATA boundaries too, the way {@link javax.xml.transform.sax.SAXResult} expects them to be supplied.</p>
+     * <p>
+     * Builds the destination the transformation writes to, so a parse only has to run it. A handler that is also a {@link LexicalHandler} receives the
+     * result's comments and CDATA boundaries too, the way {@link javax.xml.transform.sax.SAXResult} expects them to be supplied.
+     * </p>
      */
     @Override
     public void setContentHandler(final ContentHandler handler) {
@@ -179,11 +191,13 @@ final class SecureXMLFilter extends XMLFilterImpl implements ErrorListener {
     }
 
     /**
-     * {@inheritDoc}
+     * Sets the parent reader that supplies the input to the transformation.
      *
-     * <p>Wires the filter onto the new parent the way {@link XMLFilterImpl#setupParse()} would, minus the ContentHandler: the transformer owns the parent's
+     * <p>
+     * Wires the filter onto the new parent the way {@link XMLFilterImpl#setupParse()} would, minus the ContentHandler: the transformer owns the parent's
      * content events and delivers the transformed stream to the caller's handler through a {@link SAXResult} instead. Wiring the parent here rather than per
-     * parse is enough because it is the filter that is installed, not the caller's callbacks, so a callback the caller sets afterward is still reached.</p>
+     * parse is enough because it is the filter that is installed, not the caller's callbacks, so a callback the caller sets afterward is still reached.
+     * </p>
      */
     @Override
     public void setParent(final XMLReader parent) {
@@ -197,18 +211,22 @@ final class SecureXMLFilter extends XMLFilterImpl implements ErrorListener {
     }
 
     /**
-     * Fails: events pushed into the {@link ContentHandler} role inherited from {@link XMLFilterImpl} would reach the caller's handler untransformed.
+     * Always throws {@link SAXException} because pushed events would reach the caller's handler untransformed.
      *
-     * <p>The stock filters make that role inert too, by dropping the events (Apache Xalan, the JDK) or by not implementing it at all (Saxon).</p>
+     * <p>
+     * The stock filters make that role inert too, by dropping the events (Apache Xalan, the JDK) or by not implementing it at all (Saxon).
+     * </p>
      *
-     * @throws SAXException Always.
+     * @throws SAXException Thrown on every invocation.
      */
     @Override
     public void startDocument() throws SAXException {
         throw new SAXException("This XMLFilter only implements ContentHandler for technical reasons. To push SAX events, use newTransformerHandler instead.");
     }
 
-    /** Forwards a transformation warning to the caller-set {@link org.xml.sax.ErrorHandler}; the transformation continues unless that handler throws. */
+    /**
+     * Forwards a transformation warning to the caller-set {@link org.xml.sax.ErrorHandler}; the transformation continues unless that handler throws.
+     */
     @Override
     public void warning(final TransformerException e) throws TransformerException {
         try {

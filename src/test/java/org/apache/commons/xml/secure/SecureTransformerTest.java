@@ -43,7 +43,9 @@ import org.junit.jupiter.api.Test;
 @Tag("trax")
 class SecureTransformerTest {
 
-    /** A transformer a caller configured before this library saw it, the shape a caller's own Templates hands out. */
+    /**
+     * A transformer a caller configured before this library saw it, the shape a caller's own Templates hands out.
+     */
     private static SecureTransformer wrap(final URIResolver carried) throws Exception {
         final Transformer delegate = TransformerFactory.newInstance().newTransformer(AttackTestSupport.resourceSource("with-document.xsl"));
         delegate.setURIResolver(carried);

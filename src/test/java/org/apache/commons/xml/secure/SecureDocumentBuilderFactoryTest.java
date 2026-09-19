@@ -36,7 +36,9 @@ import org.junit.jupiter.api.Test;
 @Tag("dom")
 class SecureDocumentBuilderFactoryTest {
 
-    /** System property naming the {@link DocumentBuilderFactory} implementation, the JVM's mechanism for reconfiguring the default parser. */
+    /**
+     * System property naming the {@link DocumentBuilderFactory} implementation, the JVM's mechanism for reconfiguring the default parser.
+     */
     private static final String FACTORY_ID = "javax.xml.parsers.DocumentBuilderFactory";
 
     /**
@@ -52,7 +54,7 @@ class SecureDocumentBuilderFactoryTest {
     }
 
     /**
-     * Selects the implementation {@link DocumentBuilderFactory#newInstance()} returns by setting the {@value #FACTORY_ID} system property.
+     * Sets the {@value #FACTORY_ID} system property to select the implementation {@link DocumentBuilderFactory#newInstance()} returns.
      *
      * @param factoryClassName The implementation class name to install, or {@code null} to clear the property and restore the platform lookup.
      * @return The previous property value, {@code null} if it was not set; pass it back here to restore the original lookup.

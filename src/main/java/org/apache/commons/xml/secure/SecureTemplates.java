@@ -61,9 +61,11 @@ final class SecureTemplates implements Templates {
      * Constructs a new instance.
      *
      * @param delegate         The delegate to wrap; must not be {@code null}.
-     * @param factoryUriResolver The factory's compile-time URIResolver snapshot to restore onto Transformers produced from the compiled Templates; may be {@code null}.
+     * @param factoryUriResolver The factory's compile-time URIResolver snapshot to restore onto Transformers produced from the compiled Templates; may be
+     * {@code null}.
      * @param emptySource      The empty-{@link Source} supplier for the produced Transformers.
-     * @param overrideDefaultParser whether the produced Transformers' source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
+     * @param overrideDefaultParser whether the produced Transformers' source rewrites should use the pluggable parser lookup instead of the platform's built-in
+     * parser.
      * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
     SecureTemplates(final Templates delegate, final URIResolver factoryUriResolver, final Supplier<Source> emptySource, final boolean overrideDefaultParser) {

@@ -39,14 +39,18 @@ import org.xml.sax.XMLReader;
 /**
  * Tests that the JAXP {@code reset()} lifecycle methods do not strip the secure floors.
  *
- * <p>The JAXP reset contract returns an object to its just-created state, and the stock JDK / Xerces implementations take that literally: they re-install
+ * <p>
+ * The JAXP reset contract returns an object to its just-created state, and the stock JDK / Xerces implementations take that literally: they re-install
  * their initial (null) resolvers, silently removing any floor the secure wrappers installed after creation. Each test resets a secure object and asserts
  * that an external reference is still either blocked during parsing or resolved to empty content afterward; the tests are skipped on platforms whose
- * implementation does not support {@code reset()} at all (there the securing cannot be stripped in the first place).</p>
+ * implementation does not support {@code reset()} at all (there the securing cannot be stripped in the first place).
+ * </p>
  */
 class ResetSecureTest {
 
-    /** systemId of the external general entity the floor must keep covering after a reset (its content carries {@link AttackTestSupport#LEAKED_MARKER}). */
+    /**
+     * systemId of the external general entity the floor must keep covering after a reset (its content carries {@link AttackTestSupport#LEAKED_MARKER}).
+     */
     private static final String UNLISTED = AttackTestSupport.resourceUrl("referenced.xml").toString();
 
     private static String entityPayload(final String entitySystemId) {

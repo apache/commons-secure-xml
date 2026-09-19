@@ -40,14 +40,18 @@ import org.junit.jupiter.api.Test;
 @Tag("xpath")
 class SecureXPathFactoryTest {
 
-    /** A processing limit the JDK's XPath implementation recognizes through the Java 18 property API. */
+    /**
+     * A processing limit the JDK's XPath implementation recognizes through the Java 18 property API.
+     */
     private static final String XPATH_GROUP_LIMIT = "jdk.xml.xpathExprGrpLimit";
 
     /**
      * The Java 18 {@code XPathFactory} property method of the given name, or an aborted test where the platform predates it.
      *
-     * <p>Reached reflectively because this suite compiles against the Java 8 API, the same reason the wrapper delegates the pair through method handles: the
-     * call has to resolve at run time, which is also exactly how a Java 18 caller reaches it.</p>
+     * <p>
+     * Reached reflectively because this suite compiles against the Java 8 API, the same reason the wrapper delegates the pair through method handles: the
+     * call has to resolve at run time, which is also exactly how a Java 18 caller reaches it.
+     * </p>
      */
     private static Method propertyMethod(final String name, final Class<?>... parameterTypes) {
         try {
@@ -150,6 +154,11 @@ class SecureXPathFactoryTest {
                 return null;
             }
 
+            /**
+             * Always throws {@link XPathFactoryConfigurationException}.
+             *
+             * @throws XPathFactoryConfigurationException Thrown on every invocation.
+             */
             @Override
             public void setFeature(final String name, final boolean value) throws XPathFactoryConfigurationException {
                 throw new XPathFactoryConfigurationException(name);

@@ -57,21 +57,29 @@ import org.xml.sax.XMLReader;
 /**
  * Tests that a caller-supplied resolver cannot remove the secure ignore-all floor on any factory.
  *
- * <p>The observable contract on every secure factory is the same: a resource the caller resolves (returns a non-null value) is allowed, but anything the
+ * <p>
+ * The observable contract on every secure factory is the same: a resource the caller resolves (returns a non-null value) is allowed, but anything the
  * caller does not resolve is resolved to empty content instead of fetched, so a resolver that resolves nothing leaves the block in place. Most
  * factories enforce this with a {@link FallbackIgnoreEntityResolver2}-style floor that consults the caller and returns empty on a {@code null} return; Saxon
  * enforces the equivalent through an ignore-all {@code ResourceResolver} floor on its {@code Configuration}. Every resolver channel is exercised: the SAX/DOM
- * {@link EntityResolver}, the StAX {@link XMLResolver}, the schema {@link LSResourceResolver} and the XSLT {@link URIResolver}.</p>
+ * {@link EntityResolver}, the StAX {@link XMLResolver}, the schema {@link LSResourceResolver} and the XSLT {@link URIResolver}.
+ * </p>
  */
 class EntityResolverFloorTest {
 
-    /** systemId the allow-list resolvers permit (its content carries {@link AttackTestSupport#LEAKED_MARKER}). */
+    /**
+     * systemId the allow-list resolvers permit (its content carries {@link AttackTestSupport#LEAKED_MARKER}).
+     */
     private static final String ALLOWED = AttackTestSupport.resourceUrl("referenced.txt").toString();
 
-    /** systemId the allow-list resolvers do not resolve (so the floor resolves it to empty; its content carries {@link AttackTestSupport#LEAKED_MARKER}). */
+    /**
+     * systemId the allow-list resolvers do not resolve (so the floor resolves it to empty; its content carries {@link AttackTestSupport#LEAKED_MARKER}).
+     */
     private static final String UNLISTED = AttackTestSupport.resourceUrl("referenced.xml").toString();
 
-    /** Resolves only {@link #ALLOWED}; returns {@code null} for anything else. */
+    /**
+     * Resolves only {@link #ALLOWED}; returns {@code null} for anything else.
+     */
     private static final EntityResolver ENTITY_ALLOW_LIST = (publicId, systemId) ->
             ALLOWED.equals(systemId) ? new InputSource(new URL(systemId).openStream()) : null;
 
@@ -87,10 +95,14 @@ class EntityResolverFloorTest {
         return source;
     };
 
-    /** Absolute URL of the host document whose {@code xi:include} references {@code referenced.xml} by a relative href. */
+    /**
+     * Absolute URL of the host document whose {@code xi:include} references {@code referenced.xml} by a relative href.
+     */
     private static final String XINCLUDE_HOST = AttackTestSupport.resourceUrl("with-xinclude.xml").toString();
 
-    /** Resolves only {@link #ALLOWED} to its content stream; returns {@code null} for anything else. */
+    /**
+     * Resolves only {@link #ALLOWED} to its content stream; returns {@code null} for anything else.
+     */
     private static final XMLResolver STAX_ALLOW_LIST = (publicID, systemID, baseURI, namespace) -> {
         if (!ALLOWED.equals(systemID)) {
             return null;
@@ -102,14 +114,20 @@ class EntityResolverFloorTest {
         }
     };
 
-    /** Absolute location of the imported schema the allow-list resolver permits. */
+    /**
+     * Absolute location of the imported schema the allow-list resolver permits.
+     */
     private static final String ALLOWED_SCHEMA = AttackTestSupport.resourceUrl("included.xsd").toString();
 
-    /** Resolves only the {@code included.xsd} import; returns {@code null} for anything else. */
+    /**
+     * Resolves only the {@code included.xsd} import; returns {@code null} for anything else.
+     */
     private static final LSResourceResolver SCHEMA_ALLOW_LIST = (type, namespaceURI, publicId, systemId, baseURI) ->
             systemId != null && systemId.endsWith("included.xsd") ? lsInput(ALLOWED_SCHEMA) : null;
 
-    /** Resolves only the {@code included.xsl} import; returns {@code null} for anything else. */
+    /**
+     * Resolves only the {@code included.xsl} import; returns {@code null} for anything else.
+     */
     private static final URIResolver XSL_ALLOW_LIST = (href, base) ->
             href != null && href.endsWith("included.xsl") ? AttackTestSupport.resourceSource("included.xsl") : null;
 
@@ -126,7 +144,10 @@ class EntityResolverFloorTest {
         return factory;
     }
 
-    /** An {@link LSInput} naming the resource but carrying no content: a redirect the implementation fetches itself, like an identifier-only {@code InputSource}. */
+    /**
+     * An {@link LSInput} naming the resource but carrying no content: a redirect the implementation fetches itself, like an identifier-only
+     * {@code InputSource}.
+     */
     private static LSInput identifierOnlyLsInput(final String systemId) {
         return assertDoesNotThrow(() -> {
             final DOMImplementationLS ls = (DOMImplementationLS) DOMImplementationRegistry.newInstance().getDOMImplementation("LS");

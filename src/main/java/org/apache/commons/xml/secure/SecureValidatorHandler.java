@@ -34,8 +34,10 @@ import org.xml.sax.SAXNotSupportedException;
 /**
  * {@link ValidatorHandler} wrapper that keeps an ignore-all {@link LSResourceResolver} floor a caller cannot remove.
  *
- * <p>Blocks {@code xsi:schemaLocation} resolution during SAX-driven validation. A caller-set resolver is routed through a {@link
- * FallbackIgnoreLSResourceResolver} rather than replacing the floor, so a schema the caller does not resolve resolves to empty instead of being fetched.</p>
+ * <p>
+ * Blocks {@code xsi:schemaLocation} resolution during SAX-driven validation. A caller-set resolver is routed through a {@link
+ * FallbackIgnoreLSResourceResolver} rather than replacing the floor, so a schema the caller does not resolve resolves to empty instead of being fetched.
+ * </p>
  */
 final class SecureValidatorHandler extends ValidatorHandler {
 

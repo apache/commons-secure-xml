@@ -65,7 +65,9 @@ public final class SecureSchemaFactory {
      * by {@link SecureSchemaFactory#newInstance(String)}; there is no per-implementation branching and no limit configuration on the factory itself beyond
      * {@code FEATURE_SECURE_PROCESSING}.
      *
-     * <p>Three layers cooperate:</p>
+     * <p>
+     * Three layers cooperate:
+     * </p>
      * <ol>
      *   <li>{@link SecureSchemaFactory} installs an ignore-all {@link FallbackIgnoreLSResourceResolver} floor on the factory (blocking
      *       {@code xs:import}/{@code xs:include}/{@code xs:redefine} at compile time) and rewrites the Source on every {@code newSchema(Source[])} entry point
@@ -76,14 +78,16 @@ public final class SecureSchemaFactory {
      * </ol>
      *
      * <p>
-     * The secure reader supplied by {@link SecureSAXParserFactory#secure(Source, boolean)} already carries {@code FEATURE_SECURE_PROCESSING} and the processing limits, so a
+     * The secure reader supplied by {@link SecureSAXParserFactory#secure(Source, boolean)} already carries {@code FEATURE_SECURE_PROCESSING} and the processing
+     * limits, so a
      * DOCTYPE, external entity or Billion Laughs payload in the schema or instance document is bounded there rather than on this factory. One limit it cannot
      * supply is content-model expansion: a large {@code maxOccurs} is expanded by the schema loader when it builds the DFA, after parsing and without the
      * reader, so {@code FEATURE_SECURE_PROCESSING} is set on the factory as well, which is what installs that bound on external Xerces (the stock JDK applies
-     * it unconditionally). The JAXP 1.5 {@code ACCESS_EXTERNAL_*} properties are still not set explicitly: the resolver floor already blocks the same fetches on
+     * it unconditionally). The JAXP 1.5 {@code ACCESS_EXTERNAL_*} properties are still not set explicitly: the resolver floor already blocks the same fetches
+     * on
      * every implementation, and the JDK 8 {@code SchemaFactory} has a bug whereby those properties keep blocking even when a caller's own resolver would grant
-     * access. The floor is a non-removable lower bound: a caller-set {@link LSResourceResolver} is routed through it (opting a specific lookup in by returning a
-     * non-{@code null} result) rather than replacing it, so the securing (or the floor) cannot be dropped by swapping the resolver.
+     * access. The floor is a non-removable lower bound: a caller-set {@link LSResourceResolver} is routed through it (opting a specific lookup in by returning
+     * a non-{@code null} result) rather than replacing it, so the securing (or the floor) cannot be dropped by swapping the resolver.
      * </p>
      */
     private static final class Wrapper extends SchemaFactory {
@@ -151,8 +155,10 @@ public final class SecureSchemaFactory {
         /**
          * Tests whether parsers should be instantiated via {@code newInstance()} instead of {@code newDefaultInstance()}.
          *
-         * <p>The JDK implementation of {@link SchemaFactory} uses the JDK parsers while {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} is unset or
-         * {@code false}.</p>
+         * <p>
+         * The JDK implementation of {@link SchemaFactory} uses the JDK parsers while {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} is unset or
+         * {@code false}.
+         * </p>
          *
          * @return {@code true} if parsers should be created via {@code newInstance()}.
          */
@@ -205,7 +211,9 @@ public final class SecureSchemaFactory {
         }
     }
 
-    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
+    /**
+     * Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}.
+     */
     private static final String JDK_SCHEMA_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory";
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(SchemaFactory.class, "newDefaultInstance");
@@ -267,10 +275,12 @@ public final class SecureSchemaFactory {
     /**
      * Secures a {@link SchemaFactory}.
      *
-     * <p>Unlike the other factory types, there is no per-implementation branching: schema compilation and validation reach external resources only through the
+     * <p>
+     * Unlike the other factory types, there is no per-implementation branching: schema compilation and validation reach external resources only through the
      * resolver hook, so wrapping the factory with a non-removable ignore-all resolver floor is enough on every implementation. The reader used to parse schema
      * and instance documents is secured separately, through {@link SecureSAXParserFactory#secure(javax.xml.transform.Source, boolean)}; the factory carries
-     * {@code FEATURE_SECURE_PROCESSING} for the one limit that reader cannot supply, the loader's content-model expansion.</p>
+     * {@code FEATURE_SECURE_PROCESSING} for the one limit that reader cannot supply, the loader's content-model expansion.
+     * </p>
      *
      * @param factory The factory to secure; never {@code null}.
      * @return a secure factory.

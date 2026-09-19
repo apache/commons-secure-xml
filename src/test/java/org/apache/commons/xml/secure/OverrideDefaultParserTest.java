@@ -40,10 +40,12 @@ import org.xml.sax.XMLReader;
 /**
  * Tests that {@code jdk.xml.overrideDefaultParser} selects which secure parser family performs the source rewrites on factories that recognize the feature.
  *
- * <p>The wrapped implementations' internal parsers are never used (the wrappers parse every source themselves), so instead of configuring the delegate, the
+ * <p>
+ * The wrapped implementations' internal parsers are never used (the wrappers parse every source themselves), so instead of configuring the delegate, the
  * wrappers read the feature: {@code false} (the JDK's default) pins the platform's built-in parser, {@code true} (or a delegate that does not recognize the
  * feature) keeps the pluggable lookup. Both choices are secure, so the feature carries no security weight. The tests pin the JDK implementations through
- * {@code newDefaultInstance()}, so they discriminate in every JVM execution; under test-jdk-xerces the two parser families genuinely differ.</p>
+ * {@code newDefaultInstance()}, so they discriminate in every JVM execution; under test-jdk-xerces the two parser families genuinely differ.
+ * </p>
  */
 @Tag("trax")
 @Tag("xpath")
@@ -52,13 +54,19 @@ class OverrideDefaultParserTest {
 
     private static final String FEATURE = SecureSAXParserFactory.OVERRIDE_DEFAULT_PARSER;
 
-    /** Package prefix of the JDK's built-in parsers, the family a {@code false} feature value pins. */
+    /**
+     * Package prefix of the JDK's built-in parsers, the family a {@code false} feature value pins.
+     */
     private static final String JDK_INTERNAL_PREFIX = "com.sun.org.apache.xerces.internal.";
 
-    /** {@code true} where the runtime's factories know {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER}; JDK 8 gained it in 8u162. */
+    /**
+     * {@code true} where the runtime's factories know {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER}; JDK 8 gained it in 8u162.
+     */
     private static final boolean SUPPORTS_FEATURE = probeFeature();
 
-    /** Skips a test on a runtime whose factories do not recognize the feature, where there is no selection to observe. */
+    /**
+     * Skips a test on a runtime whose factories do not recognize the feature, where there is no selection to observe.
+     */
     private static void assumeFeatureSupported() {
         assumeTrue(SUPPORTS_FEATURE, "runtime does not recognize " + FEATURE);
     }

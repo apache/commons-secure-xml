@@ -82,7 +82,8 @@
  * </p>
  * <p>
  * An unresolved external reference resolves to empty content by default, so the parse continues without the resource. To reject it with an exception instead,
- * set the system property {@code org.apache.commons.xml.secure.throwOnUnresolved} to {@code true}; the property is read at resolution time, and references resolved by
+ * set the system property {@code org.apache.commons.xml.secure.throwOnUnresolved} to {@code true}; the property is read at resolution time, and references
+ * resolved by
  * a caller-supplied resolver are unaffected.
  * </p>
  * <h2>Caller-supplied URIs</h2>

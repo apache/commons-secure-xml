@@ -76,22 +76,34 @@ class SecureXMLInputFactoryTest {
      */
     private static final class RecordingXMLInputFactory extends XMLInputFactory {
 
-        /** The {@link XMLEventReader} every event-flavor creation method returns. */
+        /**
+         * The {@link XMLEventReader} every event-flavor creation method returns.
+         */
         static final XMLEventReader EVENT_SENTINEL = proxy(XMLEventReader.class);
 
-        /** The {@link XMLStreamReader} every stream-flavor creation method returns. */
+        /**
+         * The {@link XMLStreamReader} every stream-flavor creation method returns.
+         */
         static final XMLStreamReader STREAM_SENTINEL = proxy(XMLStreamReader.class);
 
-        /** A stand-in {@link XMLEventAllocator} for the round-trip tests. */
+        /**
+         * A stand-in {@link XMLEventAllocator} for the round-trip tests.
+         */
         static final XMLEventAllocator ALLOCATOR_SENTINEL = proxy(XMLEventAllocator.class);
 
-        /** A stand-in {@link XMLReporter} for the round-trip tests. */
+        /**
+         * A stand-in {@link XMLReporter} for the round-trip tests.
+         */
         static final XMLReporter REPORTER_SENTINEL = proxy(XMLReporter.class);
 
-        /** A stand-in {@link EventFilter} for the delegation tests. */
+        /**
+         * A stand-in {@link EventFilter} for the delegation tests.
+         */
         static final EventFilter EVENT_FILTER_SENTINEL = proxy(EventFilter.class);
 
-        /** A stand-in {@link StreamFilter} for the delegation tests. */
+        /**
+         * A stand-in {@link StreamFilter} for the delegation tests.
+         */
         static final StreamFilter STREAM_FILTER_SENTINEL = proxy(StreamFilter.class);
 
         /**
@@ -125,19 +137,29 @@ class SecureXMLInputFactoryTest {
             });
         }
 
-        /** Recorded calls in order, each formatted by {@link #call}. */
+        /**
+         * Recorded calls in order, each formatted by {@link #call}.
+         */
         final List<String> calls = new ArrayList<>();
 
-        /** The resolver-valued hook this factory reports; the wrapper's floor or whatever a test installs. */
+        /**
+         * The resolver-valued hook this factory reports; the wrapper's floor or whatever a test installs.
+         */
         Object resolverHook;
 
-        /** The allocator last installed via {@code setEventAllocator}. */
+        /**
+         * The allocator last installed via {@code setEventAllocator}.
+         */
         XMLEventAllocator allocator;
 
-        /** The reporter last installed via {@code setXMLReporter}. */
+        /**
+         * The reporter last installed via {@code setXMLReporter}.
+         */
         XMLReporter reporter;
 
-        /** The answer {@code isPropertySupported} gives; {@code true} by default. */
+        /**
+         * The answer {@code isPropertySupported} gives; {@code true} by default.
+         */
         boolean supported = true;
 
         @Override

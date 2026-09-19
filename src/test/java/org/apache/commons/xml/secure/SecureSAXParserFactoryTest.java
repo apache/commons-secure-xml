@@ -74,7 +74,9 @@ public class SecureSAXParserFactoryTest {
         }
     }
 
-    /** System property naming the {@link SAXParserFactory} implementation, the JVM's mechanism for reconfiguring the default parser. */
+    /**
+     * System property naming the {@link SAXParserFactory} implementation, the JVM's mechanism for reconfiguring the default parser.
+     */
     private static final String FACTORY_ID = "javax.xml.parsers.SAXParserFactory";
 
     /**
@@ -102,7 +104,7 @@ public class SecureSAXParserFactoryTest {
     }
 
     /**
-     * Selects the implementation {@link SAXParserFactory#newInstance()} returns by setting the {@value #FACTORY_ID} system property.
+     * Sets the {@value #FACTORY_ID} system property to select the implementation {@link SAXParserFactory#newInstance()} returns.
      *
      * @param factoryClassName The implementation class name to install, or {@code null} to clear the property and restore the platform lookup.
      * @return The previous property value, {@code null} if it was not set; pass it back here to restore the original lookup.

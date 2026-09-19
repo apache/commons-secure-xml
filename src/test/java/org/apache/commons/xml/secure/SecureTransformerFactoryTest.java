@@ -156,6 +156,11 @@ class SecureTransformerFactoryTest {
 
     private static final class RejectingFeatureFactory extends NullProductsFactory {
 
+        /**
+         * Always throws {@link TransformerConfigurationException}.
+         *
+         * @throws TransformerConfigurationException Thrown on every invocation.
+         */
         @Override
         public void setFeature(final String name, final boolean value) throws TransformerConfigurationException {
             throw new TransformerConfigurationException(name);
@@ -273,6 +278,11 @@ class SecureTransformerFactoryTest {
         final ClassCastException cause = new ClassCastException("Unsupported Templates implementation");
         final SAXTransformerFactory factory = (SAXTransformerFactory) SecureTransformerFactory.secure(new NullProductsFactory() {
 
+            /**
+             * Always throws {@link ClassCastException}.
+             *
+             * @throws ClassCastException Thrown on every invocation.
+             */
             @Override
             public TransformerHandler newTransformerHandler(final Templates templates) {
                 throw cause;

@@ -34,25 +34,34 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests whether Saxon's XSLT 3.0 URI-fetching functions can pull external resources into a transform result through a secure {@code TransformerFactory}.
  *
- * <p>The XPath 3.1 {@code unparsed-text} family and {@code json-doc} do not go through the JAXP {@code URIResolver} that governs {@code document()} and
+ * <p>
+ * The XPath 3.1 {@code unparsed-text} family and {@code json-doc} do not go through the JAXP {@code URIResolver} that governs {@code document()} and
  * {@code xsl:include}/{@code xsl:import}: Saxon routes them through the {@code Configuration}'s resource resolver. This test is the TrAX-side companion of
  * {@link SaxonXPathExternalCallsTest}, confirming that the floor {@code SaxonProvider} installs on the transformer path also closes these functions when they
- * are called from a stylesheet.</p>
+ * are called from a stylesheet.
+ * </p>
  *
- * <p>The three content functions ({@code unparsed-text}, {@code unparsed-text-lines}, {@code json-doc}) are checked as a leak pair: an unconfigured Saxon
- * factory resolves the URI and copies {@link AttackTestSupport#LEAKED_MARKER} into the output, while the secure factory must not. {@code unparsed-text-available}
+ * <p>
+ * The three content functions ({@code unparsed-text}, {@code unparsed-text-lines}, {@code json-doc}) are checked as a leak pair: an unconfigured Saxon
+ * factory resolves the URI and copies {@link AttackTestSupport#LEAKED_MARKER} into the output, while the secure factory must not.
+ * {@code unparsed-text-available}
  * discloses no content, so it is checked as an existence oracle: the unconfigured factory distinguishes an existing fixture from a missing one, and the secure
- * factory must not.</p>
+ * factory must not.
+ * </p>
  *
- * <p>Saxon is instantiated reflectively and every test skips when it is absent, so under the surefire group filters the checks are effective on the test-saxon
- * and test-saxon-xerces executions.</p>
+ * <p>
+ * Saxon is instantiated reflectively and every test skips when it is absent, so under the surefire group filters the checks are effective on the test-saxon
+ * and test-saxon-xerces executions.
+ * </p>
  */
 @Tag("trax")
 class SaxonTransformerExternalCallsTest {
 
     private static final String SAXON_TRANSFORMER_FACTORY_CLASS = "net.sf.saxon.TransformerFactoryImpl";
 
-    /** Runs the expression through the secure Saxon factory; a throw is an acceptable block, otherwise the marker must be absent. */
+    /**
+     * Runs the expression through the secure Saxon factory; a throw is an acceptable block, otherwise the marker must be absent.
+     */
     private static void assertSecureDoesNotLeak(final String expression) {
         try {
             final String result = transform(SecureTransformerFactory.secure(saxonFactory()), expression);
@@ -62,7 +71,9 @@ class SaxonTransformerExternalCallsTest {
         }
     }
 
-    /** Runs the expression through the unconfigured Saxon factory and asserts the marker is resolved into the output (leak control). */
+    /**
+     * Runs the expression through the unconfigured Saxon factory and asserts the marker is resolved into the output (leak control).
+     */
     private static void assertUnconfiguredLeaks(final String expression) throws TransformerException {
         final String result = transform(saxonFactory(), expression);
         assertTrue(result.contains(AttackTestSupport.LEAKED_MARKER), "unconfigured Saxon was expected to resolve " + expression + ", got: " + result);
@@ -79,7 +90,9 @@ class SaxonTransformerExternalCallsTest {
         Assumptions.assumeTrue(present, "Saxon is not on the classpath");
     }
 
-    /** The {@code unparsed-text-available} answer under the secure factory, or {@code "blocked"} when the transform throws. */
+    /**
+     * The {@code unparsed-text-available} answer under the secure factory, or {@code "blocked"} when the transform throws.
+     */
     private static String availabilityUnderSecure(final String uri) {
         try {
             return transform(SecureTransformerFactory.secure(saxonFactory()), "unparsed-text-available('" + uri + "')").contains("true") ? "true" : "false";
@@ -88,7 +101,9 @@ class SaxonTransformerExternalCallsTest {
         }
     }
 
-    /** URL of a sibling resource that does not exist, so a real fetch fails; used as the negative side of the existence-oracle check. */
+    /**
+     * URL of a sibling resource that does not exist, so a real fetch fails; used as the negative side of the existence-oracle check.
+     */
     private static String missingUrl() {
         return url("referenced.txt").replaceFirst("referenced\\.txt$", "does-not-exist.txt");
     }
@@ -101,7 +116,9 @@ class SaxonTransformerExternalCallsTest {
         }
     }
 
-    /** Wraps a single XPath 3.1 expression in an XSLT 3.0 stylesheet that copies its string value into the output. */
+    /**
+     * Wraps a single XPath 3.1 expression in an XSLT 3.0 stylesheet that copies its string value into the output.
+     */
     private static String stylesheet(final String expression) {
         return "<?xml version=\"1.0\"?>\n"
                 + "<xsl:stylesheet version=\"3.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
@@ -118,7 +135,9 @@ class SaxonTransformerExternalCallsTest {
         return sink.toString();
     }
 
-    /** URL of a fixture that carries {@link AttackTestSupport#LEAKED_MARKER}; {@code name} is a file under {@code src/test/resources/leaked/}. */
+    /**
+     * URL of a fixture that carries {@link AttackTestSupport#LEAKED_MARKER}; {@code name} is a file under {@code src/test/resources/leaked/}.
+     */
     private static String url(final String name) {
         return AttackTestSupport.resourceUrl(name).toString();
     }

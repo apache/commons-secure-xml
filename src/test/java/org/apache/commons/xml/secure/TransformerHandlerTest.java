@@ -47,7 +47,9 @@ import org.junit.jupiter.api.Test;
 @Tag("trax")
 class TransformerHandlerTest {
 
-    /** Skips the test where the implementation refuses a Templates it did not compile itself, as Saxon does. */
+    /**
+     * Skips the test where the implementation refuses a Templates it did not compile itself, as Saxon does.
+     */
     private static TransformerHandler assumeAcceptsForeignImplementation(final Templates callers) {
         try {
             return ((SAXTransformerFactory) TransformerFactory.newInstance()).newTransformerHandler(callers);
@@ -57,7 +59,9 @@ class TransformerHandlerTest {
         }
     }
 
-    /** A caller's own Templates that only configures the Transformer it hands out, the shape Apache CXF's XSLTJaxbProvider builds. */
+    /**
+     * A caller's own Templates that only configures the Transformer it hands out, the shape Apache CXF's XSLTJaxbProvider builds.
+     */
     private static Templates callersTemplates(final Templates compiled, final URIResolver carried) {
         return new Templates() {
 

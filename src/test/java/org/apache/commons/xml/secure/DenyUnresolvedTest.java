@@ -31,8 +31,10 @@ import org.xml.sax.SAXException;
 /**
  * Tests that the resolver floors reject unresolved references when the {@value SecureException#THROW_ON_UNRESOLVED} system property is set.
  *
- * <p>The floors are exercised directly: with the property set and no caller delegate, each must throw its hook's exception instead of resolving to empty
- * content. The property is read at resolution time, so setting it around a single test cannot leak into the rest of the suite.</p>
+ * <p>
+ * The floors are exercised directly: with the property set and no caller delegate, each must throw its hook's exception instead of resolving to empty
+ * content. The property is read at resolution time, so setting it around a single test cannot leak into the rest of the suite.
+ * </p>
  */
 class DenyUnresolvedTest {
 

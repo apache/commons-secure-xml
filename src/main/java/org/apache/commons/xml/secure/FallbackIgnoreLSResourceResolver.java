@@ -36,7 +36,9 @@ import org.w3c.dom.ls.LSResourceResolver;
  */
 final class FallbackIgnoreLSResourceResolver implements LSResourceResolver {
 
-    /** DOM Level 3 Load/Save implementation used to build the empty input for unresolved lookups. */
+    /**
+     * DOM Level 3 Load/Save implementation used to build the empty input for unresolved lookups.
+     */
     private static final DOMImplementationLS DOM_LS;
 
     static {
@@ -78,7 +80,7 @@ final class FallbackIgnoreLSResourceResolver implements LSResourceResolver {
             throw new LSException(LSException.PARSE_ERR, SecureException.forbidden(type, namespaceURI, publicId, systemId, baseURI));
         }
         // A character stream, not setStringData(""): the JDK's DOMEntityResolverWrapper discards empty string data, leaving a source with no content and a
-        // null system id that Xerces then fails to absolutize. The echoed identifiers give Xerces a valid base URI; the content still comes from this
+        // null system ID that Xerces then fails to absolutize. The echoed identifiers give Xerces a valid base URI; the content still comes from this
         // empty stream, so nothing is fetched.
         final LSInput empty = DOM_LS.createLSInput();
         empty.setCharacterStream(new StringReader(""));

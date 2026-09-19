@@ -173,12 +173,18 @@ public final class SecureDocumentBuilderFactory {
             delegate.setXIncludeAware(state);
         }
     }
-    /** Class name of Android's Harmony-based {@link DocumentBuilderFactory}, which exposes no secure surface. */
+    /**
+     * Class name of Android's Harmony-based {@link DocumentBuilderFactory}, which exposes no secure surface.
+     */
     private static final String ANDROID_DOCUMENT_BUILDER_FACTORY = "org.apache.harmony.xml.parsers.DocumentBuilderFactoryImpl";
-    /** System property naming the {@link DocumentBuilderFactory} implementation, the JDK's own mechanism for reconfiguring the default parser. */
+    /**
+     * System property naming the {@link DocumentBuilderFactory} implementation, the JDK's own mechanism for reconfiguring the default parser.
+     */
     private static final String DOM_FACTORY_ID = "javax.xml.parsers.DocumentBuilderFactory";
 
-    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
+    /**
+     * Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}.
+     */
     static final String JDK_DOCUMENT_BUILDER_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl";
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(DocumentBuilderFactory.class, "newDefaultInstance");
@@ -284,7 +290,8 @@ public final class SecureDocumentBuilderFactory {
      * reconfiguring the default parser, so it is honored through the standard lookup rather than bypassed.
      * </p>
      *
-     * @param overrideDefaultParser whether {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's default parser.
+     * @param overrideDefaultParser whether {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} on the originating factory asks to override the JDK's
+     * default parser.
      * @return A secure, namespace-aware factory.
      * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation.
      * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
@@ -312,15 +319,18 @@ public final class SecureDocumentBuilderFactory {
     /**
      * Applies capability-driven secure settings to any {@link DocumentBuilderFactory} on the classpath.
      *
-     * <p>Rather than branching on the implementation class, this method probes what the factory supports and adapts:</p>
+     * <p>
+     * Rather than branching on the implementation class, this method probes what the factory supports and adapts:
+     * </p>
      * <ul>
-     *     <li><strong>Android</strong> (Harmony / KXmlParser): recognized by class name and left untouched. It exposes no {@link XMLConstants#FEATURE_SECURE_PROCESSING
-     *         FSP}, no JAXP 1.5 {@code ACCESS_EXTERNAL_*} and no attribute API at all, while KXmlParser silently drops user-defined entities, so there is nothing to
+     * <li><strong>Android</strong> (Harmony / KXmlParser): recognized by class name and left untouched. It exposes no {@link
+     * XMLConstants#FEATURE_SECURE_PROCESSING
+     * FSP}, no JAXP 1.5 {@code ACCESS_EXTERNAL_*} and no attribute API at all, while KXmlParser silently drops user-defined entities, so there is nothing to
      *         apply.</li>
      *     <li><strong>FSP</strong>: required. It switches on the implementation's built-in security manager, which is what carries the processing limits.</li>
      *     <li><strong>Ignore-all resolver floor</strong>: every produced {@link DocumentBuilder} is wrapped by the nested wrapper, which keeps an
-     *         ignore-all {@link EntityResolver} floor. That floor blocks external DTD, entity, schema and {@code xi:include} fetches in one place: the stock JDK's
-     *         XInclude processor ignores {@code ACCESS_EXTERNAL_*} and consults the {@link EntityResolver} instead, so no {@code ACCESS_EXTERNAL_*} attributes are
+     * ignore-all {@link EntityResolver} floor. That floor blocks external DTD, entity, schema and {@code xi:include} fetches in one place: the stock JDK's
+     * XInclude processor ignores {@code ACCESS_EXTERNAL_*} and consults the {@link EntityResolver} instead, so no {@code ACCESS_EXTERNAL_*} attributes are
      *         needed here. A caller can chain its own resolver onto the floor to allow-list resources, but cannot remove it.</li>
      * </ul>
      *

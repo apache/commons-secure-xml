@@ -38,9 +38,16 @@ import org.xml.sax.helpers.XMLFilterImpl;
 
 class SaxonProviderTest {
 
-    /** Reader used to force SecureConfiguration.makeParser through its SecureException translation path. */
+    /**
+     * Reader used to force SecureConfiguration.makeParser through its SecureException translation path.
+     */
     public static final class FailingXMLReader extends XMLFilterImpl {
 
+        /**
+         * Always throws {@link SAXNotSupportedException}.
+         *
+         * @throws SAXNotSupportedException Thrown on every invocation.
+         */
         @Override
         public void setFeature(final String name, final boolean value) throws SAXNotSupportedException {
             throw new SAXNotSupportedException(name);

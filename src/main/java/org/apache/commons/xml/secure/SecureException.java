@@ -20,17 +20,23 @@ package org.apache.commons.xml.secure;
 /**
  * Thrown when a factory cannot be made secure.
  *
- * <p>Three failure modes share this type:</p>
+ * <p>
+ * Three failure modes share this type:
+ * </p>
  * <ul>
  *   <li>No bundled secure recipe matches the concrete factory class.</li>
  *   <li>A recipe tried to apply a secure setting and the implementation rejected it.</li>
  *   <li>The implementation could not provide the internal secure reader the Source-rewriting wrappers parse with.</li>
  * </ul>
  *
- * <p>The message names the unsupported factory class or the specific feature, attribute or property that failed; the cause, when present, is the original
- * checked or unchecked exception from the JAXP implementation.</p>
+ * <p>
+ * The message names the unsupported factory class or the specific feature, attribute or property that failed; the cause, when present, is the original
+ * checked or unchecked exception from the JAXP implementation.
+ * </p>
  *
- * <p>Package-private by design: callers should catch {@link IllegalStateException}, which this extends.</p>
+ * <p>
+ * Package-private by design: callers should catch {@link IllegalStateException}, which this extends.
+ * </p>
  */
 final class SecureException extends IllegalStateException {
 
@@ -39,8 +45,8 @@ final class SecureException extends IllegalStateException {
     /**
      * System property that switches unresolved external references from the default empty resolution to a thrown exception.
      * <p>
-     * How to enable: set {@code -Dorg.apache.commons.xml.secure.throwOnUnresolved=true}. The property is read at resolution time, so it also applies to factories
-     * created before it was set; references resolved by a caller-supplied resolver are unaffected.
+     * How to enable: set {@code -Dorg.apache.commons.xml.secure.throwOnUnresolved=true}. The property is read at resolution time, so it also applies to
+     * factories created before it was set; references resolved by a caller-supplied resolver are unaffected.
      * </p>
      */
     static final String THROW_ON_UNRESOLVED = "org.apache.commons.xml.secure.throwOnUnresolved";
@@ -63,7 +69,7 @@ final class SecureException extends IllegalStateException {
      * @param type      The resource kind, or {@code null} if not applicable.
      * @param namespace The namespace (or, for Woodstox, the entity name), or {@code null}.
      * @param publicId  The public identifier, or {@code null} if none.
-     * @param systemId  The system identifier of the denied resource.
+     * @param systemId  The system IDentifier of the denied resource.
      * @param baseURI   The base URI for relative resolution, or {@code null}.
      * @return the message naming the denied lookup and the enabling property.
      */
@@ -73,10 +79,12 @@ final class SecureException extends IllegalStateException {
     }
 
     /**
-     * Builds the standard exception for a failed internal reader provisioning.
+     * Builds the standard exception for a failure to provision an internal reader.
      *
-     * <p>Every supported implementation provides a reader as a routine capability, so the wrapped {@code ParserConfigurationException} or
-     * {@code SAXException} signals a broken environment, not a per-parse condition, so the exception is unchecked.</p>
+     * <p>
+     * Every supported implementation provides a reader as a routine capability, so the wrapped {@code ParserConfigurationException} or
+     * {@code SAXException} signals a broken environment rather than a per-parse condition. The exception is therefore unchecked.
+     * </p>
      *
      * @param cause The original checked exception from the JAXP implementation.
      * @return the exception to throw.
@@ -88,7 +96,9 @@ final class SecureException extends IllegalStateException {
     /**
      * Whether unresolved external references must be rejected instead of resolved to empty content.
      *
-     * <p>Read per resolution, so the {@value SecureException#THROW_ON_UNRESOLVED} system property also toggles factories that already exist.</p>
+     * <p>
+     * Read per resolution, so the {@value SecureException#THROW_ON_UNRESOLVED} system property also toggles factories that already exist.
+     * </p>
      *
      * @return {@code true} when the {@value SecureException#THROW_ON_UNRESOLVED} system property is set.
      */

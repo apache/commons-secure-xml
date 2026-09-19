@@ -25,8 +25,8 @@ import javax.xml.validation.ValidatorHandler;
 
 /**
  * {@link Schema} wrapper that secures every {@link Validator} and {@link ValidatorHandler} the inner Schema produces: each {@link Validator} is wrapped in
- * {@link SecureValidator} (which rewrites the Source through {@link SecureSAXParserFactory#secure(javax.xml.transform.Source, boolean)} and installs the resolver
- * floor), and each {@link ValidatorHandler} is wrapped in a {@link SecureValidatorHandler} that keeps the same ignore-all resolver floor so
+ * {@link SecureValidator} (which rewrites the Source through {@link SecureSAXParserFactory#secure(javax.xml.transform.Source, boolean)} and installs the
+ * resolver floor), and each {@link ValidatorHandler} is wrapped in a {@link SecureValidatorHandler} that keeps the same ignore-all resolver floor so
  * {@code xsi:schemaLocation} is not resolved during SAX-driven validation.
  */
 final class SecureSchema extends Schema {
@@ -42,7 +42,8 @@ final class SecureSchema extends Schema {
      * Constructs a new instance.
      *
      * @param delegate         The delegate to wrap; must not be {@code null}.
-     * @param overrideDefaultParser whether the produced Validators' source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
+     * @param overrideDefaultParser whether the produced Validators' source rewrites should use the pluggable parser lookup instead of the platform's built-in
+     * parser.
      * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
     SecureSchema(final Schema delegate, final boolean overrideDefaultParser) {

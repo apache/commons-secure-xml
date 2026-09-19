@@ -52,6 +52,11 @@ class UnsupportedXmlImplementationTest {
             return false;
         }
 
+        /**
+         * Always throws {@link UnsupportedOperationException}.
+         *
+         * @throws UnsupportedOperationException Thrown on every invocation.
+         */
         @Override
         public DocumentBuilder newDocumentBuilder() {
             throw new UnsupportedOperationException();
@@ -62,6 +67,11 @@ class UnsupportedXmlImplementationTest {
             // no-op
         }
 
+        /**
+         * Always throws {@link ParserConfigurationException}.
+         *
+         * @throws ParserConfigurationException Thrown on every invocation.
+         */
         @Override
         public void setFeature(final String name, final boolean value) throws ParserConfigurationException {
             throw new ParserConfigurationException("feature not recognized: " + name);
@@ -73,16 +83,31 @@ class UnsupportedXmlImplementationTest {
      */
     public static final class FakeSAXParserFactory extends SAXParserFactory {
 
+        /**
+         * Always throws {@link SAXNotSupportedException}.
+         *
+         * @throws SAXNotSupportedException Thrown on every invocation.
+         */
         @Override
         public boolean getFeature(final String name) throws SAXNotSupportedException {
             throw new SAXNotSupportedException("feature not recognized: " + name);
         }
 
+        /**
+         * Always throws {@link UnsupportedOperationException}.
+         *
+         * @throws UnsupportedOperationException Thrown on every invocation.
+         */
         @Override
         public SAXParser newSAXParser() {
             throw new UnsupportedOperationException();
         }
 
+        /**
+         * Always throws {@link SAXNotRecognizedException}.
+         *
+         * @throws SAXNotRecognizedException Thrown on every invocation.
+         */
         @Override
         public void setFeature(final String name, final boolean value) throws SAXNotRecognizedException {
             throw new SAXNotRecognizedException("feature not recognized: " + name);

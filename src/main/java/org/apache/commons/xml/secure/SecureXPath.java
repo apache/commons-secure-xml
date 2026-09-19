@@ -39,14 +39,18 @@ import org.xml.sax.SAXException;
  * {@link XPath} wrapper that performs the document build behind every {@link InputSource}-taking {@code evaluate} call with a secure, namespace-aware
  * {@link javax.xml.parsers.DocumentBuilder} and evaluates the delegate against the parsed {@link Document}, so the engine's own parser never runs.
  *
- * <p>The JAXP contract for {@link XPath#evaluate(String, InputSource, QName)} is "build a document from the source, then evaluate against it", and both the
+ * <p>
+ * The JAXP contract for {@link XPath#evaluate(String, InputSource, QName)} is "build a document from the source, then evaluate against it", and both the
  * stock JDK and Apache Xalan provision an internal parser for that build which {@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING} on the
  * {@link javax.xml.xpath.XPathFactory} does not reach. Parsing here puts the build on the library's resolver floor: an external reference inside the document
  * resolves to empty content, so it is neither fetched nor leaked, and the evaluation proceeds on whatever the parse produced. {@link #compile(String)} wraps
- * the compiled expression in a {@link SecureXPathExpression} on the same terms.</p>
+ * the compiled expression in a {@link SecureXPathExpression} on the same terms.
+ * </p>
  *
- * <p>The {@code evaluateExpression} default methods added to the interface by Java 9 route through the {@code evaluate} overloads overridden here, so they
- * carry the same rewrite on newer runtimes even though this class targets Java 8.</p>
+ * <p>
+ * The {@code evaluateExpression} default methods added to the interface by Java 9 route through the {@code evaluate} overloads overridden here, so they
+ * carry the same rewrite on newer runtimes even though this class targets Java 8.
+ * </p>
  */
 final class SecureXPath implements XPath {
 
@@ -83,8 +87,9 @@ final class SecureXPath implements XPath {
     /**
      * Constructs a new instance.
      *
-     * @param delegate         The delegate to wrap; must not be {@code null}.
-     * @param overrideDefaultParser whether the {@link InputSource} document builds should use the pluggable parser lookup instead of the platform's built-in parser.
+     * @param delegate              The delegate to wrap; must not be {@code null}.
+     * @param overrideDefaultParser whether the {@link InputSource} document builds should use the pluggable parser lookup instead of the platform's built-in
+     *                              parser.
      * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
     SecureXPath(final XPath delegate, final boolean overrideDefaultParser) {

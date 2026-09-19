@@ -33,13 +33,17 @@ import org.xml.sax.XMLReader;
 /**
  * {@link XMLReader} wrapper that keeps a {@link FallbackIgnoreEntityResolver2} floor as the reader's entity resolver, non-overridable by the caller.
  *
- * <p>The floor is installed once and stays the reader's entity resolver for the wrapper's lifetime; {@link #setEntityResolver(EntityResolver)} routes the
+ * <p>
+ * The floor is installed once and stays the reader's entity resolver for the wrapper's lifetime; {@link #setEntityResolver(EntityResolver)} routes the
  * caller's resolver through {@link FallbackIgnoreEntityResolver2#setDelegate} instead of replacing it. This includes the {@code DefaultHandler} that
  * {@link javax.xml.parsers.SAXParser#parse(org.xml.sax.InputSource, org.xml.sax.helpers.DefaultHandler) SAXParser.parse(source, handler)} installs as the
- * reader's entity resolver, which would otherwise silently replace the floor. {@link #getEntityResolver()} reports the caller's resolver unwrapped.</p>
+ * reader's entity resolver, which would otherwise silently replace the floor. {@link #getEntityResolver()} reports the caller's resolver unwrapped.
+ * </p>
  *
- * <p>Every other method forwards to the wrapped delegate; subclasses (e.g., {@code SecureExpatXMLReader}) add per-implementation fixups on top of the
- * floor.</p>
+ * <p>
+ * Every other method forwards to the wrapped delegate; subclasses (e.g., {@code SecureExpatXMLReader}) add per-implementation fixups on top of the
+ * floor.
+ * </p>
  */
 class SecureXMLReader implements XMLReader {
 

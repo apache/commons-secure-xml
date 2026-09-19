@@ -32,10 +32,12 @@ import org.xml.sax.SAXException;
 /**
  * {@link TemplatesHandler} wrapper whose only purpose is to return a {@link SecureTemplates} from {@link TemplatesHandler#getTemplates()}.
  *
- * <p>The handler itself only compiles: the caller drives the stylesheet's SAX events, and {@code xsl:include}/{@code xsl:import} hrefs already resolve through
+ * <p>
+ * The handler itself only compiles: the caller drives the stylesheet's SAX events, and {@code xsl:include}/{@code xsl:import} hrefs already resolve through
  * the delegate factory's resolver, which is the secure floor. What the raw handler lacks is the runtime side: the {@link Templates} it compiles produce
  * Transformers without a {@link URIResolver} floor. Wrapping {@code getTemplates()} closes that, exactly as
- * {@link javax.xml.transform.TransformerFactory#newTemplates newTemplates} does.</p>
+ * {@link javax.xml.transform.TransformerFactory#newTemplates newTemplates} does.
+ * </p>
  */
 final class SecureTemplatesHandler implements TemplatesHandler {
 
@@ -60,9 +62,11 @@ final class SecureTemplatesHandler implements TemplatesHandler {
      * Constructs a new instance.
      *
      * @param delegate The delegate to wrap; must not be {@code null}.
-     * @param factoryUriResolver The factory's compile-time URIResolver snapshot to restore onto Transformers produced from the compiled Templates; may be {@code null}.
+     * @param factoryUriResolver The factory's compile-time URIResolver snapshot to restore onto Transformers produced from the compiled Templates; may be
+     * {@code null}.
      * @param emptySource The empty-{@link Source} supplier for the produced Templates; may be {@code null} for the default empty DOM document.
-     * @param overrideDefaultParser whether the produced Templates' source rewrites should use the pluggable parser lookup instead of the platform's built-in parser.
+     * @param overrideDefaultParser whether the produced Templates' source rewrites should use the pluggable parser lookup instead of the platform's built-in
+     * parser.
      * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
     SecureTemplatesHandler(final TemplatesHandler delegate, final URIResolver factoryUriResolver, final Supplier<Source> emptySource,

@@ -58,10 +58,13 @@ import org.xml.sax.helpers.XMLFilterImpl;
 /**
  * Shared fixtures for attack tests.
  *
- * <p>The secure-side helpers come in three flavors, distinguished by their suffix:</p>
+ * <p>
+ * The secure-side helpers come in three flavors, distinguished by their suffix:
+ * </p>
  *
  * <ul>
- *   <li>{@code assert*Blocks(...)} runs the payload through a secure factory from {@link org.apache.commons.xml.secure} and asserts the parse throws. Used when the secure
+ * <li>{@code assert*Blocks(...)} runs the payload through a secure factory from {@link org.apache.commons.xml.secure} and asserts the parse throws. Used when
+ * the secure
  *       layer is expected to reject the attack outright.</li>
  *   <li>{@code assert*DoesNotLeak(...)} runs the payload through a secure factory and asserts the parse completes without throwing and without producing the
  *       {@link #LEAKED_MARKER} string. Used when the secure contract guarantees the parse succeeds but never resolves the external resource (for example,
@@ -71,28 +74,37 @@ import org.xml.sax.helpers.XMLFilterImpl;
  *       another).</li>
  * </ul>
  *
- * <p>DOM tests that depend on user-defined entity machinery should gate themselves with {@link org.junit.jupiter.api.Assumptions#assumeTrue} on
+ * <p>
+ * DOM tests that depend on user-defined entity machinery should gate themselves with {@link org.junit.jupiter.api.Assumptions#assumeTrue} on
  * {@link #DOM_RESOLVES_INTERNAL_ENTITIES} so they skip on platforms (such as Android with KXmlParser) whose DOM parser does not surface the entity events that
- * the strict {@link #assertDomBlocks} assertion expects.</p>
+ * the strict {@link #assertDomBlocks} assertion expects.
+ * </p>
  *
- * <p>The permissive-side positive controls mirror the secure-side verbs with an {@code assertPermissive*} prefix: {@code assertPermissive*Parses} for direct
+ * <p>
+ * The permissive-side positive controls mirror the secure-side verbs with an {@code assertPermissive*} prefix: {@code assertPermissive*Parses} for direct
  * parsing, {@code assertPermissive*Compiles} for {@link SchemaFactory} / {@link TransformerFactory} compilation, {@code assertPermissiveTransformerTransforms}
  * for {@code Transformer.transform}, {@code assertPermissiveValidatorValidates} for {@code Validator.validate}. Both sides perform the same operation; the
- * prefix marks which secure factory level the assertion is set against.</p>
+ * prefix marks which secure factory level the assertion is set against.
+ * </p>
  *
- * <p>Schema and Templates assertions take a {@link Source} so the same helper covers both inline-string payloads and resource-backed wrappers; build the
+ * <p>
+ * Schema and Templates assertions take a {@link Source} so the same helper covers both inline-string payloads and resource-backed wrappers; build the
  * source via {@link #streamSource(String)} for a string payload or {@link #resourceSource(String)} for a file under {@code src/test/resources/leaked/}. The
  * resource form preserves the system ID so relative {@code xs:include} / {@code xs:import} / {@code xs:redefine} / {@code xsl:include} / {@code xsl:import}
- * URIs resolve normally.</p>
+ * URIs resolve normally.
+ * </p>
  *
- * <p>The two generic primitives {@link #assertParseFails} and {@link #assertParseSucceeds} are exposed for tests that need to compose a non-standard factory
- * call.</p>
+ * <p>
+ * The two generic primitives {@link #assertParseFails} and {@link #assertParseSucceeds} are exposed for tests that need to compose a non-standard factory
+ * call.
+ * </p>
  */
 final class AttackTestSupport {
 
     /**
      * Test-only permissive counterpart of {@code SecureSAXParserFactory.SecureExpatXMLReader}: a pass-through Expat wrapper that rejects the
-     * {@code namespace-prefixes} feature eagerly (so a probing TrAX identity transformer falls back instead of failing the whole parse) but installs no ignore-all
+     * {@code namespace-prefixes} feature eagerly (so a probing TrAX identity transformer falls back instead of failing the whole parse) but installs no
+     * ignore-all
      * resolver floor, so the unconfigured/positive controls stay permissive.
      */
     private static final class PermissiveExpatReader extends XMLFilterImpl {
@@ -119,28 +131,48 @@ final class AttackTestSupport {
      * {@link ErrorListener#error(TransformerException)} / {@link ErrorListener#fatalError(TransformerException) fatalError} on the TrAX side and
      * {@link ErrorHandler#error(SAXParseException) error} / {@link ErrorHandler#fatalError(SAXParseException) fatalError} on the SAX side. Both Apache Xalan's
      * {@code DefaultErrorHandler(false)} and Saxon's {@code StandardErrorListener} are pathologically lenient defaults that swallow these events; SAX's
-     * {@link DefaultHandler} treats {@code error} as a no-op. The test fixture replaces those defaults with a strict reporter that re-throws on every reported
+     * {@link DefaultHandler} treats {@code error} as a no-op. The test fixture replaces those defaults with a strict reporter that rethrows on every reported
      * error or fatalError so the helpers can observe the block via the same mechanism the specification uses to surface it. Warnings stay silent: they are not
      * security signals.
      * </p>
      */
     static final class StrictReporter implements ErrorListener, ErrorHandler {
 
+        /**
+         * Always throws {@link SAXException}.
+         *
+         * @throws SAXException Thrown on every invocation.
+         */
         @Override
         public void error(final SAXParseException exception) throws SAXException {
             throw exception;
         }
 
+        /**
+         * Always throws {@link TransformerException}.
+         *
+         * @throws TransformerException Thrown on every invocation.
+         */
         @Override
         public void error(final TransformerException exception) throws TransformerException {
             throw exception;
         }
 
+        /**
+         * Always throws {@link SAXException}.
+         *
+         * @throws SAXException Thrown on every invocation.
+         */
         @Override
         public void fatalError(final SAXParseException exception) throws SAXException {
             throw exception;
         }
 
+        /**
+         * Always throws {@link TransformerException}.
+         *
+         * @throws TransformerException Thrown on every invocation.
+         */
         @Override
         public void fatalError(final TransformerException exception) throws TransformerException {
             throw exception;
@@ -180,7 +212,9 @@ final class AttackTestSupport {
     /**
      * Set to {@code true} when the platform's DOM parser supports user-defined internal entities.
      *
-     * <p>Android's {@code KXmlParser} currently fails this test.</p>
+     * <p>
+     * Android's {@code KXmlParser} currently fails this test.
+     * </p>
      */
     static final boolean DOM_RESOLVES_INTERNAL_ENTITIES = probeDomResolvesInternalEntities();
 
@@ -189,7 +223,9 @@ final class AttackTestSupport {
      * methods.
      */
     static final boolean DOM_SUPPORTS_SCHEMA = supportsConfiguration(() -> DocumentBuilderFactory.newInstance().setSchema(null));
-    /** {@code true} when the platform's default DOM factory accepts {@link XMLConstants#FEATURE_SECURE_PROCESSING}; Android's factory rejects it. */
+    /**
+     * {@code true} when the platform's default DOM factory accepts {@link XMLConstants#FEATURE_SECURE_PROCESSING}; Android's factory rejects it.
+     */
     static final boolean DOM_SUPPORTS_SECURE_PROCESSING =
             supportsConfiguration(() -> DocumentBuilderFactory.newInstance().setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true));
 
@@ -198,7 +234,10 @@ final class AttackTestSupport {
      */
     static final boolean DOM_SUPPORTS_XINCLUDE = supportsConfiguration(() -> DocumentBuilderFactory.newInstance().setXIncludeAware(false));
 
-    /** {@code true} when running on Android (Dalvik / ART), {@code false} on any standard JVM. Probed once via {@code Class.forName} on {@code android.os.Build}. */
+    /**
+     * {@code true} when running on Android (Dalvik / ART), {@code false} on any standard JVM. Probed once via {@code Class.forName} on
+     * {@code android.os.Build}.
+     */
     static final boolean IS_ANDROID = probeAndroid();
 
     /**
@@ -211,18 +250,24 @@ final class AttackTestSupport {
     /**
      * Text planted in every fixture under {@code src/test/resources/leaked/}.
      *
-     * <p>Tests that capture a parser's output assert this string is absent: it can only appear if the secure parser fetched the external resource, so its
-     * presence is the leak signal.</p>
+     * <p>
+     * Tests that capture a parser's output assert this string is absent: it can only appear if the secure parser fetched the external resource, so its
+     * presence is the leak signal.
+     * </p>
      */
     static final String LEAKED_MARKER = "All your base are belong to us";
-    /** {@code true} when the platform's default SAX parser supports {@code reset()}; Android inherits the throwing JAXP base method. */
+    /**
+     * {@code true} when the platform's default SAX parser supports {@code reset()}; Android inherits the throwing JAXP base method.
+     */
     static final boolean SAX_SUPPORTS_RESET = supportsConfiguration(() -> SAXParserFactory.newInstance().newSAXParser().reset());
 
     /**
      * {@code true} when the platform's default SAX factory (and its parsers) supports parser-attached schemas; Android inherits the throwing JAXP base methods.
      */
     static final boolean SAX_SUPPORTS_SCHEMA = supportsConfiguration(() -> SAXParserFactory.newInstance().setSchema(null));
-    /** {@code true} when the platform's default SAX factory accepts {@link XMLConstants#FEATURE_SECURE_PROCESSING}; Android's Expat rejects it. */
+    /**
+     * {@code true} when the platform's default SAX factory accepts {@link XMLConstants#FEATURE_SECURE_PROCESSING}; Android's Expat rejects it.
+     */
     static final boolean SAX_SUPPORTS_SECURE_PROCESSING =
             supportsConfiguration(() -> SAXParserFactory.newInstance().setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true));
 
@@ -239,7 +284,9 @@ final class AttackTestSupport {
     /**
      * Asserts a secure DOM parse of the payload throws.
      *
-     * <p>{@link DocumentBuilder#parse(InputSource)} via {@link SecureDocumentBuilderFactory#newInstance()}; only a thrown exception passes.</p>
+     * <p>
+     * {@link DocumentBuilder#parse(InputSource)} via {@link SecureDocumentBuilderFactory#newInstance()}; only a thrown exception passes.
+     * </p>
      */
     static void assertDomBlocks(final String payload) {
         assertParseFails(() -> strictDocumentBuilder(SecureDocumentBuilderFactory.newInstance()).parse(inputSource(payload)), "DOM", SAXException.class);
@@ -248,8 +295,10 @@ final class AttackTestSupport {
     /**
      * Asserts a secure DOM parse either blocks during parsing or completes without leaked content.
      *
-     * <p>Used for an external-resource payload whose outcome differs across implementations: one that resolves the reference to empty (the ignore-all floor) does
-     * not leak, while one that rejects the unresolvable systemId throws instead. Both are acceptable.</p>
+     * <p>
+     * Used for an external-resource payload whose outcome differs across implementations: one that resolves the reference to empty (the ignore-all floor) does
+     * not leak, while one that rejects the unresolvable systemId throws instead. Both are acceptable.
+     * </p>
      */
     static void assertDomBlocksOrDoesNotLeak(final String payload) {
         assertNoLeakOrThrows(() -> domParseAndCaptureText(SecureDocumentBuilderFactory.newInstance(), payload), "DOM", SAXException.class);
@@ -265,8 +314,10 @@ final class AttackTestSupport {
     /**
      * Asserts a secure DOM parse completes without throwing and without leaked content.
      *
-     * <p>{@link DocumentBuilder#parse(InputSource)} via {@link SecureDocumentBuilderFactory#newInstance()}; use this when the secure guarantee is "the parse
-     * succeeds but never resolves the external resource", for example, when the ignore-all resolver floor resolves the external subset to empty content.</p>
+     * <p>
+     * {@link DocumentBuilder#parse(InputSource)} via {@link SecureDocumentBuilderFactory#newInstance()}; use this when the secure guarantee is "the parse
+     * succeeds but never resolves the external resource", for example, when the ignore-all resolver floor resolves the external subset to empty content.
+     * </p>
      */
     static void assertDomDoesNotLeak(final String payload) {
         assertDomDoesNotLeak(SecureDocumentBuilderFactory.newInstance(), payload);
@@ -275,7 +326,9 @@ final class AttackTestSupport {
     /**
      * Asserts a secure DOM parse succeeds.
      *
-     * <p>{@link DocumentBuilder#parse(InputSource)} via {@link SecureDocumentBuilderFactory#newInstance()}; positive control for DOCTYPE-only payloads.</p>
+     * <p>
+     * {@link DocumentBuilder#parse(InputSource)} via {@link SecureDocumentBuilderFactory#newInstance()}; positive control for DOCTYPE-only payloads.
+     * </p>
      */
     static void assertDomParses(final String payload) {
         assertParseSucceeds(() -> strictDocumentBuilder(SecureDocumentBuilderFactory.newInstance()).parse(inputSource(payload)), "DOM");
@@ -284,9 +337,11 @@ final class AttackTestSupport {
     /**
      * Skeleton for every {@code assert*BlocksOrDoesNotLeak} helper.
      *
-     * <p>Treats a thrown exception of one of the {@code expected} types as "hardening blocked during parsing" (acceptable); otherwise asserts the captured
+     * <p>
+     * Treats a thrown exception of one of the {@code expected} types as "hardening blocked during parsing" (acceptable); otherwise asserts the captured
      * output omits {@link #LEAKED_MARKER}. A throw whose type does not match {@code expected} fails the test, so unrelated failures (for example, a
-     * {@link SecureException} because no recipe matched the JAXP implementation) cannot be silently accepted as a clean block.</p>
+     * {@link SecureException} because no recipe matched the JAXP implementation) cannot be silently accepted as a clean block.
+     * </p>
      *
      * @param action      The parse to execute, returning the captured output text checked for {@link #LEAKED_MARKER}.
      * @param description short label naming the JAXP surface under test.
@@ -310,9 +365,11 @@ final class AttackTestSupport {
     /**
      * Skeleton for every strict {@code assert*DoesNotLeak} helper.
      *
-     * <p>Runs the action, lets any thrown exception fail the assertion, and asserts that the captured output omits {@link #LEAKED_MARKER}. Use this when the
+     * <p>
+     * Runs the action, lets any thrown exception fail the assertion, and asserts that the captured output omits {@link #LEAKED_MARKER}. Use this when the
      * secure contract guarantees "parses successfully without resolving the external resource"; use {@link #assertNoLeakOrThrows} when the contract is
-     * "either blocks during parsing or completes without leaked content".</p>
+     * "either blocks during parsing or completes without leaked content".
+     * </p>
      *
      * @param action      The parse to execute, returning the captured output text checked for {@link #LEAKED_MARKER}.
      * @param description short label naming the JAXP surface under test.
@@ -352,9 +409,11 @@ final class AttackTestSupport {
     /**
      * Asserts the supplied action does not throw.
      *
-     * <p>Generic primitive underlying every {@code assert*Parses(...)} / {@code assert*Compiles(...)} / {@code assert*Transforms(...)} /
+     * <p>
+     * Generic primitive underlying every {@code assert*Parses(...)} / {@code assert*Compiles(...)} / {@code assert*Transforms(...)} /
      * {@code assert*Validates(...)} helper (and their permissive {@code assertPermissive*} counterparts); exposed for tests that compose a non-standard
-     * call.</p>
+     * call.
+     * </p>
      *
      * @param action      The parse to execute.
      * @param description short label included in the failure message.
@@ -366,8 +425,10 @@ final class AttackTestSupport {
     /**
      * Asserts a permissive DOM parse succeeds.
      *
-     * <p>{@link DocumentBuilder#parse(InputSource)} via {@link DocumentBuilderFactory#newInstance()} with FSP off; positive control proving the payload is
-     * well-formed.</p>
+     * <p>
+     * {@link DocumentBuilder#parse(InputSource)} via {@link DocumentBuilderFactory#newInstance()} with FSP off; positive control proving the payload is
+     * well-formed.
+     * </p>
      */
     static void assertPermissiveDomParses(final String payload) {
         assertParseSucceeds(() -> {
@@ -383,8 +444,10 @@ final class AttackTestSupport {
     /**
      * Asserts a permissive SAX parse succeeds.
      *
-     * <p>{@link XMLReader#parse(InputSource)} on a parser from {@link SAXParserFactory#newInstance()} with FSP off; positive control proving the payload is
-     * well-formed.</p>
+     * <p>
+     * {@link XMLReader#parse(InputSource)} on a parser from {@link SAXParserFactory#newInstance()} with FSP off; positive control proving the payload is
+     * well-formed.
+     * </p>
      */
     static void assertPermissiveSaxParses(final String payload) {
         assertParseSucceeds(() -> {
@@ -401,8 +464,10 @@ final class AttackTestSupport {
     /**
      * Asserts a permissive Schema compilation succeeds.
      *
-     * <p>{@link SchemaFactory#newSchema(Source)} via {@link SchemaFactory#newInstance(String)} with FSP off; positive control proving the wrapper is
-     * well-formed.</p>
+     * <p>
+     * {@link SchemaFactory#newSchema(Source)} via {@link SchemaFactory#newInstance(String)} with FSP off; positive control proving the wrapper is
+     * well-formed.
+     * </p>
      */
     static void assertPermissiveSchemaCompiles(final Source xsd) {
         assertParseSucceeds(() -> {
@@ -418,7 +483,9 @@ final class AttackTestSupport {
     /**
      * Asserts a permissive StAX parse succeeds.
      *
-     * <p>{@link XMLStreamReader} from {@link XMLInputFactory#newInstance()} with FSP off; positive control proving the payload is well-formed.</p>
+     * <p>
+     * {@link XMLStreamReader} from {@link XMLInputFactory#newInstance()} with FSP off; positive control proving the payload is well-formed.
+     * </p>
      */
     static void assertPermissiveStaxParses(final String payload) {
         assertParseSucceeds(() -> {
@@ -432,12 +499,16 @@ final class AttackTestSupport {
     /**
      * Asserts a permissive Templates compilation succeeds.
      *
-     * <p>{@link TransformerFactory#newTransformer(Source)} via {@link TransformerFactory#newInstance()} with FSP off; positive control proving the stylesheet
-     * is well-formed.</p>
+     * <p>
+     * {@link TransformerFactory#newTransformer(Source)} via {@link TransformerFactory#newInstance()} with FSP off; positive control proving the stylesheet
+     * is well-formed.
+     * </p>
      *
-     * <p>The control instantiates a {@link Transformer} rather than stopping at {@link TransformerFactory#newTemplates(Source)}, because a failed compile does
-     * not necessarily throw: Apache Xalan returns {@code null}, and XSLTC swallows the error and returns a {@code Templates} carrying no translet. Only building
-     * the transformer surfaces either, so the control cannot pass on a stylesheet that never compiled.</p>
+     * <p>
+     * The control instantiates a {@link Transformer} rather than stopping at {@link TransformerFactory#newTemplates(Source)}, because a failed compile does
+     * not necessarily throw: Apache Xalan returns {@code null}, and XSLTC swallows the error and returns a {@code Templates} carrying no translet. Only
+     * building the transformer surfaces either, so the control cannot pass on a stylesheet that never compiled.
+     * </p>
      */
     static void assertPermissiveTemplatesCompiles(final String xslt) {
         assertParseSucceeds(() -> {
@@ -454,8 +525,10 @@ final class AttackTestSupport {
     /**
      * Asserts a permissive identity Transformer succeeds.
      *
-     * <p>{@link Transformer#transform(Source, javax.xml.transform.Result)} via {@link TransformerFactory#newInstance()} with FSP off; positive control proving
-     * the payload is well-formed.</p>
+     * <p>
+     * {@link Transformer#transform(Source, javax.xml.transform.Result)} via {@link TransformerFactory#newInstance()} with FSP off; positive control proving
+     * the payload is well-formed.
+     * </p>
      */
     static void assertPermissiveTransformerTransforms(final String payload) {
         assertParseSucceeds(() -> {
@@ -468,8 +541,10 @@ final class AttackTestSupport {
     /**
      * Asserts a permissive Validator validation succeeds.
      *
-     * <p>{@link Validator#validate(Source)} on a validator from {@link #BENIGN_SCHEMA} compiled via {@link SchemaFactory#newInstance(String)} with FSP off;
-     * positive control proving the instance is well-formed.</p>
+     * <p>
+     * {@link Validator#validate(Source)} on a validator from {@link #BENIGN_SCHEMA} compiled via {@link SchemaFactory#newInstance(String)} with FSP off;
+     * positive control proving the instance is well-formed.
+     * </p>
      */
     static void assertPermissiveValidatorValidates(final String xml) {
         assertParseSucceeds(() -> {
@@ -483,7 +558,9 @@ final class AttackTestSupport {
     /**
      * Asserts a secure SAX parse of the payload throws.
      *
-     * <p>{@link XMLReader#parse(InputSource)} on a parser from {@link SecureSAXParserFactory#newInstance()}; only a thrown exception passes.</p>
+     * <p>
+     * {@link XMLReader#parse(InputSource)} on a parser from {@link SecureSAXParserFactory#newInstance()}; only a thrown exception passes.
+     * </p>
      */
     static void assertSaxBlocks(final String payload) {
         assertParseFails(() -> consumeXmlReader(strictXMLReader(SecureSAXParserFactory.newInstance()), payload), "SAX", SAXException.class);
@@ -499,8 +576,10 @@ final class AttackTestSupport {
     /**
      * Asserts a secure SAX parse completes without throwing and without leaked content.
      *
-     * <p>{@link XMLReader#parse(InputSource)} on a parser from {@link SecureSAXParserFactory#newInstance()}; use this when the secure guarantee is "the parse
-     * succeeds but never resolves the external resource", for example, when the ignore-all resolver floor resolves the external subset to empty content.</p>
+     * <p>
+     * {@link XMLReader#parse(InputSource)} on a parser from {@link SecureSAXParserFactory#newInstance()}; use this when the secure guarantee is "the parse
+     * succeeds but never resolves the external resource", for example, when the ignore-all resolver floor resolves the external subset to empty content.
+     * </p>
      */
     static void assertSaxDoesNotLeak(final String payload) {
         assertSaxDoesNotLeak(strictXMLReader(SecureSAXParserFactory.newInstance()), payload);
@@ -516,7 +595,9 @@ final class AttackTestSupport {
     /**
      * Asserts a secure SAX parse succeeds.
      *
-     * <p>{@link XMLReader#parse(InputSource)} on a parser from {@link SecureSAXParserFactory#newInstance()}; positive control for DOCTYPE-only payloads.</p>
+     * <p>
+     * {@link XMLReader#parse(InputSource)} on a parser from {@link SecureSAXParserFactory#newInstance()}; positive control for DOCTYPE-only payloads.
+     * </p>
      */
     static void assertSaxParses(final String payload) {
         assertParseSucceeds(() -> consumeXmlReader(strictXMLReader(SecureSAXParserFactory.newInstance()), payload), "SAX");
@@ -532,7 +613,9 @@ final class AttackTestSupport {
     /**
      * Asserts a secure Schema compilation throws.
      *
-     * <p>{@link SchemaFactory#newSchema(Source)} via {@link SecureSchemaFactory#newInstance(String)}; only a thrown exception passes.</p>
+     * <p>
+     * {@link SchemaFactory#newSchema(Source)} via {@link SecureSchemaFactory#newInstance(String)}; only a thrown exception passes.
+     * </p>
      */
     static void assertSchemaBlocks(final Source xsd) {
         assertSchemaBlocks(SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), xsd);
@@ -552,7 +635,9 @@ final class AttackTestSupport {
     /**
      * Asserts a secure Schema compilation succeeds.
      *
-     * <p>{@link SchemaFactory#newSchema(Source)} via {@link SecureSchemaFactory#newInstance(String)}; positive control for DOCTYPE-only payloads.</p>
+     * <p>
+     * {@link SchemaFactory#newSchema(Source)} via {@link SecureSchemaFactory#newInstance(String)}; positive control for DOCTYPE-only payloads.
+     * </p>
      */
     static void assertSchemaCompiles(final Source xsd) {
         assertParseSucceeds(() -> strictSchema(SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), xsd), "Schema compile");
@@ -568,9 +653,12 @@ final class AttackTestSupport {
     /**
      * Asserts a secure Schema compilation completes without throwing.
      *
-     * <p>{@link SchemaFactory#newSchema(Source)} via {@link SecureSchemaFactory#newInstance(String)}; use this when the secure contract guarantees compilation
-     * succeeds but never resolves the external resource (for example, {@code XERCES_LOAD_EXTERNAL_DTD=false} silently skipping the external subset, with the body's
-     * undeclared entity reference dropped per XML 1.0 §4.1).</p>
+     * <p>
+     * {@link SchemaFactory#newSchema(Source)} via {@link SecureSchemaFactory#newInstance(String)}; use this when the secure contract guarantees compilation
+     * succeeds but never resolves the external resource (for example, {@code XERCES_LOAD_EXTERNAL_DTD=false} silently skipping the external subset, with the
+     * body's
+     * undeclared entity reference dropped per XML 1.0 §4.1).
+     * </p>
      */
     static void assertSchemaDoesNotLeak(final Source xsd) {
         assertSchemaDoesNotLeak(SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI), xsd);
@@ -579,8 +667,10 @@ final class AttackTestSupport {
     /**
      * Asserts a secure StAX parse of the payload throws.
      *
-     * <p>{@link XMLStreamReader} and {@link XMLEventReader} from {@link SecureXMLInputFactory#newInstance()}; both flavors are exercised and either must
-     * throw.</p>
+     * <p>
+     * {@link XMLStreamReader} and {@link XMLEventReader} from {@link SecureXMLInputFactory#newInstance()}; both flavors are exercised and either must
+     * throw.
+     * </p>
      */
     static void assertStaxBlocks(final String payload) {
         assertParseFails(() -> consumeStreamReader(SecureXMLInputFactory.newInstance(), payload), "StAX stream", XMLStreamException.class);
@@ -599,9 +689,11 @@ final class AttackTestSupport {
     /**
      * Asserts a secure StAX parse completes without throwing and without leaked content.
      *
-     * <p>{@link XMLStreamReader} and {@link XMLEventReader} from {@link SecureXMLInputFactory#newInstance()}; both flavors are exercised. Use this when the
-     * secure guarantee is "the parse succeeds but never resolves the external resource", for example, when the JDK's {@code ignore-external-dtd} property silently
-     * skips the external subset.</p>
+     * <p>
+     * {@link XMLStreamReader} and {@link XMLEventReader} from {@link SecureXMLInputFactory#newInstance()}; both flavors are exercised. Use this when the
+     * secure guarantee is "the parse succeeds but never resolves the external resource", for example, when the JDK's {@code ignore-external-dtd} property
+     * silently skips the external subset.
+     * </p>
      */
     static void assertStaxDoesNotLeak(final String payload) {
         assertNoLeakStrict(() -> captureStaxStreamText(SecureXMLInputFactory.newInstance(), payload), "StAX stream");
@@ -611,7 +703,9 @@ final class AttackTestSupport {
     /**
      * Asserts a secure StAX parse succeeds.
      *
-     * <p>{@link XMLStreamReader} and {@link XMLEventReader} from {@link SecureXMLInputFactory#newInstance()}; positive control for DOCTYPE-only payloads.</p>
+     * <p>
+     * {@link XMLStreamReader} and {@link XMLEventReader} from {@link SecureXMLInputFactory#newInstance()}; positive control for DOCTYPE-only payloads.
+     * </p>
      */
     static void assertStaxParses(final String payload) {
         assertParseSucceeds(() -> consumeStreamReader(SecureXMLInputFactory.newInstance(), payload), "StAX stream");
@@ -621,8 +715,10 @@ final class AttackTestSupport {
     /**
      * Asserts a secure Templates compile-and-transform throws.
      *
-     * <p>{@link TransformerFactory#newTemplates(Source)} via {@link SecureTransformerFactory#newInstance()} followed by transform; either step throwing
-     * passes.</p>
+     * <p>
+     * {@link TransformerFactory#newTemplates(Source)} via {@link SecureTransformerFactory#newInstance()} followed by transform; either step throwing
+     * passes.
+     * </p>
      */
     static void assertTemplatesBlocks(final Source xslt) {
         assertParseFails(() -> {
@@ -645,8 +741,10 @@ final class AttackTestSupport {
     /**
      * Asserts a secure Templates compile-and-transform succeeds.
      *
-     * <p>{@link TransformerFactory#newTemplates(Source)} via {@link SecureTransformerFactory#newInstance()} followed by transform; positive control for
-     * DOCTYPE-only payloads.</p>
+     * <p>
+     * {@link TransformerFactory#newTemplates(Source)} via {@link SecureTransformerFactory#newInstance()} followed by transform; positive control for
+     * DOCTYPE-only payloads.
+     * </p>
      */
     static void assertTemplatesCompiles(final Source xslt) {
         assertParseSucceeds(() -> templatesCompileAndTransform(SecureTransformerFactory.newInstance(), xslt), "Templates compile");
@@ -655,8 +753,10 @@ final class AttackTestSupport {
     /**
      * Asserts a secure Templates compile-and-transform completes without throwing and without leaked content.
      *
-     * <p>{@link TransformerFactory#newTemplates(Source)} via {@link SecureTransformerFactory#newInstance()} followed by transform; use this when the secure
-     * contract guarantees the compile and transform succeed but never resolve the external resource.</p>
+     * <p>
+     * {@link TransformerFactory#newTemplates(Source)} via {@link SecureTransformerFactory#newInstance()} followed by transform; use this when the secure
+     * contract guarantees the compile and transform succeed but never resolve the external resource.
+     * </p>
      */
     static void assertTemplatesDoesNotLeak(final Source xslt) {
         assertTemplatesDoesNotLeak(SecureTransformerFactory.newInstance(), xslt);
@@ -672,8 +772,10 @@ final class AttackTestSupport {
     /**
      * Asserts a secure identity Transformer of the payload throws.
      *
-     * <p>{@link Transformer#transform(Source, javax.xml.transform.Result)} on the identity transformer from {@link SecureTransformerFactory#newInstance()}; only
-     * a thrown exception passes.</p>
+     * <p>
+     * {@link Transformer#transform(Source, javax.xml.transform.Result)} on the identity transformer from {@link SecureTransformerFactory#newInstance()}; only
+     * a thrown exception passes.
+     * </p>
      */
     static void assertTransformerBlocks(final String payload) {
         assertParseFails(
@@ -691,8 +793,10 @@ final class AttackTestSupport {
     /**
      * Asserts a secure identity Transformer completes without throwing and without leaked content.
      *
-     * <p>{@link Transformer#transform(Source, javax.xml.transform.Result)} via {@link SecureTransformerFactory#newInstance()}; use this when the secure
-     * contract guarantees the transform succeeds but never resolves the external resource.</p>
+     * <p>
+     * {@link Transformer#transform(Source, javax.xml.transform.Result)} via {@link SecureTransformerFactory#newInstance()}; use this when the secure
+     * contract guarantees the transform succeeds but never resolves the external resource.
+     * </p>
      */
     static void assertTransformerDoesNotLeak(final String payload) {
         assertTransformerDoesNotLeak(SecureTransformerFactory.newInstance(), payload);
@@ -708,8 +812,10 @@ final class AttackTestSupport {
     /**
      * Asserts a secure identity Transformer succeeds.
      *
-     * <p>{@link Transformer#transform(Source, javax.xml.transform.Result)} on the identity transformer from {@link SecureTransformerFactory#newInstance()};
-     * positive control for DOCTYPE-only payloads.</p>
+     * <p>
+     * {@link Transformer#transform(Source, javax.xml.transform.Result)} on the identity transformer from {@link SecureTransformerFactory#newInstance()};
+     * positive control for DOCTYPE-only payloads.
+     * </p>
      */
     static void assertTransformerTransforms(final String payload) {
         assertParseSucceeds(() -> identityTransformAndCapture(SecureTransformerFactory.newInstance(), payload), "Transformer");
@@ -718,8 +824,10 @@ final class AttackTestSupport {
     /**
      * Asserts a secure Validator validation throws.
      *
-     * <p>{@link Validator#validate(Source)} on a validator from {@link #BENIGN_SCHEMA} compiled via {@link SecureSchemaFactory#newInstance(String)}; only a thrown
-     * exception passes (the schema is benign; the attack lives in the instance document).</p>
+     * <p>
+     * {@link Validator#validate(Source)} on a validator from {@link #BENIGN_SCHEMA} compiled via {@link SecureSchemaFactory#newInstance(String)}; only a thrown
+     * exception passes (the schema is benign; the attack lives in the instance document).
+     * </p>
      */
     static void assertValidatorBlocks(final String xml) {
         assertParseFails(
@@ -742,8 +850,10 @@ final class AttackTestSupport {
     /**
      * Asserts a secure Validator validation completes without throwing.
      *
-     * <p>{@link Validator#validate(Source)} on a validator from {@link #BENIGN_SCHEMA} compiled via {@link SecureSchemaFactory#newInstance(String)}; use this when the
-     * secure contract guarantees validation succeeds but never resolves the external resource.</p>
+     * <p>
+     * {@link Validator#validate(Source)} on a validator from {@link #BENIGN_SCHEMA} compiled via {@link SecureSchemaFactory#newInstance(String)}; use this when
+     * the secure contract guarantees validation succeeds but never resolves the external resource.
+     * </p>
      */
     static void assertValidatorDoesNotLeak(final String xml) {
         assertParseSucceeds(
@@ -754,8 +864,10 @@ final class AttackTestSupport {
     /**
      * Asserts a secure Validator validation succeeds.
      *
-     * <p>{@link Validator#validate(Source)} on a validator from {@link #BENIGN_SCHEMA} compiled via {@link SecureSchemaFactory#newInstance(String)}; positive control
-     * for DOCTYPE-only payloads.</p>
+     * <p>
+     * {@link Validator#validate(Source)} on a validator from {@link #BENIGN_SCHEMA} compiled via {@link SecureSchemaFactory#newInstance(String)}; positive
+     * control for DOCTYPE-only payloads.
+     * </p>
      */
     static void assertValidatorValidates(final String xml) {
         assertParseSucceeds(
@@ -766,7 +878,9 @@ final class AttackTestSupport {
     /**
      * Asserts a secure-in-place XMLReader parse of the payload throws.
      *
-     * <p>{@link XMLReader#parse(InputSource)} on a raw reader secured via {@link SecureSAXParserFactory#secure(XMLReader)}; only a thrown exception passes.</p>
+     * <p>
+     * {@link XMLReader#parse(InputSource)} on a raw reader secured via {@link SecureSAXParserFactory#secure(XMLReader)}; only a thrown exception passes.
+     * </p>
      */
     static void assertXmlReaderBlocks(final String payload) {
         assertParseFails(() -> consumeXmlReader(rawSecureXMLReader(), payload), "XMLReader", SAXException.class);
@@ -783,8 +897,10 @@ final class AttackTestSupport {
     /**
      * Asserts a secure-in-place XMLReader parse completes without throwing and without leaked content.
      *
-     * <p>{@link XMLReader#parse(InputSource)} on a raw reader secured via {@link SecureSAXParserFactory#secure(XMLReader)}; use this when the secure contract
-     * guarantees the parse succeeds but never resolves the external resource.</p>
+     * <p>
+     * {@link XMLReader#parse(InputSource)} on a raw reader secured via {@link SecureSAXParserFactory#secure(XMLReader)}; use this when the secure contract
+     * guarantees the parse succeeds but never resolves the external resource.
+     * </p>
      */
     static void assertXmlReaderDoesNotLeak(final String payload) {
         assertNoLeakStrict(() -> captureCharacters(rawSecureXMLReader(), payload), "XMLReader");
@@ -793,8 +909,10 @@ final class AttackTestSupport {
     /**
      * Asserts a secure-in-place XMLReader parse succeeds.
      *
-     * <p>{@link XMLReader#parse(InputSource)} on a raw reader secured via {@link SecureSAXParserFactory#secure(XMLReader)}; positive control for DOCTYPE-only
-     * payloads.</p>
+     * <p>
+     * {@link XMLReader#parse(InputSource)} on a raw reader secured via {@link SecureSAXParserFactory#secure(XMLReader)}; positive control for DOCTYPE-only
+     * payloads.
+     * </p>
      */
     static void assertXmlReaderParses(final String payload) {
         assertParseSucceeds(() -> consumeXmlReader(rawSecureXMLReader(), payload), "XMLReader");
@@ -822,7 +940,9 @@ final class AttackTestSupport {
         return "Securing did not block " + description + "; parse completed successfully.";
     }
 
-    /** Parses the source through the supplied reader, with {@link #STRICT_REPORTER} installed, and returns the accumulated character data. */
+    /**
+     * Parses the source through the supplied reader, with {@link #STRICT_REPORTER} installed, and returns the accumulated character data.
+     */
     static String captureCharacters(final XMLReader reader, final InputSource source) throws Exception {
         final StringBuilder text = new StringBuilder();
         reader.setContentHandler(capturingHandler(text));
@@ -830,12 +950,17 @@ final class AttackTestSupport {
         return text.toString();
     }
 
-    /** Parses the payload through the supplied reader and returns the accumulated character data, used by the SAX-based {@code DoesNotLeak} helpers. */
+    /**
+     * Parses the payload through the supplied reader and returns the accumulated character data, used by the SAX-based {@code DoesNotLeak} helpers.
+     */
     static String captureCharacters(final XMLReader reader, final String payload) throws Exception {
         return captureCharacters(reader, inputSource(payload));
     }
 
-    /** Parses the payload through a {@link XMLEventReader} and returns the accumulated character and CDATA data, used by the StAX-based {@code DoesNotLeak} helper. */
+    /**
+     * Parses the payload through an {@link XMLEventReader} and returns the accumulated character and CDATA data, used by the StAX-based {@code DoesNotLeak}
+     * helper.
+     */
     static String captureStaxEventText(final XMLInputFactory factory, final String payload) throws Exception {
         final StringBuilder text = new StringBuilder();
         final XMLEventReader events = factory.createXMLEventReader(new StringReader(payload));
@@ -852,7 +977,9 @@ final class AttackTestSupport {
         return text.toString();
     }
 
-    /** Parses the payload through a {@link XMLStreamReader} and returns the accumulated character data, used by the StAX-based {@code DoesNotLeak} helper. */
+    /**
+     * Parses the payload through an {@link XMLStreamReader} and returns the accumulated character data, used by the StAX-based {@code DoesNotLeak} helper.
+     */
     private static String captureStaxStreamText(final XMLInputFactory factory, final String payload) throws Exception {
         final StringBuilder text = new StringBuilder();
         final XMLStreamReader stream = factory.createXMLStreamReader(new StringReader(payload));
@@ -869,7 +996,9 @@ final class AttackTestSupport {
         return text.toString();
     }
 
-    /** Content handler whose {@code characters} callback accumulates into {@code text}; for tests that install (or pass) the handler themselves. */
+    /**
+     * Content handler whose {@code characters} callback accumulates into {@code text}; for tests that install (or pass) the handler themselves.
+     */
     static DefaultHandler capturingHandler(final StringBuilder text) {
         return new DefaultHandler() {
             @Override
@@ -879,7 +1008,9 @@ final class AttackTestSupport {
         };
     }
 
-    /** Drains every {@link XMLEventReader} event from the factory's reader for the payload. */
+    /**
+     * Drains every {@link XMLEventReader} event from the factory's reader for the payload.
+     */
     private static void consumeEventReader(final XMLInputFactory factory, final String payload) throws Exception {
         final XMLEventReader events = factory.createXMLEventReader(new StringReader(payload));
         try {
@@ -891,7 +1022,9 @@ final class AttackTestSupport {
         }
     }
 
-    /** Drains every {@link XMLStreamReader} event from the factory's reader for the payload. */
+    /**
+     * Drains every {@link XMLStreamReader} event from the factory's reader for the payload.
+     */
     private static void consumeStreamReader(final XMLInputFactory factory, final String payload) throws Exception {
         final XMLStreamReader stream = factory.createXMLStreamReader(new StringReader(payload));
         try {
@@ -903,7 +1036,9 @@ final class AttackTestSupport {
         }
     }
 
-    /** Parses the payload through the supplied reader, discarding events; used by the SAX-based {@code Parses} / {@code Blocks} helpers. */
+    /**
+     * Parses the payload through the supplied reader, discarding events; used by the SAX-based {@code Parses} / {@code Blocks} helpers.
+     */
     private static void consumeXmlReader(final XMLReader reader, final String payload) throws Exception {
         reader.setContentHandler(new DefaultHandler());
         strictXMLReader(reader).parse(inputSource(payload));
@@ -925,26 +1060,34 @@ final class AttackTestSupport {
         return sink.toString();
     }
 
-    /** Builds an {@link InputSource} backed by a {@link StringReader} over the payload. */
+    /**
+     * Builds an {@link InputSource} backed by a {@link StringReader} over the payload.
+     */
     static InputSource inputSource(final String xml) {
         return new InputSource(new StringReader(xml));
     }
 
-    /** Lifts every entity expansion limit on a {@link DocumentBuilderFactory}. */
+    /**
+     * Lifts every entity expansion limit on a {@link DocumentBuilderFactory}.
+     */
     private static void liftEntityLimits(final DocumentBuilderFactory factory) {
         for (final String limit : JDK_ENTITY_LIMITS) {
             suppressException(() -> factory.setAttribute(limit, "0"));
         }
     }
 
-    /** Lifts every entity expansion limit on a {@link SchemaFactory}. */
+    /**
+     * Lifts every entity expansion limit on a {@link SchemaFactory}.
+     */
     private static void liftEntityLimits(final SchemaFactory factory) {
         for (final String limit : JDK_ENTITY_LIMITS) {
             suppressException(() -> factory.setProperty(limit, "0"));
         }
     }
 
-    /** Lifts every entity expansion limit on a {@link XMLInputFactory}. */
+    /**
+     * Lifts every entity expansion limit on an {@link XMLInputFactory}.
+     */
     private static void liftEntityLimits(final XMLInputFactory factory) {
         for (final String limit : JDK_ENTITY_LIMITS) {
             suppressException(() -> factory.setProperty(limit, "0"));
@@ -952,7 +1095,9 @@ final class AttackTestSupport {
         suppressException(() -> factory.setProperty(WSTX_MAX_ENTITY_COUNT, Integer.MAX_VALUE));
     }
 
-    /** Lifts every entity expansion limit on an {@link XMLReader}. */
+    /**
+     * Lifts every entity expansion limit on an {@link XMLReader}.
+     */
     private static void liftEntityLimits(final XMLReader reader) {
         for (final String limit : JDK_ENTITY_LIMITS) {
             suppressException(() -> reader.setProperty(limit, "0"));
@@ -962,9 +1107,11 @@ final class AttackTestSupport {
     /**
      * A permissive, namespace-aware {@link XMLReader} with every entity-expansion limit lifted, for the unconfigured-side controls.
      *
-     * <p>On Android the reader is Expat, which accepts {@code namespace-prefixes} at {@code setFeature} time but fails mid-parse; a probing TrAX path (an
+     * <p>
+     * On Android the reader is Expat, which accepts {@code namespace-prefixes} at {@code setFeature} time but fails mid-parse; a probing TrAX path (an
      * identity transform, or Xalan's {@code TrAXFilter} self-provisioning) enables that feature, so wrap it to reject the feature eagerly (matching the
-     * production {@code SecureExpatXMLReader}) while keeping the control permissive (no floor).</p>
+     * production {@code SecureExpatXMLReader}) while keeping the control permissive (no floor).
+     * </p>
      *
      * @return A permissive reader, wrapped on Android to reject {@code namespace-prefixes} eagerly.
      */
@@ -1002,7 +1149,10 @@ final class AttackTestSupport {
         }
     }
 
-    /** Builds a raw {@link XMLReader} from a deliberately permissive {@link SAXParserFactory} and secures it via {@link SecureSAXParserFactory#secure(XMLReader)}. */
+    /**
+     * Builds a raw {@link XMLReader} from a deliberately permissive {@link SAXParserFactory} and secures it via
+     * {@link SecureSAXParserFactory#secure(XMLReader)}.
+     */
     private static XMLReader rawSecureXMLReader() throws Exception {
         final SAXParserFactory factory = SAXParserFactory.newInstance();
         if (!IS_ANDROID) {
@@ -1011,7 +1161,9 @@ final class AttackTestSupport {
         return SecureSAXParserFactory.secure(factory.newSAXParser().getXMLReader());
     }
 
-    /** Opens the named test resource as a {@link StreamSource} preserving its system id, so relative includes/imports/redefines resolve normally. */
+    /**
+     * Opens the named test resource as a {@link StreamSource} preserving its system ID, so relative includes/imports/redefines resolve normally.
+     */
     static StreamSource resourceSource(final String name) {
         final URL url = resourceUrl(name);
         try {
@@ -1021,14 +1173,18 @@ final class AttackTestSupport {
         }
     }
 
-    /** Resolves a fixture under {@code src/test/resources/leaked/} to a {@link URL}, failing the test if the resource is missing. */
+    /**
+     * Resolves a fixture under {@code src/test/resources/leaked/} to a {@link URL}, failing the test if the resource is missing.
+     */
     static URL resourceUrl(final String name) {
         final URL url = AttackTestSupport.class.getResource("/leaked/" + name);
         assertNotNull(url, "test resource not found: " + name);
         return url;
     }
 
-    /** Builds a {@link StreamSource} backed by a {@link StringReader} over the payload. */
+    /**
+     * Builds a {@link StreamSource} backed by a {@link StringReader} over the payload.
+     */
     static StreamSource streamSource(final String xml) {
         final StreamSource streamSource = new StreamSource(new StringReader(xml));
         streamSource.setSystemId("test:fixture");
@@ -1119,7 +1275,9 @@ final class AttackTestSupport {
         }
     }
 
-    /** Runs the action and silently swallows any thrown exception; used to apply best-effort permissive-side flags that may not be supported. */
+    /**
+     * Runs the action and silently swallows any thrown exception; used to apply best-effort permissive-side flags that may not be supported.
+     */
     private static void suppressException(final Executable action) {
         try {
             action.execute();
@@ -1138,12 +1296,16 @@ final class AttackTestSupport {
         return sink.toString();
     }
 
-    /** XML body wrapping the supplied text in a benign {@code <root>/<child>} element pair, validated by {@link #BENIGN_SCHEMA}. */
+    /**
+     * XML body wrapping the supplied text in a benign {@code <root>/<child>} element pair, validated by {@link #BENIGN_SCHEMA}.
+     */
     static String xmlBody(final String text) {
         return "<root><child>" + text + "</child></root>";
     }
 
-    /** XSD body embedding the supplied text in an annotation, used as the carrier for DOCTYPE-based attacks against schema compilation. */
+    /**
+     * XSD body embedding the supplied text in an annotation, used as the carrier for DOCTYPE-based attacks against schema compilation.
+     */
     static String xsdBody(final String text) {
         return "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n"
                 + "  <xs:annotation><xs:documentation>" + text + "</xs:documentation></xs:annotation>\n"
@@ -1151,7 +1313,9 @@ final class AttackTestSupport {
                 + "</xs:schema>";
     }
 
-    /** XSLT body embedding the supplied text inside a single {@code xsl:template match="/"}, used as the carrier for DOCTYPE-based attacks against TrAX. */
+    /**
+     * XSLT body embedding the supplied text inside a single {@code xsl:template match="/"}, used as the carrier for DOCTYPE-based attacks against TrAX.
+     */
     static String xsltBody(final String text) {
         return "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\">\n"
                 + "  <xsl:template match=\"/\">" + text + "</xsl:template>\n"

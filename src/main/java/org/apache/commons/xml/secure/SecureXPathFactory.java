@@ -38,7 +38,7 @@ import javax.xml.xpath.XPathVariableResolver;
  * document is built through a secure, namespace-aware {@link javax.xml.parsers.DocumentBuilder} instead of the engine's internal parser.
  * </p>
  * <p>
- * This class is not itself a {@link XPathFactory}, so it inherits none of the static JAXP factory methods. A caller therefore cannot obtain an unsecured
+ * This class is not itself an {@link XPathFactory}, so it inherits none of the static JAXP factory methods. A caller therefore cannot obtain an unsecured
  * factory through this class by calling a method such as {@code newDefaultInstance()}. The secure factories are instances of a nested, non-public wrapper
  * class.
  * </p>
@@ -129,8 +129,10 @@ public final class SecureXPathFactory {
         /**
          * Sets a property on the delegate through the Java 18 {@code XPathFactory.setProperty(String, String)} method.
          *
-         * <p>See {@link #getProperty(String)} for why it carries no {@code @Override}. The {@code jdk.xml.xpath*} limits reached this way are processing limits
-         * like any other: an operator may tighten them, and loosening one is reconfiguration.</p>
+         * <p>
+         * See {@link #getProperty(String)} for why it carries no {@code @Override}. The {@code jdk.xml.xpath*} limits reached this way are processing limits
+         * like any other: an operator may tighten them, and loosening one is reconfiguration.
+         * </p>
          *
          * @param name  The property name.
          * @param value The value to set.
@@ -156,15 +158,21 @@ public final class SecureXPathFactory {
         }
     }
 
-    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
+    /**
+     * Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}.
+     */
     private static final String JDK_XPATH_FACTORY = "com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl";
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(XPathFactory.class, "newDefaultInstance");
 
-    /** {@code XPathFactory.getProperty(String)}, added in Java 18; {@code null} on earlier releases, where the method does not exist. */
+    /**
+     * {@code XPathFactory.getProperty(String)}, added in Java 18; {@code null} on earlier releases, where the method does not exist.
+     */
     private static final MethodHandle MH_getProperty = MethodHandleFactory.findVirtual(XPathFactory.class, "getProperty", String.class, String.class);
 
-    /** {@code XPathFactory.setProperty(String, String)}, added in Java 18; {@code null} on earlier releases, where the method does not exist. */
+    /**
+     * {@code XPathFactory.setProperty(String, String)}, added in Java 18; {@code null} on earlier releases, where the method does not exist.
+     */
     private static final MethodHandle MH_setProperty =
             MethodHandleFactory.findVirtual(XPathFactory.class, "setProperty", void.class, String.class, String.class);
 
@@ -239,13 +247,16 @@ public final class SecureXPathFactory {
     /**
      * Applies capability-driven secure settings to any {@link XPathFactory} on the classpath.
      *
-     * <p>The XPath object model mirrors TrAX: the stock JDK and Apache Xalan ship an XPath 1.0 engine with no URI-fetching functions, while Saxon adds the XPath 3.1
-     * {@code fn:doc}, {@code fn:collection} and {@code fn:unparsed-text} functions that can reach external resources. Rather than branching on the implementation
-     * class, this method probes what the factory supports and adapts:</p>
+     * <p>
+     * The XPath object model mirrors TrAX: the stock JDK and Apache Xalan ship an XPath 1.0 engine with no URI-fetching functions, while Saxon adds the XPath
+     * 3.1
+     * {@code fn:doc}, {@code fn:collection} and {@code fn:unparsed-text} functions that can reach external resources. Rather than branching on the
+     * implementation class, this method probes what the factory supports and adapts:
+     * </p>
      * <ul>
-     *     <li><strong>Saxon</strong> ({@code net.sf.saxon}): recognized by package prefix and handed to {@link SaxonProvider#configure(XPathFactory)}, so any public
-     *         subclass routes to the same recipe as the registered factory. Its URI-fetching
-     *         functions and reflection-based extension calls are reachable only through a locked-down Saxon {@code Configuration}, not the standard JAXP knobs; this
+     * <li><strong>Saxon</strong> ({@code net.sf.saxon}): recognized by package prefix and handed to {@link SaxonProvider#configure(XPathFactory)}, so any
+     * public         subclass routes to the same recipe as the registered factory. Its URI-fetching
+     * functions and reflection-based extension calls are reachable only through a locked-down Saxon {@code Configuration}, not the standard JAXP knobs; this
      *         is the XPath counterpart of the Saxon exception in {@link SecureTransformerFactory#secure(javax.xml.transform.TransformerFactory)}, kept as a
      *         documented package-prefix exception because the required securing surface is reachable only through a vendor API.</li>
      *     <li><strong>FSP</strong> ({@link javax.xml.XMLConstants#FEATURE_SECURE_PROCESSING}): required. It is the only knob both the stock JDK and Xalan XPath

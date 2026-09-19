@@ -32,14 +32,20 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests whether Saxon's XPath 3.1 URI-fetching functions can pull external resources into the result.
  *
- * <p>Saxon ships several XPath 3.1 functions that open arbitrary URIs during evaluation. None require a context node; each is triggered purely by the string
+ * <p>
+ * Saxon ships several XPath 3.1 functions that open arbitrary URIs during evaluation. None require a context node; each is triggered purely by the string
  * URI it receives. They are <em>not</em> classified as extension functions in Saxon's vocabulary, so disabling {@code ALLOW_EXTERNAL_FUNCTIONS} is not enough
- * to block them; a complete securing has to close the URI-resolution path.</p>
+ * to block them; a complete securing has to close the URI-resolution path.
+ * </p>
  *
- * <p>Each fixture under {@code src/test/resources/leaked/} contains the {@link #MARKER} string. The tests dispatch the URI-fetching function at the file's URL
- * and check whether the marker reaches the result.</p>
+ * <p>
+ * Each fixture under {@code src/test/resources/leaked/} contains the {@link #MARKER} string. The tests dispatch the URI-fetching function at the file's URL
+ * and check whether the marker reaches the result.
+ * </p>
  *
- * <p>Cases covered, each as a pair (unconfigured Saxon factory expected to leak, secure Saxon factory expected to block):</p>
+ * <p>
+ * Cases covered, each as a pair (unconfigured Saxon factory expected to leak, secure Saxon factory expected to block):
+ * </p>
  *
  * <ul>
  *   <li>{@code doc(uri)} reading {@code referenced.xml}.</li>
@@ -47,8 +53,10 @@ import org.junit.jupiter.api.Test;
  *   <li>{@code unparsed-text(uri)} reading {@code referenced.txt}.</li>
  * </ul>
  *
- * <p>The JDK's built-in XPathFactory and Xalan have no equivalent vectors. The class is tagged {@code xpath3}, so under the surefire group filters it only
- * runs in the {@code test-saxon} execution where Saxon is on the classpath.</p>
+ * <p>
+ * The JDK's built-in XPathFactory and Xalan have no equivalent vectors. The class is tagged {@code xpath3}, so under the surefire group filters it only
+ * runs in the {@code test-saxon} execution where Saxon is on the classpath.
+ * </p>
  */
 @Tag("xpath3")
 class SaxonXPathExternalCallsTest {
@@ -96,8 +104,10 @@ class SaxonXPathExternalCallsTest {
     /**
      * Instantiates Saxon's {@code XPathFactoryImpl} reflectively.
      *
-     * <p>Saxon 12.9 ships no {@code META-INF/services} entry for
-     * {@link XPathFactory}, so {@link XPathFactory#newInstance(String)} cannot find it; direct instantiation bypasses that lookup.</p>
+     * <p>
+     * Saxon 12.9 ships no {@code META-INF/services} entry for
+     * {@link XPathFactory}, so {@link XPathFactory#newInstance(String)} cannot find it; direct instantiation bypasses that lookup.
+     * </p>
      */
     private static XPathFactory saxonXPathFactory() {
         try {

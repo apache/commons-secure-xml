@@ -46,8 +46,9 @@ final class SecureXPathExpression implements XPathExpression {
     /**
      * Constructs a new instance.
      *
-     * @param delegate         The delegate to wrap; must not be {@code null}.
-     * @param overrideDefaultParser whether the {@link InputSource} document builds should use the pluggable parser lookup instead of the platform's built-in parser.
+     * @param delegate              The delegate to wrap; must not be {@code null}.
+     * @param overrideDefaultParser whether the {@link InputSource} document builds should use the pluggable parser lookup instead of the platform's built-in
+     *                              parser.
      * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
     SecureXPathExpression(final XPathExpression delegate, final boolean overrideDefaultParser) {

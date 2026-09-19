@@ -36,13 +36,17 @@ import org.xml.sax.InputSource;
 /**
  * Tests the two untrusted inputs {@code getAssociatedStylesheet} handles: the document it scans, and the href the {@code xml-stylesheet} PI names.
  *
- * <p>The scan parses the prolog, where a {@code DOCTYPE} with an external subset is processed before the root element. Apache Xalan runs it on a reader the
+ * <p>
+ * The scan parses the prolog, where a {@code DOCTYPE} with an external subset is processed before the root element. Apache Xalan runs it on a reader the
  * engine provisions itself, ignoring one passed in a {@link SAXSource} (XALANJ-2849), and the JDK's XSLTC did the same before 8u162; the wrapper hands those a
- * {@code DOMSource} it pre-parsed through a secure {@code DocumentBuilder}, so the external DTD resolves to empty instead of being fetched.</p>
+ * {@code DOMSource} it pre-parsed through a secure {@code DocumentBuilder}, so the external DTD resolves to empty instead of being fetched.
+ * </p>
  *
- * <p>The href is attacker-controlled content, so the wrapper routes it through the same floor as any other content-named reference: unresolved by default,
+ * <p>
+ * The href is attacker-controlled content, so the wrapper routes it through the same floor as any other content-named reference: unresolved by default,
  * fetched only where a caller's {@code URIResolver} opts it in. Compiling the returned Source is the one documented use of this method, so returning it live
- * would be handing back a URI the document chose. Tagged {@code trax}, so it runs on the stock JDK, Apache Xalan, Saxon, and the Android runtime.</p>
+ * would be handing back a URI the document chose. Tagged {@code trax}, so it runs on the stock JDK, Apache Xalan, Saxon, and the Android runtime.
+ * </p>
  */
 @Tag("trax")
 class AssociatedStylesheetTest {

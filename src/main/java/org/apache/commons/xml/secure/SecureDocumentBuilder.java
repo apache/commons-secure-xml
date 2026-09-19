@@ -33,9 +33,12 @@ import org.xml.sax.SAXException;
 /**
  * {@link DocumentBuilder} wrapper that keeps an ignore-all {@link EntityResolver} as a non-overridable floor.
  *
- * <p>A caller-set resolver is sandwiched inside a {@link FallbackIgnoreEntityResolver2} instead of replacing the ignore-all one, so an external lookup the
- * caller's resolver does not satisfy resolves to empty rather than being fetched. {@link #reset()} re-establishes the bare ignore-all floor, matching the just-constructed
- * state.</p>
+ * <p>
+ * A caller-set resolver is sandwiched inside a {@link FallbackIgnoreEntityResolver2} instead of replacing the ignore-all one, so an external lookup the
+ * caller's resolver does not satisfy resolves to empty rather than being fetched. {@link #reset()} re-establishes the bare ignore-all floor, matching the
+ * just-constructed
+ * state.
+ * </p>
  */
 final class SecureDocumentBuilder extends DocumentBuilder {
 

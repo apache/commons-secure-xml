@@ -46,10 +46,12 @@ import org.xml.sax.XMLReader;
  * Tests that XInclude resolution is blocked by default on factories from {@link org.apache.commons.xml.secure}, and that callers can
  * allow-list specific resources via an {@link EntityResolver}.
  *
- * <p>Each case is exercised in both {@code parse="xml"} and {@code parse="text"} modes, and for both DOM and SAX
+ * <p>
+ * Each case is exercised in both {@code parse="xml"} and {@code parse="text"} modes, and for both DOM and SAX
  * paths. XInclude resolution requires namespace-aware processing; the baseline tests set it explicitly, and the
  * secure factory tests rely on the underlying JAXP implementation being namespace-aware enough to recognize elements
- * in the {@code http://www.w3.org/2001/XInclude} namespace.</p>
+ * in the {@code http://www.w3.org/2001/XInclude} namespace.
+ * </p>
  */
 class XIncludeTest {
 
@@ -76,22 +78,32 @@ class XIncludeTest {
         }
     }
 
-    /** Absolute URL of the XML fixture pulled in by {@code parse="xml"} includes; carries {@link AttackTestSupport#LEAKED_MARKER}. */
+    /**
+     * Absolute URL of the XML fixture pulled in by {@code parse="xml"} includes; carries {@link AttackTestSupport#LEAKED_MARKER}.
+     */
     private static final String REFERENCED_XML = resourceUrl("referenced.xml").toString();
 
-    /** Absolute URL of the text fixture pulled in by {@code parse="text"} includes; carries {@link AttackTestSupport#LEAKED_MARKER}. */
+    /**
+     * Absolute URL of the text fixture pulled in by {@code parse="text"} includes; carries {@link AttackTestSupport#LEAKED_MARKER}.
+     */
     private static final String REFERENCED_TEXT = resourceUrl("referenced.txt").toString();
 
-    /** Content the allow-list resolver returns for an allowed include; its presence proves the caller's resolver was consulted. */
+    /**
+     * Content the allow-list resolver returns for an allowed include; its presence proves the caller's resolver was consulted.
+     */
     private static final String RESOLVED_MARKER = "XINCLUDE-RESOLVED-905bbbce-16ee-4a0c-b165-d1f8c663934c";
 
-    /** Resolver that resolves nothing, so the securing's ignore-all floor must empty every lookup and never leak. */
+    /**
+     * Resolver that resolves nothing, so the securing's ignore-all floor must empty every lookup and never leak.
+     */
     private static final EntityResolver NO_OP_RESOLVER = (publicId, systemId) -> null;
 
     /**
      * Enables XInclude on the factory under test, skipping the test when the platform refuses.
      *
-     * <p>On Android, {@code setXIncludeAware(true)} always throws {@link UnsupportedOperationException}.</p>
+     * <p>
+     * On Android, {@code setXIncludeAware(true)} always throws {@link UnsupportedOperationException}.
+     * </p>
      */
     private static void assumeXIncludeAware(final DocumentBuilderFactory factory) {
         try {
@@ -104,7 +116,9 @@ class XIncludeTest {
     /**
      * Enables XInclude on the factory under test, skipping the test when the platform refuses.
      *
-     * <p>On Android, {@code setXIncludeAware(true)} always throws {@link UnsupportedOperationException}.</p>
+     * <p>
+     * On Android, {@code setXIncludeAware(true)} always throws {@link UnsupportedOperationException}.
+     * </p>
      */
     private static void assumeXIncludeAware(final SAXParserFactory factory) {
         try {
@@ -114,7 +128,9 @@ class XIncludeTest {
         }
     }
 
-    /** XML wrapper for xi:include in the given {@code parse} mode referencing {@code href}. */
+    /**
+     * XML wrapper for xi:include in the given {@code parse} mode referencing {@code href}.
+     */
     private static String xiIncludeXml(final String href, final String parseMode) {
         return "<?xml version=\"1.0\"?>\n"
                 + "<root xmlns:xi=\"http://www.w3.org/2001/XInclude\">\n"

@@ -25,9 +25,11 @@ import org.junit.jupiter.api.Test;
  * Tests that a document carrying a {@code <!DOCTYPE root SYSTEM "...">} declaration but no body references parses successfully through the secure
  * factories.
  *
- * <p>The SYSTEM identifier points at a deliberately bogus URL ({@code http://invalid.example.invalid/...}) under the IANA-reserved {@code .invalid} TLD: any
+ * <p>
+ * The SYSTEM identifier points at a deliberately bogus URL ({@code http://invalid.example.invalid/...}) under the IANA-reserved {@code .invalid} TLD: any
  * attempt to fetch it would raise a network error long before the test could complete, so a passing test proves the parser did not even try. The securing
- * contract being verified is "skip the external DTD silently when nothing in the body needs it" rather than "reject every DOCTYPE".</p>
+ * contract being verified is "skip the external DTD silently when nothing in the body needs it" rather than "reject every DOCTYPE".
+ * </p>
  */
 class DoctypeOnlyTest {
 

@@ -113,15 +113,16 @@ public final class SecureTransformerFactory {
      * <h2>Caveats</h2>
      * <ul>
      *   <li>A {@link SAXSource} that carries its own {@link XMLReader} is trusted as-is: the caller is expected to supply a secure reader (via
-     *       {@link SecureSAXParserFactory#newInstance()}) in that case. The same applies to the SAX events a caller feeds into a handler, and to a parent reader a
+     * {@link SecureSAXParserFactory#newInstance()}) in that case. The same applies to the SAX events a caller feeds into a handler, and to a parent reader a
      *       caller sets on a returned {@link XMLFilter}. The exception is {@code getAssociatedStylesheet} on an engine that drops the reader (Apache Xalan, and
-     *       the JDK's XSLTC on Java 8): there the document is pre-parsed into a DOM instead, since the reader would otherwise be replaced by the engine's own.</li>
+     * the JDK's XSLTC on Java 8): there the document is pre-parsed into a DOM instead, since the reader would otherwise be replaced by the engine's own.</li>
      * </ul>
      */
     private static final class Wrapper extends SAXTransformerFactory {
 
         /**
-         * Whether the delegate is Apache Xalan (either its interpretive or its XSLTC factory), whose {@code getAssociatedStylesheet} ignores a SAXSource reader.
+         * Tests whether the delegate is Apache Xalan (either its interpretive or its XSLTC factory), whose {@code getAssociatedStylesheet} ignores a SAXSource
+         * reader.
          *
          * @param factory The delegate factory.
          * @return Whether the delegate is an {@code org.apache.xalan.} implementation.
@@ -197,8 +198,8 @@ public final class SecureTransformerFactory {
          * Constructs a new instance.
          *
          * @param delegate    The delegate to wrap; must not be {@code null}.
-         * @param emptySource The empty-{@link Source} supplier for the resolver floor, threaded onto every produced Templates/Transformer; {@code null} means the
-         *                    default empty DOM.
+         * @param emptySource The empty-{@link Source} supplier for the resolver floor, threaded onto every produced Templates/Transformer; {@code null} means
+         * the                    default empty DOM.
          * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
          */
         private Wrapper(final SAXTransformerFactory delegate, final Supplier<Source> emptySource) {
@@ -214,14 +215,17 @@ public final class SecureTransformerFactory {
          * Routes the href an {@code xml-stylesheet} PI yielded through the floor, so a URI distilled from untrusted content is opted in by the caller's
          * resolver or resolved to empty like any other content-named reference.
          *
-         * <p>XSLTC-lineage engines resolve the href during the scan, before they install the factory's {@link URIResolver}, and hand back a live
+         * <p>
+         * XSLTC-lineage engines resolve the href during the scan, before they install the factory's {@link URIResolver}, and hand back a live
          * {@link SAXSource} naming the absolutized URI; compiling it, the one documented use of this method, would then fetch it. Saxon already floors the href
-         * itself and returns an empty source, so flooring here is also what makes the engines agree.</p>
+         * itself and returns an empty source, so flooring here is also what makes the engines agree.
+         * </p>
          *
          * @param associated The delegate's result; {@code null} when no PI matched.
          * @param base       The system ID of the scanned document, the base the href was resolved against.
          * @return The caller resolver's source for an opted-in href, an empty source otherwise, or {@code null} when no PI matched.
-         * @throws TransformerConfigurationException Thrown if the floor rejects the href, which it does when {@value SecureException#THROW_ON_UNRESOLVED} is set.
+         * @throws TransformerConfigurationException Thrown if the floor rejects the href, which it does when {@value SecureException#THROW_ON_UNRESOLVED} is
+         * set.
          */
         private Source floorAssociated(final Source associated, final String base) throws TransformerConfigurationException {
             if (associated == null || associated.getSystemId() == null) {
@@ -330,8 +334,10 @@ public final class SecureTransformerFactory {
         /**
          * {@inheritDoc}
          *
-         * <p>Most implementations reject a {@link Templates} they did not compile, some in the TrAX shape, others by casting it or its Transformer to their
-         * own type. Both reach the caller as a {@link TransformerConfigurationException}.</p>
+         * <p>
+         * Most implementations reject a {@link Templates} they did not compile, some in the TrAX shape, others by casting it or its Transformer to their
+         * own type. Both reach the caller as a {@link TransformerConfigurationException}.
+         * </p>
          */
         @Override
         public TransformerHandler newTransformerHandler(final Templates templates) throws TransformerConfigurationException {
@@ -369,8 +375,10 @@ public final class SecureTransformerFactory {
         /**
          * Tests whether parsers should be instantiated via {@code newInstance()} instead of {@code newDefaultInstance()}.
          *
-         * <p>The JDK implementation of {@link TransformerFactory} uses the JDK parsers while {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} is unset
-         * or {@code false}.</p>
+         * <p>
+         * The JDK implementation of {@link TransformerFactory} uses the JDK parsers while {@value SecureSAXParserFactory#OVERRIDE_DEFAULT_PARSER} is unset
+         * or {@code false}.
+         * </p>
          *
          * @return {@code true} if parsers should be created via {@code newInstance()}.
          */
@@ -384,18 +392,21 @@ public final class SecureTransformerFactory {
 
         /**
          * Parses a stream or SAX source into a DOM through a secure, namespace-aware {@link javax.xml.parsers.DocumentBuilder} and returns a {@link DOMSource}
-         * carrying its system id, so the consumer walks the tree instead of provisioning its own reader. Any other source is left to
+         * carrying its system ID, so the consumer walks the tree instead of provisioning its own reader. Any other source is left to
          * {@link SecureSAXParserFactory#secure(Source, boolean)}.
          *
-         * <p>A {@link SAXSource} carrying the caller's own reader is pre-parsed here too, unlike everywhere else in this class: an engine that reaches this
-         * method drops that reader anyway, so honoring it is not among the options; the choice is only between this parse and the engine's unsecured one.</p>
+         * <p>
+         * A {@link SAXSource} carrying the caller's own reader is pre-parsed here too, unlike everywhere else in this class: an engine that reaches this
+         * method drops that reader anyway, so honoring it is not among the options; the choice is only between this parse and the engine's unsecured one.
+         * </p>
          *
          * @param source The source to scan for an associated stylesheet.
          * @return A {@link DOMSource} for a stream or SAX source, otherwise the result of {@link SecureSAXParserFactory#secure(Source, boolean)}.
          * @throws TransformerConfigurationException Thrown if the source cannot be parsed.
          * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service
          *                                   configuration error} or if the implementation is not available or cannot be instantiated.
-         * @throws SecureException Thrown if a (non-Android) factory cannot support the secure processing feature {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
+         * @throws SecureException Thrown if a (non-Android) factory cannot support the secure processing feature
+         * {@link XMLConstants#FEATURE_SECURE_PROCESSING}.
          */
         private Source secureSourceToDom(final Source source) throws TransformerConfigurationException {
             if (source instanceof StreamSource || source instanceof SAXSource) {
@@ -435,7 +446,9 @@ public final class SecureTransformerFactory {
         }
     }
 
-    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
+    /**
+     * Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}.
+     */
     private static final String JDK_TRANSFORMER_FACTORY = "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl";
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(TransformerFactory.class, "newDefaultInstance");
@@ -501,18 +514,18 @@ public final class SecureTransformerFactory {
      * Rather than branching on the implementation class, this method probes what the factory supports and adapts:
      * </p>
      * <ul>
-     *     <li><strong>Saxon</strong> ({@code net.sf.saxon}): recognized by package prefix and handed to {@link SaxonProvider#configure(TransformerFactory)} for the
+     * <li><strong>Saxon</strong> ({@code net.sf.saxon}): recognized by package prefix and handed to {@link SaxonProvider#configure(TransformerFactory)} for the
      *         channels the standard JAXP knobs cannot close (reflection-based extension functions, the collection finder, the internal SAX parser). It is then
      *         wrapped like every other implementation to install the {@link FallbackIgnoreURIResolver} floor; the only
      *         difference is the empty-{@link Source} shape the floor returns, {@code EmptySource} for Saxon rather than the default empty DOM document.</li>
-     *     <li><strong>FSP</strong> ({@link XMLConstants#FEATURE_SECURE_PROCESSING}): required. On XSLTC it enables the runtime evaluator limits; on Xalan it disables
-     *         reflection-based extension functions.</li>
+     * <li><strong>FSP</strong> ({@link XMLConstants#FEATURE_SECURE_PROCESSING}): required. On XSLTC it enables the runtime evaluator limits; on Xalan it
+     * disables         reflection-based extension functions.</li>
      *     <li><strong>{@link FallbackIgnoreURIResolver} floor</strong>: required. An ignore-all {@link URIResolver} floor, installed by
      *         the nested wrapper and carried onto every produced {@link Transformer}, resolves {@code xsl:import}/{@code xsl:include} at compile
-     *         time and {@code document()} at runtime to an empty document, the one channel both XSLTC and Xalan route through. A caller-set {@link URIResolver} is
+     * time and {@code document()} at runtime to an empty document, the one channel both XSLTC and Xalan route through. A caller-set {@link URIResolver} is
      *         routed through the floor rather than replacing it, so a caller can opt a specific URI in but cannot reopen the fetch.</li>
      *     <li><strong>The nested wrapper</strong>: required. Both implementations fall back to {@code SAXParserFactory.newInstance()} to parse a
-     *         stylesheet or source document that does not carry its own reader, and only set FSP on it; wrapping the factory rewrites every {@link Source} through an
+     * stylesheet or source document that does not carry its own reader, and only set FSP on it; wrapping the factory rewrites every {@link Source} through an
      *         {@link org.apache.commons.xml.secure}-secured reader instead.</li>
      * </ul>
      *

@@ -32,12 +32,16 @@ import org.xml.sax.XMLReader;
  * Shared plumbing for the {@link SAXTransformerFactory} extension-surface tests ({@code TransformerHandlerTest}, {@code TemplatesHandlerTest},
  * {@code XMLFilterTest}).
  *
- * <p>The handler products consume SAX events the caller drives, so these tests need a reader to feed them; the feed reader is a secure, namespace-aware one,
- * because the vector under test is what the <em>transform</em> resolves, not what the feed parses.</p>
+ * <p>
+ * The handler products consume SAX events the caller drives, so these tests need a reader to feed them; the feed reader is a secure, namespace-aware one,
+ * because the vector under test is what the <em>transform</em> resolves, not what the feed parses.
+ * </p>
  */
 final class SaxSurfaceTestSupport {
 
-    /** Feeds the input's SAX events into the handler through a secure, namespace-aware reader. */
+    /**
+     * Feeds the input's SAX events into the handler through a secure, namespace-aware reader.
+     */
     static void feed(final ContentHandler handler, final InputSource input) throws Exception {
         final SAXParserFactory factory = SecureSAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
@@ -47,7 +51,9 @@ final class SaxSurfaceTestSupport {
         reader.parse(input);
     }
 
-    /** Opens a fixture under {@code leaked/} as an {@link InputSource} preserving its system id, so relative hrefs resolve normally. */
+    /**
+     * Opens a fixture under {@code leaked/} as an {@link InputSource} preserving its system ID, so relative hrefs resolve normally.
+     */
     static InputSource resourceInput(final String name) throws IOException {
         final URL url = AttackTestSupport.resourceUrl(name);
         final InputSource input = new InputSource(url.openStream());
@@ -55,12 +61,16 @@ final class SaxSurfaceTestSupport {
         return input;
     }
 
-    /** A benign {@code <root/>} input document. */
+    /**
+     * A benign {@code <root/>} input document.
+     */
     static InputSource rootInput() {
         return new InputSource(new StringReader("<root/>"));
     }
 
-    /** The secure factory, as its runtime {@link SAXTransformerFactory} type. */
+    /**
+     * The secure factory, as its runtime {@link SAXTransformerFactory} type.
+     */
     static SAXTransformerFactory secureFactory() {
         return (SAXTransformerFactory) SecureTransformerFactory.newInstance();
     }

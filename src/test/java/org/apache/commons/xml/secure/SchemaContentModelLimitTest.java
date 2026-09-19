@@ -29,23 +29,31 @@ import org.xml.sax.SAXException;
 /**
  * Tests that an untrusted schema's content-model expansion is bounded, the one processing limit no reader can supply.
  *
- * <p>{@link BillionLaughsTest} covers entity expansion, which the secure reader injected into every {@code Source} bounds before a schema document reaches the
+ * <p>
+ * {@link BillionLaughsTest} covers entity expansion, which the secure reader injected into every {@code Source} bounds before a schema document reaches the
  * loader. {@code maxOccurs} is a different mechanism: the loader expands a repeated particle into content-model nodes while building the DFA, which happens
  * after parsing and never touches the reader. The bound for it is the schema implementation's own limit ({@code maxOccurLimit}, 3,000 nodes on Xerces), which
- * external Xerces installs only when {@code FEATURE_SECURE_PROCESSING} is set on the {@link SchemaFactory}.</p>
+ * external Xerces installs only when {@code FEATURE_SECURE_PROCESSING} is set on the {@link SchemaFactory}.
+ * </p>
  *
- * <p>The expansion is lazy on Xerces: {@code newSchema} returns in milliseconds whatever {@code maxOccurs} says, and the nodes are built on first validation.
+ * <p>
+ * The expansion is lazy on Xerces: {@code newSchema} returns in milliseconds whatever {@code maxOccurs} says, and the nodes are built on first validation.
  * The payload therefore has to be validated, not just compiled, and the assertion accepts a rejection at either step. The repeated particle holds two elements
  * so it cannot be collapsed into Xerces' compact repeating-leaf form, and {@link #MAX_OCCURS} clears both limits by little enough that an unbounded run still
- * finishes, in seconds, rather than exhausting the heap.</p>
+ * finishes, in seconds, rather than exhausting the heap.
+ * </p>
  */
 @Tag("schema")
 class SchemaContentModelLimitTest {
 
-    /** Above both recognized implementations' limits (3,000 nodes on Xerces, 5,000 on the stock JDK); an unbounded run still finishes in seconds. */
+    /**
+     * Above both recognized implementations' limits (3,000 nodes on Xerces, 5,000 on the stock JDK); an unbounded run still finishes in seconds.
+     */
     private static final int MAX_OCCURS = 5_001;
 
-    /** Compiles the payload through {@code factory} and validates a matching instance, the step that forces the expansion. */
+    /**
+     * Compiles the payload through {@code factory} and validates a matching instance, the step that forces the expansion.
+     */
     private static void compileAndValidate(final SchemaFactory factory) throws Exception {
         factory.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
         final Schema schema = factory.newSchema(AttackTestSupport.streamSource(maxOccursPayload()));

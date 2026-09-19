@@ -62,6 +62,11 @@ class SecureXMLFilterTest {
         final SecureXMLFilter filter = filter();
         filter.setContentHandler(new DefaultHandler() {
 
+            /**
+             * Always throws {@link SAXException}.
+             *
+             * @throws SAXException Thrown on every invocation.
+             */
             @Override
             public void startElement(final String uri, final String localName, final String qName, final Attributes attributes)
                     throws SAXException {
@@ -190,6 +195,11 @@ class SecureXMLFilterTest {
                         delegate.setURIResolver(resolver);
                     }
 
+                    /**
+                     * Always throws {@link TransformerException}.
+                     *
+                     * @throws TransformerException Thrown on every invocation.
+                     */
                     @Override
                     public void transform(final Source source, final Result result) throws TransformerException {
                         throw new TransformerException(new IOException("transform"));
@@ -237,6 +247,11 @@ class SecureXMLFilterTest {
         filter.setContentHandler(new DefaultHandler());
         filter.setParent(new XMLFilterImpl() {
 
+            /**
+             * Always throws {@link IOException}.
+             *
+             * @throws IOException Thrown on every invocation.
+             */
             @Override
             public void parse(final InputSource input) throws IOException {
                 throw new IOException("parent");
@@ -255,6 +270,11 @@ class SecureXMLFilterTest {
         final SAXException handlerFailure = new SAXException("error handler");
         filter.setErrorHandler(new DefaultHandler() {
 
+            /**
+             * Always throws {@link SAXException}.
+             *
+             * @throws SAXException Thrown on every invocation.
+             */
             @Override
             public void warning(final SAXParseException e) throws SAXException {
                 throw handlerFailure;

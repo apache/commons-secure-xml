@@ -59,9 +59,11 @@ public final class SecureSAXParserFactory {
      * {@link SecureXMLReader} for Android's {@code org.apache.harmony.xml.ExpatReader} that additionally surfaces its {@code namespace-prefixes} limitation at
      * configuration time.
      *
-     * <p>ExpatReader does not actually support the {@code namespace-prefixes} feature: enabling it is accepted by {@code setFeature} but fails later, during
-     * {@code parse}, with a {@link SAXNotSupportedException}. Reporting the rejection eagerly from {@link #setFeature(String, boolean)} lets consumers that probe
-     * the feature, such as Xalan's identity transformer, catch the exception and fall back instead of failing the whole parse.</p>
+     * <p>
+     * ExpatReader does not actually support the {@code namespace-prefixes} feature: enabling it is accepted by {@code setFeature} but fails later, during
+     * {@code parse}, with a {@link SAXNotSupportedException}. Reporting the rejection eagerly from {@link #setFeature(String, boolean)} lets consumers that
+     * probe the feature, such as Xalan's identity transformer, catch the exception and fall back instead of failing the whole parse.
+     * </p>
      */
     static final class SecureExpatXMLReader extends SecureXMLReader {
 
@@ -156,13 +158,19 @@ public final class SecureSAXParserFactory {
             delegate.setXIncludeAware(state);
         }
     }
-    /** Class name of Android's Expat-backed {@link XMLReader}. */
+    /**
+     * Class name of Android's Expat-backed {@link XMLReader}.
+     */
     private static final String ANDROID_EXPAT_READER = "org.apache.harmony.xml.ExpatReader";
 
-    /** Class name of Android's Harmony-based {@link SAXParserFactory}, backed by the native Expat parser. */
+    /**
+     * Class name of Android's Harmony-based {@link SAXParserFactory}, backed by the native Expat parser.
+     */
     private static final String ANDROID_SAX_PARSER_FACTORY = "org.apache.harmony.xml.parsers.SAXParserFactoryImpl";
 
-    /** Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}. */
+    /**
+     * Class name of the JDK's built-in default implementation, the Java 8 fallback for {@link #newDefaultInstance()}.
+     */
     static final String JDK_SAX_PARSER_FACTORY = "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl";
 
     /**
@@ -171,7 +179,9 @@ public final class SecureSAXParserFactory {
      */
     static final String OVERRIDE_DEFAULT_PARSER = "jdk.xml.overrideDefaultParser";
 
-    /** System property naming the {@link SAXParserFactory} implementation, the JDK's own mechanism for reconfiguring the default parser. */
+    /**
+     * System property naming the {@link SAXParserFactory} implementation, the JDK's own mechanism for reconfiguring the default parser.
+     */
     private static final String SAX_FACTORY_ID = "javax.xml.parsers.SAXParserFactory";
 
     private static final MethodHandle MH_newDefaultInstance = MethodHandleFactory.findStatic(SAXParserFactory.class, "newDefaultInstance");
@@ -285,7 +295,8 @@ public final class SecureSAXParserFactory {
 
     /**
      * Returns a new, secure, namespace-aware {@link SAXParserFactory} of the given implementation class, enabling namespace awareness on
-     * {@link #newInstance(String, ClassLoader)}, the behavior {@code SAXParserFactory.newNSInstance(String, ClassLoader)} (Java 13 or later) is specified to have.
+     * {@link #newInstance(String, ClassLoader)}, the behavior {@code SAXParserFactory.newNSInstance(String, ClassLoader)} (Java 13 or later) is specified to
+     * have.
      *
      * @param factoryClassName The fully qualified class name of the {@link SAXParserFactory} implementation.
      * @param classLoader      The class loader used to load the factory class; {@code null} means the current thread's context class loader.
@@ -319,20 +330,23 @@ public final class SecureSAXParserFactory {
     /**
      * Applies capability-driven secure settings to any {@link SAXParserFactory} on the classpath.
      *
-     * <p>Rather than branching on the implementation class, this method probes what the factory supports and adapts. Because
+     * <p>
+     * Rather than branching on the implementation class, this method probes what the factory supports and adapts. Because
      * {@link SAXParserFactory} exposes only a feature API and no property API, the per-parse configuration runs on each {@link XMLReader} the factory produces,
-     * funneled through the nested wrapper into {@link #secure(XMLReader)}:</p>
+     * funneled through the nested wrapper into {@link #secure(XMLReader)}:
+     * </p>
      * <ul>
-     *     <li><strong>Android</strong> (Harmony / Expat): {@link XMLConstants#FEATURE_SECURE_PROCESSING FSP} and the JAXP 1.5 {@code ACCESS_EXTERNAL_*} properties
-     *         are not recognized, and libexpat enforces its own Billion Laughs check, so neither is applied. Two fixups are still needed: an ignore-all resolver
+     * <li><strong>Android</strong> (Harmony / Expat): {@link XMLConstants#FEATURE_SECURE_PROCESSING FSP} and the JAXP 1.5 {@code ACCESS_EXTERNAL_*} properties
+     * are not recognized, and libexpat enforces its own Billion Laughs check, so neither is applied. Two fixups are still needed: an ignore-all resolver
      *         (Expat ignores external fetches silently when no resolver is set; the floor keeps that behavior non-bypassable, resolving anything unresolved to
      *         empty), and a {@link SecureExpatXMLReader} so the unsupported {@code namespace-prefixes} feature is rejected at
      *         configuration time rather than mid-parse.</li>
      *     <li><strong>FSP</strong>: required on every other reader. It switches on the implementation's built-in security manager, which is what carries the
      *         processing limits.</li>
-     *     <li><strong>Ignore-all resolver floor</strong>: every reader is wrapped in a {@link SecureXMLReader} that keeps an ignore-all {@link EntityResolver} floor.
+     * <li><strong>Ignore-all resolver floor</strong>: every reader is wrapped in a {@link SecureXMLReader} that keeps an ignore-all {@link EntityResolver}
+     * floor.
      *         That floor blocks external DTD, entity, schema and {@code xi:include} fetches in one place: the stock JDK's XInclude processor ignores
-     *         {@code ACCESS_EXTERNAL_*} and consults the {@link EntityResolver} instead, so no {@code ACCESS_EXTERNAL_*} properties are needed here. A caller can
+     * {@code ACCESS_EXTERNAL_*} and consults the {@link EntityResolver} instead, so no {@code ACCESS_EXTERNAL_*} properties are needed here. A caller can
      *         chain its own resolver onto the floor to allow-list resources, but cannot remove it.</li>
      * </ul>
      *
