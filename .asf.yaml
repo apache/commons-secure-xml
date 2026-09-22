@@ -28,7 +28,7 @@ notifications:
 github:
   description: "Apache Commons Secure XML"
   homepage: https://commons.apache.org/proper/commons-secure-xml/
-
+  
   pull_requests:
     # allow auto-merge
     allow_auto_merge: false
@@ -36,3 +36,16 @@ github:
     allow_update_branch: true
     # auto-delete head branches after being merged
     del_branch_on_merge: true
+
+  rulesets:
+    - name: "Protect Main Branches"
+      type: branch
+      branches:
+        includes:
+          - main
+          - master
+        excludes: []
+      bypass_teams:
+        - root
+      restrict_deletion: true
+      restrict_force_push: true
