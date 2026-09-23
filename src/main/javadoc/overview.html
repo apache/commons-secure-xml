@@ -19,13 +19,13 @@ limitations under the License.
 <title>Apache Commons Secure XML Overview</title>
 </head>
 <body>
-  <a href="https://commons.apache.org/secure-xml"><img src="org/apache/commons/xml/secure/doc-files/logo.png" alt="Apache Commons Secure XML"> </a>
+  <a href="https://commons.apache.org/proper/commons-secure-xml/"><img src="org/apache/commons/xml/secure/doc-files/logo.png" alt="Apache Commons Secure XML"> </a>
   <section id="apache-commons-secure-xml">
     <h1>
       <img src="org/apache/commons/xml/secure/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">Apache Commons Secure XML
     </h1>
     <p>
-      <a href="https://commons.apache.org/secure-xml">Apache Commons Secure XML</a> is part of the <a href="https://commons.apache.org/index.html">Apache Commons</a>
+      <a href="https://commons.apache.org/proper/commons-secure-xml/">Apache Commons Secure XML</a> is part of the <a href="https://commons.apache.org/index.html">Apache Commons</a>
       project.
     </p>
     <p>Apache Commons Secure XML provides secure-by-default JAXP factory creation, abstracting over implementation-specific XXE securing differences between
@@ -68,7 +68,7 @@ limitations under the License.
       </tr>
     </table>
     <p>
-      Or use the <a href="org/apache/commons/xml/secure/doc-files/rewrite.yml">OpenRewrite <strong>recipe</strong></a>.
+      Or use the <a href="#openrewrite-recipe">OpenRewrite <strong>recipe</strong></a>.
     </p>
   </section>
   <section id="why">
@@ -524,6 +524,20 @@ factory.setXMLResolver((publicID, systemID, baseURI, namespace) -&gt; {
       and it yields to a caller’s resolver without consulting the properties.
       The <a href="../threat_model.html">Threat Model</a> documents the resulting contract.
     </p>
+  </section>
+  <section id="openrewrite-recipe">
+    <h1>
+      <img src="org/apache/commons/xml/secure/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">Migrating to Apache Commons Secure XML with OpenRewrite
+    </h1>
+    <p>To migrate to Apache Commons Secure XML using the OpenRewrite recipe:</p>
+    <ol>
+      <li>Copy our <a href="org/apache/commons/xml/secure/doc-files/rewrite.yml">recipe file</a> to the root of your project, this is only temporary:</li>
+      <li><pre>wget https://github.com/apache/commons-secure-xml/blob/main/src/main/java/org/apache/commons/xml/secure/doc-files/rewrite.yml</pre></li>
+      <li>Run the OpenRewrite Maven plugin:</li>
+      <li><pre>mvn org.openrewrite.maven:rewrite-maven-plugin:run -Drewrite.activeRecipes=org.apache.commons.xml.secure.UseSecureXmlFactories</pre></li>
+      <li>Delete the recipe file from your project root.</li>
+      <li><pre>rm rewrite.yml</pre></li>
+    </ol>
   </section>
 </body>
 </html>
