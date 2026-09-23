@@ -532,7 +532,7 @@ factory.setXMLResolver((publicID, systemID, baseURI, namespace) -&gt; {
     <p>To migrate to Apache Commons Secure XML using the OpenRewrite recipe:</p>
     <ol>
       <li>Copy our <a href="org/apache/commons/xml/secure/doc-files/rewrite.yml">recipe file</a> to the root of your project, this is only temporary:</li>
-      <li><pre>wget https://github.com/apache/commons-secure-xml/blob/main/src/main/java/org/apache/commons/xml/secure/doc-files/rewrite.yml</pre></li>
+      <li><pre>wget https://raw.githubusercontent.com/apache/commons-secure-xml/refs/heads/main/src/main/java/org/apache/commons/xml/secure/doc-files/rewrite.yml</pre></li>
       <li>Run the OpenRewrite Maven plugin:</li>
       <li><pre>mvn org.openrewrite.maven:rewrite-maven-plugin:run -Drewrite.activeRecipes=org.apache.commons.xml.secure.UseSecureXmlFactories</pre></li>
       <li>Delete the recipe file from your project root.</li>
