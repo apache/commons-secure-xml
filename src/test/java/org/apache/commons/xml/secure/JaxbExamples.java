@@ -43,7 +43,7 @@ public class JaxbExamples {
         Unmarshaller unmarshaller = context.createUnmarshaller();
 
         // Create a secure SAXParserFactory via Apache Commons Secure XML
-        SAXParserFactory spf = SecureSAXParserFactory.newDefaultInstance();
+        SAXParserFactory spf = SecureSAXParserFactory.newDefaultNSInstance();
         
         // Generate a hardened XMLReader and wrap the input source
         XMLReader xmlReader = spf.newSAXParser().getXMLReader();
