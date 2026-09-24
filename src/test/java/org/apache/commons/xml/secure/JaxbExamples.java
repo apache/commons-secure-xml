@@ -38,31 +38,25 @@ public class JaxbExamples {
         // JAXB model fields and methods
     }
 
-    public MyJaxbModel unmarshalSecurelyWithSax(InputStream xmlStream) throws Exception {
-        JAXBContext context = JAXBContext.newInstance(MyJaxbModel.class);
-        Unmarshaller unmarshaller = context.createUnmarshaller();
-
+    public MyJaxbModel unmarshalSecurelyWithSax(final InputStream xmlStream) throws Exception {
+        final JAXBContext context = JAXBContext.newInstance(MyJaxbModel.class);
+        final Unmarshaller unmarshaller = context.createUnmarshaller();
         // Create a secure SAXParserFactory via Apache Commons Secure XML
-        SAXParserFactory spf = SecureSAXParserFactory.newDefaultNSInstance();
-        
+        final SAXParserFactory spf = SecureSAXParserFactory.newDefaultNSInstance();
         // Generate a hardened XMLReader and wrap the input source
-        XMLReader xmlReader = spf.newSAXParser().getXMLReader();
-        SAXSource source = new SAXSource(xmlReader, new InputSource(xmlStream));
-
+        final XMLReader xmlReader = spf.newSAXParser().getXMLReader();
+        final SAXSource source = new SAXSource(xmlReader, new InputSource(xmlStream));
         // Safe from XXE injection and entity-expansion DoS attacks
         return (MyJaxbModel) unmarshaller.unmarshal(source);
     }
-    
-    public MyJaxbModel unmarshalSecurelyWithStax(InputStream xmlStream) throws Exception {
-        JAXBContext context = JAXBContext.newInstance(MyJaxbModel.class);
-        Unmarshaller unmarshaller = context.createUnmarshaller();
 
+    public MyJaxbModel unmarshalSecurelyWithStax(final InputStream xmlStream) throws Exception {
+        final JAXBContext context = JAXBContext.newInstance(MyJaxbModel.class);
+        final Unmarshaller unmarshaller = context.createUnmarshaller();
         // Create a secure XMLInputFactory via Apache Commons Secure XML
-        XMLInputFactory xif = SecureXMLInputFactory.newDefaultFactory();
-        
+        final XMLInputFactory xif = SecureXMLInputFactory.newDefaultFactory();
         // Create a hardened cursor reader
-        XMLStreamReader xmlReader = xif.createXMLStreamReader(xmlStream);
-
+        final XMLStreamReader xmlReader = xif.createXMLStreamReader(xmlStream);
         try {
             // Safe from XXE injection and entity-expansion DoS attacks
             return (MyJaxbModel) unmarshaller.unmarshal(xmlReader);
