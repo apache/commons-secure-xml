@@ -535,7 +535,7 @@ factory.setXMLResolver((publicID, systemID, baseURI, namespace) -&gt; {
       <li><pre>wget https://raw.githubusercontent.com/apache/commons-secure-xml/refs/heads/main/src/main/java/org/apache/commons/xml/secure/doc-files/rewrite.yml</pre></li>
       <li>Run the OpenRewrite Maven plugin:</li>
       <li><pre>mvn org.openrewrite.maven:rewrite-maven-plugin:run -Drewrite.activeRecipes=org.apache.commons.xml.secure.UseSecureXmlFactories</pre></li>
-      <li>Delete the recipe file from your project root.</li>
+      <li>Delete the recipe file from your project root:</li>
       <li><pre>rm rewrite.yml</pre></li>
     </ol>
   </section>
