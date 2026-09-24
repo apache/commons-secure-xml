@@ -19,14 +19,15 @@ limitations under the License.
 <title>Apache Commons Secure XML Overview</title>
 </head>
 <body>
-  <a href="https://commons.apache.org/proper/commons-secure-xml/"><img src="org/apache/commons/xml/secure/doc-files/logo.png" alt="Apache Commons Secure XML"> </a>
+  <a href="https://commons.apache.org/proper/commons-secure-xml/"><img src="org/apache/commons/xml/secure/doc-files/logo.png"
+    alt="Apache Commons Secure XML"> </a>
   <section id="apache-commons-secure-xml">
     <h1>
       <img src="org/apache/commons/xml/secure/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">Apache Commons Secure XML
     </h1>
     <p>
-      <a href="https://commons.apache.org/proper/commons-secure-xml/">Apache Commons Secure XML</a> is part of the <a href="https://commons.apache.org/index.html">Apache Commons</a>
-      project.
+      <a href="https://commons.apache.org/proper/commons-secure-xml/">Apache Commons Secure XML</a> is part of the <a
+        href="https://commons.apache.org/index.html">Apache Commons</a> project.
     </p>
     <p>Apache Commons Secure XML provides secure-by-default JAXP factory creation, abstracting over implementation-specific XXE securing differences between
       the stock JDK and external JAXP implementations.</p>
@@ -80,8 +81,8 @@ limitations under the License.
       different set, and setting an unknown one throws an exception that callers routinely swallow. Writing this block correctly for every implementation is
       real work, and duplicating it across projects means every project owns the maintenance burden on its own.</p>
     <p>
-      Defaults are also uneven. The stock JDK SAX and DOM parsers already prevent external entity resolution through
-      <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/XMLConstants.html#FEATURE_SECURE_PROCESSING"><code>FEATURE_SECURE_PROCESSING</code></a>,
+      Defaults are also uneven. The stock JDK SAX and DOM parsers already prevent external entity resolution through <a
+        href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/XMLConstants.html#FEATURE_SECURE_PROCESSING"><code>FEATURE_SECURE_PROCESSING</code></a>,
       and implementations conforming to JAXP 1.5 ship reasonable defaults for most attacks. Others, such as standalone Xerces, Woodstox, or Saxon’s TrAX, need
       further configuration before they reach the same baseline. A library author has no control over which implementation is on the classpath at runtime, so
       the effective security posture of their code depends on a deployment decision made elsewhere.
@@ -90,8 +91,8 @@ limitations under the License.
       This library provides that baseline. Each
       <code>org.apache.commons.xml.secure</code>
       factory call returns a new factory secured by an implementation-specific recipe, so the returned object behaves the same way security-wise regardless of
-      which JAXP implementation was resolved. Security becomes a property of the call, not of the classpath, and there is one place to update when a new securing
-      setting becomes available or a default changes.
+      which JAXP implementation was resolved. Security becomes a property of the call, not of the classpath, and there is one place to update when a new
+      securing setting becomes available or a default changes.
     </p>
   </section>
   <section id="usage">
@@ -132,7 +133,8 @@ limitations under the License.
       </p>
       <p>
         <strong>DOM Parsing</strong> via
-        <code>{@link org.apache.commons.xml.secure.SecureDocumentBuilderFactory}</code>:
+        <code>{@link org.apache.commons.xml.secure.SecureDocumentBuilderFactory}</code>
+        :
       </p>
       <div class="sourceCode" id="cb1">
         <pre class="sourceCode java">
@@ -146,7 +148,8 @@ Document doc = SecureDocumentBuilderFactory.newInstance().newDocumentBuilder().p
       </div>
       <p>
         <strong>SAX Parsing</strong> via
-        <code>{@link org.apache.commons.xml.secure.SecureSAXParserFactory}</code>:
+        <code>{@link org.apache.commons.xml.secure.SecureSAXParserFactory}</code>
+        :
       </p>
       <div class="sourceCode" id="cb2">
         <pre class="sourceCode java">
@@ -159,7 +162,8 @@ SecureSAXParserFactory.newInstance().newSAXParser().parse(inputStream, myDefault
       </div>
       <p>
         <strong>Streaming (StAX) Parsing</strong> via
-        <code>{@link org.apache.commons.xml.secure.SecureXMLInputFactory}</code>:
+        <code>{@link org.apache.commons.xml.secure.SecureXMLInputFactory}</code>
+        :
       </p>
       <div class="sourceCode" id="cb3">
         <pre class="sourceCode java">
@@ -173,7 +177,8 @@ XMLStreamReader reader = SecureXMLInputFactory.newInstance().createXMLStreamRead
       </div>
       <p>
         <strong>XSLT Transforms</strong> via
-        <code>{@link org.apache.commons.xml.secure.SecureTransformerFactory}</code>:
+        <code>{@link org.apache.commons.xml.secure.SecureTransformerFactory}</code>
+        :
       </p>
       <div class="sourceCode" id="cb4">
         <pre class="sourceCode java">
@@ -190,7 +195,8 @@ SecureTransformerFactory.newInstance()
       </div>
       <p>
         <strong>XPath Queries</strong> via
-        <code>{@link org.apache.commons.xml.secure.SecureXPathFactory}</code>:
+        <code>{@link org.apache.commons.xml.secure.SecureXPathFactory}</code>
+        :
       </p>
       <div class="sourceCode" id="cb5">
         <pre class="sourceCode java">
@@ -207,7 +213,8 @@ NodeList hits = (NodeList) SecureXPathFactory.newInstance()
       </div>
       <p>
         <strong>W3C XML Schema Validation</strong> via
-        <code>{@link org.apache.commons.xml.secure.SecureSchemaFactory}</code>:
+        <code>{@link org.apache.commons.xml.secure.SecureSchemaFactory}</code>
+        :
       </p>
       <div class="sourceCode" id="cb6">
         <pre class="sourceCode java">
@@ -233,7 +240,8 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         the library respects it:</p>
       <ul>
         <li>Stock JDK factories use the JDK parsers by default, and expose the <code>jdk.xml.overrideDefaultParser</code> feature (and Java system property
-          of the same name) to switch to parsers instantiated through <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ServiceLoader.html"><code>ServiceLoader</code></a>.
+          of the same name) to switch to parsers instantiated through <a
+          href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ServiceLoader.html"><code>ServiceLoader</code></a>.
         </li>
         <li>Saxon selects its parsers through its own configuration.</li>
       </ul>
@@ -251,15 +259,15 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         <code>newNSInstance()</code>
         family (Java 13, <a href="https://bugs.openjdk.org/browse/JDK-8223423">JDK-8223423</a>).
       </p>
-      <p>
-        All of these methods work on every supported runtime, including Java 8:
-      </p>
+      <p>All of these methods work on every supported runtime, including Java 8:</p>
       <ul>
-        <li>The <code>newNSInstance</code> methods enable namespace awareness on their non-NS counterparts,
-          the behavior the JAXP methods are specified to have.</li>
-        <li>The <code>newDefaultInstance</code> methods resolve the platform’s own <code>newDefaultInstance</code>
-          at run time and use it wherever the runtime provides one (Java 9 or later, and the Android API levels that ship the method),
-          falling back to instantiating the JDK’s built-in implementation by class name on Java 8.</li>
+        <li>The <code>newNSInstance</code> methods enable namespace awareness on their non-NS counterparts, the behavior the JAXP methods are specified to
+          have.
+        </li>
+        <li>The <code>newDefaultInstance</code> methods resolve the platform’s own <code>newDefaultInstance</code> at run time and use it wherever the
+          runtime provides one (Java 9 or later, and the Android API levels that ship the method), falling back to instantiating the JDK’s built-in
+          implementation by class name on Java 8.
+        </li>
       </ul>
       <p>
         The
@@ -279,42 +287,40 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         are read by a parser the implementation picks internally, and that parser may not be secured (Saxon’s TrAX is one such case, see Building below). Treat
         stylesheets and schemas as trusted input, or pre-parse them through a secured
         <code>org.apache.commons.xml.secure</code>
-        parser and pass the result as a
-        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/dom/DOMSource.html"><code>DOMSource</code></a>
-        or
-        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/sax/SAXSource.html"><code>SAXSource</code></a>.
-        A stylesheet also chooses where the transform writes (<code>xsl:result-document</code>):
-        the securing governs reads only, so restrict output destinations yourself when running an untrusted stylesheet (see the <a href="../threat_model.html">Threat
-          Model</a>).
+        parser and pass the result as a <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/dom/DOMSource.html"><code>DOMSource</code></a>
+        or <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/sax/SAXSource.html"><code>SAXSource</code></a>. A stylesheet
+        also chooses where the transform writes (
+        <code>xsl:result-document</code>
+        ): the securing governs reads only, so restrict output destinations yourself when running an untrusted stylesheet (see the <a
+          href="../threat_model.html">Threat Model</a>).
       </p>
     </section>
     <section id="transformer-handlers-and-filters">
       <h2>Transformer Handlers and Filters</h2>
       <p>
-        The
-        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/sax/SAXTransformerFactory.html"><code>SAXTransformerFactory</code></a>
+        The <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/sax/SAXTransformerFactory.html"><code>SAXTransformerFactory</code></a>
         extension methods,
-        <code>newTransformerHandler(...)</code>,
+        <code>newTransformerHandler(...)</code>
+        ,
         <code>newTemplatesHandler()</code>
         and
-        <code>newXMLFilter(...)</code>,
-        if reachable by casting the factory from
-        <code>SecureTransformerFactory.newInstance()</code>,
-        produce handlers, filters and
-        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/Templates.html"><code>Templates</code></a>
+        <code>newXMLFilter(...)</code>
+        , if reachable by casting the factory from
+        <code>SecureTransformerFactory.newInstance()</code>
+        , produce handlers, filters and <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/Templates.html"><code>Templates</code></a>
         carrying the same securing as the standard entry points: runtime
         <code>document()</code>
         resolves to empty content, and a filter with no caller-set parent parses its input through a secured reader. The SAX events you feed into a handler, and
-        a parent reader you set on a filter, are your own configuration, like any caller-supplied parser. See the <a href="../threat_model.html">Threat Model</a>
-        for the exact scope.
+        a parent reader you set on a filter, are your own configuration, like any caller-supplied parser. See the <a href="../threat_model.html">Threat
+          Model</a> for the exact scope.
       </p>
     </section>
     <section id="caching-and-thread-safety">
       <h2>Caching and Thread Safety</h2>
       <p>
         There is no caching or pooling inside
-        <code>org.apache.commons.xml.secure</code>;
-        callers on a hot path are responsible for their own caching. The returned factories inherit the thread-safety properties of the underlying JAXP
+        <code>org.apache.commons.xml.secure</code>
+        ; callers on a hot path are responsible for their own caching. The returned factories inherit the thread-safety properties of the underlying JAXP
         implementation, which in practice means they are not thread-safe. Create a new factory per thread or synchronize externally.
       </p>
     </section>
@@ -335,34 +341,33 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
       <li>Set a stricter feature on the factory, for example, <code>http://apache.org/xml/features/disallow-doctype-decl</code> to reject every document
         carrying a DOCTYPE, on implementations that support the feature.
       </li>
-      <li>Install a resolver that throws. A caller-supplied <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/org/xml/sax/EntityResolver.html"><code>EntityResolver</code></a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/stream/XMLResolver.html"><code>XMLResolver</code></a>, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/org/w3c/dom/ls/LSResourceResolver.html"><code>LSResourceResolver</code></a> or <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/URIResolver.html"><code>URIResolver</code></a>
-        is consulted before the securing floor, so an allow-list and a deny-all are both one resolver away.
+      <li>Install a resolver that throws. A caller-supplied <a
+        href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/org/xml/sax/EntityResolver.html"><code>EntityResolver</code></a>, <a
+        href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/stream/XMLResolver.html"><code>XMLResolver</code></a>, <a
+        href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/org/w3c/dom/ls/LSResourceResolver.html"><code>LSResourceResolver</code></a> or <a
+        href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/URIResolver.html"><code>URIResolver</code></a> is consulted before
+        the securing floor, so an allow-list and a deny-all are both one resolver away.
       </li>
     </ul>
     <section id="resolvers">
       <h2>Resolvers</h2>
       <p>
-        A resolver here serves the opposite purpose from the one it serves on a stock JAXP factory.
-        There, returning <code>null</code> hands the reference back to the parser, which fetches it;
-        on a secured factory, returning <code>null</code> leaves the reference unresolved,
-        and the securing floor answers it with empty content.
-        Whatever your resolver leaves unresolved is never fetched.
+        A resolver here serves the opposite purpose from the one it serves on a stock JAXP factory. There, returning
+        <code>null</code>
+        hands the reference back to the parser, which fetches it; on a secured factory, returning
+        <code>null</code>
+        leaves the reference unresolved, and the securing floor answers it with empty content. Whatever your resolver leaves unresolved is never fetched.
       </p>
+      <p>A resolver is therefore the way to opt a resource back in, and returning a non-null result is how you say “this one is allowed.” Your resolver is
+        consulted before the floor and is never replaced by it, and what it returns is honored even where the JAXP 1.5 external-access properties would deny the
+        fetch, because those properties do not apply to a resolved result.</p>
       <p>
-        A resolver is therefore the way to opt a resource back in,
-        and returning a non-null result is how you say “this one is allowed.”
-        Your resolver is consulted before the floor and is never replaced by it,
-        and what it returns is honored even where the JAXP 1.5 external-access properties would deny the fetch,
-        because those properties do not apply to a resolved result.
-      </p>
-      <p>
-        <strong>DTDs, external entities, and <code>xi:include</code> targets</strong> on
-        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/parsers/DocumentBuilder.html"><code>DocumentBuilder</code></a>
-        and
-        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/org/xml/sax/XMLReader.html"><code>XMLReader</code></a>,
-        via
-        <code>EntityResolver</code>.
-        An <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/org/xml/sax/InputSource.html"><code>InputSource</code></a> carrying only the system identifier is the shortest way to allow one: the parser opens it itself.
+        <strong>DTDs, external entities, and <code>xi:include</code> targets
+        </strong> on <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/parsers/DocumentBuilder.html"><code>DocumentBuilder</code></a> and <a
+          href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/org/xml/sax/XMLReader.html"><code>XMLReader</code></a>, via
+        <code>EntityResolver</code>
+        . An <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/org/xml/sax/InputSource.html"><code>InputSource</code></a> carrying only the
+        system identifier is the shortest way to allow one: the parser opens it itself.
       </p>
       <div class="sourceCode" id="cb7">
         <pre class="sourceCode java">
@@ -377,20 +382,23 @@ builder.setEntityResolver((publicId, systemId) -&gt; ALLOWED.contains(systemId) 
       </div>
       <p>
         <strong>Every fetch on the schema path</strong> on
-        <code>SchemaFactory</code>,
-        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/validation/Schema.html"><code>Schema</code></a>,
-        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/validation/Validator.html"><code>Validator</code></a>
-        and
-        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/validation/ValidatorHandler.html"><code>ValidatorHandler</code></a>,
-        via
-        <code>LSResourceResolver</code>.
-        This one resolver answers for the schema documents a schema pulls in
-        (<code>xs:include</code>, <code>xs:import</code>, and <code>xsi:schemaLocation</code> hints)
-        and for the DTD and the external entities of the instance document being validated.
-        The <code>type</code> argument tells them apart, as DOM Level 3 Load and Save prescribes:
-        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/XMLConstants.html#W3C_XML_SCHEMA_NS_URI"><code>XMLConstants.W3C_XML_SCHEMA_NS_URI</code></a> for a schema document,
-        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/XMLConstants.html#XML_DTD_NS_URI"><code>XMLConstants.XML_DTD_NS_URI</code></a> for a DTD or an entity.
-        A schema references its neighbors using relative URIs, so resolve the system identifier against the base URI before matching it.
+        <code>SchemaFactory</code>
+        , <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/validation/Schema.html"><code>Schema</code></a>, <a
+          href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/validation/Validator.html"><code>Validator</code></a> and <a
+          href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/validation/ValidatorHandler.html"><code>ValidatorHandler</code></a>, via
+        <code>LSResourceResolver</code>
+        . This one resolver answers for the schema documents a schema pulls in (
+        <code>xs:include</code>
+        ,
+        <code>xs:import</code>
+        , and
+        <code>xsi:schemaLocation</code>
+        hints) and for the DTD and the external entities of the instance document being validated. The
+        <code>type</code>
+        argument tells them apart, as DOM Level 3 Load and Save prescribes: <a
+          href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/XMLConstants.html#W3C_XML_SCHEMA_NS_URI"><code>XMLConstants.W3C_XML_SCHEMA_NS_URI</code></a>
+        for a schema document, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/XMLConstants.html#XML_DTD_NS_URI"><code>XMLConstants.XML_DTD_NS_URI</code></a>
+        for a DTD or an entity. A schema references its neighbors using relative URIs, so resolve the system identifier against the base URI before matching it.
       </p>
       <div class="sourceCode" id="cb8">
         <pre class="sourceCode java">
@@ -417,22 +425,26 @@ factory.setResourceResolver((type, namespaceURI, publicId, systemId, baseURI) -&
       </div>
       <p>
         <strong>Every fetch on the transform path</strong> on
-        <code>TransformerFactory</code>,
+        <code>TransformerFactory</code>
+        ,
         <code>Templates</code>
+        and <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/Transformer.html"><code>Transformer</code></a>, via
+        <code>URIResolver</code>
+        . This one resolver answers for the stylesheet modules pulled in at compile time (
+        <code>xsl:include</code>
         and
-        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/Transformer.html"><code>Transformer</code></a>,
-        via
-        <code>URIResolver</code>.
-        This one resolver answers for the stylesheet modules pulled in at compile time
-        (<code>xsl:include</code> and <code>xsl:import</code>)
-        and for everything the transform fetches as it runs:
-        <code>document()</code>,
-        and on an XSLT 3.0 implementation, the <code>unparsed-text()</code> family and <code>json-doc()</code> as well.
-        A <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/stream/StreamSource.html"><code>StreamSource</code></a> you return is re-parsed with a secured reader,
-        so the references inside the resource you allowed face the same floor again.
-        A function that cannot accept an empty document in place of what it asked for, such as <code>unparsed-text()</code>,
-        reports an error when the resolver declines rather than returning empty content;
-        either way, the resource is not fetched.
+        <code>xsl:import</code>
+        ) and for everything the transform fetches as it runs:
+        <code>document()</code>
+        , and on an XSLT 3.0 implementation, the
+        <code>unparsed-text()</code>
+        family and
+        <code>json-doc()</code>
+        as well. A <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/stream/StreamSource.html"><code>StreamSource</code></a>
+        you return is re-parsed with a secured reader, so the references inside the resource you allowed face the same floor again. A function that cannot
+        accept an empty document in place of what it asked for, such as
+        <code>unparsed-text()</code>
+        , reports an error when the resolver declines rather than returning empty content; either way, the resource is not fetched.
       </p>
       <div class="sourceCode" id="cb9">
         <pre class="sourceCode java">
@@ -450,18 +462,14 @@ factory.setURIResolver((href, base) -&gt; {
       </div>
       <p>
         <strong>Entities on the streaming path</strong> on
-        <code>XMLInputFactory</code>,
-        via
-        <code>XMLResolver</code>.
-        This is the one resolver that has to open the resource itself:
-        it must return an
-        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/InputStream.html"><code>InputStream</code></a>,
-        an
-        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/stream/XMLStreamReader.html"><code>XMLStreamReader</code></a>
-        or an
-        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/stream/XMLEventReader.html"><code>XMLEventReader</code></a>,
-        and any other type is silently ignored
-        (the stock JDK then falls back to fetching the identifier the document declared, not the one you returned).
+        <code>XMLInputFactory</code>
+        , via
+        <code>XMLResolver</code>
+        . This is the one resolver that has to open the resource itself: it must return an <a
+          href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/InputStream.html"><code>InputStream</code></a>, an <a
+          href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/stream/XMLStreamReader.html"><code>XMLStreamReader</code></a> or an <a
+          href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/stream/XMLEventReader.html"><code>XMLEventReader</code></a>, and any other
+        type is silently ignored (the stock JDK then falls back to fetching the identifier the document declared, not the one you returned).
       </p>
       <div class="sourceCode" id="cb10">
         <pre class="sourceCode java">
@@ -481,57 +489,52 @@ factory.setXMLResolver((publicID, systemID, baseURI, namespace) -&gt; {
       As a temporary debugging measure, set the system property
       <code>org.apache.commons.xml.secure.throwOnUnresolved</code>
       to
-      <code>true</code>:
-      every unresolved external reference is then rejected with the resolution hook’s exception, and the message names the denied resource. The property is
+      <code>true</code>
+      : every unresolved external reference is then rejected with the resolution hook’s exception, and the message names the denied resource. The property is
       read at resolution time, so it can be toggled on a running application; treat it as a diagnostic switch, not as an application configuration.
     </p>
   </section>
   <section id="external-access-properties">
     <h1>
-      <img src="org/apache/commons/xml/secure/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">Why Not the JAXP 1.5 External-Access Properties
+      <img src="org/apache/commons/xml/secure/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">Why Not the JAXP 1.5
+      External-Access Properties
     </h1>
     <p>
-      The securing installs deny-by-default resolver floors on every factory it returns
-      instead of setting the JAXP 1.5 external-access properties
-      (<code>accessExternalDTD</code>, <code>accessExternalSchema</code>, <code>accessExternalStylesheet</code>).
-      The two mechanisms are not interchangeable:
-      by <a href="https://docs.oracle.com/en/java/javase/21/security/java-api-xml-processing-jaxp-security-guide.html">specification</a>,
-      the external-access properties have no effect
-      when a registered resolver returns a non-null source,
-      so a resolver takes precedence over the properties on every conforming implementation.
-      Beyond that ordering, three defects make the properties unfit as the basis of the securing:
+      The securing installs deny-by-default resolver floors on every factory it returns instead of setting the JAXP 1.5 external-access properties (
+      <code>accessExternalDTD</code>
+      ,
+      <code>accessExternalSchema</code>
+      ,
+      <code>accessExternalStylesheet</code>
+      ). The two mechanisms are not interchangeable: by <a
+        href="https://docs.oracle.com/en/java/javase/21/security/java-api-xml-processing-jaxp-security-guide.html">specification</a>, the external-access
+      properties have no effect when a registered resolver returns a non-null source, so a resolver takes precedence over the properties on every conforming
+      implementation. Beyond that ordering, three defects make the properties unfit as the basis of the securing:
     </p>
     <ul>
-      <li>On older JDK 8 versions, the <code>accessExternalSchema</code> check is applied
-        even to a schema document supplied by a caller’s resolver.
+      <li>On older JDK 8 versions, the <code>accessExternalSchema</code> check is applied even to a schema document supplied by a caller’s resolver.
       </li>
-      <li>No external-access property governs an XInclude fetch,
-        and a value set through the API is not even honored
-        inside an XIncluded document.
-        Only a resolver can gate XInclude.
-      </li>
-      <li>Schema documents named by <code>xsi:schemaLocation</code> hints are checked
-        even when supplied by a caller’s resolver.
+      <li>No external-access property governs an XInclude fetch, and a value set through the API is not even honored inside an XIncluded document. Only a
+        resolver can gate XInclude.</li>
+      <li>Schema documents named by <code>xsi:schemaLocation</code> hints are checked even when supplied by a caller’s resolver.
       </li>
     </ul>
     <p>
-      The first and third defects fail closed:
-      a legitimately resolved document is denied, never fetched.
-      They therefore break resolver-based applications without weakening the securing;
-      the second fails open and would leave a real fetch channel unguarded.
-      A resolver floor has neither problem:
-      it covers every channel on every supported implementation,
-      and it yields to a caller’s resolver without consulting the properties.
-      The <a href="../threat_model.html">Threat Model</a> documents the resulting contract.
+      The first and third defects fail closed: a legitimately resolved document is denied, never fetched. They therefore break resolver-based applications
+      without weakening the securing; the second fails open and would leave a real fetch channel unguarded. A resolver floor has neither problem: it covers
+      every channel on every supported implementation, and it yields to a caller’s resolver without consulting the properties. The <a
+        href="../threat_model.html">Threat Model</a> documents the resulting contract.
     </p>
   </section>
   <section id="openrewrite-recipe">
     <h1>
-      <img src="org/apache/commons/xml/secure/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">Migrating to Apache Commons Secure XML with OpenRewrite
+      <img src="org/apache/commons/xml/secure/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">Migrating to Apache Commons Secure
+      XML with OpenRewrite
     </h1>
     <p>To migrate to Apache Commons Secure XML using the OpenRewrite recipe:</p>
     <ol>
-      <li>Copy our <a href="org/apache/commons/xml/secure/doc-files/rewrite.yml">recipe file</a> to the root of your project, this is only temporary:</li>
+      <li>Copy our <a href="org/apache/commons/xml/secure/doc-files/rewrite.yml">recipe file</a> to the root of your project, this is only temporary:
+      </li>
       <li><pre>wget https://raw.githubusercontent.com/apache/commons-secure-xml/refs/heads/main/src/main/java/org/apache/commons/xml/secure/doc-files/rewrite.yml</pre></li>
       <li>Run the OpenRewrite Maven plugin:</li>
       <li><pre>mvn org.openrewrite.maven:rewrite-maven-plugin:run -Drewrite.activeRecipes=org.apache.commons.xml.secure.UseSecureXmlFactories</pre></li>
