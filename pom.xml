@@ -732,6 +732,8 @@ limitations under the License.
               <buildArgs>
                 <!-- The JUnit platform feature discovers tests while the image is built, which initializes TestTag. -->
                 <buildArg>--initialize-at-build-time=org.junit.platform.engine.TestTag</buildArg>
+                <!-- LocatorImpl has no static fields or initializer and is safe to retain in the image heap. -->
+                <buildArg>--initialize-at-build-time=org.xml.sax.helpers.LocatorImpl</buildArg>
                 <!-- Embed the fixtures explicitly: the agent records only resources a run actually opened. -->
                 <buildArg>-H:IncludeResources=leaked/.*</buildArg>
               </buildArgs>
