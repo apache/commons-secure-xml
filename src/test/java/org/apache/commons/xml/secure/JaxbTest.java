@@ -17,25 +17,49 @@
 
 package org.apache.commons.xml.secure;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.sax.SAXSource;
 
+import org.junit.jupiter.api.Test;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
 /**
- * Examples for the Javadoc {@code overview.html} file.
+ * Tests JAXB integration.
+ * <p>
+ * This class' two public methods server as examples for the Javadoc {@code overview.html} file.
+ * </p>
  */
-public class JaxbExamples {
+public class JaxbTest {
 
+    @XmlRootElement
     static class MyJaxbModel {
         // JAXB model fields and methods
+    }
+
+    @Test
+    void testUnmarshalSecurelyWithSax() throws Exception {
+        try (InputStream xmlStream = new ByteArrayInputStream("<myJaxbModel/>".getBytes(StandardCharsets.UTF_8))) {
+            assertNotNull(new JaxbTest().unmarshalSecurelyWithSax(xmlStream));
+        }
+    }
+
+    @Test
+    void testUnmarshalSecurelyWithStax() throws Exception {
+        try (InputStream xmlStream = new ByteArrayInputStream("<myJaxbModel/>".getBytes(StandardCharsets.UTF_8))) {
+            assertNotNull(new JaxbTest().unmarshalSecurelyWithStax(xmlStream));
+        }
     }
 
     public MyJaxbModel unmarshalSecurelyWithSax(final InputStream xmlStream) throws Exception {
