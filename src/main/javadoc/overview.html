@@ -532,8 +532,8 @@ factory.setXMLResolver((publicID, systemID, baseURI, namespace) -&gt; {
     </h1>
     This section shows you how to secure XML parsing and JAXB unmarshalling.
     <p>
-      By default, JAXB unmarshallers do not disable External Entity resolution (XXE) or Billion Laughs denial-of-service vulnerabilities. Below are the two
-      recommended approaches for integrating <strong>Apache Commons Secure XML</strong> to harden your unmarshalling pipeline.
+      JAXB does not provide a portable guarantee that external entity resolution is disabled or that Billion Laughs entity-expansion payloads are bounded by default.
+      Below are the two recommended approaches for integrating <strong>Apache Commons Secure XML</strong> to harden your unmarshalling pipeline.
     </p>
     <h2>Option 1: SAX-based Secure Unmarshalling (Recommended)</h2>
     <p>
@@ -557,7 +557,9 @@ public MyJaxbModel unmarshalSecurelyWithSax(InputStream xmlStream) throws Except
     XMLReader xmlReader = spf.newSAXParser().getXMLReader();
     SAXSource source = new SAXSource(xmlReader, new InputSource(xmlStream));
 
-    // Safe from XXE injection and entity-expansion DoS attacks
+    // With the default resolver configuration, external DTDs and entities are prevented from being fetched or resolved, protecting against XXE attacks, protecting against XXE attacks.
+    // Entity-expansion limits use FEATURE_SECURE_PROCESSING on JDK parsers;
+    // Android support is implementation-dependent and best-effort.
     return (MyJaxbModel) unmarshaller.unmarshal(source);
 }
 </pre>
@@ -581,7 +583,9 @@ public MyJaxbModel unmarshalSecurelyWithStax(InputStream xmlStream) throws Excep
     XMLStreamReader xmlReader = xif.createXMLStreamReader(xmlStream);
 
     try {
-        // Safe from XXE injection and entity-expansion DoS attacks
+        // With the default resolver configuration, external DTDs and entities are prevented from being fetched or resolved, protecting against XXE attacks, protecting against XXE attacks.
+        // Entity-expansion protection is implementation-dependent and best-effort
+        // because StAX exposes no secure-processing feature.
         return (MyJaxbModel) unmarshaller.unmarshal(xmlReader);
     } finally {
         xmlReader.close();

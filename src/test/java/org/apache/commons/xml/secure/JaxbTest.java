@@ -38,7 +38,7 @@ import org.xml.sax.XMLReader;
 /**
  * Tests JAXB integration.
  * <p>
- * This class' two public methods server as examples for the Javadoc {@code overview.html} file.
+ * This class' two public methods serve as examples for the Javadoc {@code overview.html} file.
  * </p>
  */
 public class JaxbTest {
@@ -70,7 +70,9 @@ public class JaxbTest {
         // Generate a hardened XMLReader and wrap the input source
         final XMLReader xmlReader = spf.newSAXParser().getXMLReader();
         final SAXSource source = new SAXSource(xmlReader, new InputSource(xmlStream));
-        // Safe from XXE injection and entity-expansion DoS attacks
+        // With the default resolver configuration, external DTDs and entities are prevented from being fetched or resolved, protecting against XXE attacks, protecting against XXE attacks.
+        // Entity-expansion limits use FEATURE_SECURE_PROCESSING on JDK parsers;
+        // Android support is implementation-dependent and best-effort.
         return (MyJaxbModel) unmarshaller.unmarshal(source);
     }
 
@@ -82,7 +84,9 @@ public class JaxbTest {
         // Create a hardened cursor reader
         final XMLStreamReader xmlReader = xif.createXMLStreamReader(xmlStream);
         try {
-            // Safe from XXE injection and entity-expansion DoS attacks
+            // With the default resolver configuration, external DTDs and entities are prevented from being fetched or resolved, protecting against XXE attacks, protecting against XXE attacks.
+            // Entity-expansion protection is implementation-dependent and best-effort
+            // because StAX exposes no secure-processing feature.
             return (MyJaxbModel) unmarshaller.unmarshal(xmlReader);
         } finally {
             xmlReader.close();
