@@ -26,8 +26,8 @@ limitations under the License.
       <img src="org/apache/commons/xml/secure/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">Apache Commons Secure XML
     </h1>
     <p>
-      <a href="https://commons.apache.org/proper/commons-secure-xml/">Apache Commons Secure XML</a> is part of the <a
-        href="https://commons.apache.org/index.html">Apache Commons</a> project.
+      <a href="https://commons.apache.org/proper/commons-secure-xml/">Apache Commons Secure XML</a> is part of the
+      <a href="https://commons.apache.org/index.html">Apache Commons</a> project.
     </p>
     <p>Apache Commons Secure XML provides secure-by-default JAXP factory creation, abstracting over implementation-specific XXE securing differences between
       the stock JDK and external JAXP implementations.</p>
@@ -81,8 +81,8 @@ limitations under the License.
       different set, and setting an unknown one throws an exception that callers routinely swallow. Writing this block correctly for every implementation is
       real work, and duplicating it across projects means every project owns the maintenance burden on its own.</p>
     <p>
-      Defaults are also uneven. The stock JDK SAX and DOM parsers already prevent external entity resolution through <a
-        href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/XMLConstants.html#FEATURE_SECURE_PROCESSING"><code>FEATURE_SECURE_PROCESSING</code></a>,
+      Defaults are also uneven. The stock JDK SAX and DOM parsers already prevent external entity resolution through 
+      <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/XMLConstants.html#FEATURE_SECURE_PROCESSING"><code>FEATURE_SECURE_PROCESSING</code></a>,
       and implementations conforming to JAXP 1.5 ship reasonable defaults for most attacks. Others, such as standalone Xerces, Woodstox, or Saxon’s TrAX, need
       further configuration before they reach the same baseline. A library author has no control over which implementation is on the classpath at runtime, so
       the effective security posture of their code depends on a deployment decision made elsewhere.
@@ -240,8 +240,8 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         the library respects it:</p>
       <ul>
         <li>Stock JDK factories use the JDK parsers by default, and expose the <code>jdk.xml.overrideDefaultParser</code> feature (and Java system property
-          of the same name) to switch to parsers instantiated through <a
-          href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ServiceLoader.html"><code>ServiceLoader</code></a>.
+          of the same name) to switch to parsers instantiated through 
+          <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/ServiceLoader.html"><code>ServiceLoader</code></a>.
         </li>
         <li>Saxon selects its parsers through its own configuration.</li>
       </ul>
@@ -291,8 +291,8 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         or <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/sax/SAXSource.html"><code>SAXSource</code></a>. A stylesheet
         also chooses where the transform writes (
         <code>xsl:result-document</code>
-        ): the securing governs reads only, so restrict output destinations yourself when running an untrusted stylesheet (see the <a
-          href="../threat_model.html">Threat Model</a>).
+        ): the securing governs reads only, so restrict output destinations yourself when running an untrusted stylesheet (see the
+        <a href="../threat_model.html">Threat Model</a>).
       </p>
     </section>
     <section id="transformer-handlers-and-filters">
@@ -341,11 +341,11 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
       <li>Set a stricter feature on the factory, for example, <code>http://apache.org/xml/features/disallow-doctype-decl</code> to reject every document
         carrying a DOCTYPE, on implementations that support the feature.
       </li>
-      <li>Install a resolver that throws. A caller-supplied <a
-        href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/org/xml/sax/EntityResolver.html"><code>EntityResolver</code></a>, <a
-        href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/stream/XMLResolver.html"><code>XMLResolver</code></a>, <a
-        href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/org/w3c/dom/ls/LSResourceResolver.html"><code>LSResourceResolver</code></a> or <a
-        href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/URIResolver.html"><code>URIResolver</code></a> is consulted before
+      <li>Install a resolver that throws. A caller-supplied
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/org/xml/sax/EntityResolver.html"><code>EntityResolver</code></a>,
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/stream/XMLResolver.html"><code>XMLResolver</code></a>,
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/org/w3c/dom/ls/LSResourceResolver.html"><code>LSResourceResolver</code></a> or
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/transform/URIResolver.html"><code>URIResolver</code></a> is consulted before
         the securing floor, so an allow-list and a deny-all are both one resolver away.
       </li>
     </ul>
@@ -363,8 +363,9 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         fetch, because those properties do not apply to a resolved result.</p>
       <p>
         <strong>DTDs, external entities, and <code>xi:include</code> targets
-        </strong> on <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/parsers/DocumentBuilder.html"><code>DocumentBuilder</code></a> and <a
-          href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/org/xml/sax/XMLReader.html"><code>XMLReader</code></a>, via
+        </strong> on
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/parsers/DocumentBuilder.html"><code>DocumentBuilder</code></a> and
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/org/xml/sax/XMLReader.html"><code>XMLReader</code></a>, via
         <code>EntityResolver</code>
         . An <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/org/xml/sax/InputSource.html"><code>InputSource</code></a> carrying only the
         system identifier is the shortest way to allow one: the parser opens it itself.
@@ -383,9 +384,10 @@ builder.setEntityResolver((publicId, systemId) -&gt; ALLOWED.contains(systemId) 
       <p>
         <strong>Every fetch on the schema path</strong> on
         <code>SchemaFactory</code>
-        , <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/validation/Schema.html"><code>Schema</code></a>, <a
-          href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/validation/Validator.html"><code>Validator</code></a> and <a
-          href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/validation/ValidatorHandler.html"><code>ValidatorHandler</code></a>, via
+        ,
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/validation/Schema.html"><code>Schema</code></a>,
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/validation/Validator.html"><code>Validator</code></a> and
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/validation/ValidatorHandler.html"><code>ValidatorHandler</code></a>, via
         <code>LSResourceResolver</code>
         . This one resolver answers for the schema documents a schema pulls in (
         <code>xs:include</code>
@@ -395,9 +397,10 @@ builder.setEntityResolver((publicId, systemId) -&gt; ALLOWED.contains(systemId) 
         <code>xsi:schemaLocation</code>
         hints) and for the DTD and the external entities of the instance document being validated. The
         <code>type</code>
-        argument tells them apart, as DOM Level 3 Load and Save prescribes: <a
-          href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/XMLConstants.html#W3C_XML_SCHEMA_NS_URI"><code>XMLConstants.W3C_XML_SCHEMA_NS_URI</code></a>
-        for a schema document, <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/XMLConstants.html#XML_DTD_NS_URI"><code>XMLConstants.XML_DTD_NS_URI</code></a>
+        argument tells them apart, as DOM Level 3 Load and Save prescribes:
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/XMLConstants.html#W3C_XML_SCHEMA_NS_URI"><code>XMLConstants.W3C_XML_SCHEMA_NS_URI</code></a>
+        for a schema document,
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/XMLConstants.html#XML_DTD_NS_URI"><code>XMLConstants.XML_DTD_NS_URI</code></a>
         for a DTD or an entity. A schema references its neighbors using relative URIs, so resolve the system identifier against the base URI before matching it.
       </p>
       <div class="sourceCode" id="cb8">
@@ -465,10 +468,10 @@ factory.setURIResolver((href, base) -&gt; {
         <code>XMLInputFactory</code>
         , via
         <code>XMLResolver</code>
-        . This is the one resolver that has to open the resource itself: it must return an <a
-          href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/InputStream.html"><code>InputStream</code></a>, an <a
-          href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/stream/XMLStreamReader.html"><code>XMLStreamReader</code></a> or an <a
-          href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/stream/XMLEventReader.html"><code>XMLEventReader</code></a>, and any other
+        . This is the one resolver that has to open the resource itself: it must return an
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/io/InputStream.html"><code>InputStream</code></a>, an
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/stream/XMLStreamReader.html"><code>XMLStreamReader</code></a> or an
+        <a href="https://docs.oracle.com/en/java/javase/25/docs/api/java.xml/javax/xml/stream/XMLEventReader.html"><code>XMLEventReader</code></a>, and any other
         type is silently ignored (the stock JDK then falls back to fetching the identifier the document declared, not the one you returned).
       </p>
       <div class="sourceCode" id="cb10">
@@ -506,8 +509,8 @@ factory.setXMLResolver((publicID, systemID, baseURI, namespace) -&gt; {
       <code>accessExternalSchema</code>
       ,
       <code>accessExternalStylesheet</code>
-      ). The two mechanisms are not interchangeable: by <a
-        href="https://docs.oracle.com/en/java/javase/21/security/java-api-xml-processing-jaxp-security-guide.html">specification</a>, the external-access
+      ). The two mechanisms are not interchangeable: by
+      <a href="https://docs.oracle.com/en/java/javase/21/security/java-api-xml-processing-jaxp-security-guide.html">specification</a>, the external-access
       properties have no effect when a registered resolver returns a non-null source, so a resolver takes precedence over the properties on every conforming
       implementation. Beyond that ordering, three defects make the properties unfit as the basis of the securing:
     </p>
@@ -522,8 +525,8 @@ factory.setXMLResolver((publicID, systemID, baseURI, namespace) -&gt; {
     <p>
       The first and third defects fail closed: a legitimately resolved document is denied, never fetched. They therefore break resolver-based applications
       without weakening the securing; the second fails open and would leave a real fetch channel unguarded. A resolver floor has neither problem: it covers
-      every channel on every supported implementation, and it yields to a caller’s resolver without consulting the properties. The <a
-        href="../threat_model.html">Threat Model</a> documents the resulting contract.
+      every channel on every supported implementation, and it yields to a caller’s resolver without consulting the properties. The
+      <a href="../threat_model.html">Threat Model</a> documents the resulting contract.
     </p>
   </section>
   <section id="openrewrite-recipe">
