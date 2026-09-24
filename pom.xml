@@ -73,6 +73,9 @@ limitations under the License.
     <commons.xerces.version>2.12.2</commons.xerces.version>
     <!-- Test-only: computes each secure class's shade closure, mirroring maven-shade minimizeJar, for ShadingFootprintTest. -->
     <commons.jdependency.version>2.16</commons.jdependency.version>
+    <!-- Test-only JAXB dependencies. -->
+    <commons.jaxb.api.version>2.3.1</commons.jaxb.api.version>
+    <commons.jaxb.runtime.version>2.3.9</commons.jaxb.runtime.version>
     <!--
       jacoco-maven-plugin: Should only get better.
 
@@ -120,13 +123,13 @@ limitations under the License.
     <dependency>
       <groupId>javax.xml.bind</groupId>
       <artifactId>jaxb-api</artifactId>
-      <version>2.3.1</version>
+      <version>${commons.jaxb.api.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.glassfish.jaxb</groupId>
       <artifactId>jaxb-runtime</artifactId>
-      <version>2.3.9</version>
+      <version>${commons.jaxb.runtime.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
