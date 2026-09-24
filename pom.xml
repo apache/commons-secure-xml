@@ -116,6 +116,13 @@ limitations under the License.
       <version>${commons.jdependency.version}</version>
       <scope>test</scope>
     </dependency>
+    <!-- JAXB examples. -->
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+      <version>2.3.1</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <defaultGoal>clean checkstyle:check spotbugs:check pmd:check javadoc:javadoc verify</defaultGoal>
