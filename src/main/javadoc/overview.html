@@ -19,6 +19,38 @@ limitations under the License.
 <title>Apache Commons Secure XML Overview</title>
 </head>
 <body>
+  <nav id="toc" aria-labelledby="toc-heading">
+    <h1 id="toc-heading">Contents</h1>
+    <ul>
+      <li><a href="#apache-commons-secure-xml">Apache Commons Secure XML</a></li>
+      <li><a href="#tldr">TL;DR</a></li>
+      <li><a href="#why">Why</a></li>
+      <li><a href="#usage">Usage</a>
+        <ul>
+          <li><a href="#supported-runtimes">Supported Runtimes</a></li>
+          <li><a href="#supported-implementations">Supported Implementations</a></li>
+          <li><a href="#wrappers-not-the-original-factories">Wrappers, not the Original Factories</a></li>
+          <li><a href="#factory-methods">Factory Methods</a></li>
+          <li><a href="#stylesheets-and-schemas">Stylesheets and Schemas</a></li>
+          <li><a href="#transformer-handlers-and-filters">Transformer Handlers and Filters</a></li>
+          <li><a href="#caching-and-thread-safety">Caching and Thread Safety</a></li>
+        </ul>
+      </li>
+      <li><a href="#configuration">Configuration</a>
+        <ul>
+          <li><a href="#resolvers">Resolvers</a></li>
+        </ul>
+      </li>
+      <li><a href="#external-access-properties">Why Not the JAXP 1.5 External-Access Properties</a></li>
+      <li><a href="#jaxb">Migrating JAXB</a>
+        <ul>
+          <li><a href="#jaxb-sax">Option 1: SAX-based Secure Unmarshalling</a></li>
+          <li><a href="#jaxb-stax">Option 2: StAX-based Secure Unmarshalling</a></li>
+        </ul>
+      </li>
+      <li><a href="#openrewrite-recipe">Migrating to Apache Commons Secure XML with OpenRewrite</a></li>
+    </ul>
+  </nav>
   <a href="https://commons.apache.org/proper/commons-secure-xml/"><img src="org/apache/commons/xml/secure/doc-files/logo.png"
     alt="Apache Commons Secure XML"> </a>
   <section id="apache-commons-secure-xml">
@@ -538,7 +570,7 @@ factory.setXMLResolver((publicID, systemID, baseURI, namespace) -&gt; {
       JAXB does not provide a portable guarantee that external entity resolution is disabled or that Billion Laughs entity-expansion payloads are bounded by default.
       Below are the two recommended approaches for integrating <strong>Apache Commons Secure XML</strong> to harden your unmarshalling pipeline.
     </p>
-    <h2>Option 1: SAX-based Secure Unmarshalling (Recommended)</h2>
+    <h2 id="jaxb-sax">Option 1: SAX-based Secure Unmarshalling (Recommended)</h2>
     <p>
       This approach uses
       <code>SecureSAXParserFactory</code>
@@ -566,7 +598,7 @@ public MyJaxbModel unmarshalSecurelyWithSax(InputStream xmlStream) throws Except
     return (MyJaxbModel) unmarshaller.unmarshal(source);
 }
 </pre>
-    <h2>Option 2: StAX-based Secure Unmarshalling</h2>
+    <h2 id="jaxb-stax">Option 2: StAX-based Secure Unmarshalling</h2>
     <p>
       This approach uses
       <code>SecureXMLInputFactory</code>
