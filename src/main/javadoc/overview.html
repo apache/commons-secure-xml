@@ -529,6 +529,73 @@ factory.setXMLResolver((publicID, systemID, baseURI, namespace) -&gt; {
       <a href="../threat_model.html">Threat Model</a> documents the resulting contract.
     </p>
   </section>
+  <section id="jaxb">
+    <h1>
+      <img src="org/apache/commons/xml/secure/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">Migrating JAXB
+    </h1>
+    This section shows you how to secure XML parsing and JAXB unmarshalling.
+    <p>
+      JAXB does not provide a portable guarantee that external entity resolution is disabled or that Billion Laughs entity-expansion payloads are bounded by default.
+      Below are the two recommended approaches for integrating <strong>Apache Commons Secure XML</strong> to harden your unmarshalling pipeline.
+    </p>
+    <h2>Option 1: SAX-based Secure Unmarshalling (Recommended)</h2>
+    <p>
+      This approach uses
+      <code>SecureSAXParserFactory</code>
+      to construct a hardened, secure
+      <code>XMLReader</code>
+      which is then wrapped inside a
+      <code>SAXSource</code>
+      .
+    </p>
+    <pre>
+public MyJaxbModel unmarshalSecurelyWithSax(InputStream xmlStream) throws Exception {
+    JAXBContext context = JAXBContext.newInstance(MyJaxbModel.class);
+    Unmarshaller unmarshaller = context.createUnmarshaller();
+
+    // Create a secure SAXParserFactory via Apache Commons Secure XML
+    SAXParserFactory spf = SecureSAXParserFactory.newDefaultNSInstance();
+    
+    // Generate a hardened XMLReader and wrap the input source
+    XMLReader xmlReader = spf.newSAXParser().getXMLReader();
+    SAXSource source = new SAXSource(xmlReader, new InputSource(xmlStream));
+
+    // With the default resolver configuration, external DTDs and entities are prevented from being fetched or resolved, protecting against XXE attacks, protecting against XXE attacks.
+    // Entity-expansion limits use FEATURE_SECURE_PROCESSING on JDK parsers;
+    // Android support is implementation-dependent and best-effort.
+    return (MyJaxbModel) unmarshaller.unmarshal(source);
+}
+</pre>
+    <h2>Option 2: StAX-based Secure Unmarshalling</h2>
+    <p>
+      This approach uses
+      <code>SecureXMLInputFactory</code>
+      to instantiate a secure
+      <code>XMLStreamReader</code>
+      cursor stream.
+    </p>
+    <pre>
+public MyJaxbModel unmarshalSecurelyWithStax(InputStream xmlStream) throws Exception {
+    JAXBContext context = JAXBContext.newInstance(MyJaxbModel.class);
+    Unmarshaller unmarshaller = context.createUnmarshaller();
+
+    // Create a secure XMLInputFactory via Apache Commons Secure XML
+    XMLInputFactory xif = SecureXMLInputFactory.newDefaultFactory();
+    
+    // Create a hardened cursor reader
+    XMLStreamReader xmlReader = xif.createXMLStreamReader(xmlStream);
+
+    try {
+        // With the default resolver configuration, external DTDs and entities are prevented from being fetched or resolved, protecting against XXE attacks, protecting against XXE attacks.
+        // Entity-expansion protection is implementation-dependent and best-effort
+        // because StAX exposes no secure-processing feature.
+        return (MyJaxbModel) unmarshaller.unmarshal(xmlReader);
+    } finally {
+        xmlReader.close();
+    }
+}
+</pre>
+  </section>
   <section id="openrewrite-recipe">
     <h1>
       <img src="org/apache/commons/xml/secure/doc-files/leaf.svg" style="height: 1em; padding-right: 0.25em" alt="leaf">Migrating to Apache Commons Secure

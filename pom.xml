@@ -73,6 +73,9 @@ limitations under the License.
     <commons.xerces.version>2.12.2</commons.xerces.version>
     <!-- Test-only: computes each secure class's shade closure, mirroring maven-shade minimizeJar, for ShadingFootprintTest. -->
     <commons.jdependency.version>2.16</commons.jdependency.version>
+    <!-- Test-only JAXB dependencies. -->
+    <commons.jaxb.api.version>2.3.1</commons.jaxb.api.version>
+    <commons.jaxb.runtime.version>2.3.9</commons.jaxb.runtime.version>
     <!--
       jacoco-maven-plugin: Should only get better.
 
@@ -114,6 +117,19 @@ limitations under the License.
       <groupId>org.vafer</groupId>
       <artifactId>jdependency</artifactId>
       <version>${commons.jdependency.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- JAXB examples. -->
+    <dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+      <version>${commons.jaxb.api.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-runtime</artifactId>
+      <version>${commons.jaxb.runtime.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -716,6 +732,9 @@ limitations under the License.
               <buildArgs>
                 <!-- The JUnit platform feature discovers tests while the image is built, which initializes TestTag. -->
                 <buildArg>--initialize-at-build-time=org.junit.platform.engine.TestTag</buildArg>
+                <!-- LocatorImpl has no static fields or initializer and is safe to retain in the image heap. -->
+                <buildArg>--initialize-at-build-time=org.xml.sax.helpers.LocatorImpl</buildArg>
+                <buildArg>--initialize-at-build-time=org.xml.sax.helpers.DefaultHandler</buildArg>
                 <!-- Embed the fixtures explicitly: the agent records only resources a run actually opened. -->
                 <buildArg>-H:IncludeResources=leaked/.*</buildArg>
               </buildArgs>

@@ -103,9 +103,9 @@ android {
     }
 }
 
-// ShadingFootprintTest is a JVM-only build check (it uses jdependency to read target/classes); exclude it from the Android test compile.
+// These are JVM-only test classes; exclude them from the Android test compile.
 tasks.withType<JavaCompile>().configureEach {
-    exclude("**/ShadingFootprintTest.java")
+    exclude("**/ShadingFootprintTest.java", "**/JaxbTest.java")
 }
 
 // Skip JAXP groups whose factories Android does not ship
