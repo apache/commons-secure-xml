@@ -272,6 +272,7 @@ public final class SecureDocumentBuilderFactory {
      *                                   create a builder.
      * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
      *                                   implementation is not available or cannot be instantiated.
+     * @since 1.1.0
      */
     public static DocumentBuilder newDocumentBuilder() {
         return newDocumentBuilder(newInstance());
@@ -319,6 +320,7 @@ public final class SecureDocumentBuilderFactory {
      *                                   create a builder.
      * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
      *                                   implementation is not available or cannot be instantiated.
+     * @since 1.1.0
      */
     public static DocumentBuilder newNSDocumentBuilder() {
         return newDocumentBuilder(newNSInstance());
