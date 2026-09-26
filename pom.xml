@@ -24,7 +24,7 @@ limitations under the License.
     <version>105</version>
   </parent>
   <artifactId>commons-secure-xml</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.1.0-SNAPSHOT</version>
   <name>Apache Commons Secure XML</name>
   <url>https://commons.apache.org/proper/commons-secure-xml/</url>
   <inceptionYear>2026</inceptionYear>
@@ -40,11 +40,11 @@ limitations under the License.
   <properties>
     <!-- Release-related properties -->
     <commons.main.branch>main</commons.main.branch>
-    <commons.release.version>1.0.1</commons.release.version>
+    <commons.release.version>1.1.0</commons.release.version>
     <commons.release.desc>(Java 8+)</commons.release.desc>
     <commons.rc.version>RC1</commons.rc.version>
     <commons.bc.version>1.0.0</commons.bc.version>
-    <commons.release.next>1.0.2</commons.release.next>
+    <commons.release.next>1.1.1</commons.release.next>
     <commons.componentid>secure-xml</commons.componentid>
     <commons.packageId>secure-xml</commons.packageId>
     <commons.module.name>org.apache.commons.xml.secure</commons.module.name>

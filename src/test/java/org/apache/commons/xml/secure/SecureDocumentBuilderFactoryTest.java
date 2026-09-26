@@ -22,19 +22,59 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 
 import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledInNativeImage;
 
 @Tag("dom")
 class SecureDocumentBuilderFactoryTest {
+
+    /**
+     * Test JAXP provider that delegates builder creation to a Mockito mock.
+     */
+    public static final class MockDocumentBuilderFactory extends DocumentBuilderFactory {
+
+        private static DocumentBuilderFactory delegate;
+
+        @Override
+        public Object getAttribute(final String name) {
+            return null;
+        }
+
+        @Override
+        public boolean getFeature(final String name) {
+            return false;
+        }
+
+        @Override
+        public DocumentBuilder newDocumentBuilder() throws ParserConfigurationException {
+            return delegate.newDocumentBuilder();
+        }
+
+        @Override
+        public void setAttribute(final String name, final Object value) {
+            // no-op
+        }
+
+        @Override
+        public void setFeature(final String name, final boolean value) {
+            // no-op
+        }
+    }
 
     /**
      * System property naming the {@link DocumentBuilderFactory} implementation, the JVM's mechanism for reconfiguring the default parser.
@@ -76,6 +116,36 @@ class SecureDocumentBuilderFactoryTest {
         assertInstanceOf(SecureDocumentBuilder.class, SecureDocumentBuilderFactory.newDefaultInstance().newDocumentBuilder());
         assertInstanceOf(SecureDocumentBuilder.class, SecureDocumentBuilderFactory.newNSInstance().newDocumentBuilder());
         assertInstanceOf(SecureDocumentBuilder.class, SecureDocumentBuilderFactory.newDefaultNSInstance().newDocumentBuilder());
+    }
+
+    @Test
+    void createsBuildersDirectly() {
+        final DocumentBuilder builder = SecureDocumentBuilderFactory.newDocumentBuilder();
+        final DocumentBuilder nsBuilder = SecureDocumentBuilderFactory.newNSDocumentBuilder();
+        assertFalse(builder.isNamespaceAware());
+        assertTrue(nsBuilder.isNamespaceAware());
+        if (AttackTestSupport.DOM_RESOLVES_INTERNAL_ENTITIES) {
+            assertInstanceOf(SecureDocumentBuilder.class, builder);
+            assertInstanceOf(SecureDocumentBuilder.class, nsBuilder);
+        }
+    }
+
+    @Test
+    // Mockito generates the mock classes and its plugin proxies at run time, which a closed-world native image cannot do.
+    @DisabledInNativeImage
+    void newDocumentBuilderWrapsDeclaredExceptions() throws Exception {
+        Assumptions.assumeFalse(AttackTestSupport.IS_ANDROID, "Skipped on Android: parser selection is pinned to the platform implementation");
+        final String previous = setFactoryIdProperty(MockDocumentBuilderFactory.class.getName());
+        try {
+            final ParserConfigurationException cause = new ParserConfigurationException("test");
+            MockDocumentBuilderFactory.delegate = mock(DocumentBuilderFactory.class);
+            when(MockDocumentBuilderFactory.delegate.newDocumentBuilder()).thenThrow(cause);
+            assertSame(cause, assertThrows(IllegalStateException.class, SecureDocumentBuilderFactory::newDocumentBuilder).getCause());
+            assertSame(cause, assertThrows(IllegalStateException.class, SecureDocumentBuilderFactory::newNSDocumentBuilder).getCause());
+        } finally {
+            setFactoryIdProperty(previous);
+            MockDocumentBuilderFactory.delegate = null;
+        }
     }
 
     @Test

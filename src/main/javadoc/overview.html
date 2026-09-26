@@ -174,7 +174,7 @@ limitations under the License.
 import org.w3c.dom.Document;
 import org.apache.commons.xml.secure.SecureDocumentBuilderFactory;
 
-Document doc = SecureDocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputStream);
+Document doc = SecureDocumentBuilderFactory.newNSDocumentBuilder().parse(inputStream);
       </code>
     </pre>
       </div>
@@ -187,8 +187,13 @@ Document doc = SecureDocumentBuilderFactory.newInstance().newDocumentBuilder().p
         <pre class="sourceCode java">
       <code class="sourceCode java">
 import org.apache.commons.xml.secure.SecureSAXParserFactory;
+import org.xml.sax.InputSource;
 
-SecureSAXParserFactory.newInstance().newSAXParser().parse(inputStream, myDefaultHandler);
+// With a SAXParser and a DefaultHandler
+SecureSAXParserFactory.newNSSAXParser().parse(inputStream, myDefaultHandler);
+
+// With an XMLReader and a ContentHandler
+SecureSAXParserFactory.newNSXMLReader(myContentHandler).parse(new InputSource(inputStream));
       </code>
     </pre>
       </div>
@@ -308,6 +313,17 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
         suits a library with minimal XML requirements, which can parse with the well-known platform parser rather than delegate the choice of implementation to
         the application developer.
       </p>
+      <p>
+        Most callers never configure the factory: they want a parser.
+        For them, the DOM and SAX factory classes add helpers that return one directly,
+        in a plain and a namespace-aware flavor built on <code>newInstance()</code> and <code>newNSInstance()</code>:
+        <code>newDocumentBuilder()</code> and <code>newNSDocumentBuilder()</code>,
+        <code>newSAXParser()</code> and <code>newNSSAXParser()</code>,
+        and <code>newXMLReader(ContentHandler)</code> and <code>newNSXMLReader(ContentHandler)</code>,
+        which register the given handler, if any, on the reader.
+        They report a parser the configured factory fails to create as an unchecked <code>IllegalStateException</code>,
+        since a supported implementation rejects a setting when it is set, not when a parser is built.
+      </p>
     </section>
     <section id="stylesheets-and-schemas">
       <h2>Stylesheets and Schemas</h2>
@@ -350,10 +366,18 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
     <section id="caching-and-thread-safety">
       <h2>Caching and Thread Safety</h2>
       <p>
-        There is no caching or pooling inside
-        <code>org.apache.commons.xml.secure</code>
-        ; callers on a hot path are responsible for their own caching. The returned factories inherit the thread-safety properties of the underlying JAXP
-        implementation, which in practice means they are not thread-safe. Create a new factory per thread or synchronize externally.
+        There is no caching or pooling inside <code>org.apache.commons.xml.secure</code>;
+        callers on a hot path are responsible for their own caching.
+        The returned factories inherit the thread-safety properties of the underlying JAXP implementation,
+        which in practice means they are not thread-safe.
+        Create a new factory per thread or synchronize externally.
+      </p>
+      <p>
+        To parse many documents, reuse the parser rather than the factory.
+        Creating and securing a factory costs a fixed few microseconds per call, and creating a parser from it costs about as much again;
+        both are noticeable only for tiny documents.
+        Keeping a <code>DocumentBuilder</code> or <code>SAXParser</code> and calling its <code>reset()</code> method between documents saves both,
+        and <code>reset()</code> itself costs next to nothing while keeping handler state from leaking between parses.
       </p>
     </section>
   </section>
