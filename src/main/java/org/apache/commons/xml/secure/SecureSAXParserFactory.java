@@ -322,6 +322,7 @@ public final class SecureSAXParserFactory {
      *                                   create a parser.
      * @throws FactoryConfigurationError Thrown from {@link SAXParserFactory} in case of a {@link java.util.ServiceConfigurationError service configuration
      *                                   error} or if the implementation is not available or cannot be instantiated.
+     * @since 1.1.0
      */
     public static SAXParser newNSSAXParser() {
         return newSAXParser(newNSInstance());
@@ -341,6 +342,7 @@ public final class SecureSAXParserFactory {
      *                                   create a reader.
      * @throws FactoryConfigurationError Thrown from {@link SAXParserFactory} in case of a {@link java.util.ServiceConfigurationError service configuration
      *                                   error} or if the implementation is not available or cannot be instantiated.
+     * @since 1.1.0
      */
     public static XMLReader newNSXMLReader(final ContentHandler handler) {
         return newXMLReader(newNSInstance(), handler);
@@ -362,6 +364,7 @@ public final class SecureSAXParserFactory {
      *                                   create a parser.
      * @throws FactoryConfigurationError Thrown from {@link SAXParserFactory} in case of a {@link java.util.ServiceConfigurationError service configuration
      *                                   error} or if the implementation is not available or cannot be instantiated.
+     * @since 1.1.0
      */
     public static SAXParser newSAXParser() {
         return newSAXParser(newInstance());
@@ -400,6 +403,7 @@ public final class SecureSAXParserFactory {
      *                                   create a reader.
      * @throws FactoryConfigurationError Thrown from {@link SAXParserFactory} in case of a {@link java.util.ServiceConfigurationError service configuration
      *                                   error} or if the implementation is not available or cannot be instantiated.
+     * @since 1.1.0
      */
     public static XMLReader newXMLReader(final ContentHandler handler) {
         return newXMLReader(newInstance(), handler);
