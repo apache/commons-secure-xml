@@ -120,13 +120,10 @@ class SecureDocumentBuilderFactoryTest {
 
     @Test
     void createsBuildersDirectly() {
-        final DocumentBuilder builder = SecureDocumentBuilderFactory.newDocumentBuilder();
-        final DocumentBuilder nsBuilder = SecureDocumentBuilderFactory.newNSDocumentBuilder();
-        assertFalse(builder.isNamespaceAware());
-        assertTrue(nsBuilder.isNamespaceAware());
+        final DocumentBuilder builder = SecureDocumentBuilderFactory.newNSDocumentBuilder();
+        assertTrue(builder.isNamespaceAware());
         if (AttackTestSupport.DOM_RESOLVES_INTERNAL_ENTITIES) {
             assertInstanceOf(SecureDocumentBuilder.class, builder);
-            assertInstanceOf(SecureDocumentBuilder.class, nsBuilder);
         }
     }
 
@@ -140,7 +137,6 @@ class SecureDocumentBuilderFactoryTest {
             final ParserConfigurationException cause = new ParserConfigurationException("test");
             MockDocumentBuilderFactory.delegate = mock(DocumentBuilderFactory.class);
             when(MockDocumentBuilderFactory.delegate.newDocumentBuilder()).thenThrow(cause);
-            assertSame(cause, assertThrows(IllegalStateException.class, SecureDocumentBuilderFactory::newDocumentBuilder).getCause());
             assertSame(cause, assertThrows(IllegalStateException.class, SecureDocumentBuilderFactory::newNSDocumentBuilder).getCause());
         } finally {
             setFactoryIdProperty(previous);

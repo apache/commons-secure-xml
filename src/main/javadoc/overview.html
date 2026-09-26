@@ -315,12 +315,12 @@ SecureSchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
       </p>
       <p>
         Most callers never configure the factory: they want a parser.
-        For them, the DOM and SAX factory classes add helpers that return one directly,
-        in a plain and a namespace-aware flavor built on <code>newInstance()</code> and <code>newNSInstance()</code>:
-        <code>newDocumentBuilder()</code> and <code>newNSDocumentBuilder()</code>,
-        <code>newSAXParser()</code> and <code>newNSSAXParser()</code>,
-        and <code>newXMLReader(ContentHandler)</code> and <code>newNSXMLReader(ContentHandler)</code>,
-        which register the given handler, if any, on the reader.
+        For them, the DOM and SAX factory classes add helpers that return a namespace-aware one directly,
+        built on <code>newNSInstance()</code>:
+        <code>newNSDocumentBuilder()</code>,
+        <code>newNSSAXParser()</code>,
+        and <code>newNSXMLReader()</code>, with an overload taking the <code>ContentHandler</code> to register on the reader.
+        A caller that needs a parser without namespace awareness, or any other setting, configures the factory instead.
         They report a parser the configured factory fails to create as an unchecked <code>IllegalStateException</code>,
         since a supported implementation rejects a setting when it is set, not when a parser is built.
       </p>

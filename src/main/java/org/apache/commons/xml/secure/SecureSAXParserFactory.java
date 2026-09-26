@@ -325,7 +325,31 @@ public final class SecureSAXParserFactory {
      * @since 1.1.0
      */
     public static SAXParser newNSSAXParser() {
-        return newSAXParser(newNSInstance());
+        try {
+            return newNSInstance().newSAXParser();
+        } catch (final ParserConfigurationException | SAXException e) {
+            // Implementations reject settings when they are set on the factory, not here: a failure means a broken environment.
+            throw SecureException.creationFailed(SAXParser.class, e);
+        }
+    }
+
+    /**
+     * Creates a new, secure, namespace-aware {@link XMLReader} from {@link #newNSInstance()}, with no content handler registered.
+     * <p>
+     * No factory is cached: each call configures a fresh one. To parse many documents, keep the returned reader and parse each document with it. Reusing the
+     * reader saves more than caching the factory would. Handlers set on the reader stay set between parses, and a reader is not thread-safe, so reuse it within
+     * one thread.
+     * </p>
+     *
+     * @return A secure, namespace-aware reader.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation, or if the implementation cannot
+     *                                   create a reader.
+     * @throws FactoryConfigurationError Thrown from {@link SAXParserFactory} in case of a {@link java.util.ServiceConfigurationError service configuration
+     *                                   error} or if the implementation is not available or cannot be instantiated.
+     * @since 1.1.0
+     */
+    public static XMLReader newNSXMLReader() {
+        return newNSXMLReader(null);
     }
 
     /**
@@ -346,67 +370,6 @@ public final class SecureSAXParserFactory {
      */
     public static XMLReader newNSXMLReader(final ContentHandler handler) {
         return newXMLReader(newNSInstance(), handler);
-    }
-
-    /**
-     * Creates a new, secure {@link SAXParser} from {@link #newInstance()}.
-     * <p>
-     * The parser is not namespace-aware, as in JAXP; most callers want {@link #newNSSAXParser()}.
-     * </p>
-     * <p>
-     * No factory is cached: each call configures a fresh one. To parse many documents, keep the returned parser and call {@link SAXParser#reset()} between
-     * documents. Reusing the parser saves more than caching the factory would, and {@code reset()} costs next to nothing while keeping handler state from
-     * leaking between parses. A parser is not thread-safe, so reuse it within one thread.
-     * </p>
-     *
-     * @return A secure parser.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation, or if the implementation cannot
-     *                                   create a parser.
-     * @throws FactoryConfigurationError Thrown from {@link SAXParserFactory} in case of a {@link java.util.ServiceConfigurationError service configuration
-     *                                   error} or if the implementation is not available or cannot be instantiated.
-     * @since 1.1.0
-     */
-    public static SAXParser newSAXParser() {
-        return newSAXParser(newInstance());
-    }
-
-    /**
-     * Creates a new {@link SAXParser} from the given secure factory.
-     *
-     * @param factory The secure factory; never {@code null}.
-     * @return A secure parser.
-     * @throws IllegalStateException Thrown if the factory cannot create a parser.
-     */
-    private static SAXParser newSAXParser(final SAXParserFactory factory) {
-        try {
-            return factory.newSAXParser();
-        } catch (final ParserConfigurationException | SAXException e) {
-            // Implementations reject settings when they are set on the factory, not here: a failure means a broken environment.
-            throw SecureException.creationFailed(SAXParser.class, e);
-        }
-    }
-
-    /**
-     * Creates a new, secure {@link XMLReader} from {@link #newInstance()}.
-     * <p>
-     * The reader is not namespace-aware, as in JAXP; most callers want {@link #newNSXMLReader(ContentHandler)}.
-     * </p>
-     * <p>
-     * No factory is cached: each call configures a fresh one. To parse many documents, keep the returned reader and parse each document with it. Reusing the
-     * reader saves more than caching the factory would. Handlers set on the reader stay set between parses, and a reader is not thread-safe, so reuse it within
-     * one thread.
-     * </p>
-     *
-     * @param handler The content handler to register on the reader, or {@code null} to register none.
-     * @return A secure reader.
-     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation, or if the implementation cannot
-     *                                   create a reader.
-     * @throws FactoryConfigurationError Thrown from {@link SAXParserFactory} in case of a {@link java.util.ServiceConfigurationError service configuration
-     *                                   error} or if the implementation is not available or cannot be instantiated.
-     * @since 1.1.0
-     */
-    public static XMLReader newXMLReader(final ContentHandler handler) {
-        return newXMLReader(newInstance(), handler);
     }
 
     /**
