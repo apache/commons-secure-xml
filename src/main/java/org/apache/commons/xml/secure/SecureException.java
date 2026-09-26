@@ -26,7 +26,7 @@ package org.apache.commons.xml.secure;
  * <ul>
  *   <li>No bundled secure recipe matches the concrete factory class.</li>
  *   <li>A recipe tried to apply a secure setting and the implementation rejected it.</li>
- *   <li>The implementation could not provide the internal secure reader the Source-rewriting wrappers parse with.</li>
+ *   <li>The implementation could not provide a secure parser or reader from an already secured factory.</li>
  * </ul>
  *
  * <p>
@@ -79,18 +79,20 @@ final class SecureException extends IllegalStateException {
     }
 
     /**
-     * Builds the standard exception for a failure to provision an internal reader.
+     * Builds the standard exception for a failure to create a parser or reader from an already secured factory.
      *
      * <p>
-     * Every supported implementation provides a reader as a routine capability, so the wrapped {@code ParserConfigurationException} or
-     * {@code SAXException} signals a broken environment rather than a per-parse condition. The exception is therefore unchecked.
+     * Every supported implementation provides parsers and readers as a routine capability, and rejects an unsupported setting when it is set on the factory,
+     * not when a parser is built. The wrapped {@code ParserConfigurationException} or {@code SAXException} therefore signals a broken environment rather than
+     * a per-parse condition, so the exception is unchecked.
      * </p>
      *
+     * @param type  The type of the object that could not be created, such as {@code DocumentBuilder}, {@code SAXParser} or {@code XMLReader}.
      * @param cause The original checked exception from the JAXP implementation.
      * @return the exception to throw.
      */
-    static SecureException readerFailed(final Throwable cause) {
-        return new SecureException("Failed to create a secure XMLReader", cause);
+    static SecureException creationFailed(final Class<?> type, final Throwable cause) {
+        return new SecureException("Failed to create a secure " + type.getSimpleName(), cause);
     }
 
     /**

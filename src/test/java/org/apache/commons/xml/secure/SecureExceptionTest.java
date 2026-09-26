@@ -30,7 +30,7 @@ class SecureExceptionTest {
         final RuntimeException cause = new RuntimeException("cause");
         assertSame(cause, SecureException.featureFailed("feature", this, cause).getCause());
         assertTrue(SecureException.forbidden("type", "namespace", "public", "system", "base").contains("system"));
-        assertSame(cause, SecureException.readerFailed(cause).getCause());
+        assertSame(cause, SecureException.creationFailed(Object.class, cause).getCause());
         System.clearProperty(SecureException.THROW_ON_UNRESOLVED);
         assertFalse(SecureException.throwOnUnresolved());
         System.setProperty(SecureException.THROW_ON_UNRESOLVED, "true");

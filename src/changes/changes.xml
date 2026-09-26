@@ -31,7 +31,7 @@ The <action> type attribute can be add, update, fix, or remove.
     <title>Apache Commons Secure XML Changes</title>
   </properties>
   <body>
-    <release version="1.0.1" date="YYYY-MM-DD" description="Second release. Requires Java 8 or later.">
+    <release version="1.1.0" date="YYYY-MM-DD" description="Second release. Requires Java 8 or later.">
       <!-- FIX -->
       <action type="fix" dev="ggregory" due-to="Gary Gregory">Fix the OpenRewrite migration recipe to target static method calls instead of class references.</action>
       <action type="fix" dev="ggregory" due-to="Gary Gregory">Fix the OpenRewrite migration recipe to add a dependency on org.apache.commons:commons-secure-xml:1.0.0.</action>
@@ -42,6 +42,7 @@ The <action> type attribute can be add, update, fix, or remove.
       <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory">Report a stylesheet that produces no XMLFilter as a TransformerConfigurationException instead of returning null.</action>
       <action type="fix" dev="ggregory" due-to="Gary Gregory">General Javadoc and site documentation improvements.</action>
       <!-- ADD -->
+      <action type="add" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-18">Add helpers that return a secure, namespace-aware DocumentBuilder, SAXParser or XMLReader directly, without the factory.</action>
       <!-- UPDATE -->
       <action dev="ggregory" type="update" due-to="Gary Gregory">Bump org.apache.commons:commons-parent from 104 to 105.</action>
       <action dev="pkarwasz" type="update" due-to="Piotr P. Karwasz, Gary Gregory">Bump com.android.library from 8.6.1 to 9.4.0 in /android-tests.</action>

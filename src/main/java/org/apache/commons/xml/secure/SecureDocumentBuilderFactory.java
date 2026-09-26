@@ -270,6 +270,30 @@ public final class SecureDocumentBuilderFactory {
     }
 
     /**
+     * Creates a new, secure, namespace-aware {@link DocumentBuilder} from {@link #newNSInstance()}.
+     * <p>
+     * No factory is cached: each call configures a fresh one. To parse many documents, keep the returned builder and call {@link DocumentBuilder#reset()}
+     * between documents. Reusing the builder saves more than caching the factory would, and {@code reset()} costs next to nothing while keeping handler state
+     * from leaking between parses. A builder is not thread-safe, so reuse it within one thread.
+     * </p>
+     *
+     * @return A secure, namespace-aware builder.
+     * @throws IllegalStateException     Thrown if a required secure setting cannot be applied to the underlying implementation, or if the implementation cannot
+     *                                   create a builder.
+     * @throws FactoryConfigurationError Thrown from a factory in case of a {@link java.util.ServiceConfigurationError service configuration error} or if the
+     *                                   implementation is not available or cannot be instantiated.
+     * @since 1.1.0
+     */
+    public static DocumentBuilder newNSDocumentBuilder() {
+        try {
+            return newNSInstance().newDocumentBuilder();
+        } catch (final ParserConfigurationException e) {
+            // Implementations reject settings when they are set on the factory, not here: a failure means a broken environment.
+            throw SecureException.creationFailed(DocumentBuilder.class, e);
+        }
+    }
+
+    /**
      * Returns a new, secure, namespace-aware {@link DocumentBuilderFactory}, enabling namespace awareness on {@link #newInstance()}, the behavior
      * {@code DocumentBuilderFactory.newNSInstance()} (Java 13 or later) is specified to have.
      *

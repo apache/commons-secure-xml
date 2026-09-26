@@ -47,6 +47,7 @@ import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.DefaultHandler;
 
 @Tag("sax")
 public class SecureSAXParserFactoryTest {
@@ -79,16 +80,19 @@ public class SecureSAXParserFactoryTest {
      */
     private static final String FACTORY_ID = "javax.xml.parsers.SAXParserFactory";
 
+    private static final String NAMESPACES_FEATURE = "http://xml.org/sax/features/namespaces";
+
     /**
-     * Asserts {@link SecureSAXParserFactory#newXMLReader(boolean)} on the given delegate throws {@link IllegalStateException} with the given cause.
+     * Asserts every {@code newXMLReader} and {@code newNSXMLReader} method on the given delegate throws {@link IllegalStateException} with the given cause.
      *
      * @param cause    The checked exception the delegate is stubbed to throw.
      * @param delegate The stubbed factory to route {@link MockSAXParserFactory} to.
      */
     private static void assertNewXmlReaderWraps(final Exception cause, final SAXParserFactory delegate) {
         MockSAXParserFactory.delegate = delegate;
-        final IllegalStateException exception = assertThrows(IllegalStateException.class, () -> SecureSAXParserFactory.newXMLReader(false));
-        assertSame(cause, exception.getCause());
+        assertSame(cause, assertThrows(IllegalStateException.class, () -> SecureSAXParserFactory.newXMLReader(false)).getCause());
+        assertSame(cause, assertThrows(IllegalStateException.class, () -> SecureSAXParserFactory.newNSXMLReader()).getCause());
+        assertSame(cause, assertThrows(IllegalStateException.class, () -> SecureSAXParserFactory.newNSXMLReader(null)).getCause());
     }
 
     /**
@@ -125,6 +129,23 @@ public class SecureSAXParserFactoryTest {
         assertNotNull(SecureSAXParserFactory.newDefaultInstance().newSAXParser());
         assertNotNull(SecureSAXParserFactory.newNSInstance().newSAXParser());
         assertNotNull(SecureSAXParserFactory.newDefaultNSInstance().newSAXParser());
+    }
+
+    @Test
+    void createsParsersAndReadersDirectly() throws Exception {
+        final SAXParser parser = SecureSAXParserFactory.newNSSAXParser();
+        assertInstanceOf(SecureSAXParser.class, parser);
+        assertTrue(parser.isNamespaceAware());
+        final DefaultHandler handler = new DefaultHandler();
+        final XMLReader reader = SecureSAXParserFactory.newNSXMLReader(handler);
+        assertInstanceOf(SecureXMLReader.class, reader);
+        assertSame(handler, reader.getContentHandler());
+        assertTrue(reader.getFeature(NAMESPACES_FEATURE));
+        final XMLReader noHandlerReader = SecureSAXParserFactory.newNSXMLReader();
+        assertInstanceOf(SecureXMLReader.class, noHandlerReader);
+        assertNull(noHandlerReader.getContentHandler());
+        assertTrue(noHandlerReader.getFeature(NAMESPACES_FEATURE));
+        assertNull(SecureSAXParserFactory.newNSXMLReader(null).getContentHandler());
     }
 
     @Test
@@ -201,10 +222,12 @@ public class SecureSAXParserFactoryTest {
             SAXParserFactory factory = mock(SAXParserFactory.class);
             when(factory.newSAXParser()).thenThrow(notConfigurable);
             assertNewXmlReaderWraps(notConfigurable, factory);
+            assertSame(notConfigurable, assertThrows(IllegalStateException.class, SecureSAXParserFactory::newNSSAXParser).getCause());
             final SAXException noParser = new SAXException("test");
             factory = mock(SAXParserFactory.class);
             when(factory.newSAXParser()).thenThrow(noParser);
             assertNewXmlReaderWraps(noParser, factory);
+            assertSame(noParser, assertThrows(IllegalStateException.class, SecureSAXParserFactory::newNSSAXParser).getCause());
             // SAXParser.getXMLReader() declares SAXException
             final SAXException noReader = new SAXException("test");
             factory = mock(SAXParserFactory.class);
