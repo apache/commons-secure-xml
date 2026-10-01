@@ -154,7 +154,7 @@ dependencies {
     androidTestImplementation("de.mannodermaus.junit5:android-test-core:2.0.1")
     androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:2.0.1")
     androidTestRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
-    androidTestImplementation("androidx.test:runner:1.5.2")
+    androidTestImplementation("androidx.test:runner:1.7.0")
     androidTestImplementation("org.mockito:mockito-android:4.11.0")
 }
 
