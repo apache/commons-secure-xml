@@ -32,7 +32,7 @@ buildscript {
 // AGP 9 records this suite's JUnit 5 assumption aborts as failures in its aggregated test XML, where AGP 8.6.1 reported them as skips.
 // The build passes either way; only the uploaded report misstates them.
 plugins {
-    id("com.android.library") version "9.4.0"
+    id("com.android.library") version "9.4.1"
     id("de.mannodermaus.android-junit5") version "2.0.1"
 }
 
