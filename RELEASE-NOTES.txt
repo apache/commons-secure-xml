@@ -14,6 +14,61 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
+Apache Commons Secure XML 1.1.0 Release Notes
+---------------------------------------------
+
+The Apache Commons Secure XML team is pleased to announce the release of Apache Commons Secure XML 1.1.0.
+
+Apache Commons Secure XML provides secure-by-default JAXP factory creation, abstracting over
+implementation-specific XXE securing differences between the stock JDK and external JAXP implementations
+(Android, Apache Xalan, Apache Xerces, Woodstox, Saxon-HE).
+
+Second release. Requires Java 8 or later.
+
+
+New features
+------------
+
+* COMMONSXML-18:   Add helpers that return a secure, namespace-aware DocumentBuilder, SAXParser or XMLReader directly, without the factory. Thanks to Piotr P. Karwasz, Gary Gregory.
+
+Fixed Bugs
+----------
+
+*                  Fix the OpenRewrite migration recipe to target static method calls instead of class references. Thanks to Gary Gregory.
+*                  Fix the OpenRewrite migration recipe to add a dependency on org.apache.commons:commons-secure-xml:1.0.0. Thanks to Gary Gregory.
+*                  Fix rejection behavior of foreign Templates in SAXTransformerFactory.newTransformerHandler. Thanks to Piotr P. Karwasz, Gary Gregory.
+*                  Fix a NullPointerException when an XMLFilter with a self-driven parent reader is parsed with a null InputSource. #86 Thanks to Piotr P. Karwasz, Gary Gregory.
+* COMMONSXML-17:   Keep a URIResolver already set on a Transformer when it is wrapped, instead of replacing it with the resolver floor. Thanks to Piotr P. Karwasz, Gary Gregory.
+*                  Create the Transformer of an XMLFilter eagerly and reuse it for every parse. Thanks to Piotr P. Karwasz, Gary Gregory.
+*                  Report a stylesheet that produces no XMLFilter as a TransformerConfigurationException instead of returning null. Thanks to Piotr P. Karwasz, Gary Gregory.
+*                  General Javadoc and site documentation improvements. Thanks to Gary Gregory.
+
+Changes
+-------
+
+*                  Bump org.apache.commons:commons-parent from 104 to 105. Thanks to Gary Gregory.
+*                  Bump com.android.library from 8.6.1 to 9.4.0 in /android-tests. Thanks to Piotr P. Karwasz, Gary Gregory.
+*                  Bump commons.graalvm.buildtools.version from 1.1.12 to 1.1.14 (#102). Thanks to Gary Gregory, Dependabot.
+*                  Bump androidx.test:runner from 1.5.2 to 1.7.0 in /android-tests (#106). Thanks to Gary Gregory, Dependabot.
+*                  Bump com.android.library from 9.4.0 to 9.4.1 in /android-tests (#107). Thanks to Gary Gregory, Dependabot.
+*                  Bump gradle-wrapper from 9.7.1 to 9.8.0 in /android-tests (#108). Thanks to Gary Gregory, Dependabot.
+*                  Bump org.junit.jupiter:junit-jupiter-api from 5.10.2 to 5.14.4 on Android (#111). Thanks to Gary Gregory, Dependabot.
+
+
+Historical list of changes: https://commons.apache.org/proper/commons-secure-xml//changes.html
+
+For complete information on Apache Commons Secure XML, including instructions on how to submit bug reports,
+patches, or suggestions for improvement, see the Apache Commons Secure XML website:
+
+https://commons.apache.org/proper/commons-secure-xml/
+
+Download page: https://commons.apache.org/proper/commons-secure-xml//download_secure-xml.cgi
+
+Have fun!
+-Apache Commons Team
+
+-----------------------------------------------------------------------------
+
 Apache Commons Secure XML 1.0.0 Release Notes
 ---------------------------------------------
 

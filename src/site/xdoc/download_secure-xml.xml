@@ -115,32 +115,32 @@ limitations under the License.
       </p>
     </subsection>
     </section>
-    <section name="Apache Commons Secure XML 1.0.0 (Java 8+)">
+    <section name="Apache Commons Secure XML 1.1.0 (Java 8+)">
       <subsection name="Binaries">
         <table>
           <tr>
-              <td><a href="[preferred]/commons/secure-xml/binaries/commons-secure-xml-1.0.0-bin.tar.gz">commons-secure-xml-1.0.0-bin.tar.gz</a></td>
-              <td><a href="https://downloads.apache.org/commons/secure-xml/binaries/commons-secure-xml-1.0.0-bin.tar.gz.sha512">sha512</a></td>
-              <td><a href="https://downloads.apache.org/commons/secure-xml/binaries/commons-secure-xml-1.0.0-bin.tar.gz.asc">pgp</a></td>
+              <td><a href="[preferred]/commons/secure-xml/binaries/commons-secure-xml-1.1.0-bin.tar.gz">commons-secure-xml-1.1.0-bin.tar.gz</a></td>
+              <td><a href="https://downloads.apache.org/commons/secure-xml/binaries/commons-secure-xml-1.1.0-bin.tar.gz.sha512">sha512</a></td>
+              <td><a href="https://downloads.apache.org/commons/secure-xml/binaries/commons-secure-xml-1.1.0-bin.tar.gz.asc">pgp</a></td>
           </tr>
           <tr>
-              <td><a href="[preferred]/commons/secure-xml/binaries/commons-secure-xml-1.0.0-bin.zip">commons-secure-xml-1.0.0-bin.zip</a></td>
-              <td><a href="https://downloads.apache.org/commons/secure-xml/binaries/commons-secure-xml-1.0.0-bin.zip.sha512">sha512</a></td>
-              <td><a href="https://downloads.apache.org/commons/secure-xml/binaries/commons-secure-xml-1.0.0-bin.zip.asc">pgp</a></td>
+              <td><a href="[preferred]/commons/secure-xml/binaries/commons-secure-xml-1.1.0-bin.zip">commons-secure-xml-1.1.0-bin.zip</a></td>
+              <td><a href="https://downloads.apache.org/commons/secure-xml/binaries/commons-secure-xml-1.1.0-bin.zip.sha512">sha512</a></td>
+              <td><a href="https://downloads.apache.org/commons/secure-xml/binaries/commons-secure-xml-1.1.0-bin.zip.asc">pgp</a></td>
           </tr>
         </table>
       </subsection>
       <subsection name="Source">
         <table>
           <tr>
-              <td><a href="[preferred]/commons/secure-xml/source/commons-secure-xml-1.0.0-src.tar.gz">commons-secure-xml-1.0.0-src.tar.gz</a></td>
-              <td><a href="https://downloads.apache.org/commons/secure-xml/source/commons-secure-xml-1.0.0-src.tar.gz.sha512">sha512</a></td>
-              <td><a href="https://downloads.apache.org/commons/secure-xml/source/commons-secure-xml-1.0.0-src.tar.gz.asc">pgp</a></td>
+              <td><a href="[preferred]/commons/secure-xml/source/commons-secure-xml-1.1.0-src.tar.gz">commons-secure-xml-1.1.0-src.tar.gz</a></td>
+              <td><a href="https://downloads.apache.org/commons/secure-xml/source/commons-secure-xml-1.1.0-src.tar.gz.sha512">sha512</a></td>
+              <td><a href="https://downloads.apache.org/commons/secure-xml/source/commons-secure-xml-1.1.0-src.tar.gz.asc">pgp</a></td>
           </tr>
           <tr>
-              <td><a href="[preferred]/commons/secure-xml/source/commons-secure-xml-1.0.0-src.zip">commons-secure-xml-1.0.0-src.zip</a></td>
-              <td><a href="https://downloads.apache.org/commons/secure-xml/source/commons-secure-xml-1.0.0-src.zip.sha512">sha512</a></td>
-              <td><a href="https://downloads.apache.org/commons/secure-xml/source/commons-secure-xml-1.0.0-src.zip.asc">pgp</a></td>
+              <td><a href="[preferred]/commons/secure-xml/source/commons-secure-xml-1.1.0-src.zip">commons-secure-xml-1.1.0-src.zip</a></td>
+              <td><a href="https://downloads.apache.org/commons/secure-xml/source/commons-secure-xml-1.1.0-src.zip.sha512">sha512</a></td>
+              <td><a href="https://downloads.apache.org/commons/secure-xml/source/commons-secure-xml-1.1.0-src.zip.asc">pgp</a></td>
           </tr>
         </table>
       </subsection>

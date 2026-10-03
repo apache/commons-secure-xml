@@ -45,9 +45,9 @@ Apache Commons Secure XML
 
 [![Java CI](https://github.com/apache/commons-secure-xml/actions/workflows/maven.yml/badge.svg)](https://github.com/apache/commons-secure-xml/actions/workflows/maven.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/org.apache.commons/commons-secure-xml?label=Maven%20Central)](https://search.maven.org/artifact/org.apache.commons/commons-secure-xml)
-[![Javadocs](https://javadoc.io/badge/org.apache.commons/commons-secure-xml/1.0.0.svg)](https://javadoc.io/doc/org.apache.commons/commons-secure-xml/1.0.0)
+[![Javadocs](https://javadoc.io/badge/org.apache.commons/commons-secure-xml/1.1.0.svg)](https://javadoc.io/doc/org.apache.commons/commons-secure-xml/1.1.0)
 [![CodeQL](https://github.com/apache/commons-secure-xml/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/apache/commons-secure-xml/actions/workflows/codeql-analysis.yml)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/apache/commons-secure-xml/badge)](https://api.securityscorecards.dev/projects/github.com/apache/commons-secure-xml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/apache/commons-secure-xml/badge)](https://scorecard.dev/viewer/?uri=github.com/apache/commons-secure-xml)
 
 Apache Commons Secure XML provides secure-by-default JAXP factory creation, abstracting over
     implementation-specific XXE securing differences between the stock JDK and external JAXP implementations
@@ -70,7 +70,7 @@ Alternatively, you can pull it from the central Maven repositories:
 <dependency>
   <groupId>org.apache.commons</groupId>
   <artifactId>commons-secure-xml</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
 </dependency>
 ```
 
