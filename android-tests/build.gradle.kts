@@ -150,10 +150,10 @@ dependencies {
     // Apache Xerces: android.jar ships javax.xml.validation but no SchemaFactory implementation.
     androidTestImplementation("xerces:xercesImpl:2.12.2")
 
-    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
+    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:6.1.3")
     androidTestImplementation("de.mannodermaus.junit5:android-test-core:2.0.1")
     androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:2.0.1")
-    androidTestRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+    androidTestRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:6.1.3")
     androidTestImplementation("androidx.test:runner:1.7.0")
     androidTestImplementation("org.mockito:mockito-android:4.11.0")
 }
