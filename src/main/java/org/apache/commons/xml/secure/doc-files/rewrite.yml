@@ -21,7 +21,7 @@ recipeList:
   - org.openrewrite.maven.AddDependency:
       groupId: org.apache.commons
       artifactId: commons-secure-xml
-      version: 1.0.0
+      version: 1.1.0
   - org.openrewrite.java.ChangeMethodTargetToStatic:
       methodPattern: javax.xml.parsers.DocumentBuilderFactory newDefaultInstance()
       fullyQualifiedTargetTypeName: org.apache.commons.xml.secure.SecureDocumentBuilderFactory
