@@ -31,7 +31,12 @@ The <action> type attribute can be add, update, fix, or remove.
     <title>Apache Commons Secure XML Changes</title>
   </properties>
   <body>
-    <release version="1.1.0" date="2026-10-03" description="Second release. Requires Java 8 or later.">
+    <release version="1.1.1" date="YYYY-MM-DD" description="This is a maintenance release. Java 8 or later is required.">
+      <!-- FIX -->
+      <!-- ADD -->
+      <!-- UPDATE -->
+    </release>
+    <release version="1.1.0" date="2026-10-03" description="This is a feature and maintenance release. Requires Java 8 or later.">
       <!-- FIX -->
       <action type="fix" dev="ggregory" due-to="Gary Gregory">Fix the OpenRewrite migration recipe to target static method calls instead of class references.</action>
       <action type="fix" dev="ggregory" due-to="Gary Gregory">Fix the OpenRewrite migration recipe to add a dependency on org.apache.commons:commons-secure-xml:1.0.0.</action>
@@ -52,7 +57,7 @@ The <action> type attribute can be add, update, fix, or remove.
       <action dev="ggregory" type="update" due-to="Gary Gregory, Dependabot">Bump gradle-wrapper from 9.7.1 to 9.8.0 in /android-tests (#108).</action>
       <action dev="ggregory" type="update" due-to="Gary Gregory, Dependabot">Bump org.junit.jupiter:junit-jupiter-api from 5.10.2 to 5.14.4 on Android (#111).</action>
     </release>
-    <release version="1.0.0" date="2026-09-02" description="First release. Requires Java 8 or later.">
+    <release version="1.0.0" date="2026-09-02" description="This is the first release. Requires Java 8 or later.">
       <!-- SPECIAL -->
       <action type="add" dev="ggregory" due-to="Piotr P. Karwasz, Gary Gregory">This is the first release of Apache Commons Secure XML.</action>      
       <!-- ADD -->
