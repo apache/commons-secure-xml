@@ -124,14 +124,6 @@ public class SecureSAXParserFactoryTest {
     }
 
     @Test
-    void createsSecureParsersFromEveryStaticEntryPoint() throws Exception {
-        assertNotNull(SecureSAXParserFactory.newInstance().newSAXParser());
-        assertNotNull(SecureSAXParserFactory.newDefaultInstance().newSAXParser());
-        assertNotNull(SecureSAXParserFactory.newNSInstance().newSAXParser());
-        assertNotNull(SecureSAXParserFactory.newDefaultNSInstance().newSAXParser());
-    }
-
-    @Test
     void createsParsersAndReadersDirectly() throws Exception {
         final SAXParser parser = SecureSAXParserFactory.newNSSAXParser();
         assertInstanceOf(SecureSAXParser.class, parser);
@@ -146,6 +138,14 @@ public class SecureSAXParserFactoryTest {
         assertNull(noHandlerReader.getContentHandler());
         assertTrue(noHandlerReader.getFeature(NAMESPACES_FEATURE));
         assertNull(SecureSAXParserFactory.newNSXMLReader(null).getContentHandler());
+    }
+
+    @Test
+    void createsSecureParsersFromEveryStaticEntryPoint() throws Exception {
+        assertNotNull(SecureSAXParserFactory.newInstance().newSAXParser());
+        assertNotNull(SecureSAXParserFactory.newDefaultInstance().newSAXParser());
+        assertNotNull(SecureSAXParserFactory.newNSInstance().newSAXParser());
+        assertNotNull(SecureSAXParserFactory.newDefaultNSInstance().newSAXParser());
     }
 
     @Test

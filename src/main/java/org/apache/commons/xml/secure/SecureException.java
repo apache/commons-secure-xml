@@ -52,6 +52,23 @@ final class SecureException extends IllegalStateException {
     static final String THROW_ON_UNRESOLVED = "org.apache.commons.xml.secure.throwOnUnresolved";
 
     /**
+     * Builds the standard exception for a failure to create a parser or reader from an already secured factory.
+     *
+     * <p>
+     * Every supported implementation provides parsers and readers as a routine capability, and rejects an unsupported setting when it is set on the factory,
+     * not when a parser is built. The wrapped {@code ParserConfigurationException} or {@code SAXException} therefore signals a broken environment rather than
+     * a per-parse condition, so the exception is unchecked.
+     * </p>
+     *
+     * @param type  The type of the object that could not be created, such as {@code DocumentBuilder}, {@code SAXParser} or {@code XMLReader}.
+     * @param cause The original checked exception from the JAXP implementation.
+     * @return the exception to throw.
+     */
+    static SecureException creationFailed(final Class<?> type, final Throwable cause) {
+        return new SecureException("Failed to create a secure " + type.getSimpleName(), cause);
+    }
+
+    /**
      * Builds the standard exception for a rejected secure setting.
      * @param name   The name of the feature, attribute or property that could not be set.
      * @param target The factory, parser, validator or reader that rejected the setting; its concrete class names the offending implementation.
@@ -76,23 +93,6 @@ final class SecureException extends IllegalStateException {
     static String forbidden(final String type, final String namespace, final String publicId, final String systemId, final String baseURI) {
         return String.format("External resource fetch forbidden by %s: type=%s, namespace=%s, publicId=%s, systemId=%s, baseURI=%s",
                 SecureException.THROW_ON_UNRESOLVED, type, namespace, publicId, systemId, baseURI);
-    }
-
-    /**
-     * Builds the standard exception for a failure to create a parser or reader from an already secured factory.
-     *
-     * <p>
-     * Every supported implementation provides parsers and readers as a routine capability, and rejects an unsupported setting when it is set on the factory,
-     * not when a parser is built. The wrapped {@code ParserConfigurationException} or {@code SAXException} therefore signals a broken environment rather than
-     * a per-parse condition, so the exception is unchecked.
-     * </p>
-     *
-     * @param type  The type of the object that could not be created, such as {@code DocumentBuilder}, {@code SAXParser} or {@code XMLReader}.
-     * @param cause The original checked exception from the JAXP implementation.
-     * @return the exception to throw.
-     */
-    static SecureException creationFailed(final Class<?> type, final Throwable cause) {
-        return new SecureException("Failed to create a secure " + type.getSimpleName(), cause);
     }
 
     /**

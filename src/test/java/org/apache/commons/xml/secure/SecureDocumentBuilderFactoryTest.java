@@ -35,6 +35,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -110,15 +113,6 @@ class SecureDocumentBuilderFactoryTest {
     }
 
     @Test
-    void createsSecureBuildersFromEveryStaticEntryPoint() throws Exception {
-        Assumptions.assumeTrue(AttackTestSupport.DOM_RESOLVES_INTERNAL_ENTITIES, "the platform DOM is left unwrapped: it does not resolve user-defined entities");
-        assertInstanceOf(SecureDocumentBuilder.class, SecureDocumentBuilderFactory.newInstance().newDocumentBuilder());
-        assertInstanceOf(SecureDocumentBuilder.class, SecureDocumentBuilderFactory.newDefaultInstance().newDocumentBuilder());
-        assertInstanceOf(SecureDocumentBuilder.class, SecureDocumentBuilderFactory.newNSInstance().newDocumentBuilder());
-        assertInstanceOf(SecureDocumentBuilder.class, SecureDocumentBuilderFactory.newDefaultNSInstance().newDocumentBuilder());
-    }
-
-    @Test
     void createsBuildersDirectly() {
         final DocumentBuilder builder = SecureDocumentBuilderFactory.newNSDocumentBuilder();
         assertTrue(builder.isNamespaceAware());
@@ -128,20 +122,12 @@ class SecureDocumentBuilderFactoryTest {
     }
 
     @Test
-    // Mockito generates the mock classes and its plugin proxies at run time, which a closed-world native image cannot do.
-    @DisabledInNativeImage
-    void newDocumentBuilderWrapsDeclaredExceptions() throws Exception {
-        Assumptions.assumeFalse(AttackTestSupport.IS_ANDROID, "Skipped on Android: parser selection is pinned to the platform implementation");
-        final String previous = setFactoryIdProperty(MockDocumentBuilderFactory.class.getName());
-        try {
-            final ParserConfigurationException cause = new ParserConfigurationException("test");
-            MockDocumentBuilderFactory.delegate = mock(DocumentBuilderFactory.class);
-            when(MockDocumentBuilderFactory.delegate.newDocumentBuilder()).thenThrow(cause);
-            assertSame(cause, assertThrows(IllegalStateException.class, SecureDocumentBuilderFactory::newNSDocumentBuilder).getCause());
-        } finally {
-            setFactoryIdProperty(previous);
-            MockDocumentBuilderFactory.delegate = null;
-        }
+    void createsSecureBuildersFromEveryStaticEntryPoint() throws Exception {
+        Assumptions.assumeTrue(AttackTestSupport.DOM_RESOLVES_INTERNAL_ENTITIES, "the platform DOM is left unwrapped: it does not resolve user-defined entities");
+        assertInstanceOf(SecureDocumentBuilder.class, SecureDocumentBuilderFactory.newInstance().newDocumentBuilder());
+        assertInstanceOf(SecureDocumentBuilder.class, SecureDocumentBuilderFactory.newDefaultInstance().newDocumentBuilder());
+        assertInstanceOf(SecureDocumentBuilder.class, SecureDocumentBuilderFactory.newNSInstance().newDocumentBuilder());
+        assertInstanceOf(SecureDocumentBuilder.class, SecureDocumentBuilderFactory.newDefaultNSInstance().newDocumentBuilder());
     }
 
     @Test
@@ -181,6 +167,23 @@ class SecureDocumentBuilderFactoryTest {
     }
 
     @Test
+    // Mockito generates the mock classes and its plugin proxies at run time, which a closed-world native image cannot do.
+    @DisabledInNativeImage
+    void newDocumentBuilderWrapsDeclaredExceptions() throws Exception {
+        Assumptions.assumeFalse(AttackTestSupport.IS_ANDROID, "Skipped on Android: parser selection is pinned to the platform implementation");
+        final String previous = setFactoryIdProperty(MockDocumentBuilderFactory.class.getName());
+        try {
+            final ParserConfigurationException cause = new ParserConfigurationException("test");
+            MockDocumentBuilderFactory.delegate = mock(DocumentBuilderFactory.class);
+            when(MockDocumentBuilderFactory.delegate.newDocumentBuilder()).thenThrow(cause);
+            assertSame(cause, assertThrows(IllegalStateException.class, SecureDocumentBuilderFactory::newNSDocumentBuilder).getCause());
+        } finally {
+            setFactoryIdProperty(previous);
+            MockDocumentBuilderFactory.delegate = null;
+        }
+    }
+
+    @Test
     void newNSInstanceFollowsParserSelection() throws Exception {
         Assumptions.assumeFalse(AttackTestSupport.IS_ANDROID, "Skipped on Android: the platform factory is used unwrapped");
         final Class<?> discovered = DocumentBuilderFactory.newInstance().getClass();
@@ -197,4 +200,5 @@ class SecureDocumentBuilderFactoryTest {
             setFactoryIdProperty(previous);
         }
     }
+
 }
