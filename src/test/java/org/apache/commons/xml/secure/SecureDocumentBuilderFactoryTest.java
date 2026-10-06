@@ -201,4 +201,28 @@ class SecureDocumentBuilderFactoryTest {
         }
     }
 
+    @Test
+    void xincludeTrueWithFile() throws Exception {
+        Assumptions.assumeTrue(AttackTestSupport.DOM_SUPPORTS_XINCLUDE, "the platform DOM does not support XInclude");
+        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        factory.setXIncludeAware(true);
+        final DocumentBuilder builder = factory.newDocumentBuilder();
+        builder.setEntityResolver((publicId, systemId) -> systemId != null && systemId.endsWith("referenced.xml")
+                ? new InputSource(AttackTestSupport.resourceUrl("referenced.xml").toString())
+                : null);
+        final Document document = builder.parse(AttackTestSupport.resourceUrl("with-xinclude.xml").toString());
+        assertEquals("All your base are belong to us", document.getDocumentElement().getTextContent().trim());
+    }
+
+    @Test
+    void xincludeFalseWithFile() throws Exception {
+        Assumptions.assumeTrue(AttackTestSupport.DOM_SUPPORTS_XINCLUDE, "the platform DOM does not support XInclude");
+        final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        factory.setXIncludeAware(false);
+        final Document document = factory.newDocumentBuilder().parse(AttackTestSupport.resourceUrl("with-xinclude.xml").toString());
+        assertEquals("", document.getDocumentElement().getTextContent().trim());
+    }
+
 }
