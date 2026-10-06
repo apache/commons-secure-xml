@@ -24,7 +24,7 @@ limitations under the License.
     <version>105</version>
   </parent>
   <artifactId>commons-secure-xml</artifactId>
-  <version>1.1.0</version>
+  <version>1.1.1-SNAPSHOT</version>
   <name>Apache Commons Secure XML</name>
   <url>https://commons.apache.org/proper/commons-secure-xml/</url>
   <inceptionYear>2026</inceptionYear>
@@ -60,7 +60,7 @@ limitations under the License.
       org.apache.xerces.*;resolution:=optional,
       *
     </commons.osgi.import>
-    <project.build.outputTimestamp>2026-10-03T02:20:09Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2026-10-06T10:25:02Z</project.build.outputTimestamp>
     <!-- Java baseline -->
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
