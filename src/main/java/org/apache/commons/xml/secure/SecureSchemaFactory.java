@@ -237,7 +237,8 @@ public final class SecureSchemaFactory {
         }
         try {
             // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead.
-            return newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI, JDK_SCHEMA_FACTORY, null);
+            // Load it from the system class loader: the context class loader may not see it (for example an OSGi bundle class loader).
+            return newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI, JDK_SCHEMA_FACTORY, ClassLoader.getSystemClassLoader());
         } catch (final IllegalArgumentException e) {
             // Neither exists (for example Android): degrade to the regular lookup, whose Android fallback is exactly the Xerces implementation.
             return newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);

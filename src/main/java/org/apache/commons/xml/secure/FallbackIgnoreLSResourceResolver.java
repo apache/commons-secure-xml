@@ -42,11 +42,24 @@ final class FallbackIgnoreLSResourceResolver implements LSResourceResolver {
     private static final DOMImplementationLS DOM_LS;
 
     static {
+        DOMImplementationLS domLs;
         try {
-            DOM_LS = (DOMImplementationLS) DOMImplementationRegistry.newInstance().getDOMImplementation("LS");
+            domLs = (DOMImplementationLS) DOMImplementationRegistry.newInstance().getDOMImplementation("LS");
         } catch (final ReflectiveOperationException e) {
-            throw new ExceptionInInitializerError(e);
+            // The registry loads through the context class loader, which may not see the JDK's implementation (for example an OSGi bundle class loader).
+            final Thread thread = Thread.currentThread();
+            final ClassLoader contextClassLoader = thread.getContextClassLoader();
+            thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
+            try {
+                domLs = (DOMImplementationLS) DOMImplementationRegistry.newInstance().getDOMImplementation("LS");
+            } catch (final ReflectiveOperationException retry) {
+                retry.addSuppressed(e);
+                throw new ExceptionInInitializerError(retry);
+            } finally {
+                thread.setContextClassLoader(contextClassLoader);
+            }
         }
+        DOM_LS = domLs;
     }
 
     private LSResourceResolver delegate;
