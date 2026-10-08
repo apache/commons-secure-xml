@@ -60,6 +60,7 @@ import org.junit.platform.launcher.listeners.TestExecutionSummary;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 import org.osgi.framework.wiring.BundleWiring;
@@ -74,8 +75,8 @@ import org.osgi.framework.wiring.BundleWiring;
  * </p>
  * <p>
  * The test output directory, which the build gives a fragment manifest, is attached to that bundle, so the tests share its class loader and keep their
- * package-private access. The test harness (JUnit, Mockito, JAXB) is not under test and is boot-delegated to the class path. Only the JDK's built-in JAXP implementations are used, as in the
- * {@code test-stockjdk} execution: provider lookups cannot see other bundles without a mediator such as SPI Fly.
+ * package-private access. The test harness (JUnit, Mockito, JAXB) is not under test and is boot-delegated to the class path. Only the JDK's built-in JAXP
+ * implementations are used, as in the {@code test-stockjdk} execution: provider lookups cannot see other bundles without a mediator such as SPI Fly.
  * </p>
  * <p>
  * The framework is whichever single {@link FrameworkFactory} the class path provides; the build runs this class once with Apache Felix and once with Eclipse
@@ -89,9 +90,9 @@ class OsgiIT {
      * Factory methods that reach the JDK's built-in implementations without a provider lookup: {@code SecureSchemaFactory} also initializes the
      * {@code LSResourceResolver} floor.
      */
-    private static final String[][] DEFAULT_FACTORIES = {{"SecureDocumentBuilderFactory", "newDefaultInstance"}, {"SecureSAXParserFactory", "newDefaultInstance"},
-        {"SecureSchemaFactory", "newDefaultInstance"}, {"SecureTransformerFactory", "newDefaultInstance"}, {"SecureXPathFactory", "newDefaultInstance"},
-        {"SecureXMLInputFactory", "newDefaultFactory"}};
+    private static final String[][] DEFAULT_FACTORIES = {{"SecureDocumentBuilderFactory", "newDefaultInstance"},
+        {"SecureSAXParserFactory", "newDefaultInstance"}, {"SecureSchemaFactory", "newDefaultInstance"}, {"SecureTransformerFactory", "newDefaultInstance"},
+        {"SecureXPathFactory", "newDefaultInstance"}, {"SecureXMLInputFactory", "newDefaultFactory"}};
 
     /**
      * Package roots the framework delegates to the class path: the test harness only, never the library or JDK internals.
@@ -170,7 +171,9 @@ class OsgiIT {
     static void stopFramework() throws Exception {
         if (framework != null) {
             framework.stop();
-            framework.waitForStop(10_000);
+            final FrameworkEvent event = framework.waitForStop(10_000);
+            assertEquals(FrameworkEvent.STOPPED, event.getType(),
+                    () -> "framework did not stop cleanly: event type " + event.getType() + ", " + event.getThrowable());
         }
     }
 
