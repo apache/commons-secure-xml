@@ -233,7 +233,7 @@ class OsgiIT {
     @Order(2)
     Stream<DynamicTest> unitTestsPassInsideFramework() throws ClassNotFoundException {
         final List<DynamicTest> tests = new ArrayList<>();
-        final Enumeration<URL> entries = host.findEntries(TEST_PACKAGE, "*Test.class", false);
+        final Enumeration<URL> entries = host.findEntries(TEST_PACKAGE, "*Test.class", true);
         assertNotNull(entries, "test fragment must be attached to the library bundle");
         while (entries.hasMoreElements()) {
             final String path = entries.nextElement().getPath();
