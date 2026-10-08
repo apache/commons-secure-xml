@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
@@ -87,6 +88,8 @@ final class FallbackIgnoreURIResolver implements URIResolver {
      */
     private final BooleanSupplier overrideDefaultParser;
 
+    private ErrorListener listener;
+
     /**
      * Constructs a new resolver.
      *
@@ -124,8 +127,12 @@ final class FallbackIgnoreURIResolver implements URIResolver {
             // The implementation parses the opted-in handle with an internal reader at its own defaults; the rewrite hands it a secure reader instead.
             return SecureSAXParserFactory.secure(resolved, overrideDefaultParser.getAsBoolean());
         }
+        final TransformerException forbiddenUriException = new TransformerException(SecureException.forbidden("uri", null, null, href, base));
         if (SecureException.throwOnUnresolved()) {
-            throw new TransformerException(SecureException.forbidden("uri", null, null, href, base));
+            throw forbiddenUriException;
+        }
+        if (listener != null) {
+            listener.warning(forbiddenUriException);
         }
         return emptySource.get();
     }
@@ -137,5 +144,9 @@ final class FallbackIgnoreURIResolver implements URIResolver {
      */
     void setDelegate(final URIResolver delegate) {
         this.delegate = delegate;
+    }
+
+    public void setErrorListener(ErrorListener listener) {
+        this.listener = listener;
     }
 }

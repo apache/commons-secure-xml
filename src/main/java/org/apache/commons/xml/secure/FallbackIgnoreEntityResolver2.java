@@ -23,9 +23,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.xml.sax.EntityResolver;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.ext.DefaultHandler2;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.ext.EntityResolver2;
 
 /**
@@ -48,7 +49,7 @@ import org.xml.sax.ext.EntityResolver2;
  * default.
  * </p>
  */
-final class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
+final class FallbackIgnoreEntityResolver2 implements EntityResolver2 {
 
     private static final byte[] EMPTY = {};
 
@@ -75,6 +76,7 @@ final class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
      * Caller-supplied resolver consulted first, or {@code null} for a pure ignore-all floor.
      */
     private EntityResolver delegate;
+    private ErrorHandler errorHandler;
 
     /**
      * Constructs a new ignore-all floor with an optional caller-supplied resolver.
@@ -114,13 +116,28 @@ final class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
      * @throws IOException  Thrown if an overriding implementation encounters an I/O error; never thrown by the default implementation.
      */
     private InputSource onUnresolved(final String name, final String publicId, final String baseURI, final String systemId) throws SAXException {
+        final SAXParseException forbiddenException = new SAXParseException(SecureException.forbidden(name, null, publicId, systemId, baseURI), null);
         if (SecureException.throwOnUnresolved()) {
-            throw new SAXException(SecureException.forbidden(name, null, publicId, systemId, baseURI));
+            throw forbiddenException;
+        }
+        if (errorHandler != null && !isThrowingOnWarningErrorHandler(errorHandler)) {
+            // only emit a warning if that doesn't lead to an exception being thrown, however some implementations just silently swallow warnings so this is just best effort
+            errorHandler.warning(forbiddenException);
         }
         final InputSource empty = new InputSource(new ByteArrayInputStream(EMPTY));
         empty.setPublicId(publicId);
         empty.setSystemId(absolutize(baseURI, systemId));
         return empty;
+    }
+
+    /**
+     * This is a heuristic to detect the JDK's internal error handler, which throws on warnings.
+     * @param errorHandler
+     * @return true if the error handler is the JDK's internal error handler, false otherwise
+     */
+    private static boolean isThrowingOnWarningErrorHandler(ErrorHandler errorHandler) {
+        // https://bugs.openjdk.org/browse/JDK-815783 (https://github.com/openjdk/jdk/blob/6edf757bc4152dc62c449ad69f30f7c85a1b4f00/src/java.xml/share/classes/jdk/xml/internal/ErrorHandlerProxy.java)
+        return errorHandler.getClass().getName().equals("jdk.xml.internal.ErrorHandlerProxy");
     }
 
     @Override
@@ -156,5 +173,14 @@ final class FallbackIgnoreEntityResolver2 extends DefaultHandler2 {
      */
     void setDelegate(final EntityResolver delegate) {
         this.delegate = delegate;
+    }
+
+    /**
+     * Sets the error handler to receive warnings when an unresolved entity is ignored.
+     *
+     * @param errorHandler The error handler, or {@code null} to ignore warnings.
+     */
+    void setErrorHandler(final ErrorHandler errorHandler) {
+        this.errorHandler = errorHandler;
     }
 }
