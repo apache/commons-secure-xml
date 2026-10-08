@@ -32,6 +32,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -239,7 +240,7 @@ class OsgiIT {
             }
         }
         assertFalse(tests.isEmpty(), "no test classes found in the test fragment");
-        tests.sort((a, b) -> a.getDisplayName().compareTo(b.getDisplayName()));
+        tests.sort(Comparator.comparing(DynamicTest::getDisplayName));
         return tests.stream();
     }
 }
