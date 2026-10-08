@@ -28,7 +28,8 @@ notifications:
 github:
   description: "Apache Commons Secure XML"
   homepage: https://commons.apache.org/proper/commons-secure-xml/
-  
+  autolink_jira:
+    - COMMONSXML
   pull_requests:
     # allow auto-merge
     allow_auto_merge: false
