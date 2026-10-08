@@ -121,11 +121,6 @@ class OsgiIT {
     private static final List<String> METHODS_NOT_IN_OSGI = Arrays.asList("SecureDocumentBuilderFactoryTest#newDocumentBuilderWrapsDeclaredExceptions",
             "SecureSAXParserFactoryTest#newXmlReaderWrapsDeclaredExceptions");
 
-    /**
-     * Location of the test classes inside the fragment.
-     */
-    private static final String TEST_PACKAGE = HOST_SYMBOLIC_NAME.replace('.', '/');
-
     private static Framework framework;
 
     private static Bundle host;
@@ -233,11 +228,11 @@ class OsgiIT {
     @Order(2)
     Stream<DynamicTest> unitTestsPassInsideFramework() throws ClassNotFoundException {
         final List<DynamicTest> tests = new ArrayList<>();
-        final Enumeration<URL> entries = host.findEntries(TEST_PACKAGE, "*Test.class", true);
+        final Enumeration<URL> entries = host.findEntries("/", "*Test.class", true);
         assertNotNull(entries, "test fragment must be attached to the library bundle");
         while (entries.hasMoreElements()) {
             final String path = entries.nextElement().getPath();
-            final String className = path.substring(path.indexOf(TEST_PACKAGE), path.length() - ".class".length()).replace('/', '.');
+            final String className = path.substring(path.startsWith("/") ? 1 : 0, path.length() - ".class".length()).replace('/', '.');
             if (!NOT_IN_OSGI.contains(className)) {
                 final Class<?> testClass = host.loadClass(className);
                 tests.add(DynamicTest.dynamicTest(testClass.getSimpleName(), () -> runTestClass(testClass)));
