@@ -17,12 +17,14 @@
 
 package org.apache.commons.xml.osgi;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,7 +43,11 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.platform.engine.FilterResult;
 import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.engine.support.descriptor.MethodSource;
@@ -56,6 +62,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
+import org.osgi.framework.wiring.BundleWiring;
 
 /**
  * Runs the unit test suite inside an OSGi framework, against the built bundle.
@@ -75,7 +82,16 @@ import org.osgi.framework.launch.FrameworkFactory;
  * Equinox.
  * </p>
  */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class OsgiIT {
+
+    /**
+     * Factory methods that reach the JDK's built-in implementations without a provider lookup: {@code SecureSchemaFactory} also initializes the
+     * {@code LSResourceResolver} floor.
+     */
+    private static final String[][] DEFAULT_FACTORIES = {{"SecureDocumentBuilderFactory", "newDefaultInstance"}, {"SecureSAXParserFactory", "newDefaultInstance"},
+        {"SecureSchemaFactory", "newDefaultInstance"}, {"SecureTransformerFactory", "newDefaultInstance"}, {"SecureXPathFactory", "newDefaultInstance"},
+        {"SecureXMLInputFactory", "newDefaultFactory"}};
 
     /**
      * Package roots the framework delegates to the class path: the test harness only, never the library or JDK internals.
@@ -184,7 +200,34 @@ class OsgiIT {
         }
     }
 
+    /**
+     * Checks that the default factories do not depend on the context class loader, with the library bundle's class loader as one.
+     *
+     * <p>
+     * Runs first: a class initializer, such as that of the {@code LSResourceResolver} floor, runs once per framework.
+     * </p>
+     */
+    @Test
+    @Order(1)
+    void defaultFactoriesIgnoreContextClassLoader() throws Exception {
+        final Thread thread = Thread.currentThread();
+        final ClassLoader contextClassLoader = thread.getContextClassLoader();
+        thread.setContextClassLoader(host.adapt(BundleWiring.class).getClassLoader());
+        try {
+            assertAll(Stream.of(DEFAULT_FACTORIES).map(factory -> () -> {
+                try {
+                    assertNotNull(host.loadClass(HOST_SYMBOLIC_NAME + "." + factory[0]).getMethod(factory[1]).invoke(null), factory[0] + "." + factory[1]);
+                } catch (final InvocationTargetException e) {
+                    throw e.getCause();
+                }
+            }));
+        } finally {
+            thread.setContextClassLoader(contextClassLoader);
+        }
+    }
+
     @TestFactory
+    @Order(2)
     Stream<DynamicTest> unitTestsPassInsideFramework() throws ClassNotFoundException {
         final List<DynamicTest> tests = new ArrayList<>();
         final Enumeration<URL> entries = host.findEntries(TEST_PACKAGE, "*Test.class", false);
