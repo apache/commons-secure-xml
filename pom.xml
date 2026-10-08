@@ -440,8 +440,11 @@ limitations under the License.
                 <Import-Package>*;resolution:=optional</Import-Package>
                 <!-- The java11 test sources would otherwise raise the osgi.ee requirement to that of the build JDK. -->
                 <_noee>true</_noee>
-                <!-- The host is the bundle under test, not a dependency. -->
-                <_fixupmessages>"Host *cannot be found on the classpath";is:=ignore</_fixupmessages>
+                <!--
+                  bnd looks the host up on the class path to drop its packages from Import-Package, but the host is this module's own jar, not built yet.
+                  Harmless: the tests are in the host's packages, so the fragment imports none of them anyway.
+                -->
+                <_fixupmessages>"Host ${commons.osgi.symbolicName}= for this fragment/require bundle cannot be found on the classpath";is:=ignore</_fixupmessages>
               </instructions>
             </configuration>
           </execution>
