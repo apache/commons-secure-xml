@@ -89,6 +89,7 @@ public final class SecureXMLInputFactory {
         }
 
         private final XMLInputFactory delegate;
+        private final FallbackIgnoreXMLResolver floor = new FallbackIgnoreXMLResolver(null);
 
         /**
          * Constructs a new instance.
@@ -98,7 +99,7 @@ public final class SecureXMLInputFactory {
          */
         private Wrapper(final XMLInputFactory delegate) {
             this.delegate = Objects.requireNonNull(delegate, "delegate");
-            delegate.setXMLResolver(new FallbackIgnoreXMLResolver(null));
+            delegate.setXMLResolver(floor);
         }
 
         @Override
@@ -239,6 +240,7 @@ public final class SecureXMLInputFactory {
 
         @Override
         public void setXMLReporter(final XMLReporter reporter) {
+            floor.setXMLReporter(reporter);
             delegate.setXMLReporter(reporter);
         }
 

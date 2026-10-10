@@ -24,6 +24,9 @@ import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSException;
 import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 /**
  * {@link LSResourceResolver} floor: consults an optional caller-supplied resolver and ignores (resolves to empty) whatever the caller does not resolve.
@@ -50,6 +53,7 @@ final class FallbackIgnoreLSResourceResolver implements LSResourceResolver {
     }
 
     private LSResourceResolver delegate;
+    private ErrorHandler errorHandler;
 
     /**
      * Constructs a new resolver that consults the given delegate and ignores whatever it does not resolve.
@@ -75,9 +79,17 @@ final class FallbackIgnoreLSResourceResolver implements LSResourceResolver {
         if (resolved != null) {
             return resolved;
         }
+        final String message = SecureException.forbidden(type, namespaceURI, publicId, systemId, baseURI);
         if (SecureException.throwOnUnresolved()) {
             // The interface declares no checked exception; LSException is the DOM Load/Save runtime failure type.
-            throw new LSException(LSException.PARSE_ERR, SecureException.forbidden(type, namespaceURI, publicId, systemId, baseURI));
+            throw new LSException(LSException.PARSE_ERR, message);
+        }
+        if (errorHandler != null) {
+            try {
+                errorHandler.warning(new SAXParseException(message, null));
+            } catch (SAXException e) {
+                // something went wrong in the error handler; ignore it and continue to return an empty input
+            }
         }
         // A character stream, not setStringData(""): the JDK's DOMEntityResolverWrapper discards empty string data, leaving a source with no content and a
         // null system ID that Xerces then fails to absolutize. The echoed identifiers give Xerces a valid base URI; the content still comes from this
@@ -97,5 +109,9 @@ final class FallbackIgnoreLSResourceResolver implements LSResourceResolver {
      */
     void setDelegate(final LSResourceResolver delegate) {
         this.delegate = delegate;
+    }
+
+    public void setErrorHandler(ErrorHandler errorHandler) {
+        this.errorHandler = errorHandler;
     }
 }
