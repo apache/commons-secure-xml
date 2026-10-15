@@ -33,6 +33,8 @@ The <action> type attribute can be add, update, fix, or remove.
   <body>
     <release version="1.1.1" date="YYYY-MM-DD" description="This is a maintenance release. Java 8 or later is required.">
       <!-- FIX -->
+      <action type="fix" dev="pkarwasz" due-to="Konrad Windszus, Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-20">Load the JDK's built-in XMLInputFactory on Java 8 from the bootstrap class loader, so SecureXMLInputFactory.newDefaultFactory() works in OSGi.</action>
+      <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-23">Load the JDK's built-in implementations from the system class loader in the Java 8 newDefaultInstance() fallbacks, and retry with it in the LSResourceResolver floor, so they work when the context class loader cannot see them.</action>
       <!-- ADD -->
       <!-- UPDATE -->
     </release>
