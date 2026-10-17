@@ -14,6 +14,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collection;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -135,9 +136,21 @@ final class AttackTestSupport {
      * error or fatalError so the helpers can observe the block via the same mechanism the specification uses to surface it. Warnings stay silent: they are not
      * security signals.
      * </p>
+     * Optionally it captures warnings in caller-supplied collections (per channel).
      */
     static final class StrictReporter implements ErrorListener, ErrorHandler {
 
+        private final Collection<SAXParseException> saxWarnings;
+        private final Collection<TransformerException> transformerWarnings;
+        
+        public StrictReporter() {
+            this(null, null);
+        }
+        
+        public StrictReporter(Collection<SAXParseException> saxWarnings, Collection<TransformerException> transformerWarnings) {
+            this.saxWarnings = saxWarnings;
+            this.transformerWarnings = transformerWarnings;
+        }
         /**
          * Always throws {@link SAXException}.
          *
@@ -180,12 +193,16 @@ final class AttackTestSupport {
 
         @Override
         public void warning(final SAXParseException exception) {
-            // not a security signal
+            if (saxWarnings != null) {
+                saxWarnings.add(exception);
+            }
         }
 
         @Override
         public void warning(final TransformerException exception) {
-            // not a security signal
+            if (transformerWarnings != null) {
+                transformerWarnings.add(exception);
+            }
         }
     }
     /**
@@ -1000,14 +1017,28 @@ final class AttackTestSupport {
      * Content handler whose {@code characters} callback accumulates into {@code text}; for tests that install (or pass) the handler themselves.
      */
     static DefaultHandler capturingHandler(final StringBuilder text) {
+        return capturingHandler(text, null);
+    }
+
+    /**
+     * Content handler whose {@code characters} callback accumulates into {@code text}; for tests that install (or pass) the handler themselves.
+     * Also it captures warnings into the supplied collection, for tests that want to assert on the warnings.
+     */
+    static DefaultHandler capturingHandler(final StringBuilder text, Collection<SAXParseException> warnings) {
         return new DefaultHandler() {
             @Override
             public void characters(final char[] ch, final int start, final int length) {
                 text.append(ch, start, length);
             }
+
+            @Override
+            public void warning(SAXParseException e) throws SAXException {
+                if (warnings != null)
+                    warnings.add(e);
+            }
         };
     }
-
+ 
     /**
      * Drains every {@link XMLEventReader} event from the factory's reader for the payload.
      */
@@ -1259,6 +1290,9 @@ final class AttackTestSupport {
      * Installs {@link #STRICT_REPORTER} as the error handler on {@code reader} and returns it; for raw-reader paths.
      */
     static XMLReader strictXMLReader(final XMLReader reader) {
+        if (reader.getErrorHandler() instanceof StrictReporter) {
+            return reader;
+        }
         reader.setErrorHandler(STRICT_REPORTER);
         return reader;
     }

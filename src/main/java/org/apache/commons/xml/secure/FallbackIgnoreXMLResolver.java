@@ -20,6 +20,7 @@ package org.apache.commons.xml.secure;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
+import javax.xml.stream.XMLReporter;
 import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
 
@@ -41,6 +42,7 @@ final class FallbackIgnoreXMLResolver implements XMLResolver {
     private static final InputStream EMPTY = new ByteArrayInputStream(new byte[0]);
 
     private XMLResolver delegate;
+    private XMLReporter reporter;
 
     /**
      * Constructs a new resolver that consults the given delegate and ignores whatever it does not resolve.
@@ -66,8 +68,12 @@ final class FallbackIgnoreXMLResolver implements XMLResolver {
         if (resolved != null) {
             return resolved;
         }
+        final String message = SecureException.forbidden(null, namespace, publicID, systemID, baseURI);
         if (SecureException.throwOnUnresolved()) {
-            throw new XMLStreamException(SecureException.forbidden(null, namespace, publicID, systemID, baseURI));
+            throw new XMLStreamException(message);
+        }
+        if (reporter != null) {
+            reporter.report(message, "forbidden entity", null, null);
         }
         return EMPTY;
     }
@@ -82,5 +88,9 @@ final class FallbackIgnoreXMLResolver implements XMLResolver {
      */
     void setDelegate(final XMLResolver delegate) {
         this.delegate = delegate;
+    }
+
+    public void setXMLReporter(XMLReporter reporter) {
+        this.reporter = reporter;
     }
 }

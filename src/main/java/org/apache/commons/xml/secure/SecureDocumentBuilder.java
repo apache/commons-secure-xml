@@ -106,6 +106,7 @@ final class SecureDocumentBuilder extends DocumentBuilder {
 
     @Override
     public void setErrorHandler(final ErrorHandler eh) {
+        floor.setErrorHandler(eh);
         delegate.setErrorHandler(eh);
     }
 }
