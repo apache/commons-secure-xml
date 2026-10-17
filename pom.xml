@@ -75,7 +75,7 @@ limitations under the License.
     <commons.jdependency.version>2.16</commons.jdependency.version>
     <!-- Test-only JAXB dependencies. -->
     <commons.jaxb.api.version>2.3.1</commons.jaxb.api.version>
-    <commons.jaxb.runtime.version>2.3.9</commons.jaxb.runtime.version>
+    <commons.jaxb.runtime.version>4.0.9</commons.jaxb.runtime.version>
     <!--
       jacoco-maven-plugin: Should only get better.
 
