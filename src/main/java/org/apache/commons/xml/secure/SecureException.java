@@ -81,7 +81,8 @@ final class SecureException extends IllegalStateException {
     }
 
     /**
-     * Builds the standard "forbidden" message shared by every resolver floor when {@link #throwOnUnresolved()} rejects an unresolved reference.
+     * Builds the standard "forbidden" message shared by every resolver floor.
+     * Used in the exception message when {@link #throwOnUnresolved()} rejects an unresolved reference, otherwise logged in the error handler as a warning.
      *
      * @param type      The resource kind, or {@code null} if not applicable.
      * @param namespace The namespace (or, for Woodstox, the entity name), or {@code null}.
