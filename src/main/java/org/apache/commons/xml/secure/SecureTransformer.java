@@ -118,6 +118,7 @@ final class SecureTransformer extends Transformer {
 
     @Override
     public void setErrorListener(final ErrorListener listener) {
+        floor.setErrorListener(listener);
         delegate.setErrorListener(listener);
     }
 

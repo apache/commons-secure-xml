@@ -93,6 +93,7 @@ final class SecureValidator extends Validator {
 
     @Override
     public void setErrorHandler(final ErrorHandler errorHandler) {
+        floor.setErrorHandler(errorHandler);
         delegate.setErrorHandler(errorHandler);
     }
 
