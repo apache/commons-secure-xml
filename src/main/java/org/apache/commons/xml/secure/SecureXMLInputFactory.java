@@ -285,7 +285,8 @@ public final class SecureXMLInputFactory {
         }
         try {
             // Java 8: the method does not exist, and XMLInputFactory has no class-name-taking lookup; instantiate the JDK's built-in default directly.
-            return secure((XMLInputFactory) Class.forName(JDK_XML_INPUT_FACTORY).getConstructor().newInstance());
+            // Load it from the bootstrap loader: our own loader may not see com.sun.* (for example, an OSGi bundle class loader).
+            return secure((XMLInputFactory) Class.forName(JDK_XML_INPUT_FACTORY, true, null).getConstructor().newInstance());
         } catch (final ReflectiveOperationException e) {
             // Where the class does not exist either (for example Android), report the miss like any StAX factory lookup: with FactoryConfigurationError.
             throw new FactoryConfigurationError(e, "Neither XMLInputFactory.newDefaultFactory() nor " + JDK_XML_INPUT_FACTORY + " is available");
