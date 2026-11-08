@@ -35,7 +35,7 @@ The <action> type attribute can be add, update, fix, or remove.
       <!-- FIX -->
       <action type="fix" dev="pkarwasz" due-to="Konrad Windszus, Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-20">Load the JDK's built-in XMLInputFactory on Java 8 from the bootstrap class loader, so SecureXMLInputFactory.newDefaultFactory() works in OSGi.</action>
       <action type="fix" dev="pkarwasz" due-to="Piotr P. Karwasz, Gary Gregory" issue="COMMONSXML-23">Load the JDK's built-in implementations from the system class loader in the Java 8 newDefaultInstance() fallbacks, and retry with it in the LSResourceResolver floor, so they work when the context class loader cannot see them.</action>
-      <action type="fix" dev="pkarwasz" due-to="Gary Gregory, Piotr P. Karwasz">Bump Android GitHub CI tests from API level 35 to 37.</action>
+      <action type="fix" dev="ggregory" due-to="Gary Gregory, Piotr P. Karwasz">Bump Android GitHub CI tests from API level 35 to 37.</action>
       <!-- ADD -->
       <!-- UPDATE -->
       <action dev="ggregory" type="update" due-to="Gary Gregory">Bump org.apache.commons:commons-parent from 105 to 107.</action>
