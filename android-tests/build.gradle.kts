@@ -105,7 +105,12 @@ android {
 
 // These are JVM-only test classes; exclude them from the Android test compile.
 tasks.withType<JavaCompile>().configureEach {
-    exclude("**/ShadingFootprintTest.java", "**/JaxbTest.java", "**/OsgiIT.java")
+    exclude(
+        "**/ShadingFootprintTest.java",
+        "**/JaxbTest.java",
+        "**/OsgiIT.java",
+        "**/FallbackIgnoreLSResourceResolverInitializationTest.java"
+    )
 }
 
 // Skip JAXP groups whose factories Android does not ship

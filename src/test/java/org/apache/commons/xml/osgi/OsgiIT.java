@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -67,7 +68,7 @@ import org.osgi.framework.launch.FrameworkFactory;
 import org.osgi.framework.wiring.BundleWiring;
 
 /**
- * Runs the unit test suite inside an OSGi framework, against the built bundle.
+ * Runs the applicable unit tests inside an OSGi framework, against the built bundle.
  *
  * <p>
  * The tests catch class-loading assumptions that only hold on a flat classpath: an OSGi bundle class loader sees its own classes, the packages it imports and
@@ -78,6 +79,11 @@ import org.osgi.framework.wiring.BundleWiring;
  * The test output directory, which the build gives a fragment manifest, is attached to that bundle, so the tests share its class loader and keep their
  * package-private access. The test harness (JUnit, Mockito, JAXB) is not under test and is boot-delegated to the class path. Only the JDK's built-in JAXP
  * implementations are used, as in the {@code test-stockjdk} execution: provider lookups cannot see other bundles without a mediator such as SPI Fly.
+ * </p>
+ * <p>
+ * Only the initial default-factory checks use the bundle class loader as the thread context class loader (TCCL). The reused tests retain the launcher's
+ * TCCL: XSLTC-generated translets need a parent loader that can see JDK internals. They therefore do not prove that all operations work with a bundle TCCL.
+ * The reused suite excludes {@code xpath3}, {@link #NOT_IN_OSGI} and {@link #METHODS_NOT_IN_OSGI}.
  * </p>
  * <p>
  * The framework is whichever single {@link FrameworkFactory} the class path provides; the build runs this class once with Apache Felix and once with Eclipse
@@ -91,9 +97,18 @@ class OsgiIT {
      * Factory methods that reach the JDK's built-in implementations without a provider lookup: {@code SecureSchemaFactory} also initializes the
      * {@code LSResourceResolver} floor.
      */
-    private static final String[][] DEFAULT_FACTORIES = {{"SecureDocumentBuilderFactory", "newDefaultInstance"},
-        {"SecureSAXParserFactory", "newDefaultInstance"}, {"SecureSchemaFactory", "newDefaultInstance"}, {"SecureTransformerFactory", "newDefaultInstance"},
-        {"SecureXPathFactory", "newDefaultInstance"}, {"SecureXMLInputFactory", "newDefaultFactory"}};
+    private static final String[][] DEFAULT_FACTORIES = {
+        {"SecureDocumentBuilderFactory", "newDefaultInstance", "javax.xml.parsers.DocumentBuilderFactory",
+            "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl"},
+        {"SecureSAXParserFactory", "newDefaultInstance", "javax.xml.parsers.SAXParserFactory",
+            "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl"},
+        {"SecureSchemaFactory", "newDefaultInstance", "javax.xml.validation.SchemaFactory:http://www.w3.org/2001/XMLSchema",
+            "com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory"},
+        {"SecureTransformerFactory", "newDefaultInstance", "javax.xml.transform.TransformerFactory",
+            "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl"},
+        {"SecureXPathFactory", "newDefaultInstance", "javax.xml.xpath.XPathFactory:http://java.sun.com/jaxp/xpath/dom",
+            "com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl"},
+        {"SecureXMLInputFactory", "newDefaultFactory", "javax.xml.stream.XMLInputFactory", "com.sun.xml.internal.stream.XMLInputFactoryImpl"}};
 
     /**
      * Package roots the framework delegates to the class path: the test harness only, never the library or JDK internals.
@@ -214,10 +229,26 @@ class OsgiIT {
         thread.setContextClassLoader(host.adapt(BundleWiring.class).getClassLoader());
         try {
             assertAll(Stream.of(DEFAULT_FACTORIES).map(factory -> () -> {
+                final String className = factory[0];
+                final String methodName = factory[1];
+                final String property = factory[2];
+                final String provider = factory[3];
+                // A broken provider selection makes an accidental fallback to ordinary discovery fail, even on a stock-JDK class path.
+                final String previous = System.setProperty(property, "missing.Provider");
                 try {
-                    assertNotNull(host.loadClass(HOST_SYMBOLIC_NAME + "." + factory[0]).getMethod(factory[1]).invoke(null), factory[0] + "." + factory[1]);
+                    final Object secured = host.loadClass(HOST_SYMBOLIC_NAME + "." + className).getMethod(methodName).invoke(null);
+                    assertNotNull(secured, className + "." + methodName);
+                    final Field delegate = secured.getClass().getDeclaredField("delegate");
+                    delegate.setAccessible(true);
+                    assertEquals(provider, delegate.get(secured).getClass().getName(), className);
                 } catch (final InvocationTargetException e) {
                     throw e.getCause();
+                } finally {
+                    if (previous == null) {
+                        System.clearProperty(property);
+                    } else {
+                        System.setProperty(property, previous);
+                    }
                 }
             }));
         } finally {
