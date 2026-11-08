@@ -481,7 +481,8 @@ public final class SecureTransformerFactory {
         }
         // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead. Where that class does not exist either (for
         // example Android), the lookup miss surfaces as TransformerFactoryConfigurationError, like any newInstance miss.
-        return newInstance(JDK_TRANSFORMER_FACTORY, null);
+        // Load it from the system class loader: the context class loader may not see it (for example an OSGi bundle class loader).
+        return newInstance(JDK_TRANSFORMER_FACTORY, ClassLoader.getSystemClassLoader());
     }
 
     /**

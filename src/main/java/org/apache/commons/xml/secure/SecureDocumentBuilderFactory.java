@@ -220,7 +220,8 @@ public final class SecureDocumentBuilderFactory {
         }
         try {
             // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead.
-            return newInstance(JDK_DOCUMENT_BUILDER_FACTORY, null);
+            // Load it from the system class loader: the context class loader may not see it (for example an OSGi bundle class loader).
+            return newInstance(JDK_DOCUMENT_BUILDER_FACTORY, ClassLoader.getSystemClassLoader());
         } catch (final FactoryConfigurationError e) {
             // Neither exists (for example, Android): degrade to the regular lookup, which such platforms pin to their built-in parser.
             return newInstance();

@@ -194,7 +194,8 @@ public final class SecureXPathFactory {
         }
         try {
             // Java 8: the method does not exist; instantiate the JDK's built-in default by its class name instead.
-            return newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI, JDK_XPATH_FACTORY, null);
+            // Load it from the system class loader: the context class loader may not see it (for example an OSGi bundle class loader).
+            return newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI, JDK_XPATH_FACTORY, ClassLoader.getSystemClassLoader());
         } catch (final XPathFactoryConfigurationException e) {
             // newDefaultInstance declares no checked exception; mirror XPathFactory.newInstance(), which reports a default-model miss as a RuntimeException.
             throw new RuntimeException("Neither XPathFactory.newDefaultInstance() nor " + JDK_XPATH_FACTORY + " is available", e);

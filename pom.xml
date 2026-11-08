@@ -53,7 +53,8 @@ limitations under the License.
     <!-- OSGi bundle metadata: override commons-parent's org.apache.commons.* defaults. -->
     <commons.osgi.symbolicName>org.apache.commons.xml.secure</commons.osgi.symbolicName>
     <commons.osgi.export>org.apache.commons.xml.secure.*;version=${project.version};-noimport:=true</commons.osgi.export>
-    <!-- The negation drops the JDK-internal package bnd infers from the reflective Java 8 fallback in SecureXMLInputFactory.newDefaultFactory(). -->
+    <!-- The negation drops the JDK-internal package bnd infers from the Java 8 fallback in SecureXMLInputFactory.newDefaultFactory(),
+         which loads it from the bootstrap loader. -->
     <commons.osgi.import>
       !com.sun.xml.internal.stream,
       net.sf.saxon.*;resolution:=optional,
@@ -71,6 +72,9 @@ limitations under the License.
     <commons.woodstox.version>7.1.1</commons.woodstox.version>
     <commons.xalan.version>2.7.3</commons.xalan.version>
     <commons.xerces.version>2.12.2</commons.xerces.version>
+    <!-- Test-only: OSGi frameworks for OsgiIT; the last Felix line and the latest Equinox both still run on Java 8. -->
+    <commons.felix.framework.version>7.0.5</commons.felix.framework.version>
+    <commons.equinox.version>3.24.300</commons.equinox.version>
     <!-- Test-only: computes each secure class's shade closure, mirroring maven-shade minimizeJar, for ShadingFootprintTest. -->
     <commons.jdependency.version>2.16</commons.jdependency.version>
     <!-- Test-only JAXB dependencies. -->
@@ -117,6 +121,24 @@ limitations under the License.
       <groupId>org.vafer</groupId>
       <artifactId>jdependency</artifactId>
       <version>${commons.jdependency.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- OsgiIT: runs the unit tests through the JUnit Platform launcher inside each OSGi framework. -->
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-launcher</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.framework</artifactId>
+      <version>${commons.felix.framework.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.platform</groupId>
+      <artifactId>org.eclipse.osgi</artifactId>
+      <version>${commons.equinox.version}</version>
       <scope>test</scope>
     </dependency>
     <!-- JAXB examples. -->
@@ -391,6 +413,110 @@ limitations under the License.
           </execution>
         </executions>
       </plugin>
+      <!--
+        Writes a fragment manifest into the test output directory,
+        so OsgiIT can install it as an exploded bundle attached to the library.
+        The imports are optional:
+        the test harness (JUnit, Mockito, JAXB) is boot-delegated to the class path by OsgiIT.
+      -->
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>test-bundle-manifest</id>
+            <phase>process-test-classes</phase>
+            <goals>
+              <goal>manifest</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
+              <manifestLocation>${project.build.testOutputDirectory}/META-INF</manifestLocation>
+              <instructions>
+                <Bundle-SymbolicName>${commons.osgi.symbolicName}.tests</Bundle-SymbolicName>
+                <Fragment-Host>${commons.osgi.symbolicName}</Fragment-Host>
+                <Export-Package>!*</Export-Package>
+                <Private-Package>org.apache.commons.xml.*</Private-Package>
+                <Import-Package>*;resolution:=optional</Import-Package>
+                <!-- The java11 test sources would otherwise raise the osgi.ee requirement to that of the build JDK. -->
+                <_noee>true</_noee>
+                <!--
+                  bnd looks the host up on the class path to drop its packages from Import-Package, but the host is this module's own jar, not built yet.
+                  Harmless: the tests are in the host's packages, so the fragment imports none of them anyway.
+                -->
+                <_fixupmessages>"Host ${commons.osgi.symbolicName}= for this fragment/require bundle cannot be found on the classpath";is:=ignore</_fixupmessages>
+              </instructions>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!--
+        OsgiIT runs the unit tests inside an OSGi framework against the packaged bundle, once per framework.
+        Each framework jar embeds its own copy of the OSGi API,
+        so each execution keeps exactly one of them on the class path.
+        Saxon is dropped as in test-stockjdk,
+        so provider lookups reach the JDK's built-in implementations, as they do for a bundle.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <!-- The same permissive JDK defaults as the surefire executions. -->
+        <configuration>
+          <systemPropertyVariables>
+            <javax.xml.accessExternalDTD>all</javax.xml.accessExternalDTD>
+            <javax.xml.accessExternalSchema>all</javax.xml.accessExternalSchema>
+            <javax.xml.accessExternalStylesheet>all</javax.xml.accessExternalStylesheet>
+          </systemPropertyVariables>
+        </configuration>
+        <executions>
+          <execution>
+            <id>test-osgi-felix</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+            <configuration>
+              <includes>
+                <include>**/OsgiIT.java</include>
+              </includes>
+              <reportsDirectory>${project.build.directory}/failsafe-reports/felix</reportsDirectory>
+              <summaryFile>${project.build.directory}/failsafe-reports/felix/failsafe-summary.xml</summaryFile>
+              <classpathDependencyExcludes>
+                <exclude>net.sf.saxon:Saxon-HE</exclude>
+                <exclude>org.eclipse.platform:org.eclipse.osgi</exclude>
+              </classpathDependencyExcludes>
+              <systemPropertyVariables>
+                <buildJar>${project.build.directory}/${project.build.finalName}.jar</buildJar>
+                <testClassesDirectory>${project.build.testOutputDirectory}</testClassesDirectory>
+                <osgiWorkDirectory>${project.build.directory}/osgi/felix</osgiWorkDirectory>
+              </systemPropertyVariables>
+            </configuration>
+          </execution>
+          <execution>
+            <id>test-osgi-equinox</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+            <configuration>
+              <includes>
+                <include>**/OsgiIT.java</include>
+              </includes>
+              <reportsDirectory>${project.build.directory}/failsafe-reports/equinox</reportsDirectory>
+              <summaryFile>${project.build.directory}/failsafe-reports/equinox/failsafe-summary.xml</summaryFile>
+              <classpathDependencyExcludes>
+                <exclude>net.sf.saxon:Saxon-HE</exclude>
+                <exclude>org.apache.felix:org.apache.felix.framework</exclude>
+              </classpathDependencyExcludes>
+              <systemPropertyVariables>
+                <buildJar>${project.build.directory}/${project.build.finalName}.jar</buildJar>
+                <testClassesDirectory>${project.build.testOutputDirectory}</testClassesDirectory>
+                <osgiWorkDirectory>${project.build.directory}/osgi/equinox</osgiWorkDirectory>
+              </systemPropertyVariables>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <!-- Do not publish a test-jar: the test classes are not part of the consumer contract. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -591,6 +717,9 @@ limitations under the License.
                   <goal>verify</goal>
                 </goals>
                 <configuration>
+                  <includes>
+                    <include>**/DescriptorIT.java</include>
+                  </includes>
                   <systemPropertyVariables>
                     <buildJar>${project.build.directory}/${project.build.finalName}.jar</buildJar>
                   </systemPropertyVariables>
