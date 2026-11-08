@@ -123,7 +123,7 @@ jobs:
 
   build-android:
 
-    # API 33 mirrors the Pixel 6a AVD baseline configured in android-tests/build.gradle.kts; API 35 covers the latest stable platform.
+    # API 33 mirrors the Pixel 6a AVD baseline configured in android-tests/build.gradle.kts; API 37 covers the latest stable platform.
     # Linux runners only: GitHub-hosted macOS / Windows runners no longer ship KVM / HAXM acceleration, and arm64 / x86 emulator images
     # without acceleration boot too slowly to be useful in CI.
     name: build (android, API ${{ matrix.api-level }})
@@ -133,7 +133,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        api-level: [ 33, 35 ]
+        api-level: [ 33, "37.0" ]
 
     steps:
       - name: Enable KVM
