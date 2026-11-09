@@ -40,6 +40,7 @@ The <action> type attribute can be add, update, fix, or remove.
       <action type="update" dev="ggregory" due-to="Gary Gregory">Bump org.apache.commons:commons-parent from 105 to 107.</action>
       <action type="update" dev="ggregory" due-to="Gary Gregory, Piotr P. Karwasz">Bump Android GitHub CI tests from API level 35 to 37.</action>
       <action type="update" dev="ggregory" due-to="Gary Gregory">Bump commons.saxon.version from 13.0 to 13.1 on Java 17 and up.</action>
+      <action type="update" dev="ggregory" due-to="Gary Gregory, Dependabot">Bump org.vafer:jdependency from 2.16 to 2.17 (#123⁠).</action>
     </release>
     <release version="1.1.0" date="2026-10-03" description="This is a feature and maintenance release. Requires Java 8 or later.">
       <!-- FIX -->
