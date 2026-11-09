@@ -41,7 +41,7 @@ import org.xml.sax.XMLReader;
  * This class' two public methods serve as examples for the Javadoc {@code overview.html} file.
  * </p>
  */
-public class JaxbTest {
+public class JaxbJavaxTest {
 
     @XmlRootElement
     static class MyJaxbModel {
@@ -51,14 +51,14 @@ public class JaxbTest {
     @Test
     void testUnmarshalSecurelyWithSax() throws Exception {
         try (InputStream xmlStream = new ByteArrayInputStream("<myJaxbModel/>".getBytes(StandardCharsets.UTF_8))) {
-            assertNotNull(new JaxbTest().unmarshalSecurelyWithSax(xmlStream));
+            assertNotNull(new JaxbJavaxTest().unmarshalSecurelyWithSax(xmlStream));
         }
     }
 
     @Test
     void testUnmarshalSecurelyWithStax() throws Exception {
         try (InputStream xmlStream = new ByteArrayInputStream("<myJaxbModel/>".getBytes(StandardCharsets.UTF_8))) {
-            assertNotNull(new JaxbTest().unmarshalSecurelyWithStax(xmlStream));
+            assertNotNull(new JaxbJavaxTest().unmarshalSecurelyWithStax(xmlStream));
         }
     }
 
