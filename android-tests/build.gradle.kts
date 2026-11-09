@@ -107,7 +107,8 @@ android {
 tasks.withType<JavaCompile>().configureEach {
     exclude(
         "**/ShadingFootprintTest.java",
-        "**/JaxbTest.java",
+        "**/JaxbJavaxTest.java",
+        "**/JaxbJakartaTest.java",
         "**/OsgiIT.java",
         "**/FallbackIgnoreLSResourceResolverInitializationTest.java"
     )
