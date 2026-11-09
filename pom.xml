@@ -751,7 +751,7 @@ limitations under the License.
       </activation>
 
       <properties>
-        <commons.saxon.version>13.0</commons.saxon.version>
+        <commons.saxon.version>13.1</commons.saxon.version>
       </properties>
     </profile>
     <!--
