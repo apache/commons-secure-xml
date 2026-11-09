@@ -80,6 +80,8 @@ limitations under the License.
     <!-- Test-only JAXB dependencies. -->
     <commons.jaxb.api.version>2.3.1</commons.jaxb.api.version>
     <commons.jaxb.runtime.version>2.3.9</commons.jaxb.runtime.version>
+    <commons.jaxb.jakarta.api.version>3.0.1</commons.jaxb.jakarta.api.version>
+    <commons.jaxb.jakarta.runtime.version>3.0.2</commons.jaxb.jakarta.runtime.version>
     <!--
       jacoco-maven-plugin: Should only get better.
 
@@ -153,6 +155,19 @@ limitations under the License.
       <artifactId>jaxb-runtime</artifactId>
       <version>${commons.jaxb.runtime.version}</version>
       <scope>test</scope>
+      <exclusions>
+        <!-- The Javax API is supplied explicitly above; Jakarta 3 uses the same Maven coordinates as this transitive 2.x API. -->
+        <exclusion>
+          <groupId>jakarta.xml.bind</groupId>
+          <artifactId>jakarta.xml.bind-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+      <version>${commons.jaxb.jakarta.api.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <build>
@@ -209,14 +224,15 @@ limitations under the License.
     </pluginManagement>
     <plugins>
       <!--
-        Run the test suite eight times, each with a distinct JAXP combination:
+        Run the test suite with eight distinct JAXP combinations, plus an isolated Jakarta JAXB execution:
 
           - test-jdk-xerces:    stock JDK TrAX and XPath over Apache Xerces SAX/DOM
                                 (the only cell where jdk.xml.overrideDefaultParser decides which parser rewrites sources)
           - test-saxon:         Saxon-HE (TrAX, XPath) over stock JDK SAX
           - test-saxon-xerces:  Saxon-HE (TrAX, XPath) over stock JDK SAX or Apache Xerces SAX
                                 (Saxon prefers the JDK SAX provider but may resolve to Xerces)
-          - test-stockjdk:      stock JDK factories only (every group except xpath3)
+          - test-stockjdk:      stock JDK factories only (every group except xpath3 and jaxb-jakarta)
+          - test-jaxb-jakarta:  Jakarta JAXB over stock JDK SAX and StAX
           - test-woodstox:      Woodstox (StAX)
           - test-xalan:         Apache Xalan (TrAX, XPath) over stock JDK SAX
           - test-xalan-xerces:  Apache Xalan (TrAX, XPath) over Apache Xerces SAX
@@ -233,6 +249,8 @@ limitations under the License.
           Inherited by every execution defined below.
         -->
         <configuration>
+          <!-- Jakarta JAXB has its own isolated runtime execution. -->
+          <excludedGroups>jaxb-jakarta</excludedGroups>
           <systemPropertyVariables>
             <!-- Allow all protocols for external DTDs, schemas, and stylesheets. -->
             <javax.xml.accessExternalDTD>all</javax.xml.accessExternalDTD>
@@ -244,6 +262,34 @@ limitations under the License.
           <execution>
             <id>default-test</id>
             <phase>none</phase>
+          </execution>
+          <execution>
+            <id>test-jaxb-jakarta</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <reportsDirectory>${project.build.directory}/surefire-reports/jaxb-jakarta</reportsDirectory>
+              <groups>jaxb-jakarta</groups>
+              <excludedGroups>xpath3</excludedGroups>
+              <!-- Remove the Javax runtime closure before adding the Jakarta runtime closure. -->
+              <classpathDependencyExcludes>
+                <exclude>net.sf.saxon:Saxon-HE</exclude>
+                <exclude>javax.xml.bind:jaxb-api</exclude>
+                <exclude>javax.activation:javax.activation-api</exclude>
+                <exclude>org.glassfish.jaxb:jaxb-runtime</exclude>
+                <exclude>org.glassfish.jaxb:txw2</exclude>
+                <exclude>com.sun.istack:istack-commons-runtime</exclude>
+                <exclude>com.sun.activation:jakarta.activation</exclude>
+              </classpathDependencyExcludes>
+              <additionalClasspathDependencies>
+                <dependency>
+                  <groupId>org.glassfish.jaxb</groupId>
+                  <artifactId>jaxb-runtime</artifactId>
+                  <version>${commons.jaxb.jakarta.runtime.version}</version>
+                </dependency>
+              </additionalClasspathDependencies>
+            </configuration>
           </execution>
           <execution>
             <id>test-saxon</id>
@@ -281,8 +327,8 @@ limitations under the License.
             </goals>
             <configuration>
               <reportsDirectory>${project.build.directory}/surefire-reports/stockjdk</reportsDirectory>
-              <!-- Run every tagged and untagged test except xpath3, which needs Saxon on the classpath. -->
-              <excludedGroups>xpath3</excludedGroups>
+              <!-- Run every tagged and untagged test except xpath3 and jaxb-jakarta, which have separate executions. -->
+              <excludedGroups>xpath3,jaxb-jakarta</excludedGroups>
               <classpathDependencyExcludes>
                 <exclude>net.sf.saxon:Saxon-HE</exclude>
               </classpathDependencyExcludes>
@@ -612,6 +658,7 @@ limitations under the License.
             <configuration>
               <!-- The suite runs once per JAXP combination, each execution into its own directory. -->
               <reportsDirectories>
+                <reportsDirectory>${project.build.directory}/surefire-reports/jaxb-jakarta</reportsDirectory>
                 <reportsDirectory>${project.build.directory}/surefire-reports/jdk-xerces</reportsDirectory>
                 <reportsDirectory>${project.build.directory}/surefire-reports/saxon</reportsDirectory>
                 <reportsDirectory>${project.build.directory}/surefire-reports/saxon-xerces</reportsDirectory>
@@ -804,6 +851,11 @@ limitations under the License.
 
                 Every other execution is silenced; their classpath swaps have no native equivalent.
               -->
+              <!-- The native image replays the Javax classpath; Jakarta is tested in its separate JVM execution. -->
+              <execution>
+                <id>test-jaxb-jakarta</id>
+                <phase>none</phase>
+              </execution>
               <execution>
                 <id>test-xalan</id>
                 <phase>none</phase>

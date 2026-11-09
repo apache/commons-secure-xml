@@ -32,7 +32,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -122,9 +121,11 @@ class OsgiIT {
     private static final String HOST_SYMBOLIC_NAME = "org.apache.commons.xml.secure";
 
     /**
-     * Test classes that cannot run inside a framework: {@code ShadingFootprintTest} reads {@code target/classes} directly.
+     * Test classes that cannot run inside a framework: {@code ShadingFootprintTest} reads {@code target/classes} directly;
+     * {@code JaxbJakartaTest} requires its isolated Jakarta runtime.
      */
-    private static final List<String> NOT_IN_OSGI = Collections.singletonList("org.apache.commons.xml.secure.ShadingFootprintTest");
+    private static final List<String> NOT_IN_OSGI = Arrays.asList("org.apache.commons.xml.secure.ShadingFootprintTest",
+            "org.apache.commons.xml.secure.JaxbJakartaTest");
 
     /**
      * Test methods that cannot run inside a framework.
