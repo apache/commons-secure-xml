@@ -68,7 +68,7 @@ limitations under the License.
     <!-- GraalVM native-image tooling; used by the `native-xalan` profile only. -->
     <commons.graalvm.buildtools.version>1.1.14</commons.graalvm.buildtools.version>
     <!-- Optional JAXP implementations used by bundled providers. -->
-    <commons.saxon.version>12.9</commons.saxon.version>
+    <commons.saxon.version>13.1</commons.saxon.version>
     <commons.woodstox.version>7.1.1</commons.woodstox.version>
     <commons.xalan.version>2.7.3</commons.xalan.version>
     <commons.xerces.version>2.12.2</commons.xerces.version>
