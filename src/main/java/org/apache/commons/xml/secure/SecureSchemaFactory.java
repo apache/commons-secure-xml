@@ -190,6 +190,7 @@ public final class SecureSchemaFactory {
 
         @Override
         public void setErrorHandler(final ErrorHandler errorHandler) {
+            floor.setErrorHandler(errorHandler);
             delegate.setErrorHandler(errorHandler);
         }
 
