@@ -73,7 +73,7 @@ limitations under the License.
     <commons.xalan.version>2.7.3</commons.xalan.version>
     <commons.xerces.version>2.12.2</commons.xerces.version>
     <!-- Test-only: OSGi frameworks for OsgiIT; the last Felix line and the latest Equinox both still run on Java 8. -->
-    <commons.felix.framework.version>7.0.5</commons.felix.framework.version>
+    <commons.felix.framework.version>8.0.0</commons.felix.framework.version>
     <commons.equinox.version>3.24.300</commons.equinox.version>
     <!-- Test-only: computes each secure class's shade closure, mirroring maven-shade minimizeJar, for ShadingFootprintTest. -->
     <commons.jdependency.version>2.17</commons.jdependency.version>
