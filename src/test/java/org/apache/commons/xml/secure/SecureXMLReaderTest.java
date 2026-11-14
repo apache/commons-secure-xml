@@ -17,6 +17,10 @@
 
 package org.apache.commons.xml.secure;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -27,6 +31,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLFilterImpl;
@@ -49,6 +54,37 @@ class SecureXMLReaderTest {
         public void parse(final String systemId) {
             systemIdParsed = true;
         }
+    }
+
+    @Test
+    void constructorInstallsFloorOnDelegate() {
+        final XMLFilterImpl delegate = new XMLFilterImpl();
+        final SecureXMLReader reader = new SecureXMLReader(delegate);
+        final FallbackIgnoreEntityResolver2 floor = assertInstanceOf(FallbackIgnoreEntityResolver2.class, delegate.getEntityResolver());
+        assertSame(delegate, reader.getDelegate());
+        assertNull(reader.getEntityResolver());
+        final DefaultHandler handler = new DefaultHandler();
+        reader.setEntityResolver(handler);
+        assertSame(floor, delegate.getEntityResolver());
+        assertSame(handler, floor.getDelegate());
+        assertSame(handler, reader.getEntityResolver());
+    }
+
+    @Test
+    void constructorPropagatesResolverInstallationFailure() {
+        final IllegalStateException failure = new IllegalStateException("test");
+        final XMLFilterImpl delegate = new XMLFilterImpl() {
+            @Override
+            public void setEntityResolver(final EntityResolver resolver) {
+                throw failure;
+            }
+        };
+        assertSame(failure, assertThrows(IllegalStateException.class, () -> new SecureXMLReader(delegate)));
+    }
+
+    @Test
+    void constructorRejectsNullDelegate() {
+        assertEquals("delegate", assertThrows(NullPointerException.class, () -> new SecureXMLReader(null)).getMessage());
     }
 
     @Test

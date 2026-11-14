@@ -171,7 +171,7 @@ limitations under the License.
     </dependency>
   </dependencies>
   <build>
-    <defaultGoal>clean checkstyle:check spotbugs:check pmd:check javadoc:javadoc verify</defaultGoal>
+    <defaultGoal>clean checkstyle:check javadoc:javadoc verify pmd:check spotbugs:check</defaultGoal>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -682,6 +682,31 @@ limitations under the License.
     </plugins>
   </reporting>
   <profiles>
+    <profile>
+      <id>java28-tests</id>
+      <activation>
+        <jdk>[28,)</jdk>
+      </activation>
+      <build>
+        <plugins>
+          <!-- Temporarily allow Mockito/Objenesis to construct test doubles on JDK 28 and later. -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <argLine>@{argLine} -Djdk.reflect.allowNonSerializableConstruction=true</argLine>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <configuration>
+              <argLine>@{argLine} -Djdk.reflect.allowNonSerializableConstruction=true</argLine>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
     <!--
       Fold the Android instrumented run into the coverage data.
     -->

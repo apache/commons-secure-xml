@@ -47,6 +47,13 @@ import org.xml.sax.XMLReader;
  */
 class SecureXMLReader implements XMLReader {
 
+    private static FallbackIgnoreEntityResolver2 installFloor(final XMLReader delegate) {
+        Objects.requireNonNull(delegate, "delegate");
+        final FallbackIgnoreEntityResolver2 floor = new FallbackIgnoreEntityResolver2(null);
+        delegate.setEntityResolver(floor);
+        return floor;
+    }
+
     private final XMLReader delegate;
 
     private final FallbackIgnoreEntityResolver2 floor;
@@ -58,9 +65,13 @@ class SecureXMLReader implements XMLReader {
      * @throws NullPointerException Thrown if {@code delegate} is {@code null}.
      */
     SecureXMLReader(final XMLReader delegate) {
-        this.delegate = Objects.requireNonNull(delegate, "delegate");
-        this.floor = new FallbackIgnoreEntityResolver2(null);
-        delegate.setEntityResolver(floor);
+        // Complete potentially throwing initialization before Object construction to prevent finalizer attacks.
+        this(delegate, installFloor(delegate));
+    }
+
+    private SecureXMLReader(final XMLReader delegate, final FallbackIgnoreEntityResolver2 floor) {
+        this.delegate = delegate;
+        this.floor = floor;
     }
 
     @Override
