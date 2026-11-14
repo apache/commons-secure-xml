@@ -148,6 +148,32 @@ class OsgiIT {
         return Paths.get(value).toAbsolutePath();
     }
 
+    /**
+     * Runs one test class, loaded through the library bundle, and fails with the inner failures if any.
+     */
+    private static void runTestClass(final Class<?> testClass) {
+        final SummaryGeneratingListener listener = new SummaryGeneratingListener();
+        final PostDiscoveryFilter notInOsgi = descriptor -> descriptor.getSource()
+                .filter(MethodSource.class::isInstance)
+                .map(MethodSource.class::cast)
+                .filter(source -> METHODS_NOT_IN_OSGI.contains(source.getJavaClass().getSimpleName() + "#" + source.getMethodName()))
+                .map(source -> FilterResult.excluded("cannot run inside an OSGi framework"))
+                .orElseGet(() -> FilterResult.included(null));
+        // The context class loader stays the class path's, as in a plain framework launcher.
+        LauncherFactory.create().execute(LauncherDiscoveryRequestBuilder.request()
+                .selectors(DiscoverySelectors.selectClass(testClass))
+                // Same exclusion as the test-stockjdk execution: xpath3 needs Saxon.
+                .filters(TagFilter.excludeTags("xpath3"), notInOsgi)
+                .build(), listener);
+        final TestExecutionSummary summary = listener.getSummary();
+        if (summary.getTotalFailureCount() > 0) {
+            final StringWriter failures = new StringWriter();
+            summary.printFailuresTo(new PrintWriter(failures), 25);
+            throw new AssertionError(summary.getTotalFailureCount() + " failure(s) in " + testClass.getName() + " under " + framework.getSymbolicName()
+                    + System.lineSeparator() + failures);
+        }
+    }
+
     @BeforeAll
     static void startFramework() throws Exception {
         final List<FrameworkFactory> factories = new ArrayList<>();
@@ -186,32 +212,6 @@ class OsgiIT {
             final FrameworkEvent event = framework.waitForStop(10_000);
             assertEquals(FrameworkEvent.STOPPED, event.getType(),
                     () -> "framework did not stop cleanly: event type " + event.getType() + ", " + event.getThrowable());
-        }
-    }
-
-    /**
-     * Runs one test class, loaded through the library bundle, and fails with the inner failures if any.
-     */
-    private static void runTestClass(final Class<?> testClass) {
-        final SummaryGeneratingListener listener = new SummaryGeneratingListener();
-        final PostDiscoveryFilter notInOsgi = descriptor -> descriptor.getSource()
-                .filter(MethodSource.class::isInstance)
-                .map(MethodSource.class::cast)
-                .filter(source -> METHODS_NOT_IN_OSGI.contains(source.getJavaClass().getSimpleName() + "#" + source.getMethodName()))
-                .map(source -> FilterResult.excluded("cannot run inside an OSGi framework"))
-                .orElseGet(() -> FilterResult.included(null));
-        // The context class loader stays the class path's, as in a plain framework launcher.
-        LauncherFactory.create().execute(LauncherDiscoveryRequestBuilder.request()
-                .selectors(DiscoverySelectors.selectClass(testClass))
-                // Same exclusion as the test-stockjdk execution: xpath3 needs Saxon.
-                .filters(TagFilter.excludeTags("xpath3"), notInOsgi)
-                .build(), listener);
-        final TestExecutionSummary summary = listener.getSummary();
-        if (summary.getTotalFailureCount() > 0) {
-            final StringWriter failures = new StringWriter();
-            summary.printFailuresTo(new PrintWriter(failures), 25);
-            throw new AssertionError(summary.getTotalFailureCount() + " failure(s) in " + testClass.getName() + " under " + framework.getSymbolicName()
-                    + System.lineSeparator() + failures);
         }
     }
 
