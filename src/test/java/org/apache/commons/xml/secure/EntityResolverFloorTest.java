@@ -27,6 +27,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -36,6 +39,9 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLResolver;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.transform.Templates;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
@@ -52,6 +58,7 @@ import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 
 /**
@@ -165,9 +172,9 @@ class EntityResolverFloorTest {
         }, "Failed to build LSInput for " + systemId);
     }
 
-    private static DocumentBuilder secureBuilder() throws Exception {
+    private static DocumentBuilder secureBuilder(Collection<SAXParseException> saxWarnings) throws Exception {
         final DocumentBuilder builder = SecureDocumentBuilderFactory.newInstance().newDocumentBuilder();
-        builder.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
+        builder.setErrorHandler(new AttackTestSupport.StrictReporter(saxWarnings,  null));
         return builder;
     }
 
@@ -177,47 +184,76 @@ class EntityResolverFloorTest {
      * resolver that returns {@code null} cannot re-open the fetch. The strict listener turns any reported-and-recovered error into a test failure, so an
      * implementation cannot quietly recover from a floor resolution while the test asserts clean completion.
      */
-    private static TransformerFactory secureTransformerFactory() {
+    private static TransformerFactory secureTransformerFactory(Collection<TransformerException> transformerWarnings) {
         final TransformerFactory factory = SecureTransformerFactory.newInstance();
-        factory.setErrorListener(AttackTestSupport.STRICT_REPORTER);
+        factory.setErrorListener(new AttackTestSupport.StrictReporter(null, transformerWarnings));
         return factory;
     }
 
-    private static XMLReader secureXMLReader() throws Exception {
+    private static XMLReader secureXMLReader(Collection<SAXParseException> saxWarnings) throws Exception {
         final XMLReader reader = SecureSAXParserFactory.newInstance().newSAXParser().getXMLReader();
-        reader.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
+        reader.setErrorHandler(new AttackTestSupport.StrictReporter(saxWarnings,  null));
         return reader;
     }
 
-    private static DocumentBuilder xIncludeAwareBuilder() throws Exception {
+    private static DocumentBuilder xIncludeAwareBuilder(Collection<SAXParseException> saxWarnings) throws Exception {
         final DocumentBuilderFactory factory = SecureDocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         AttackTestSupport.assumeDoesNotThrow(() -> factory.setXIncludeAware(true));
         final DocumentBuilder builder = factory.newDocumentBuilder();
-        builder.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
+        builder.setErrorHandler(new AttackTestSupport.StrictReporter(saxWarnings,  null));
         return builder;
     }
 
-    private static XMLReader xIncludeAwareReader() throws Exception {
+    private static XMLReader xIncludeAwareReader(Collection<SAXParseException> saxWarnings) throws Exception {
         final SAXParserFactory factory = SecureSAXParserFactory.newInstance();
         factory.setNamespaceAware(true);
         AttackTestSupport.assumeDoesNotThrow(() -> factory.setXIncludeAware(true));
         final XMLReader reader = factory.newSAXParser().getXMLReader();
-        reader.setErrorHandler(AttackTestSupport.STRICT_REPORTER);
+        reader.setErrorHandler(new AttackTestSupport.StrictReporter(saxWarnings,  null));
         return reader;
+    }
+
+    private static void assertIgnoredEntitySax(Collection<SAXParseException> warnings) {
+        doAssertIgnoredEntity(false, warnings.stream().map(SAXParseException::getMessage).collect(Collectors.toList()));
+    }
+
+    private static void assertIgnoredEntityTransformer(Collection<TransformerException> warnings) {
+        doAssertIgnoredEntity(false, warnings.stream().map(TransformerException::getMessage).collect(Collectors.toList()));
+    }
+
+    private static void assertNoIgnoredEntitySax(Collection<SAXParseException> warnings) {
+        doAssertIgnoredEntity(true, warnings.stream().map(SAXParseException::getMessage).collect(Collectors.toList()));
+    }
+
+    private static void assertNoIgnoredEntityTransformer(Collection<TransformerException> warnings) {
+        doAssertIgnoredEntity(true, warnings.stream().map(TransformerException::getMessage).collect(Collectors.toList()));
+    }
+
+    private static final void doAssertIgnoredEntity(boolean expectNone, Collection<String> messages) {
+        final String expected = "External resource fetch forbidden";
+        if (expectNone) {
+            assertTrue(messages.stream().noneMatch(m -> m.contains(expected)),
+                    "Expected no warning for ignored entity found in " + messages);
+        } else {
+            assertTrue(messages.stream().anyMatch(m -> m.contains(expected)),
+                    "Expected at least one warning for ignored entity not found in " + messages);
+        }
     }
 
     @Test
     @Tag("dom")
     void domDoesNotLeakUnlisted() throws Exception {
         Assumptions.assumeTrue(AttackTestSupport.DOM_RESOLVES_INTERNAL_ENTITIES, "platform DOM does not resolve user-defined entities");
-        final DocumentBuilder builder = secureBuilder();
+        final Collection<SAXParseException> warnings = new ArrayList<>();
+        final DocumentBuilder builder = secureBuilder(warnings);
         builder.setEntityResolver(ENTITY_ALLOW_LIST);
         // The caller returns null for the unlisted entity, so the floor resolves it to empty rather than fetching it: the parse completes (or is rejected)
         // without leaking the entity's content.
         try {
             final Document doc = builder.parse(AttackTestSupport.inputSource(entityPayload(UNLISTED)));
             assertFalse(doc.getDocumentElement().getTextContent().contains(AttackTestSupport.LEAKED_MARKER), "unlisted external entity leaked into the DOM");
+            assertIgnoredEntitySax(warnings);
         } catch (final SAXException blocked) {
             // Acceptable: the reference was rejected at parse rather than resolved to empty.
         }
@@ -227,21 +263,25 @@ class EntityResolverFloorTest {
     @Tag("dom")
     void domResolvesAllowListed() throws Exception {
         Assumptions.assumeTrue(AttackTestSupport.DOM_RESOLVES_INTERNAL_ENTITIES, "platform DOM does not resolve user-defined entities");
-        final DocumentBuilder builder = secureBuilder();
+        final Collection<SAXParseException> warnings = new ArrayList<>();
+        final DocumentBuilder builder = secureBuilder(warnings);
         builder.setEntityResolver(ENTITY_ALLOW_LIST);
         final Document doc = builder.parse(AttackTestSupport.inputSource(entityPayload(ALLOWED)));
         assertTrue(doc.getDocumentElement().getTextContent().contains(AttackTestSupport.LEAKED_MARKER),
                 "allow-listed external entity should resolve through the caller's resolver");
+        assertNoIgnoredEntitySax(warnings);
     }
 
     @Test
     @Tag("dom")
     void domResolvesRelativeXIncludeSibling() throws Exception {
-        final DocumentBuilder builder = xIncludeAwareBuilder();
+        final Collection<SAXParseException> warnings = new ArrayList<>();
+        final DocumentBuilder builder = xIncludeAwareBuilder(warnings);
         builder.setEntityResolver(RESOLVE_ALL);
         final Document doc = builder.parse(XINCLUDE_HOST);
         assertTrue(doc.getDocumentElement().getTextContent().contains(AttackTestSupport.LEAKED_MARKER),
                 "relative XInclude sibling should resolve through the caller's resolver after the floor absolutizes the href");
+        assertNoIgnoredEntitySax(warnings);
     }
 
     @Test
@@ -251,18 +291,21 @@ class EntityResolverFloorTest {
         // ignore-all floor must still resolve the external entity to empty rather than letting the parser fetch it.
         final SAXParser parser = SecureSAXParserFactory.newInstance().newSAXParser();
         final StringBuilder text = new StringBuilder();
+        final Collection<SAXParseException> warnings = new ArrayList<>();
         try {
-            parser.parse(AttackTestSupport.inputSource(entityPayload(ALLOWED)), AttackTestSupport.capturingHandler(text));
+            parser.parse(AttackTestSupport.inputSource(entityPayload(ALLOWED)), AttackTestSupport.capturingHandler(text, warnings));
         } catch (final SAXException e) {
             return; // blocked at parse: acceptable
         }
         assertFalse(text.toString().contains(AttackTestSupport.LEAKED_MARKER), "parse(source, handler) leaked the external entity:\n" + text);
+        assertIgnoredEntitySax(warnings);
     }
 
     @Test
     @Tag("sax")
     void saxReaderDoesNotLeakUnlisted() throws Exception {
-        final XMLReader reader = secureXMLReader();
+        final Collection<SAXParseException> warnings = new ArrayList<>();
+        final XMLReader reader = secureXMLReader(warnings);
         reader.setEntityResolver(ENTITY_ALLOW_LIST);
         // The caller returns null for the unlisted entity, so the floor resolves it to empty rather than fetching it.
         final String text;
@@ -272,26 +315,31 @@ class EntityResolverFloorTest {
             return; // Acceptable: rejected at parse rather than resolved to empty.
         }
         assertFalse(text.contains(AttackTestSupport.LEAKED_MARKER), "unlisted external entity leaked:\n" + text);
+        assertIgnoredEntitySax(warnings);
     }
 
     @Test
     @Tag("sax")
     void saxReaderResolvesAllowListed() throws Exception {
-        final XMLReader reader = secureXMLReader();
+        final Collection<SAXParseException> warnings = new ArrayList<>();
+        final XMLReader reader = secureXMLReader(warnings);
         reader.setEntityResolver(ENTITY_ALLOW_LIST);
         final String text = AttackTestSupport.captureCharacters(reader, entityPayload(ALLOWED));
         assertTrue(text.contains(AttackTestSupport.LEAKED_MARKER),
                 "allow-listed external entity should resolve through the caller's resolver");
+        assertNoIgnoredEntitySax(warnings);
     }
 
     @Test
     @Tag("sax")
     void saxResolvesRelativeXIncludeSibling() throws Exception {
-        final XMLReader reader = xIncludeAwareReader();
+        final Collection<SAXParseException> warnings = new ArrayList<>();
+        final XMLReader reader = xIncludeAwareReader(warnings);
         reader.setEntityResolver(RESOLVE_ALL);
         final String text = AttackTestSupport.captureCharacters(reader, new InputSource(XINCLUDE_HOST));
         assertTrue(text.contains(AttackTestSupport.LEAKED_MARKER),
                 "relative XInclude sibling should resolve through the caller's resolver after the floor absolutizes the href");
+        assertNoIgnoredEntitySax(warnings);
     }
 
     @Test
@@ -376,7 +424,8 @@ class EntityResolverFloorTest {
     @Test
     @Tag("trax")
     void transformerDoesNotLeakUnlisted() throws Exception {
-        final TransformerFactory factory = secureTransformerFactory();
+        final Collection<TransformerException> warnings = new ArrayList<>();
+        final TransformerFactory factory = secureTransformerFactory(warnings);
         factory.setURIResolver((href, base) -> null);
         // Deterministic on every implementation: XSLTC and Xalan compile the empty document the URIResolver floor
         // returns, Saxon the EmptySource its Configuration floor returns, so the import contributes nothing.
@@ -384,43 +433,80 @@ class EntityResolverFloorTest {
         factory.newTemplates(AttackTestSupport.resourceSource("with-import.xsl")).newTransformer().transform(AttackTestSupport.streamSource("<root/>"),
                 new StreamResult(sink));
         assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "unlisted stylesheet import leaked");
+        assertIgnoredEntityTransformer(warnings);
     }
 
     @Test
     @Tag("trax")
     void transformerParsesOptedInDocumentSecured() throws Exception {
+        final Collection<TransformerException> warnings = new ArrayList<>();
         // Same contract on the runtime document() channel, which reaches a different internal reader than the compile-time import.
-        final TransformerFactory factory = secureTransformerFactory();
+        final TransformerFactory factory = secureTransformerFactory(warnings);
         factory.setURIResolver(
                 (href, base) -> href != null && href.endsWith("referenced.xml") ? AttackTestSupport.resourceSource("referenced-with-entity.xml") : null);
         // Same undeclared-entity outcome as the import above: skipped, never expanded.
         final StringWriter sink = new StringWriter();
-        factory.newTemplates(AttackTestSupport.resourceSource("with-document.xsl")).newTransformer().transform(AttackTestSupport.streamSource("<root/>"),
+        final Templates templates = factory.newTemplates(AttackTestSupport.resourceSource("with-document.xsl"));
+        final Transformer transformer = templates.newTransformer();
+        transformer.transform(AttackTestSupport.streamSource("<root/>"),
                 new StreamResult(sink));
         assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "opted-in document() resource leaked its external entity");
+        // entity expansion happens at run time
+        if (isEmittingWarnings(true, templates)) {
+            assertIgnoredEntityTransformer(warnings);
+        }
     }
 
     @Test
     @Tag("trax")
     void transformerParsesOptedInImportSecured() throws Exception {
+        final Collection<TransformerException> warnings = new ArrayList<>();
         // The opted-in module carries an external DTD reference; parsed on the floor the DTD is empty, so its entity cannot expand into the output.
-        final TransformerFactory factory = secureTransformerFactory();
+        final TransformerFactory factory = secureTransformerFactory(warnings);
         factory.setURIResolver(
                 (href, base) -> href != null && href.endsWith("included.xsl") ? AttackTestSupport.resourceSource("included-with-entity.xsl") : null);
         // The emptied DTD leaves the entity undeclared — only a validity violation when an external subset is
         // declared — so every non-validating parser skips it and the transform deterministically completes.
         final StringWriter sink = new StringWriter();
-        factory.newTemplates(AttackTestSupport.resourceSource("with-import.xsl")).newTransformer().transform(AttackTestSupport.streamSource("<root/>"),
+        final Templates templates = factory.newTemplates(AttackTestSupport.resourceSource("with-import.xsl"));
+        templates.newTransformer().transform(AttackTestSupport.streamSource("<root/>"),
                 new StreamResult(sink));
         assertFalse(sink.toString().contains(AttackTestSupport.LEAKED_MARKER), "opted-in stylesheet import leaked its external entity");
+        // entity expansion happens at compile time
+        if (isEmittingWarnings(false, templates)) {
+            assertIgnoredEntityTransformer(warnings);
+        }
+    }
+
+    static boolean isEmittingWarnings(boolean isRuntime, final Templates templates) {
+        if (templates instanceof SecureTemplates) {
+            Templates wrappedTemplates = ((SecureTemplates) templates).getDelegate();
+            if (wrappedTemplates.getClass().getName().equals("com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl")) {
+                // uses either ErrorHandlerProxy at compile time which throws on warnings 
+                // (https://github.com/openjdk/jdk/blob/440be4ff6ce97d9a125c2c7c49ace140a8ddc0b7/src/java.xml/share/classes/com/sun/org/apache/xalan/internal/xsltc/compiler/Parser.java#L435)
+                // or at runtime uses com.sun.org.apache.xml.internal.dtm.ref.sax2dtm.SAX2DTM2#warning(...) which just emits to System.err
+                return false;
+            } else if (wrappedTemplates.getClass().getName().startsWith("org.apache.xalan.internal.xsltc.trax.TemplatesImpl")) {
+                // warnings swallowed at compile time
+                return isRuntime;
+            } else if (wrappedTemplates.getClass().getName().startsWith("net.sf.saxon")) {
+                // net.sf.saxon.lib.StandardErrorHandler used which swallows warnings during run time.
+                return !isRuntime;
+            }
+        } else {
+            throw new IllegalArgumentException("Expected SecureTemplates, got " + templates.getClass().getName());
+        }
+        return false;
     }
 
     @Test
     @Tag("trax")
     void transformerResolvesAllowListed() {
+        final Collection<TransformerException> warnings = new ArrayList<>();
         // with-import.xsl imports included.xsl, so it compiles only if the import is resolved.
-        final TransformerFactory factory = secureTransformerFactory();
+        final TransformerFactory factory = secureTransformerFactory(warnings);
         factory.setURIResolver(XSL_ALLOW_LIST);
         assertParseSucceeds(() -> factory.newTemplates(AttackTestSupport.resourceSource("with-import.xsl")), "Stylesheet import via caller resolver");
+        assertNoIgnoredEntityTransformer(warnings);
     }
 }

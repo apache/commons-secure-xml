@@ -431,6 +431,7 @@ public final class SecureTransformerFactory {
 
         @Override
         public void setErrorListener(final ErrorListener listener) {
+            floor.setErrorListener(listener);
             delegate.setErrorListener(listener);
         }
 

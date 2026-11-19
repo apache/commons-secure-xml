@@ -148,6 +148,7 @@ class SecureXMLReader implements XMLReader {
 
     @Override
     public void setErrorHandler(final ErrorHandler handler) {
+        floor.setErrorHandler(handler);
         delegate.setErrorHandler(handler);
     }
 
